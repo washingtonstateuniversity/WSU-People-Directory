@@ -19,7 +19,7 @@ class WSUWP_People_Directory {
 	var $personnel_content_type = 'wsuwp_people_profile';
 
 	/**
-	 * The fields used throughout the metaboxes (temp).
+	 * The fields used throughout the metaboxes (temporary).
 	 */
 	var $personnel_fields = array(
 		'_wsuwp_profile_display_name',
@@ -29,17 +29,27 @@ class WSUWP_People_Directory {
 		'_wsuwp_profile_alt_email',
 		'_wsuwp_profile_website',
 		'_wsuwp_profile_degree',
-		'_wsuwp_profile_cv'
+		'_wsuwp_profile_cv',
+		'_wsuwp_profile_coeditor',
+		'_wsuwp_profile_dept',
 	);
 
 	public function __construct() {
 
+		// Custom content type and metaboxes.
 		add_action( 'init', array( $this, 'register_personnel_content_type' ), 11 );
 		add_action( 'admin_enqueue_scripts', array( $this, 'admin_enqueue_scripts' ) );
 		add_action( 'edit_form_after_title', array( $this, 'edit_form_after_title' ) );
 		add_action( 'edit_form_after_editor',	array( $this, 'edit_form_after_editor' ) );
 		add_action( 'add_meta_boxes', array( $this, 'add_meta_boxes' ), 10, 2 );
 		add_action( 'save_post', array( $this, 'save_post' ), 10, 2 );
+
+		// Capabilities and related.
+		add_action( 'personal_options', array( $this, 'personal_options' ) );
+		add_action( 'edit_user_profile_update', array( $this, 'edit_user_profile_update' ) );
+		add_action( 'personal_options_update', array( $this, 'edit_user_profile_update' ) );
+		add_filter( 'user_has_cap', array( $this, 'user_has_cap' ), 10, 3 );
+		add_action( 'admin_menu', array( $this, 'admin_menu' ) );
 
 	}
 
@@ -166,7 +176,7 @@ class WSUWP_People_Directory {
 	public function add_meta_boxes( $post_type ) {
 
 		add_meta_box(
-			'wsuwp_people_position_info',
+			'wsuwp_profile_position_info',
 			'Position and Contact Information',
 			array( $this, 'display_position_info_meta_box' ),
 			$this->personnel_content_type,
@@ -175,7 +185,7 @@ class WSUWP_People_Directory {
 		);
 		
 		add_meta_box(
-			'wsuwp_people_contact_info',
+			'wsuwp_profile_contact_info',
 			'Alternate Contact Information',
 			array( $this, 'display_contact_info_meta_box' ),
 			$this->personnel_content_type,
@@ -184,7 +194,7 @@ class WSUWP_People_Directory {
 		);
 		
 		add_meta_box(
-			'wsuwp_people_degree_info',
+			'wsuwp_profile_degree_info',
 			'Degree Information',
 			array( $this, 'display_degree_info_meta_box' ),
 			$this->personnel_content_type,
@@ -193,12 +203,21 @@ class WSUWP_People_Directory {
 		);
 		
 		add_meta_box(
-			'wsuwp_people_cv_upload',
+			'wsuwp_profile_cv_upload',
 			'Curriculum Vitae',
 			array( $this, 'display_cv_upload_meta_box' ),
 			$this->personnel_content_type,
 			'after-title',
 			'core'
+		);
+
+		add_meta_box(
+			'wsuwp_profile_coeditor',
+			'Editors',
+			array( $this, 'display_profile_coeditor_meta_box' ),
+			$this->personnel_content_type,
+			'advanced',
+			'high'
 		);
 
 	}
@@ -211,8 +230,14 @@ class WSUWP_People_Directory {
 		<p>(Data pulled from active directory)</p>
 		<p><strong><label for="wsu_id">WSU ID</label></strong><br />
 		<input type="text" id="wsu_id" name="wsu_id" value="12345678" class="widefat" disabled="disabled" /></p>
-		<p><strong><label for="dept">Department</label></strong><br />
-		<input type="text" id="dept" name="dept" value="ABC" class="widefat" disabled="disabled" /></p>
+    <p><strong><label for="name_first">First Name</label></strong><br />
+		<input type="text" id="name_first" name="name_first" value="John" class="widefat" disabled="disabled" /></p>
+    <p><strong><label for="name_last">Last Name</label></strong><br />
+		<input type="text" id="name_last" name="name_last" value="Doe" class="widefat" disabled="disabled" /></p>
+
+		<p><strong><label for="_wsuwp_profile_dept">Department</label></strong><br />
+		<input type="text" id="_wsuwp_profile_dept" name="_wsuwp_profile_dept" value="<?php echo get_post_meta( $post->ID, '_wsuwp_profile_dept', true ); ?>" class="widefat" /></p>
+
 		<p><strong><label for="official_title">Official Title</label></strong><br />
 		<input type="text" id="official_title" name="official_title" value="Widget builder" class="widefat" disabled="disabled" /></p>
 		<p><strong>Appointment</strong><br />
@@ -265,12 +290,13 @@ class WSUWP_People_Directory {
 	}
 
 	/**
-	 * Display a meta box used to upload a persons c.v.
+	 * Display a meta box used to upload a person's C.V.
 	 */
 	public function display_cv_upload_meta_box( $post ) {
+		$cv = get_post_meta( $post->ID, '_wsuwp_profile_cv', true );
 		?>
 			<div class="upload-set-wrapper">
-				<input type="hidden" class="wsuwp-profile-upload" name="_wsuwp_profile_cv" id="_wsuwp_profile_cv" value="<?php echo get_user_meta( $user->ID, '_wsuwp_profile_cv', true ); ?>" />
+				<input type="hidden" class="wsuwp-profile-upload" name="_wsuwp_profile_cv" id="_wsuwp_profile_cv" value="<?php echo $cv; ?>" />
 				<p class="hide-if-no-js"><a title="C.V." data-type="File" href="#" class="wsuwp-profile-upload-link">
 				<?php if ( $cv ) : ?>
 					<img src="<?php echo get_bloginfo( 'url' ) . '/wp-includes/images/media/document.png'; ?>" /></a></p>
@@ -283,9 +309,20 @@ class WSUWP_People_Directory {
 	}
 
 	/**
+	 * Display a meta box used to assign additional editorship of a profile.
+	 */
+	public function display_profile_coeditor_meta_box( $post ) {
+		?>
+			<p>To grant another user the ability to edit your profile, add them here.</p>
+      <p><input type="text" id="_wsuwp_profile_coeditor" name="_wsuwp_profile_coeditor" value="<?php echo get_post_meta( $post->ID, '_wsuwp_profile_coeditor', true ); ?>" class="widefat" /></p>
+		<?php
+	}
+
+	/**
 	 * Save post meta data.
 	 */
 	public function save_post( $post_id ) {
+
 		if ( ! isset( $_POST['wsuwsp_profile_nonce'] ) )
 			return $post_id;
 
@@ -317,7 +354,94 @@ class WSUWP_People_Directory {
 		else
 			delete_post_meta( $post_id, '_wsuwp_profile_research' );
 
+	}
 
+	/**
+	 * Add 'Organization Administrator' field in profile.
+	 */
+	public function personal_options( $user ) {
+
+		if ( IS_PROFILE_PAGE )
+			return;
+
+		?>
+		<tr>
+			<th><label for="wsuwp_people_organization_admin">Organization Administrator for</label></th>
+			<td><input type="text" id="wsuwp_people_organization_admin" name="wsuwp_people_organization_admin" value="<?php echo get_user_meta( $user->ID, 'wsuwp_people_organization_admin', true ); ?>" /></td>
+		</tr>
+		<?php
+	}
+
+	/**
+	 * Store the type of authentication assigned to a user.
+	 *
+	 * @param int $user_id ID of the user being edited.
+	 */
+	public function edit_user_profile_update( $user_id ) {
+		if ( isset( $_POST['wsuwp_people_organization_admin'] ) && $_POST['wsuwp_people_organization_admin'] != '' )
+			update_user_meta( $user_id, 'wsuwp_people_organization_admin', sanitize_text_field( $_POST['wsuwp_people_organization_admin'] ) );
+		else
+			delete_user_meta( $user_id, 'wsuwp_people_organization_admin' );
+	}
+
+	/**
+	 * Capability modifications.
+	 */
+	public function user_has_cap( $allcaps, $cap, $args ) {
+		// Bail out if we're not asking about a post:
+		//if ( 'edit_post' != $args[0] )
+		//	return $allcaps;
+		// This condition results in a "You are not allowed to edit posts as this user." message upon updating.
+	
+		// Bail for users who can already edit others posts:
+		if ( $allcaps['edit_others_posts'] )
+			return $allcaps;
+	
+		// Bail for users who can't publish posts:
+		if ( !isset( $allcaps['publish_posts'] ) or !$allcaps['publish_posts'] )
+			return $allcaps;
+	
+		// Load the post data:
+		$post = get_post( $args[2] );
+
+		// Bail if the post type isn't 'wsuwp_people_profile':
+		if ( $this->personnel_content_type != $post->post_type )
+			return $allcaps;
+
+		// Bail if the user is the post author:
+		if ( $args[1] == $post->post_author )
+			return $allcaps;
+	
+		// Bail if the post isn't published:
+		if ( 'publish' != $post->post_status )
+			return $allcaps;
+
+		// Bail if the user isn't an Organization Administrator or listed as a coeditor:
+		$coeditor = get_post_meta( $post->ID, '_wsuwp_profile_coeditor', true );
+		$dept = get_post_meta( $post->ID, '_wsuwp_profile_dept', true );
+		$org_admin = get_user_meta( $args[1], 'wsuwp_people_organization_admin', true );
+		if ( ( $args[1] != $coeditor ) && ( $org_admin != $dept ) )
+			return $allcaps;
+
+		// Load the author data:
+		$author = new WP_User( $post->post_author );
+	
+		// Bail if post author can edit others posts:
+		if ( $author->has_cap( 'edit_others_posts' ) )
+			return $allcaps;
+	
+		$allcaps[$cap[0]] = true;
+	
+		return $allcaps;
+	}
+
+	/**
+	 * Remove Profile menu page to avoid confusion.
+	 */
+	public function admin_menu() {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			remove_menu_page( 'profile.php' );
+		}
 	}
 
 }

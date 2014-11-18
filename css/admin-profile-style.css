@@ -32,3 +32,6 @@
 #wp-_wsuwp_profile_research-wrap {
 	margin-bottom: 20px;
 }
+.postbox .inside .upload-set-wrapper>p:last-child {
+	margin-bottom: 1px;
+}
