@@ -1,0 +1,34 @@
+#wsuwp-profile-tabs > ul {
+	border-bottom: 1px solid #ccc;
+	margin: 20px 0 15px;
+	padding: 9px 15px 0 10px;
+}
+#wsuwp-profile-tabs > ul li {
+	display: inline-block;
+	margin: 0;
+}
+#wsuwp-profile-tabs > ul li a {
+	border: 1px solid #ccc;
+	font-size: 15px;
+	font-weight: bold;
+	line-height: 24px;
+}
+#wsuwp-profile-tabs > ul li a:focus {
+	outline: 0;
+}
+#wsuwp-profile-tabs > ul li.ui-tabs-active a {
+	border-bottom: 1px solid #f1f1f1;
+	background: #f1f1f1;
+	color: #000;
+}
+#poststuff h3.wpuwp-profile-label {
+	padding-left: 0;
+	padding-right: 0;
+}
+.wsuwp-profile-namefield {
+	margin-bottom: 1em;
+}
+#wp-_wsuwp_profile_teaching-wrap,
+#wp-_wsuwp_profile_research-wrap {
+	margin-bottom: 20px;
+}
