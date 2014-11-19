@@ -2,7 +2,7 @@
 
 <main>
 
-	<?php get_template_part('parts/headers'); ?>
+	<?php get_template_part( 'parts/headers' ); ?>
 
 	<section class="row side-right gutter pad-ends">
 
@@ -22,19 +22,22 @@
 
 				<div class="article-body">
 
-					<?php
-					if ( has_post_thumbnail() ) {
-						?><figure class="article-thumbnail"><?php the_post_thumbnail( array( 132, 132, true ) ); ?></figure><?php
-					}
-					?>
+					<?php // Featured image.
+					if ( has_post_thumbnail() ) : ?>
+					<figure class="article-thumbnail"><?php the_post_thumbnail( array( 132, 132, true ) ); ?></figure>
+					<?php endif; ?>
 
-					<?php
-						$degree = get_post_meta( get_the_ID(), '_wsuwp_profile_degree', true );
-						if ( $degree )
-							echo '<p class="degree">' . esc_html( $degree ) . '</p>';
-					?>
+					<?php // Degree information.
+					$degree = get_post_meta( get_the_ID(), '_wsuwp_profile_degree', true );
+					if ( $degree ) : ?>
+					<p class="degree"><?php echo esc_html( $degree ); ?></p>
+					<?php endif; ?>
+
+					<?php // Title and department info. ?>
+
 					<?php the_content(); ?>
-					<?php wp_link_pages( array( 'before' => '<div class="page-links">' . __( 'Pages:', 'spine' ), 'after' => '</div>' ) ); ?>
+
+					<?php /*wp_link_pages( array( 'before' => '<div class="page-links">' . __( 'Pages:', 'spine' ), 'after' => '</div>' ) );*/ ?>
 				</div>
 <!--
 				<footer class="article-footer">
@@ -61,12 +64,10 @@
 				?>
 				</footer>
 -->
-				<?php
-				// If the user viewing the post can edit it, show an edit link.
-				if ( current_user_can( 'edit_post', $post->ID ) ) :
-					?><dl class="editors"><?php edit_post_link( 'Edit', '<span class="edit-link">', '</span>' ); ?></dl><?php
-				endif;
-				?>
+				<?php // If the user viewing the post can edit it, show an edit link.
+				if ( current_user_can( 'edit_post', $post->ID ) ) : ?>
+				<dl class="editors"><?php edit_post_link( 'Edit', '<span class="edit-link">', '</span>' ); ?></dl>
+				<?php endif; ?>
 
 			</article>
 
@@ -80,17 +81,19 @@
 
 				<h2>Contact Information</h2>
 
-				<?php
-				
-				$website = get_post_meta( get_the_ID(), '_wsuwp_profile_website', true );
-				if ( $website )
-					echo '<p><a href="' . esc_url( $website ) . '">My Website &raquo;</a></p>';
-					
-				$cv = get_post_meta( get_the_ID(), '_wsuwp_profile_cv', true );
-				if ( $cv )
-					echo '<p><a href="' . esc_url( wp_get_attachment_url( $cv )	). '">My C.V &raquo;</a></p>';
-				?>
+				<?php // Contact-specific "card" data also goes here. ?>
 
+				<?php // Website.
+				$website = get_post_meta( get_the_ID(), '_wsuwp_profile_website', true );
+				if ( $website ) : ?>
+				<p><a href="<?php echo esc_url( $website ); ?>">My Website &raquo;</a></p>
+				<?php endif; ?>
+
+				<?php // Curriculum Vitae.
+				$cv = get_post_meta( get_the_ID(), '_wsuwp_profile_cv', true );
+				if ( $cv ) : ?>
+				<p><a href="<?php echo esc_url( wp_get_attachment_url( $cv ) ); ?>">My C.V &raquo;</a></p>
+				<?php endif; ?>
 
 			</aside>
 

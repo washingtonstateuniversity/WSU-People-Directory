@@ -22,11 +22,10 @@
 
 			<div class="article-summary">
 
-				<?php
-				if ( has_post_thumbnail() ) {
-					?><figure class="article-thumbnail"><?php the_post_thumbnail( array( 132, 132, true ) ); ?></figure><?php
-				}
-				?>
+				<?php // Featured image.
+				if ( has_post_thumbnail() ) : ?>
+				<figure class="article-thumbnail"><?php the_post_thumbnail( array( 132, 132, true ) ); ?></figure>
+				<?php endif; ?>
 
 				<p>
 				<?php // Title.
@@ -35,7 +34,9 @@
 
 				<?php // Department.
 				$dept = get_post_meta( get_the_ID(), '_wsuwp_profile_dept', true );
-				if ( $dept ) echo esc_html( $dept ) . '<br />';
+				if ( $dept ) {
+					echo esc_html( $dept ) . '<br />';
+				}
 				?>
 
 				<?php // Office Location.

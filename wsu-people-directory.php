@@ -27,6 +27,7 @@ class WSUWP_People_Directory {
 		'_wsuwp_profile_alt_phone',
 		'_wsuwp_profile_alt_email',
 		'_wsuwp_profile_website',
+		'_wsuwp_profile_research_photo',
 		'_wsuwp_profile_degree',
 		'_wsuwp_profile_cv',
 		'_wsuwp_profile_coeditor',
@@ -70,6 +71,7 @@ class WSUWP_People_Directory {
 	 * Register the project content type.
 	 */
 	public function register_personnel_content_type() {
+
 		$args = array(
 			'labels' => array(
 				'name' => 'Personnel',
@@ -106,37 +108,46 @@ class WSUWP_People_Directory {
 				'with_front' => false
 			),
 		);
+
 		register_post_type( $this->personnel_content_type, $args );
+
 	}
 
 	/**
 	 * Enqueue the scripts and styles used in the admin interface.
 	 */
 	public function admin_enqueue_scripts( $hook ) {
+
 		$screen = get_current_screen();
-		if ( ( $hook == 'post-new.php' || $hook == 'post.php' ) && $screen->post_type == $this->personnel_content_type ) {
+
+		if ( ( 'post-new.php' == $hook || 'post.php' == $hook ) && $screen->post_type == $this->personnel_content_type ) {
 			wp_enqueue_style( 'wsuwp-people-admin-style', plugins_url( 'css/admin-profile-style.css', __FILE__ ) );
 			wp_enqueue_script( 'wsuwp-people-admin-script', plugins_url( 'js/admin-profile.js', __FILE__ ), array( 'jquery-ui-tabs' ), '', true );
 		}
+
 	}
 
 	/**
 	 * Change the "Enter title here" text for the Personnel content type.
 	 */
 	public function enter_title_here( $title ) {
+
 		$screen = get_current_screen();
 
-		if ( $screen->post_type == $this->personnel_content_type )
+		if ( $this->personnel_content_type == $screen->post_type ) {
 			$title = 'Enter name here';
+		}
 
 		return $title;
+
 	}
 
 	/**
 	 * Add stuff after the title of the edit screen for the Personnel content type.
 	 */
 	public function edit_form_after_title( $post ) {
-		if ( $post->post_type === $this->personnel_content_type ) :
+
+		if ( $this->personnel_content_type === $post->post_type ) :
 			?>
 			<div id="wsuwp-profile-tabs">
 				<ul>
@@ -150,16 +161,18 @@ class WSUWP_People_Directory {
 			<?php
 			do_meta_boxes( get_current_screen(), 'after-title', $post );
 		endif;
+
 	}
 
 	/**
 	 * Add stuff after the editor of the edit screen for the Personnel content type.
 	 */
-	public function edit_form_after_editor($post ) {
-		if ( $post->post_type === $this->personnel_content_type ) {
+	public function edit_form_after_editor( $post ) {
+
+		if ( $this->personnel_content_type === $post->post_type ) :
 			?>
 				</div><!--wsuwp-profile-default-->
-	
+
 				<div id="wsuwp-profile-teaching">
 					<p>(Could be cool to conditionally show this tab if user has a teaching appointment.)</p>
 					<p class="description">Your teaching responsibilities, classes you teach, etc.</p>
@@ -170,7 +183,7 @@ class WSUWP_People_Directory {
 						wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_teaching', true ), '_wsuwp_profile_teaching' );
 					?>
 				</div>
-	
+
 				<div id="wsuwp-profile-research">
 					<p>(Could be cool to conditionally show this tab if user has a research appointment.)</p>
 					<p class="description">Information about your research interests, recent funding/funded projects/grant submissions, grad students/program personnel/research team, research facilities, collaborators, patents, etc.</p>
@@ -188,7 +201,8 @@ class WSUWP_People_Directory {
 
 			</div><!--wsuwp-profile-tabs-->
 			<?php
-		}
+		endif;
+
 	}
 
 	/**
@@ -206,7 +220,7 @@ class WSUWP_People_Directory {
 			'side',
 			'high'
 		);
-		
+
 		add_meta_box(
 			'wsuwp_profile_contact_info',
 			'Alternate Contact Information',
@@ -215,7 +229,16 @@ class WSUWP_People_Directory {
 			'side',
 			'high'
 		);
-		
+
+		add_meta_box(
+			'wsuwp_profile_research_photo',
+			'Research Photo',
+			array( $this, 'display_profile_research_photo_meta_box' ),
+			$this->personnel_content_type,
+			'side',
+			'low'
+		);
+
 		add_meta_box(
 			'wsuwp_profile_degree_info',
 			'Degree Information',
@@ -224,7 +247,7 @@ class WSUWP_People_Directory {
 			'after-title',
 			'high'
 		);
-		
+
 		add_meta_box(
 			'wsuwp_profile_cv_upload',
 			'Curriculum Vitae',
@@ -246,11 +269,13 @@ class WSUWP_People_Directory {
 	}
 
 	/**
-	 * Display a meta box used to show a persons "card".
+	 * Display a meta box used to show a person's "card".
 	 */
 	public function display_position_info_meta_box( $post ) {
-		// Some conditions are needed here for non-WSU profiles so they can edit their "card" info.
-		// "_wsuwp_sso_user_type" could possibly be leveraged for people who have logged in and claimed their profile...
+
+		// Some conditions are needed here for non-WSU/AD profiles so they can edit their "card" info.
+		// "_wsuwp_sso_user_type" could possibly be leveraged for people who have logged in/claimed their profile...
+
 		?>
 		<p>(Data pulled from active directory)</p>
 		<p><strong><label for="wsu_id">WSU ID</label></strong><br />
@@ -285,13 +310,16 @@ class WSUWP_People_Directory {
 		<input type="text" id="email" name="email" value="someone@wsu.edu" disabled="disabled" /></p></strong></p>
 		<p class="description">Notify <a href="#">HR</a> if any of this information is incorrect or needs updated.</p>
 		<?php
+
 	}
 
 	/**
 	 * Display a meta box used to collect any additional or alternate contact info.
 	 */
 	public function display_contact_info_meta_box( $post ) {
+
 		wp_nonce_field( 'wsuwsp_profile', 'wsuwsp_profile_nonce' );
+
 		?>
 		<p><strong><label for="_wsuwp_profile_alt_phone">Phone Number</label></strong><br />
 		<input type="text" id="_wsuwp_profile_alt_phone" name="_wsuwp_profile_alt_phone" value="<?php echo get_post_meta( $post->ID, '_wsuwp_profile_alt_phone', true ); ?>" class="widefat" /></p>
@@ -300,25 +328,56 @@ class WSUWP_People_Directory {
 		<p><strong><label for="_wsuwp_profile_website">Website URL</label></strong><br />
 		<input type="text" id="_wsuwp_profile_website" name="_wsuwp_profile_website" value="<?php echo get_post_meta( $post->ID, '_wsuwp_profile_website', true ); ?>" class="widefat" /></p>
 		<?php
+
+	}
+
+	/**
+	 * Display a metabox used to upload a persons research photo
+	 */
+	public function display_profile_research_photo_meta_box( $post ) {
+
+		$research_photo = get_post_meta( $post->ID, '_wsuwp_profile_research_photo', true );
+
+		?>
+			<p class="description">If you want a different image to display on your research-specific profile, upload it here.</p>
+			<div class="upload-set-wrapper">
+				<input type="hidden" class="wsuwp-profile-upload" name="_wsuwp_profile_research_photo" id="_wsuwp_profile_research_photo" value="<?php echo $research_photo; ?>" />
+				<p class="hide-if-no-js"><a title="research photo" data-type="Photo" href="#" class="wsuwp-profile-upload-link">
+				<?php if ( $research_photo ) :
+					$image = wp_get_attachment_image_src( $research_photo, 'thumbnail' );
+					?>
+					<img src="<?php echo $image[0]; ?>" /></a></p>
+					<p class="hide-if-no-js"><a title="research photo" href="#" class="wsuwp-profile-remove-link">Remove research photo</a></p>
+				<?php else : ?>
+					 Upload research photo</a></p>
+				<?php endif; ?>
+			</div>
+		<?php
+
 	}
 
 	/**
 	 * Display a meta box used to enter a persons degree information.
 	 */
 	public function display_degree_info_meta_box( $post ) {
+
 		$degrees = get_post_meta( $post->ID, '_wsuwp_profile_degree', true );
+
 		?>
 		<p><strong><label for="_wsuwp_profile_degree">Degree</label></strong><br />
 		<input type="text" id="_wsuwp_profile_degree" name="_wsuwp_profile_degree" value="" class="widefat" /></p>
 		<p><a href="#">+ Add Another</a></p>
 		<?php
+
 	}
 
 	/**
 	 * Display a meta box used to upload a person's C.V.
 	 */
 	public function display_cv_upload_meta_box( $post ) {
+
 		$cv = get_post_meta( $post->ID, '_wsuwp_profile_cv', true );
+
 		?>
 			<div class="upload-set-wrapper">
 				<input type="hidden" class="wsuwp-profile-upload" name="_wsuwp_profile_cv" id="_wsuwp_profile_cv" value="<?php echo $cv; ?>" />
@@ -331,16 +390,19 @@ class WSUWP_People_Directory {
 				<?php endif; ?>
 			</div>
 		<?php
+
 	}
 
 	/**
 	 * Display a meta box used to assign additional editorship of a profile.
 	 */
 	public function display_profile_coeditor_meta_box( $post ) {
+
 		?>
 			<p>To grant another user the ability to edit your profile, add them here.</p>
 			<p><input type="text" id="_wsuwp_profile_coeditor" name="_wsuwp_profile_coeditor" value="<?php echo get_post_meta( $post->ID, '_wsuwp_profile_coeditor', true ); ?>" class="widefat" /></p>
 		<?php
+
 	}
 
 	/**
@@ -348,36 +410,45 @@ class WSUWP_People_Directory {
 	 */
 	public function save_post( $post_id ) {
 
-		if ( ! isset( $_POST['wsuwsp_profile_nonce'] ) )
+		if ( ! isset( $_POST['wsuwsp_profile_nonce'] ) ) {
 			return $post_id;
+		}
 
 		$nonce = $_POST['wsuwsp_profile_nonce'];
 
-		if ( ! wp_verify_nonce( $nonce, 'wsuwsp_profile' ) )
+		if ( ! wp_verify_nonce( $nonce, 'wsuwsp_profile' ) ) {
 			return $post_id;
-
-		if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) 
-			return $post_id;
-
-		if ( ! current_user_can( 'edit_post', $post_id ) )
-			return $post_id;
-
-		foreach ( $this->personnel_fields as $field ) {
-			if ( isset( $_POST[$field] ) && $_POST[$field] != '' )
-				update_post_meta( $post_id, $field, sanitize_text_field( $_POST[$field] ) );
-			else
-				delete_post_meta( $post_id, $field );
 		}
 
-		if ( isset( $_POST['_wsuwp_profile_teaching'] ) && $_POST['_wsuwp_profile_teaching'] != '' )
-			update_post_meta( $post_id, '_wsuwp_profile_teaching', wp_kses_post( $_POST['_wsuwp_profile_teaching'] ) );
-		else
-			delete_post_meta( $post_id, '_wsuwp_profile_teaching' );
+		if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
+			return $post_id;
+		}
 
-		if ( isset( $_POST['_wsuwp_profile_research'] ) && $_POST['_wsuwp_profile_research'] != '' )
+		if ( ! current_user_can( 'edit_post', $post_id ) ) {
+			return $post_id;
+		}
+
+		foreach ( $this->personnel_fields as $field ) {
+
+			if ( isset( $_POST[ $field ] ) && '' != $_POST[ $field ] ) {
+				update_post_meta( $post_id, $field, sanitize_text_field( $_POST[ $field ] ) );
+			} else {
+				delete_post_meta( $post_id, $field );
+			}
+
+		}
+
+		if ( isset( $_POST['_wsuwp_profile_teaching'] ) && '' != $_POST['_wsuwp_profile_teaching'] ) {
+			update_post_meta( $post_id, '_wsuwp_profile_teaching', wp_kses_post( $_POST['_wsuwp_profile_teaching'] ) );
+		} else {
+			delete_post_meta( $post_id, '_wsuwp_profile_teaching' );
+		}
+
+		if ( isset( $_POST['_wsuwp_profile_research'] ) && '' != $_POST['_wsuwp_profile_research'] ) {
 			update_post_meta( $post_id, '_wsuwp_profile_research', wp_kses_post( $_POST['_wsuwp_profile_research'] ) );
-		else
+		} else {
 			delete_post_meta( $post_id, '_wsuwp_profile_research' );
+		}
 
 	}
 
@@ -386,8 +457,9 @@ class WSUWP_People_Directory {
 	 */
 	public function personal_options( $user ) {
 
-		if ( IS_PROFILE_PAGE )
+		if ( IS_PROFILE_PAGE ) {
 			return;
+		}
 
 		?>
 		<tr>
@@ -404,13 +476,15 @@ class WSUWP_People_Directory {
 	 */
 	public function edit_user_profile_update( $user_id ) {
 
-		if ( ! current_user_can( 'edit_users', $user_id ) )
+		if ( ! current_user_can( 'edit_users', $user_id ) ) {
 			return;
+		}
 
-		if ( isset( $_POST['wsuwp_people_organization_admin'] ) && $_POST['wsuwp_people_organization_admin'] != '' )
+		if ( isset( $_POST['wsuwp_people_organization_admin'] ) && '' != $_POST['wsuwp_people_organization_admin'] ) {
 			update_user_meta( $user_id, 'wsuwp_people_organization_admin', sanitize_text_field( $_POST['wsuwp_people_organization_admin'] ) );
-		else
+		} else {
 			delete_user_meta( $user_id, 'wsuwp_people_organization_admin' );
+		}
 
 	}
 
@@ -418,50 +492,58 @@ class WSUWP_People_Directory {
 	 * Capability modifications.
 	 */
 	public function user_has_cap( $allcaps, $cap, $args ) {
+
 		// Bail out if we're not asking about a post:
 		//if ( 'edit_post' != $args[0] )
 		//	return $allcaps;
 		// This condition results in a "You are not allowed to edit posts as this user." message upon updating.
-	
+
 		// Bail for users who can already edit others posts:
-		if ( $allcaps['edit_others_posts'] )
+		if ( $allcaps['edit_others_posts'] ) {
 			return $allcaps;
-	
+		}
+
 		// Bail for users who can't publish posts:
-		if ( !isset( $allcaps['publish_posts'] ) or !$allcaps['publish_posts'] )
+		if ( ! isset( $allcaps['publish_posts'] ) or ! $allcaps['publish_posts'] ) {
 			return $allcaps;
-	
+		}
+
 		// Load the post data:
 		$post = get_post( $args[2] );
 
 		// Bail if the post type isn't Personnel:
-		if ( $this->personnel_content_type != $post->post_type )
+		if ( $this->personnel_content_type != $post->post_type ) {
 			return $allcaps;
+		}
 
 		// Bail if the user is the post author:
-		if ( $args[1] == $post->post_author )
+		if ( $args[1] == $post->post_author ) {
 			return $allcaps;
-	
+		}
+
 		// Bail if the post isn't published:
-		if ( 'publish' != $post->post_status )
+		if ( 'publish' != $post->post_status ) {
 			return $allcaps;
+		}
 
 		// Bail if the user isn't an Organization Administrator or listed as a coeditor:
 		$coeditor = get_post_meta( $post->ID, '_wsuwp_profile_coeditor', true );
 		$dept = get_post_meta( $post->ID, '_wsuwp_profile_dept', true );
 		$org_admin = get_user_meta( $args[1], 'wsuwp_people_organization_admin', true );
-		if ( ( $args[1] != $coeditor ) && ( $org_admin != $dept ) )
+		if ( ( $args[1] != $coeditor ) && ( $org_admin != $dept ) ) {
 			return $allcaps;
+		}
 
 		// Load the author data:
 		$author = new WP_User( $post->post_author );
-	
+
 		// Bail if post author can edit others posts:
-		if ( $author->has_cap( 'edit_others_posts' ) )
+		if ( $author->has_cap( 'edit_others_posts' ) ) {
 			return $allcaps;
-	
-		$allcaps[$cap[0]] = true;
-	
+		}
+
+		$allcaps[ $cap[0] ] = true;
+
 		return $allcaps;
 	}
 
@@ -469,9 +551,11 @@ class WSUWP_People_Directory {
 	 * Remove Profile menu page to avoid confusion.
 	 */
 	public function admin_menu() {
+
 		if ( ! current_user_can( 'manage_options' ) ) {
 			remove_menu_page( 'profile.php' );
 		}
+
 	}
 
 	/**
@@ -479,13 +563,15 @@ class WSUWP_People_Directory {
 	 */
 	public function template_include( $template ) {
 
-		if ( get_post_type() == $this->personnel_content_type ) {
+		if ( $this->personnel_content_type == get_post_type() ) {
 
-			if ( is_single() )
+			if ( is_single() ) {
 				$template = plugin_dir_path( __FILE__ ) . 'templates/single.php';
+			}
 
-			if ( is_archive() )
+			if ( is_archive() ) {
 				$template = plugin_dir_path( __FILE__ ) . 'templates/archive.php';
+			}
 
 		}
 
@@ -497,20 +583,26 @@ class WSUWP_People_Directory {
 	 * Enqueue the scripts and styles used on the front end.
 	 */
 	public function wp_enqueue_scripts() {
-		if ( get_post_type() == $this->personnel_content_type && is_single() ) {
-			wp_enqueue_style( 'wsuwp-people-profile-style', plugins_url( 'css/profile.css', __FILE__ ) );
+
+		if ( $this->personnel_content_type == get_post_type() ) {
+			if ( is_single() ) {
+				wp_enqueue_style( 'wsuwp-people-profile-style', plugins_url( 'css/profile.css', __FILE__ ) );
+			}
 		}
+
 	}
 
 	/**
 	 * Order Personnel query results alphabetically by last name
 	 */
 	public function profile_archives( $query ) {
+
 		if ( $query->is_post_type_archive( $this->personnel_content_type ) && $query->is_main_query() && ! is_admin() ) {
 			$query->set( 'order', 'ASC' );
 			$query->set( 'orderby', 'meta_value' );
 			$query->set( 'meta_key', '_wsuwp_profile_name_last' );
 		}
+
 	}
 
 }
