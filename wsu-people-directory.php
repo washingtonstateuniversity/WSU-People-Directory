@@ -22,7 +22,6 @@ class WSUWP_People_Directory {
 	 * The fields used throughout the metaboxes (temporary).
 	 */
 	var $personnel_fields = array(
-		'_wsuwp_profile_display_name',
 		'_wsuwp_profile_teaching_name',
 		'_wsuwp_profile_research_name',
 		'_wsuwp_profile_alt_phone',
@@ -32,13 +31,22 @@ class WSUWP_People_Directory {
 		'_wsuwp_profile_cv',
 		'_wsuwp_profile_coeditor',
 		'_wsuwp_profile_dept',
+		'_wsuwp_profile_name_first',
+		'_wsuwp_profile_name_last',
 	);
+
+	/**
+	 * Some of the data pulled from active directory needs to be captured.
+	 * If keeping the fields array (which is simply for ease of saving),
+	 * make a separate one for those populated by AD data so saving can be handled differently.
+	 */
 
 	public function __construct() {
 
 		// Custom content type and metaboxes.
 		add_action( 'init', array( $this, 'register_personnel_content_type' ), 11 );
 		add_action( 'admin_enqueue_scripts', array( $this, 'admin_enqueue_scripts' ) );
+		add_filter( 'enter_title_here', array( $this, 'enter_title_here' ) );
 		add_action( 'edit_form_after_title', array( $this, 'edit_form_after_title' ) );
 		add_action( 'edit_form_after_editor',	array( $this, 'edit_form_after_editor' ) );
 		add_action( 'add_meta_boxes', array( $this, 'add_meta_boxes' ), 10, 2 );
@@ -49,7 +57,12 @@ class WSUWP_People_Directory {
 		add_action( 'edit_user_profile_update', array( $this, 'edit_user_profile_update' ) );
 		add_action( 'personal_options_update', array( $this, 'edit_user_profile_update' ) );
 		add_filter( 'user_has_cap', array( $this, 'user_has_cap' ), 10, 3 );
-		add_action( 'admin_menu', array( $this, 'admin_menu' ) );
+		//add_action( 'admin_menu', array( $this, 'admin_menu' ) );
+
+		// Templates, scripts, styles, and filters for the front end.
+		add_filter( 'template_include', array( $this, 'template_include' ), 1 );
+		add_action( 'wp_enqueue_scripts', array( $this, 'wp_enqueue_scripts' ), 11 );
+		add_action( 'pre_get_posts', array( $this, 'profile_archives' ) );
 
 	}
 
@@ -102,9 +115,21 @@ class WSUWP_People_Directory {
 	public function admin_enqueue_scripts( $hook ) {
 		$screen = get_current_screen();
 		if ( ( $hook == 'post-new.php' || $hook == 'post.php' ) && $screen->post_type == $this->personnel_content_type ) {
-			wp_enqueue_script( 'wsuwp-people-admin-script', plugins_url( 'js/admin-profile.js', __FILE__ ), array( 'jquery-ui-tabs' ), '', true );
 			wp_enqueue_style( 'wsuwp-people-admin-style', plugins_url( 'css/admin-profile-style.css', __FILE__ ) );
+			wp_enqueue_script( 'wsuwp-people-admin-script', plugins_url( 'js/admin-profile.js', __FILE__ ), array( 'jquery-ui-tabs' ), '', true );
 		}
+	}
+
+	/**
+	 * Change the "Enter title here" text for the Personnel content type.
+	 */
+	public function enter_title_here( $title ) {
+		$screen = get_current_screen();
+
+		if ( $screen->post_type == $this->personnel_content_type )
+			$title = 'Enter name here';
+
+		return $title;
 	}
 
 	/**
@@ -114,18 +139,16 @@ class WSUWP_People_Directory {
 		if ( $post->post_type === $this->personnel_content_type ) :
 			?>
 			<div id="wsuwp-profile-tabs">
-        <ul>
-          <li><a href="#wsuwp-profile-default" class="nav-tab">Bio</a></li>
-          <li><a href="#wsuwp-profile-teaching" class="nav-tab">Teaching</a></li>
-          <li><a href="#wsuwp-profile-research" class="nav-tab">Research</a></li>
-          <li><a href="#wsuwp-profile-publications" class="nav-tab">Publications</a></li>
-        </ul>
-        <div id="wsuwp-profile-default">
-          <p class="description">Consider including professional experience, previous employment, awards, honors, memberships, or other information you wish to share about yourself here.</p>
-          <h3 class="wpuwp-profile-label"><label for="_wsuwp_profile_display_name">Default Display Name</label></h3>
-          <input type="text" id="_wsuwp_profile_display_name" name="_wsuwp_profile_display_name" value="<?php echo get_post_meta( $post->ID, '_wsuwp_profile_display_name', true ); ?>" class="widefat wsuwp-profile-namefield" />
+				<ul>
+					<li><a href="#wsuwp-profile-default" class="nav-tab">Bio</a></li>
+					<li><a href="#wsuwp-profile-teaching" class="nav-tab">Teaching</a></li>
+					<li><a href="#wsuwp-profile-research" class="nav-tab">Research</a></li>
+					<li><a href="#wsuwp-profile-publications" class="nav-tab">Publications</a></li>
+				</ul>
+				<div id="wsuwp-profile-default">
+					<p class="description">Consider including professional experience, previous employment, awards, honors, memberships, or other information you wish to share about yourself here.</p>
 			<?php
-			do_meta_boxes( get_current_screen(), 'after-title', $post ); // maybe better to hardcode
+			do_meta_boxes( get_current_screen(), 'after-title', $post );
 		endif;
 	}
 
@@ -135,33 +158,33 @@ class WSUWP_People_Directory {
 	public function edit_form_after_editor($post ) {
 		if ( $post->post_type === $this->personnel_content_type ) {
 			?>
-        </div><!--wsuwp-profile-default-->
-  
-        <div id="wsuwp-profile-teaching">
-          <p>(Could be cool to conditionally show this tab if user has a teaching appointment.)</p>
-          <p class="description">Your teaching responsibilities, classes you teach, etc.</p>
-          <h3 class="wpuwp-profile-label"><label for="_wsuwp_profile_teaching_name">Teaching Profile Display Name</label></h3>
-          <p class="description">(if different than default)</p>
-          <input type="text" id="_wsuwp_profile_teaching_name" name="_wsuwp_profile_teaching_name" value="<?php echo get_post_meta( $post->ID, '_wsuwp_profile_teaching_name', true ); ?>" class="widefat wsuwp-profile-namefield" /></p>
-          <?php
-            wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_teaching', true ), '_wsuwp_profile_teaching' );
-          ?>
-        </div>
-  
-        <div id="wsuwp-profile-research">
-          <p>(Could be cool to conditionally show this tab if user has a research appointment.)</p>
-          <p class="description">Information about your research interests, recent funding/funded projects/grant submissions, grad students/program personnel/research team, research facilities, collaborators, patents, etc.</p>
-          <h3 class="wpuwp-profile-label"><label for="_wsuwp_profile_research_name">Research Profile Display Name</label></h3>
-          <p class="description">(if different than default)</p>
-          <input type="text" id="_wsuwp_profile_research_name" name="_wsuwp_profile_research_name" value="<?php echo get_post_meta( $post->ID, '_wsuwp_profile_research_name', true ); ?>" class="widefat wsuwp-profile-namefield" /></p>
-          <?php
-            wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_research', true ), '_wsuwp_profile_research' );
-          ?>
-        </div>
+				</div><!--wsuwp-profile-default-->
+	
+				<div id="wsuwp-profile-teaching">
+					<p>(Could be cool to conditionally show this tab if user has a teaching appointment.)</p>
+					<p class="description">Your teaching responsibilities, classes you teach, etc.</p>
+					<h3 class="wpuwp-profile-label"><label for="_wsuwp_profile_teaching_name">Teaching Profile Display Name</label></h3>
+					<p class="description">(if different than default)</p>
+					<input type="text" id="_wsuwp_profile_teaching_name" name="_wsuwp_profile_teaching_name" value="<?php echo get_post_meta( $post->ID, '_wsuwp_profile_teaching_name', true ); ?>" class="widefat wsuwp-profile-namefield" /></p>
+					<?php
+						wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_teaching', true ), '_wsuwp_profile_teaching' );
+					?>
+				</div>
+	
+				<div id="wsuwp-profile-research">
+					<p>(Could be cool to conditionally show this tab if user has a research appointment.)</p>
+					<p class="description">Information about your research interests, recent funding/funded projects/grant submissions, grad students/program personnel/research team, research facilities, collaborators, patents, etc.</p>
+					<h3 class="wpuwp-profile-label"><label for="_wsuwp_profile_research_name">Research Profile Display Name</label></h3>
+					<p class="description">(if different than default)</p>
+					<input type="text" id="_wsuwp_profile_research_name" name="_wsuwp_profile_research_name" value="<?php echo get_post_meta( $post->ID, '_wsuwp_profile_research_name', true ); ?>" class="widefat wsuwp-profile-namefield" /></p>
+					<?php
+						wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_research', true ), '_wsuwp_profile_research' );
+					?>
+				</div>
 
 				<div id="wsuwp-profile-publications">
-          <p>(This section would ideally include a way for users to dynamically pull in a feed from the pubs store, and a wp_editor for manually inputting book chapters, professional articles, peer-reviewed exhibitions, juried artistic works, and other publications that wouldn't be in the pubs store.)</p>
-        </div>
+					<p>(This section would ideally include a way for users to dynamically pull in a feed from the pubs store, and a wp_editor for manually inputting book chapters, professional articles, peer-reviewed exhibitions, juried artistic works, and other publications that wouldn't be in the pubs store.)</p>
+				</div>
 
 			</div><!--wsuwp-profile-tabs-->
 			<?php
@@ -223,17 +246,19 @@ class WSUWP_People_Directory {
 	}
 
 	/**
-	 * Display a meta box used to show a persons 'card'.
+	 * Display a meta box used to show a persons "card".
 	 */
 	public function display_position_info_meta_box( $post ) {
+		// Some conditions are needed here for non-WSU profiles so they can edit their "card" info.
+		// "_wsuwp_sso_user_type" could possibly be leveraged for people who have logged in and claimed their profile...
 		?>
 		<p>(Data pulled from active directory)</p>
 		<p><strong><label for="wsu_id">WSU ID</label></strong><br />
 		<input type="text" id="wsu_id" name="wsu_id" value="12345678" class="widefat" disabled="disabled" /></p>
-    <p><strong><label for="name_first">First Name</label></strong><br />
-		<input type="text" id="name_first" name="name_first" value="John" class="widefat" disabled="disabled" /></p>
-    <p><strong><label for="name_last">Last Name</label></strong><br />
-		<input type="text" id="name_last" name="name_last" value="Doe" class="widefat" disabled="disabled" /></p>
+		<p><strong><label for="_wsuwp_profile_name_first">First Name</label></strong><br />
+		<input type="text" id="_wsuwp_profile_name_first" name="_wsuwp_profile_name_first" value="<?php echo get_post_meta( $post->ID, '_wsuwp_profile_name_first', true ); ?>" class="widefat" /></p>
+		<p><strong><label for="_wsuwp_profile_name_last">Last Name</label></strong><br />
+		<input type="text" id="_wsuwp_profile_name_last" name="_wsuwp_profile_name_last" value="<?php echo get_post_meta( $post->ID, '_wsuwp_profile_name_last', true ); ?>" class="widefat" /></p>
 
 		<p><strong><label for="_wsuwp_profile_dept">Department</label></strong><br />
 		<input type="text" id="_wsuwp_profile_dept" name="_wsuwp_profile_dept" value="<?php echo get_post_meta( $post->ID, '_wsuwp_profile_dept', true ); ?>" class="widefat" /></p>
@@ -314,7 +339,7 @@ class WSUWP_People_Directory {
 	public function display_profile_coeditor_meta_box( $post ) {
 		?>
 			<p>To grant another user the ability to edit your profile, add them here.</p>
-      <p><input type="text" id="_wsuwp_profile_coeditor" name="_wsuwp_profile_coeditor" value="<?php echo get_post_meta( $post->ID, '_wsuwp_profile_coeditor', true ); ?>" class="widefat" /></p>
+			<p><input type="text" id="_wsuwp_profile_coeditor" name="_wsuwp_profile_coeditor" value="<?php echo get_post_meta( $post->ID, '_wsuwp_profile_coeditor', true ); ?>" class="widefat" /></p>
 		<?php
 	}
 
@@ -357,7 +382,7 @@ class WSUWP_People_Directory {
 	}
 
 	/**
-	 * Add 'Organization Administrator' field in profile.
+	 * Add "Organization Administrator" field in profile.
 	 */
 	public function personal_options( $user ) {
 
@@ -378,10 +403,15 @@ class WSUWP_People_Directory {
 	 * @param int $user_id ID of the user being edited.
 	 */
 	public function edit_user_profile_update( $user_id ) {
+
+		if ( ! current_user_can( 'edit_users', $user_id ) )
+			return;
+
 		if ( isset( $_POST['wsuwp_people_organization_admin'] ) && $_POST['wsuwp_people_organization_admin'] != '' )
 			update_user_meta( $user_id, 'wsuwp_people_organization_admin', sanitize_text_field( $_POST['wsuwp_people_organization_admin'] ) );
 		else
 			delete_user_meta( $user_id, 'wsuwp_people_organization_admin' );
+
 	}
 
 	/**
@@ -404,7 +434,7 @@ class WSUWP_People_Directory {
 		// Load the post data:
 		$post = get_post( $args[2] );
 
-		// Bail if the post type isn't 'wsuwp_people_profile':
+		// Bail if the post type isn't Personnel:
 		if ( $this->personnel_content_type != $post->post_type )
 			return $allcaps;
 
@@ -441,6 +471,45 @@ class WSUWP_People_Directory {
 	public function admin_menu() {
 		if ( ! current_user_can( 'manage_options' ) ) {
 			remove_menu_page( 'profile.php' );
+		}
+	}
+
+	/**
+	 * Add templates for the Personnel custom content type.
+	 */
+	public function template_include( $template ) {
+
+		if ( get_post_type() == $this->personnel_content_type ) {
+
+			if ( is_single() )
+				$template = plugin_dir_path( __FILE__ ) . 'templates/single.php';
+
+			if ( is_archive() )
+				$template = plugin_dir_path( __FILE__ ) . 'templates/archive.php';
+
+		}
+
+		return $template;
+
+	}
+
+	/**
+	 * Enqueue the scripts and styles used on the front end.
+	 */
+	public function wp_enqueue_scripts() {
+		if ( get_post_type() == $this->personnel_content_type && is_single() ) {
+			wp_enqueue_style( 'wsuwp-people-profile-style', plugins_url( 'css/profile.css', __FILE__ ) );
+		}
+	}
+
+	/**
+	 * Order Personnel query results alphabetically by last name
+	 */
+	public function profile_archives( $query ) {
+		if ( $query->is_post_type_archive( $this->personnel_content_type ) && $query->is_main_query() && ! is_admin() ) {
+			$query->set( 'order', 'ASC' );
+			$query->set( 'orderby', 'meta_value' );
+			$query->set( 'meta_key', '_wsuwp_profile_name_last' );
 		}
 	}
 
