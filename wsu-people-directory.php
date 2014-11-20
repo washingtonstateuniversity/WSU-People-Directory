@@ -40,6 +40,8 @@ class WSUWP_People_Directory {
 	 * Some of the data pulled from active directory needs to be captured.
 	 * If keeping the fields array (which is simply for ease of saving),
 	 * make a separate one for those populated by AD data so saving can be handled differently.
+	 *
+	 * Capturing organization data as taxonomic data would make retrieving by organization really easy...
 	 */
 
 	public function __construct() {
@@ -59,6 +61,7 @@ class WSUWP_People_Directory {
 		add_action( 'personal_options_update', array( $this, 'edit_user_profile_update' ) );
 		add_filter( 'user_has_cap', array( $this, 'user_has_cap' ), 10, 3 );
 		//add_action( 'admin_menu', array( $this, 'admin_menu' ) );
+		add_action( 'pre_get_posts', array( $this, 'limit_media_library' ) );
 
 		// Templates, scripts, styles, and filters for the front end.
 		add_filter( 'template_include', array( $this, 'template_include' ), 1 );
@@ -274,7 +277,7 @@ class WSUWP_People_Directory {
 	public function display_position_info_meta_box( $post ) {
 
 		// Some conditions are needed here for non-WSU/AD profiles so they can edit their "card" info.
-		// "_wsuwp_sso_user_type" could possibly be leveraged for people who have logged in/claimed their profile...
+		// Leveraging "_wsuwp_sso_user_type" would work for users, not sure what to do otherwise.
 
 		?>
 		<p>(Data pulled from active directory)</p>
@@ -559,6 +562,30 @@ class WSUWP_People_Directory {
 	}
 
 	/**
+	 * Show (non-Admin) users only the media they have uploaded.
+	 * Theoretically, they have no need to see the rest.
+	 * This doesn't change the counts on the Media Library page.
+	 */
+	public function limit_media_library( $query ) {
+
+		if ( is_admin() ) {
+
+			$screen = get_current_screen();
+			$current_user = wp_get_current_user();
+
+			if ( 'upload' != $screen->base && 'query-attachments' != $_REQUEST['action'] ) {
+				return;
+			}
+
+			if ( ! current_user_can( 'manage_options' ) ) {
+				$query->set( 'author', $current_user->ID );
+			}
+
+		}
+
+	}
+
+	/**
 	 * Add templates for the Personnel custom content type.
 	 */
 	public function template_include( $template ) {
@@ -593,7 +620,7 @@ class WSUWP_People_Directory {
 	}
 
 	/**
-	 * Order Personnel query results alphabetically by last name
+	 * Order public Personnel query results alphabetically by last name
 	 */
 	public function profile_archives( $query ) {
 
