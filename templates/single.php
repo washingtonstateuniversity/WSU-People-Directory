@@ -28,9 +28,13 @@
 					<?php endif; ?>
 
 					<?php // Degree information.
-					$degree = get_post_meta( get_the_ID(), '_wsuwp_profile_degree', true );
-					if ( $degree ) : ?>
-					<p class="degree"><?php echo esc_html( $degree ); ?></p>
+					$degrees = get_post_meta( get_the_ID(), '_wsuwp_profile_degree', true );
+					if ( $degrees && is_array($degrees) ) : ?>
+					<ul>
+						<?php foreach ( $degrees as $degree ) : ?>
+						<li class="degree"><?php echo esc_html( $degree ); ?></li>
+						<?php endforeach; ?>
+					</ul>
 					<?php endif; ?>
 
 					<?php // Title and department info. ?>

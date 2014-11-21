@@ -3,7 +3,7 @@
 Plugin Name: WSU People Directory
 Plugin URI:	#
 Description: A plugin to maintain a central directory of people.
-Author:	washingtonstateuniversity, CAHNRS, philcable, jeremyfelt
+Author:	washingtonstateuniversity, CAHNRS, philcable, danialbleile
 Version: 0.1.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -28,12 +28,15 @@ class WSUWP_People_Directory {
 		'_wsuwp_profile_alt_email',
 		'_wsuwp_profile_website',
 		'_wsuwp_profile_research_photo',
-		'_wsuwp_profile_degree',
 		'_wsuwp_profile_cv',
 		'_wsuwp_profile_coeditor',
 		'_wsuwp_profile_dept',
 		'_wsuwp_profile_name_first',
 		'_wsuwp_profile_name_last',
+	);
+
+	var $repeatable_fields = array(
+		'_wsuwp_profile_degree',
 	);
 
 	/**
@@ -48,6 +51,7 @@ class WSUWP_People_Directory {
 
 		// Custom content type and metaboxes.
 		add_action( 'init', array( $this, 'register_personnel_content_type' ), 11 );
+		// Probably should add rewrite flushing.
 		add_action( 'admin_enqueue_scripts', array( $this, 'admin_enqueue_scripts' ) );
 		add_filter( 'enter_title_here', array( $this, 'enter_title_here' ) );
 		add_action( 'edit_form_after_title', array( $this, 'edit_form_after_title' ) );
@@ -366,11 +370,22 @@ class WSUWP_People_Directory {
 
 		$degrees = get_post_meta( $post->ID, '_wsuwp_profile_degree', true );
 
+		if ( is_array( $degrees ) ) :
+			foreach ( $degrees as $index => $degree ) :
+			?>
+			<p class="wp-profile-repeatable"><strong><label for="_wsuwp_profile_degree[<?php echo $index; ?>]">Degree</label></strong><br />
+			<input type="text" id="_wsuwp_profile_degree[<?php echo $index; ?>]" name="_wsuwp_profile_degree[<?php echo $index; ?>]" value="<?php echo $degree; ?>" class="widefat" /></p>
+			<?php
+			endforeach;
+		else :
+			?>
+			<p class="wp-profile-repeatable"><strong><label for="_wsuwp_profile_degree[0]">Degree</label></strong><br />
+			<input type="text" id="_wsuwp_profile_degree[0]" name="_wsuwp_profile_degree[0]" value="<?php echo $degrees; ?>" class="widefat" /></p>
+			<?php
+		endif;
 		?>
-		<p><strong><label for="_wsuwp_profile_degree">Degree</label></strong><br />
-		<input type="text" id="_wsuwp_profile_degree" name="_wsuwp_profile_degree" value="" class="widefat" /></p>
-		<p><a href="#">+ Add Another</a></p>
-		<?php
+    <p class="wsuwp-profile-add-repeatable"><a href="#">+ Add Another</a></p>
+    <?php
 
 	}
 
@@ -432,13 +447,11 @@ class WSUWP_People_Directory {
 		}
 
 		foreach ( $this->personnel_fields as $field ) {
-
 			if ( isset( $_POST[ $field ] ) && '' != $_POST[ $field ] ) {
 				update_post_meta( $post_id, $field, sanitize_text_field( $_POST[ $field ] ) );
 			} else {
 				delete_post_meta( $post_id, $field );
 			}
-
 		}
 
 		if ( isset( $_POST['_wsuwp_profile_teaching'] ) && '' != $_POST['_wsuwp_profile_teaching'] ) {
@@ -451,6 +464,37 @@ class WSUWP_People_Directory {
 			update_post_meta( $post_id, '_wsuwp_profile_research', wp_kses_post( $_POST['_wsuwp_profile_research'] ) );
 		} else {
 			delete_post_meta( $post_id, '_wsuwp_profile_research' );
+		}
+
+		foreach ( $this->repeatable_fields as $field ) {
+
+			if ( isset( $_POST[ $field ] ) && '' != $_POST[ $field ] ) {
+/*
+				array_walk( $_POST[ $field ], function( &$value, $key ) {
+					$value = sanitize_text_field( $value );
+    		} ); 
+				
+				if ( isset( $_POST[ $field ] ) && '' != $_POST[ $field ] ) {
+					update_post_meta( $post_id, $field, $_POST[ $field ] );
+				} else {
+					delete_post_meta( $post_id, $field );
+				}
+*/
+				$array = array();
+
+				foreach ( $_POST[ $field ] as $value ) {
+					if ( isset( $value ) && '' != $value ) {
+						$array[] = sanitize_text_field( $value );
+					}
+				}
+
+				if ( isset( $array ) && '' != $array ) {
+					update_post_meta( $post_id, $field, $array );
+				} else {
+					delete_post_meta( $post_id, $field );
+				}
+
+			}
 		}
 
 	}
