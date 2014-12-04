@@ -401,7 +401,7 @@ class WSUWP_People_Directory {
 
 		?>
 			<div class="upload-set-wrapper">
-				<input type="hidden" class="wsuwp-profile-upload" name="_wsuwp_profile_cv" id="_wsuwp_profile_cv" value="<?php echo $cv; ?>" />
+				<input type="hidden" class="wsuwp-profile-upload" name="_wsuwp_profile_cv" id="_wsuwp_profile_cv" value="<?php echo esc_attr( $cv ); ?>" />
 				<p class="hide-if-no-js"><a title="C.V." data-type="File" href="#" class="wsuwp-profile-upload-link">
 				<?php if ( $cv ) : ?>
 					<img src="<?php echo get_bloginfo( 'url' ) . '/wp-includes/images/media/document.png'; ?>" /></a></p>
