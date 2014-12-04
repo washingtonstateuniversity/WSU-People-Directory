@@ -111,7 +111,7 @@ class WSUWP_People_Directory {
 			),
 			'has_archive' => true,
 			'rewrite' => array(
-				'slug' => 'listing',
+				'slug' => 'profile',
 				'with_front' => false
 			),
 		);
