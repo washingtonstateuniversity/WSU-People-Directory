@@ -218,6 +218,9 @@ class WSUWP_People_Directory {
 	 * @param string $post_type The slug of the current post type.
 	 */
 	public function add_meta_boxes( $post_type ) {
+		if ( $this->personnel_content_type !== $post_type ) {
+			return;
+		}
 
 		add_meta_box(
 			'wsuwp_profile_position_info',
