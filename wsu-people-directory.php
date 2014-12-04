@@ -376,14 +376,14 @@ class WSUWP_People_Directory {
 		if ( is_array( $degrees ) ) :
 			foreach ( $degrees as $index => $degree ) :
 			?>
-			<p class="wp-profile-repeatable"><strong><label for="_wsuwp_profile_degree[<?php echo $index; ?>]">Degree</label></strong><br />
-			<input type="text" id="_wsuwp_profile_degree[<?php echo $index; ?>]" name="_wsuwp_profile_degree[<?php echo $index; ?>]" value="<?php echo $degree; ?>" class="widefat" /></p>
+			<p class="wp-profile-repeatable"><strong><label for="_wsuwp_profile_degree[<?php echo esc_attr( $index ); ?>]">Degree</label></strong><br />
+			<input type="text" id="_wsuwp_profile_degree[<?php echo esc_attr( $index ); ?>]" name="_wsuwp_profile_degree[<?php echo esc_attr( $index ); ?>]" value="<?php echo esc_attr( $degree ); ?>" class="widefat" /></p>
 			<?php
 			endforeach;
 		else :
 			?>
 			<p class="wp-profile-repeatable"><strong><label for="_wsuwp_profile_degree[0]">Degree</label></strong><br />
-			<input type="text" id="_wsuwp_profile_degree[0]" name="_wsuwp_profile_degree[0]" value="<?php echo $degrees; ?>" class="widefat" /></p>
+			<input type="text" id="_wsuwp_profile_degree[0]" name="_wsuwp_profile_degree[0]" value="<?php echo esc_attr( $degrees ); ?>" class="widefat" /></p>
 			<?php
 		endif;
 		?>
