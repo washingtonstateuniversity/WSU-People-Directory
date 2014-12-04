@@ -332,11 +332,11 @@ class WSUWP_People_Directory {
 
 		?>
 		<p><strong><label for="_wsuwp_profile_alt_phone">Phone Number</label></strong><br />
-		<input type="text" id="_wsuwp_profile_alt_phone" name="_wsuwp_profile_alt_phone" value="<?php echo get_post_meta( $post->ID, '_wsuwp_profile_alt_phone', true ); ?>" class="widefat" /></p>
+		<input type="text" id="_wsuwp_profile_alt_phone" name="_wsuwp_profile_alt_phone" value="<?php echo esc_attr( get_post_meta( $post->ID, '_wsuwp_profile_alt_phone', true ) ); ?>" class="widefat" /></p>
 		<p><strong><label for="_wsuwp_profile_alt_email">Email Address</label></strong><br />
-		<input type="text" id="_wsuwp_profile_alt_email" name="_wsuwp_profile_alt_email" value="<?php echo get_post_meta( $post->ID, '_wsuwp_profile_alt_email', true ); ?>" class="widefat" /></p>
+		<input type="text" id="_wsuwp_profile_alt_email" name="_wsuwp_profile_alt_email" value="<?php echo esc_attr( get_post_meta( $post->ID, '_wsuwp_profile_alt_email', true ) ); ?>" class="widefat" /></p>
 		<p><strong><label for="_wsuwp_profile_website">Website URL</label></strong><br />
-		<input type="text" id="_wsuwp_profile_website" name="_wsuwp_profile_website" value="<?php echo get_post_meta( $post->ID, '_wsuwp_profile_website', true ); ?>" class="widefat" /></p>
+		<input type="text" id="_wsuwp_profile_website" name="_wsuwp_profile_website" value="<?php echo esc_attr( get_post_meta( $post->ID, '_wsuwp_profile_website', true ) ); ?>" class="widefat" /></p>
 		<?php
 
 	}
@@ -351,12 +351,12 @@ class WSUWP_People_Directory {
 		?>
 			<p class="description">If you want a different image to display on your research-specific profile, upload it here.</p>
 			<div class="upload-set-wrapper">
-				<input type="hidden" class="wsuwp-profile-upload" name="_wsuwp_profile_research_photo" id="_wsuwp_profile_research_photo" value="<?php echo $research_photo; ?>" />
+				<input type="hidden" class="wsuwp-profile-upload" name="_wsuwp_profile_research_photo" id="_wsuwp_profile_research_photo" value="<?php echo esc_attr( $research_photo ); ?>" />
 				<p class="hide-if-no-js"><a title="research photo" data-type="Photo" href="#" class="wsuwp-profile-upload-link">
 				<?php if ( $research_photo ) :
 					$image = wp_get_attachment_image_src( $research_photo, 'thumbnail' );
 					?>
-					<img src="<?php echo $image[0]; ?>" /></a></p>
+					<img src="<?php echo esc_url( $image[0] ); ?>" /></a></p>
 					<p class="hide-if-no-js"><a title="research photo" href="#" class="wsuwp-profile-remove-link">Remove research photo</a></p>
 				<?php else : ?>
 					 Upload research photo</a></p>
