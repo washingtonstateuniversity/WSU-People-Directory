@@ -291,12 +291,12 @@ class WSUWP_People_Directory {
 		<p><strong><label for="wsu_id">WSU ID</label></strong><br />
 		<input type="text" id="wsu_id" name="wsu_id" value="12345678" class="widefat" disabled="disabled" /></p>
 		<p><strong><label for="_wsuwp_profile_name_first">First Name</label></strong><br />
-		<input type="text" id="_wsuwp_profile_name_first" name="_wsuwp_profile_name_first" value="<?php echo get_post_meta( $post->ID, '_wsuwp_profile_name_first', true ); ?>" class="widefat" /></p>
+		<input type="text" id="_wsuwp_profile_name_first" name="_wsuwp_profile_name_first" value="<?php echo esc_attr( get_post_meta( $post->ID, '_wsuwp_profile_name_first', true ) ); ?>" class="widefat" /></p>
 		<p><strong><label for="_wsuwp_profile_name_last">Last Name</label></strong><br />
-		<input type="text" id="_wsuwp_profile_name_last" name="_wsuwp_profile_name_last" value="<?php echo get_post_meta( $post->ID, '_wsuwp_profile_name_last', true ); ?>" class="widefat" /></p>
+		<input type="text" id="_wsuwp_profile_name_last" name="_wsuwp_profile_name_last" value="<?php echo esc_attr( get_post_meta( $post->ID, '_wsuwp_profile_name_last', true ) ); ?>" class="widefat" /></p>
 
 		<p><strong><label for="_wsuwp_profile_dept">Department</label></strong><br />
-		<input type="text" id="_wsuwp_profile_dept" name="_wsuwp_profile_dept" value="<?php echo get_post_meta( $post->ID, '_wsuwp_profile_dept', true ); ?>" class="widefat" /></p>
+		<input type="text" id="_wsuwp_profile_dept" name="_wsuwp_profile_dept" value="<?php echo esc_attr( get_post_meta( $post->ID, '_wsuwp_profile_dept', true ) ); ?>" class="widefat" /></p>
 
 		<p><strong><label for="official_title">Official Title</label></strong><br />
 		<input type="text" id="official_title" name="official_title" value="Widget builder" class="widefat" disabled="disabled" /></p>
