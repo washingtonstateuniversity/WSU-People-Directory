@@ -421,7 +421,7 @@ class WSUWP_People_Directory {
 
 		?>
 			<p>To grant another user the ability to edit your profile, add them here.</p>
-			<p><input type="text" id="_wsuwp_profile_coeditor" name="_wsuwp_profile_coeditor" value="<?php echo get_post_meta( $post->ID, '_wsuwp_profile_coeditor', true ); ?>" class="widefat" /></p>
+			<p><input type="text" id="_wsuwp_profile_coeditor" name="_wsuwp_profile_coeditor" value="<?php echo esc_attr( get_post_meta( $post->ID, '_wsuwp_profile_coeditor', true ) ); ?>" class="widefat" /></p>
 		<?php
 
 	}
@@ -514,7 +514,7 @@ class WSUWP_People_Directory {
 		?>
 		<tr>
 			<th><label for="wsuwp_people_organization_admin">Organization Administrator for</label></th>
-			<td><input type="text" id="wsuwp_people_organization_admin" name="wsuwp_people_organization_admin" value="<?php echo get_user_meta( $user->ID, 'wsuwp_people_organization_admin', true ); ?>" /></td>
+			<td><input type="text" id="wsuwp_people_organization_admin" name="wsuwp_people_organization_admin" value="<?php echo esc_attr( get_user_meta( $user->ID, 'wsuwp_people_organization_admin', true ) ); ?>" /></td>
 		</tr>
 		<?php
 	}
