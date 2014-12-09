@@ -12,6 +12,14 @@ License URI: http://www.gnu.org/licenses/gpl-2.0.html
 class WSUWP_People_Directory {
 
 	/**
+	 * The plugin version number, used to break caches and trigger
+	 * upgrade routines.
+	 *
+	 * @var string
+	 */
+	var $personnel_plugin_version = '0.1.0';
+
+	/**
 	 * The slug used to register the "Personnel" custom content type.
 	 *
 	 * @var string
@@ -49,15 +57,19 @@ class WSUWP_People_Directory {
 
 	public function __construct() {
 
-		// Custom content type and metaboxes.
+		// Custom content type and taxonomies.
+		//add_action( 'init', array( $this, 'process_upgrade_routine' ), 12 );
 		add_action( 'init', array( $this, 'register_personnel_content_type' ), 11 );
-		// Probably should add rewrite flushing.
+		add_action( 'init', array( $this, 'add_taxonomies' ), 12 );
+
+		// Custom metaboxes and all that.
 		add_action( 'admin_enqueue_scripts', array( $this, 'admin_enqueue_scripts' ) );
 		add_filter( 'enter_title_here', array( $this, 'enter_title_here' ) );
 		add_action( 'edit_form_after_title', array( $this, 'edit_form_after_title' ) );
 		add_action( 'edit_form_after_editor',	array( $this, 'edit_form_after_editor' ) );
 		add_action( 'add_meta_boxes', array( $this, 'add_meta_boxes' ), 10, 2 );
 		add_action( 'save_post', array( $this, 'save_post' ), 10, 2 );
+		add_filter( 'wp_post_revision_meta_keys', array( $this, 'add_meta_keys_to_revision' ) );
 
 		// Capabilities and related.
 		add_action( 'personal_options', array( $this, 'personal_options' ) );
@@ -71,6 +83,23 @@ class WSUWP_People_Directory {
 		add_filter( 'template_include', array( $this, 'template_include' ), 1 );
 		add_action( 'wp_enqueue_scripts', array( $this, 'wp_enqueue_scripts' ), 11 );
 		add_action( 'pre_get_posts', array( $this, 'profile_archives' ) );
+
+	}
+
+	/**
+	 * Process any upgrade routines between versions or on initial activation.
+	 * (Taken verbatim from the Unversity Center plugin)
+	 */
+	public function process_upgrade_routine() {
+
+		$db_version = get_option( 'wsuwp_people_version', '0.0.0' );
+
+		// Flush rewrite rules if on an early or non existing DB version.
+		if ( version_compare( $db_version, '0.1.0', '<' ) ) {
+			flush_rewrite_rules();
+		}
+
+		update_option( 'wsuwp_people_version', $this->personnel_plugin_version );
 
 	}
 
@@ -118,6 +147,15 @@ class WSUWP_People_Directory {
 
 		register_post_type( $this->personnel_content_type, $args );
 
+	}
+
+	/**
+	 * Add WSUWP University Taxonomies.
+	 */
+	public function add_taxonomies() {
+		register_taxonomy_for_object_type( 'wsuwp_university_category', $this->personnel_content_type );
+		register_taxonomy_for_object_type( 'wsuwp_university_location', $this->personnel_content_type );
+		//register_taxonomy_for_object_type( 'wsuwp_university_organizations', $this->personnel_content_type );
 	}
 
 	/**
@@ -282,7 +320,6 @@ class WSUWP_People_Directory {
 
 		// Some conditions are needed here for non-WSU/AD profiles so they can edit their "card" info.
 		// Leveraging "_wsuwp_sso_user_type" would work for users, not sure what to do otherwise.
-
 		?>
 		<p>(Data pulled from active directory)</p>
 		<p><strong><label for="wsu_id">WSU ID</label></strong><br />
@@ -500,6 +537,21 @@ class WSUWP_People_Directory {
 	}
 
 	/**
+	 * Keys of meta fields to revision.
+	 */
+	public function add_meta_keys_to_revision( $keys ) {
+		foreach ( $this->personnel_fields as $field ) {
+			$keys[] = $field;
+		}
+		foreach ( $this->repeatable_fields as $field ) {
+			$keys[] = $field;
+		}
+		$keys[] = '_wsuwp_profile_teaching';
+		$keys[] = '_wsuwp_profile_research';
+    return $keys;
+	}
+
+	/**
 	 * Add "Organization Administrator" field in profile.
 	 */
 	public function personal_options( $user ) {
@@ -658,6 +710,7 @@ class WSUWP_People_Directory {
 		if ( $this->personnel_content_type == get_post_type() ) {
 			if ( is_single() ) {
 				wp_enqueue_style( 'wsuwp-people-profile-style', plugins_url( 'css/profile.css', __FILE__ ) );
+				wp_enqueue_script( 'wsuwp-people-profile-script', plugins_url( 'js/profile.js', __FILE__ ), array( 'jquery-ui-tabs' ), false, true );
 			}
 		}
 
