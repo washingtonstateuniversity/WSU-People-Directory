@@ -140,7 +140,7 @@ class WSUWP_People_Directory {
 			),
 			'has_archive' => true,
 			'rewrite' => array(
-				'slug' => 'listing',
+				'slug' => 'profile',
 				'with_front' => false
 			),
 		);
@@ -256,6 +256,9 @@ class WSUWP_People_Directory {
 	 * @param string $post_type The slug of the current post type.
 	 */
 	public function add_meta_boxes( $post_type ) {
+		if ( $this->personnel_content_type !== $post_type ) {
+			return;
+		}
 
 		add_meta_box(
 			'wsuwp_profile_position_info',
@@ -325,12 +328,12 @@ class WSUWP_People_Directory {
 		<p><strong><label for="wsu_id">WSU ID</label></strong><br />
 		<input type="text" id="wsu_id" name="wsu_id" value="12345678" class="widefat" disabled="disabled" /></p>
 		<p><strong><label for="_wsuwp_profile_name_first">First Name</label></strong><br />
-		<input type="text" id="_wsuwp_profile_name_first" name="_wsuwp_profile_name_first" value="<?php echo get_post_meta( $post->ID, '_wsuwp_profile_name_first', true ); ?>" class="widefat" /></p>
+		<input type="text" id="_wsuwp_profile_name_first" name="_wsuwp_profile_name_first" value="<?php echo esc_attr( get_post_meta( $post->ID, '_wsuwp_profile_name_first', true ) ); ?>" class="widefat" /></p>
 		<p><strong><label for="_wsuwp_profile_name_last">Last Name</label></strong><br />
-		<input type="text" id="_wsuwp_profile_name_last" name="_wsuwp_profile_name_last" value="<?php echo get_post_meta( $post->ID, '_wsuwp_profile_name_last', true ); ?>" class="widefat" /></p>
+		<input type="text" id="_wsuwp_profile_name_last" name="_wsuwp_profile_name_last" value="<?php echo esc_attr( get_post_meta( $post->ID, '_wsuwp_profile_name_last', true ) ); ?>" class="widefat" /></p>
 
 		<p><strong><label for="_wsuwp_profile_dept">Department</label></strong><br />
-		<input type="text" id="_wsuwp_profile_dept" name="_wsuwp_profile_dept" value="<?php echo get_post_meta( $post->ID, '_wsuwp_profile_dept', true ); ?>" class="widefat" /></p>
+		<input type="text" id="_wsuwp_profile_dept" name="_wsuwp_profile_dept" value="<?php echo esc_attr( get_post_meta( $post->ID, '_wsuwp_profile_dept', true ) ); ?>" class="widefat" /></p>
 
 		<p><strong><label for="official_title">Official Title</label></strong><br />
 		<input type="text" id="official_title" name="official_title" value="Widget builder" class="widefat" disabled="disabled" /></p>
@@ -366,11 +369,11 @@ class WSUWP_People_Directory {
 
 		?>
 		<p><strong><label for="_wsuwp_profile_alt_phone">Phone Number</label></strong><br />
-		<input type="text" id="_wsuwp_profile_alt_phone" name="_wsuwp_profile_alt_phone" value="<?php echo get_post_meta( $post->ID, '_wsuwp_profile_alt_phone', true ); ?>" class="widefat" /></p>
+		<input type="text" id="_wsuwp_profile_alt_phone" name="_wsuwp_profile_alt_phone" value="<?php echo esc_attr( get_post_meta( $post->ID, '_wsuwp_profile_alt_phone', true ) ); ?>" class="widefat" /></p>
 		<p><strong><label for="_wsuwp_profile_alt_email">Email Address</label></strong><br />
-		<input type="text" id="_wsuwp_profile_alt_email" name="_wsuwp_profile_alt_email" value="<?php echo get_post_meta( $post->ID, '_wsuwp_profile_alt_email', true ); ?>" class="widefat" /></p>
+		<input type="text" id="_wsuwp_profile_alt_email" name="_wsuwp_profile_alt_email" value="<?php echo esc_attr( get_post_meta( $post->ID, '_wsuwp_profile_alt_email', true ) ); ?>" class="widefat" /></p>
 		<p><strong><label for="_wsuwp_profile_website">Website URL</label></strong><br />
-		<input type="text" id="_wsuwp_profile_website" name="_wsuwp_profile_website" value="<?php echo get_post_meta( $post->ID, '_wsuwp_profile_website', true ); ?>" class="widefat" /></p>
+		<input type="text" id="_wsuwp_profile_website" name="_wsuwp_profile_website" value="<?php echo esc_attr( get_post_meta( $post->ID, '_wsuwp_profile_website', true ) ); ?>" class="widefat" /></p>
 		<?php
 
 	}
@@ -385,12 +388,12 @@ class WSUWP_People_Directory {
 		?>
 			<p class="description">If you want a different image to display on your research-specific profile, upload it here.</p>
 			<div class="upload-set-wrapper">
-				<input type="hidden" class="wsuwp-profile-upload" name="_wsuwp_profile_research_photo" id="_wsuwp_profile_research_photo" value="<?php echo $research_photo; ?>" />
+				<input type="hidden" class="wsuwp-profile-upload" name="_wsuwp_profile_research_photo" id="_wsuwp_profile_research_photo" value="<?php echo esc_attr( $research_photo ); ?>" />
 				<p class="hide-if-no-js"><a title="research photo" data-type="Photo" href="#" class="wsuwp-profile-upload-link">
 				<?php if ( $research_photo ) :
 					$image = wp_get_attachment_image_src( $research_photo, 'thumbnail' );
 					?>
-					<img src="<?php echo $image[0]; ?>" /></a></p>
+					<img src="<?php echo esc_url( $image[0] ); ?>" /></a></p>
 					<p class="hide-if-no-js"><a title="research photo" href="#" class="wsuwp-profile-remove-link">Remove research photo</a></p>
 				<?php else : ?>
 					 Upload research photo</a></p>
@@ -410,14 +413,14 @@ class WSUWP_People_Directory {
 		if ( is_array( $degrees ) ) :
 			foreach ( $degrees as $index => $degree ) :
 			?>
-			<p class="wp-profile-repeatable"><strong><label for="_wsuwp_profile_degree[<?php echo $index; ?>]">Degree</label></strong><br />
-			<input type="text" id="_wsuwp_profile_degree[<?php echo $index; ?>]" name="_wsuwp_profile_degree[<?php echo $index; ?>]" value="<?php echo $degree; ?>" class="widefat" /></p>
+			<p class="wp-profile-repeatable"><strong><label for="_wsuwp_profile_degree[<?php echo esc_attr( $index ); ?>]">Degree</label></strong><br />
+			<input type="text" id="_wsuwp_profile_degree[<?php echo esc_attr( $index ); ?>]" name="_wsuwp_profile_degree[<?php echo esc_attr( $index ); ?>]" value="<?php echo esc_attr( $degree ); ?>" class="widefat" /></p>
 			<?php
 			endforeach;
 		else :
 			?>
 			<p class="wp-profile-repeatable"><strong><label for="_wsuwp_profile_degree[0]">Degree</label></strong><br />
-			<input type="text" id="_wsuwp_profile_degree[0]" name="_wsuwp_profile_degree[0]" value="<?php echo $degrees; ?>" class="widefat" /></p>
+			<input type="text" id="_wsuwp_profile_degree[0]" name="_wsuwp_profile_degree[0]" value="<?php echo esc_attr( $degrees ); ?>" class="widefat" /></p>
 			<?php
 		endif;
 		?>
@@ -435,10 +438,10 @@ class WSUWP_People_Directory {
 
 		?>
 			<div class="upload-set-wrapper">
-				<input type="hidden" class="wsuwp-profile-upload" name="_wsuwp_profile_cv" id="_wsuwp_profile_cv" value="<?php echo $cv; ?>" />
+				<input type="hidden" class="wsuwp-profile-upload" name="_wsuwp_profile_cv" id="_wsuwp_profile_cv" value="<?php echo esc_attr( $cv ); ?>" />
 				<p class="hide-if-no-js"><a title="C.V." data-type="File" href="#" class="wsuwp-profile-upload-link">
 				<?php if ( $cv ) : ?>
-					<img src="<?php echo get_bloginfo( 'url' ) . '/wp-includes/images/media/document.png'; ?>" /></a></p>
+					<img src="<?php echo esc_url( home_url( '/wp-includes/images/media/document.png' ) ); ?>" /></a></p>
 					<p class="hide-if-no-js"><a title="C.V." href="#" class="wsuwp-profile-remove-link">Remove C.V.</a></p>
 				<?php else : ?>
 					 Upload C.V.</a></p>
@@ -455,7 +458,7 @@ class WSUWP_People_Directory {
 
 		?>
 			<p>To grant another user the ability to edit your profile, add them here.</p>
-			<p><input type="text" id="_wsuwp_profile_coeditor" name="_wsuwp_profile_coeditor" value="<?php echo get_post_meta( $post->ID, '_wsuwp_profile_coeditor', true ); ?>" class="widefat" /></p>
+			<p><input type="text" id="_wsuwp_profile_coeditor" name="_wsuwp_profile_coeditor" value="<?php echo esc_attr( get_post_meta( $post->ID, '_wsuwp_profile_coeditor', true ) ); ?>" class="widefat" /></p>
 		<?php
 
 	}
@@ -563,7 +566,7 @@ class WSUWP_People_Directory {
 		?>
 		<tr>
 			<th><label for="wsuwp_people_organization_admin">Organization Administrator for</label></th>
-			<td><input type="text" id="wsuwp_people_organization_admin" name="wsuwp_people_organization_admin" value="<?php echo get_user_meta( $user->ID, 'wsuwp_people_organization_admin', true ); ?>" /></td>
+			<td><input type="text" id="wsuwp_people_organization_admin" name="wsuwp_people_organization_admin" value="<?php echo esc_attr( get_user_meta( $user->ID, 'wsuwp_people_organization_admin', true ) ); ?>" /></td>
 		</tr>
 		<?php
 	}
