@@ -27,9 +27,25 @@ class WSUWP_People_Directory {
 	var $personnel_content_type = 'wsuwp_people_profile';
 
 	/**
-	 * The fields used throughout the metaboxes (temporary).
+	 * Fields used to capture Active Directory data.
 	 */
-	var $personnel_fields = array(
+	var $ad_fields = array(
+		'_wsuwp_profile_ad_nid',
+		'_wsuwp_profile_ad_name_first',
+		'_wsuwp_profile_ad_name_last',
+		'_wsuwp_profile_ad_dept',
+		'_wsuwp_profile_ad_title',
+		'_wsuwp_profile_ad_appointment',// Not sure if this information is in AD.
+		'_wsuwp_profile_ad_classification',// Ditto.
+		'_wsuwp_profile_ad_office',
+		'_wsuwp_profile_ad_phone',
+		'_wsuwp_profile_ad_email',
+	);
+
+	/**
+	 * Fields used to capture additional profile information.
+	 */
+	var $basic_fields = array(
 		'_wsuwp_profile_teaching_name',
 		'_wsuwp_profile_research_name',
 		'_wsuwp_profile_alt_phone',
@@ -38,22 +54,24 @@ class WSUWP_People_Directory {
 		'_wsuwp_profile_research_photo',
 		'_wsuwp_profile_cv',
 		'_wsuwp_profile_coeditor',
-		'_wsuwp_profile_dept',
-		'_wsuwp_profile_name_first',
-		'_wsuwp_profile_name_last',
 	);
 
+	/**
+	 * Repeatable fields used throughout the metaboxes.
+	 */
 	var $repeatable_fields = array(
 		'_wsuwp_profile_degree',
 	);
 
 	/**
-	 * Some of the data pulled from active directory needs to be captured.
-	 * If keeping the fields array (which is simply for ease of saving),
-	 * make a separate one for those populated by AD data so saving can be handled differently.
-	 *
-	 * Capturing organization data as taxonomic data would make retrieving by organization really easy...
+	 * WP editors used throughout the metaboxes.
 	 */
+	var $wp_editors = array(
+		'_wsuwp_profile_teaching',
+		'_wsuwp_profile_research',
+		'_wsuwp_profile_extension',
+		'_wsuwp_profile_publications',
+	);
 
 	public function __construct() {
 
@@ -68,6 +86,7 @@ class WSUWP_People_Directory {
 		add_action( 'edit_form_after_title', array( $this, 'edit_form_after_title' ) );
 		add_action( 'edit_form_after_editor',	array( $this, 'edit_form_after_editor' ) );
 		add_action( 'add_meta_boxes', array( $this, 'add_meta_boxes' ), 10, 2 );
+		add_action( 'do_meta_boxes', array( $this, 'featured_image_box' ) ); 
 		add_action( 'save_post', array( $this, 'save_post' ), 10, 2 );
 		add_filter( 'wp_post_revision_meta_keys', array( $this, 'add_meta_keys_to_revision' ) );
 
@@ -192,6 +211,8 @@ class WSUWP_People_Directory {
 	 */
 	public function edit_form_after_title( $post ) {
 
+		do_meta_boxes( get_current_screen(), 'after_title', $post );
+
 		if ( $this->personnel_content_type === $post->post_type ) :
 			?>
 			<div id="wsuwp-profile-tabs">
@@ -199,12 +220,13 @@ class WSUWP_People_Directory {
 					<li><a href="#wsuwp-profile-default" class="nav-tab">Bio</a></li>
 					<li><a href="#wsuwp-profile-teaching" class="nav-tab">Teaching</a></li>
 					<li><a href="#wsuwp-profile-research" class="nav-tab">Research</a></li>
+          <li><a href="#wsuwp-profile-extension" class="nav-tab">Extension</a></li>
 					<li><a href="#wsuwp-profile-publications" class="nav-tab">Publications</a></li>
 				</ul>
 				<div id="wsuwp-profile-default">
 					<p class="description">Consider including professional experience, previous employment, awards, honors, memberships, or other information you wish to share about yourself here.</p>
 			<?php
-			do_meta_boxes( get_current_screen(), 'after-title', $post );
+			do_meta_boxes( get_current_screen(), 'bio_above_editor', $post ); // Metaboxes added this way don't show up for my Super Admin account - hoping it's a unique case...
 		endif;
 
 	}
@@ -223,10 +245,9 @@ class WSUWP_People_Directory {
 					<p class="description">Your teaching responsibilities, classes you teach, etc.</p>
 					<h3 class="wpuwp-profile-label"><label for="_wsuwp_profile_teaching_name">Teaching Profile Display Name</label></h3>
 					<p class="description">(if different than default)</p>
-					<input type="text" id="_wsuwp_profile_teaching_name" name="_wsuwp_profile_teaching_name" value="<?php echo get_post_meta( $post->ID, '_wsuwp_profile_teaching_name', true ); ?>" class="widefat wsuwp-profile-namefield" /></p>
-					<?php
-						wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_teaching', true ), '_wsuwp_profile_teaching' );
-					?>
+					<input type="text" id="_wsuwp_profile_teaching_name" name="_wsuwp_profile_teaching_name" value="<?php echo esc_attr( get_post_meta( $post->ID, '_wsuwp_profile_teaching_name', true ) ); ?>" class="widefat wsuwp-profile-namefield" /></p>
+					<?php do_meta_boxes( get_current_screen(), 'teaching_above_editor', $post ); ?>
+					<?php wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_teaching', true ), '_wsuwp_profile_teaching' ); ?>
 				</div>
 
 				<div id="wsuwp-profile-research">
@@ -234,14 +255,22 @@ class WSUWP_People_Directory {
 					<p class="description">Information about your research interests, recent funding/funded projects/grant submissions, grad students/program personnel/research team, research facilities, collaborators, patents, etc.</p>
 					<h3 class="wpuwp-profile-label"><label for="_wsuwp_profile_research_name">Research Profile Display Name</label></h3>
 					<p class="description">(if different than default)</p>
-					<input type="text" id="_wsuwp_profile_research_name" name="_wsuwp_profile_research_name" value="<?php echo get_post_meta( $post->ID, '_wsuwp_profile_research_name', true ); ?>" class="widefat wsuwp-profile-namefield" /></p>
-					<?php
-						wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_research', true ), '_wsuwp_profile_research' );
-					?>
+					<input type="text" id="_wsuwp_profile_research_name" name="_wsuwp_profile_research_name" value="<?php echo esc_attr( get_post_meta( $post->ID, '_wsuwp_profile_research_name', true ) ); ?>" class="widefat wsuwp-profile-namefield" /></p>
+          <?php do_meta_boxes( get_current_screen(), 'research_above_editor', $post ); ?>
+					<?php wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_research', true ), '_wsuwp_profile_research' ); ?>
+				</div>
+
+				<div id="wsuwp-profile-extension">
+					<p>(Could be cool to conditionally show this tab if user has an Extension appointment.)</p>
+					<p class="description">Information about your Extension duties.</p>
+					<?php do_meta_boxes( get_current_screen(), 'extension_above_editor', $post ); ?>
+					<?php wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_extension', true ), '_wsuwp_profile_extension' ); ?>
 				</div>
 
 				<div id="wsuwp-profile-publications">
 					<p>(This section would ideally include a way for users to dynamically pull in a feed from the pubs store, and a wp_editor for manually inputting book chapters, professional articles, peer-reviewed exhibitions, juried artistic works, and other publications that wouldn't be in the pubs store.)</p>
+					<?php do_meta_boxes( get_current_screen(), 'publications_above_editor', $post ); ?>
+					<?php wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_publications', true ), '_wsuwp_profile_publications' ); ?>
 				</div>
 
 			</div><!--wsuwp-profile-tabs-->
@@ -256,6 +285,10 @@ class WSUWP_People_Directory {
 	 * @param string $post_type The slug of the current post type.
 	 */
 	public function add_meta_boxes( $post_type ) {
+
+		if ( $this->personnel_content_type !== $post_type ) {
+			return;
+		}
 
 		add_meta_box(
 			'wsuwp_profile_position_info',
@@ -280,7 +313,7 @@ class WSUWP_People_Directory {
 			'Research Photo',
 			array( $this, 'display_profile_research_photo_meta_box' ),
 			$this->personnel_content_type,
-			'side',
+			'research_above_editor',
 			'low'
 		);
 
@@ -289,7 +322,7 @@ class WSUWP_People_Directory {
 			'Degree Information',
 			array( $this, 'display_degree_info_meta_box' ),
 			$this->personnel_content_type,
-			'after-title',
+			'bio_above_editor',
 			'high'
 		);
 
@@ -298,7 +331,7 @@ class WSUWP_People_Directory {
 			'Curriculum Vitae',
 			array( $this, 'display_cv_upload_meta_box' ),
 			$this->personnel_content_type,
-			'after-title',
+			'bio_above_editor',
 			'core'
 		);
 
@@ -318,42 +351,50 @@ class WSUWP_People_Directory {
 	 */
 	public function display_position_info_meta_box( $post ) {
 
-		// Some conditions are needed here for non-WSU/AD profiles so they can edit their "card" info.
-		// Leveraging "_wsuwp_sso_user_type" would work for users, not sure what to do otherwise.
+		$nid = get_post_meta( $post->ID, '_wsuwp_profile_ad_nid', true );
+
 		?>
-		<p>(Data pulled from active directory)</p>
-		<p><strong><label for="wsu_id">WSU ID</label></strong><br />
-		<input type="text" id="wsu_id" name="wsu_id" value="12345678" class="widefat" disabled="disabled" /></p>
-		<p><strong><label for="_wsuwp_profile_name_first">First Name</label></strong><br />
-		<input type="text" id="_wsuwp_profile_name_first" name="_wsuwp_profile_name_first" value="<?php echo get_post_meta( $post->ID, '_wsuwp_profile_name_first', true ); ?>" class="widefat" /></p>
-		<p><strong><label for="_wsuwp_profile_name_last">Last Name</label></strong><br />
-		<input type="text" id="_wsuwp_profile_name_last" name="_wsuwp_profile_name_last" value="<?php echo get_post_meta( $post->ID, '_wsuwp_profile_name_last', true ); ?>" class="widefat" /></p>
 
-		<p><strong><label for="_wsuwp_profile_dept">Department</label></strong><br />
-		<input type="text" id="_wsuwp_profile_dept" name="_wsuwp_profile_dept" value="<?php echo get_post_meta( $post->ID, '_wsuwp_profile_dept', true ); ?>" class="widefat" /></p>
+		<!-- Just for testing. Capture the NID during post creation/save. -->
+    <input type="text" id="_wsuwp_profile_ad_nid" name="_wsuwp_profile_ad_nid" value="<?php echo esc_attr( $nid ); ?>" />
 
-		<p><strong><label for="official_title">Official Title</label></strong><br />
-		<input type="text" id="official_title" name="official_title" value="Widget builder" class="widefat" disabled="disabled" /></p>
-		<p><strong>Appointment</strong><br />
-		<label for="appointment_teaching"><input type="checkbox" id="appointment_teaching" name="appointment_teaching" checked="checked" disabled="disabled"> Teaching</label><br />
-		<label for="appointment_research"><input type="checkbox" id="appointment_research" name="appointment_research" checked="checked" disabled="disabled"> Research</label><br />
-		<label for="appointment_extension"><input type="checkbox" id="appointment_extension" name="appointment_extension" checked="checked" disabled="disabled"> Extension</label><br />
-		<label for="appointment_other"><input type="checkbox" id="appointment_other" name="appointment_other" checked="checked" disabled="disabled"> Other</label><br />
-		<p><strong>Classification</strong><br />
-		<label for="classification_faculty"><input type="checkbox" id="classification_faculty" name="classification_faculty" checked="checked" disabled="disabled"> Faculty</label><br />
-		<label for="classification_ap"><input type="checkbox" id="classification_ap" name="classification_ap" checked="checked" disabled="disabled"> Administrative Professional</label><br />
-		<label for="classification_staff"><input type="checkbox" id="classification_staff" name="classification_staff" checked="checked" disabled="disabled"> Staff</label><br />
-		<label for="classification_ga"><input type="checkbox" id="classification_ga" name="classification_ga" checked="checked" disabled="disabled"> Graduate Assistant</label><br />
-		<label for="classification_hourly"><input type="checkbox" id="classification_hourly" name="classification_hourly" checked="checked" disabled="disabled"> Hourly</label><br />
-		<label for="classification_pa"><input type="checkbox" id="classification_pa" name="classification_pa" checked="checked" disabled="disabled"> Public Affiliate</label><br />
-		<p><strong><label for="office">Office Location</label></strong><br />
-		<input type="text" id="office" name="office" value="Somewhere" disabled="disabled" /></p></strong></p>
-		<p><strong><label for="phone">Office Phone Number</label></strong><br />
-		<input type="text" id="phone" name="phone" value="(509) 335-5555" disabled="disabled" /></p></strong></p>
-		<p><strong><label for="email">Email Address</label></strong><br />
-		<input type="text" id="email" name="email" value="someone@wsu.edu" disabled="disabled" /></p></strong></p>
-		<p class="description">Notify <a href="#">HR</a> if any of this information is incorrect or needs updated.</p>
 		<?php
+		/**
+		 * Just an idea...
+		 * We'll pull this data from AD for all WSU people (who will presumably have a NID),
+		 * but we don't want them to edit it here. We do, however, want to allow non-WSU folk
+		 * whom we're hosting a profile for to be able to add contact info.
+		 * So, let's leverage the NID to offer up a different presentation for those situations.
+		 */
+		if ( $nid ) : ?>
+
+		<p><?php echo esc_attr( get_post_meta( $post->ID, '_wsuwp_profile_ad_name_first', true ) ) . ' ' . esc_attr( get_post_meta( $post->ID, '_wsuwp_profile_ad_name_last', true ) ); ?></p>
+		<p><?php echo esc_attr( get_post_meta( $post->ID, '_wsuwp_profile_ad_dept', true ) ); ?></p>
+		<p><?php echo esc_attr( get_post_meta( $post->ID, '_wsuwp_profile_ad_appointment', true ) ); ?></p>
+		<p><?php echo esc_attr( get_post_meta( $post->ID, '_wsuwp_profile_ad_classification', true ) ); ?></p>
+		<p><?php echo esc_attr( get_post_meta( $post->ID, '_wsuwp_profile_ad_title', true ) ); ?></p>
+		<p><?php echo esc_attr( get_post_meta( $post->ID, '_wsuwp_profile_ad_email', true ) ); ?></p>
+		<p><?php echo esc_attr( get_post_meta( $post->ID, '_wsuwp_profile_ad_phone', true ) ); ?></p>
+		<p><?php echo esc_attr( get_post_meta( $post->ID, '_wsuwp_profile_ad_office', true ) ); ?></p>
+		<p class="description">Notify <a href="#">HR</a> if any of this information is incorrect or needs updated.</p>
+
+		<?php else : ?>
+
+		<!-- I hate require users to put in a name twice, but we would need to capture the last name in order to sort by it -->
+		<!--<p><label for="_wsuwp_profile_ad_name_first">First Name</label><br />
+    <input type="text" id="_wsuwp_profile_ad_name_first" name="_wsuwp_profile_ad_name_first" value="<?php echo esc_attr( get_post_meta( $post->ID, '_wsuwp_profile_ad_name_first', true ) ); ?>" class="widefat" /></p>
+    <p><label for="_wsuwp_profile_ad_name_last">Last Name</label><br />
+    <input type="text" id="_wsuwp_profile_ad_name_last" name="_wsuwp_profile_ad_name_last" value="<?php echo esc_attr( get_post_meta( $post->ID, '_wsuwp_profile_ad_name_last', true ) ); ?>" class="widefat" /></p>-->
+    <p><label for="_wsuwp_profile_ad_title">Title</label><br />
+		<input type="text" id="_wsuwp_profile_ad_title" name="_wsuwp_profile_ad_title" value="<?php echo esc_attr( get_post_meta( $post->ID, '_wsuwp_profile_ad_title', true ) ); ?>" class="widefat" /></p>
+		<p><label for="_wsuwp_profile_ad_office">Location</label><br />
+		<input type="text" id="_wsuwp_profile_ad_office" name="_wsuwp_profile_ad_office" value="<?php echo esc_attr( get_post_meta( $post->ID, '_wsuwp_profile_ad_office', true ) ); ?>" class="widefat" /></p>
+		<p><label for="_wsuwp_profile_ad_phone">Phone Number <span class="description">(xxx-xxx-xxxx)</span></label><br />
+		<input type="text" id="_wsuwp_profile_ad_phone" name="_wsuwp_profile_ad_phone" value="<?php echo esc_attr( get_post_meta( $post->ID, '_wsuwp_profile_ad_phone', true ) ); ?>" class="widefat" /></p>
+		<p><label for="_wsuwp_profile_ad_email">Email Address</label><br />
+		<input type="text" id="_wsuwp_profile_ad_email" name="_wsuwp_profile_ad_email" value="<?php echo esc_attr( get_post_meta( $post->ID, '_wsuwp_profile_ad_email', true ) ); ?>" class="widefat" /></p>
+
+		<?php endif;
 
 	}
 
@@ -365,12 +406,12 @@ class WSUWP_People_Directory {
 		wp_nonce_field( 'wsuwsp_profile', 'wsuwsp_profile_nonce' );
 
 		?>
-		<p><strong><label for="_wsuwp_profile_alt_phone">Phone Number</label></strong><br />
-		<input type="text" id="_wsuwp_profile_alt_phone" name="_wsuwp_profile_alt_phone" value="<?php echo get_post_meta( $post->ID, '_wsuwp_profile_alt_phone', true ); ?>" class="widefat" /></p>
-		<p><strong><label for="_wsuwp_profile_alt_email">Email Address</label></strong><br />
-		<input type="text" id="_wsuwp_profile_alt_email" name="_wsuwp_profile_alt_email" value="<?php echo get_post_meta( $post->ID, '_wsuwp_profile_alt_email', true ); ?>" class="widefat" /></p>
-		<p><strong><label for="_wsuwp_profile_website">Website URL</label></strong><br />
-		<input type="text" id="_wsuwp_profile_website" name="_wsuwp_profile_website" value="<?php echo get_post_meta( $post->ID, '_wsuwp_profile_website', true ); ?>" class="widefat" /></p>
+		<p><label for="_wsuwp_profile_alt_phone">Phone Number</label><br />
+		<input type="text" id="_wsuwp_profile_alt_phone" name="_wsuwp_profile_alt_phone" value="<?php echo esc_attr( get_post_meta( $post->ID, '_wsuwp_profile_alt_phone', true ) ); ?>" class="widefat" /></p>
+		<p><label for="_wsuwp_profile_alt_email">Email Address</label><br />
+		<input type="text" id="_wsuwp_profile_alt_email" name="_wsuwp_profile_alt_email" value="<?php echo esc_attr( get_post_meta( $post->ID, '_wsuwp_profile_alt_email', true ) ); ?>" class="widefat" /></p>
+		<p><label for="_wsuwp_profile_website">Website URL</label><br />
+		<input type="text" id="_wsuwp_profile_website" name="_wsuwp_profile_website" value="<?php echo esc_attr( get_post_meta( $post->ID, '_wsuwp_profile_website', true ) ); ?>" class="widefat" /></p>
 		<?php
 
 	}
@@ -383,14 +424,14 @@ class WSUWP_People_Directory {
 		$research_photo = get_post_meta( $post->ID, '_wsuwp_profile_research_photo', true );
 
 		?>
-			<p class="description">If you want a different image to display on your research-specific profile, upload it here.</p>
+			<p class="description">If you would like to associate a different image with your research information, upload it here.</p>
 			<div class="upload-set-wrapper">
-				<input type="hidden" class="wsuwp-profile-upload" name="_wsuwp_profile_research_photo" id="_wsuwp_profile_research_photo" value="<?php echo $research_photo; ?>" />
+				<input type="hidden" class="wsuwp-profile-upload" name="_wsuwp_profile_research_photo" id="_wsuwp_profile_research_photo" value="<?php echo esc_attr( $research_photo ); ?>" />
 				<p class="hide-if-no-js"><a title="research photo" data-type="Photo" href="#" class="wsuwp-profile-upload-link">
 				<?php if ( $research_photo ) :
 					$image = wp_get_attachment_image_src( $research_photo, 'thumbnail' );
 					?>
-					<img src="<?php echo $image[0]; ?>" /></a></p>
+					<img src="<?php echo esc_url( $image[0] ); ?>" /></a></p>
 					<p class="hide-if-no-js"><a title="research photo" href="#" class="wsuwp-profile-remove-link">Remove research photo</a></p>
 				<?php else : ?>
 					 Upload research photo</a></p>
@@ -410,14 +451,14 @@ class WSUWP_People_Directory {
 		if ( is_array( $degrees ) ) :
 			foreach ( $degrees as $index => $degree ) :
 			?>
-			<p class="wp-profile-repeatable"><strong><label for="_wsuwp_profile_degree[<?php echo $index; ?>]">Degree</label></strong><br />
-			<input type="text" id="_wsuwp_profile_degree[<?php echo $index; ?>]" name="_wsuwp_profile_degree[<?php echo $index; ?>]" value="<?php echo $degree; ?>" class="widefat" /></p>
+			<p class="wp-profile-repeatable"><label for="_wsuwp_profile_degree[<?php echo esc_attr( $index ); ?>]">Degree</label><br />
+			<input type="text" id="_wsuwp_profile_degree[<?php echo esc_attr( $index ); ?>]" name="_wsuwp_profile_degree[<?php echo esc_attr( $index ); ?>]" value="<?php echo esc_attr( $degree ); ?>" class="widefat" /></p>
 			<?php
 			endforeach;
 		else :
 			?>
-			<p class="wp-profile-repeatable"><strong><label for="_wsuwp_profile_degree[0]">Degree</label></strong><br />
-			<input type="text" id="_wsuwp_profile_degree[0]" name="_wsuwp_profile_degree[0]" value="<?php echo $degrees; ?>" class="widefat" /></p>
+			<p class="wp-profile-repeatable"><label for="_wsuwp_profile_degree[0]">Degree</label><br />
+			<input type="text" id="_wsuwp_profile_degree[0]" name="_wsuwp_profile_degree[0]" value="<?php echo esc_attr( $degrees ); ?>" class="widefat" /></p>
 			<?php
 		endif;
 		?>
@@ -435,10 +476,10 @@ class WSUWP_People_Directory {
 
 		?>
 			<div class="upload-set-wrapper">
-				<input type="hidden" class="wsuwp-profile-upload" name="_wsuwp_profile_cv" id="_wsuwp_profile_cv" value="<?php echo $cv; ?>" />
+				<input type="hidden" class="wsuwp-profile-upload" name="_wsuwp_profile_cv" id="_wsuwp_profile_cv" value="<?php echo esc_attr( $cv ); ?>" />
 				<p class="hide-if-no-js"><a title="C.V." data-type="File" href="#" class="wsuwp-profile-upload-link">
 				<?php if ( $cv ) : ?>
-					<img src="<?php echo get_bloginfo( 'url' ) . '/wp-includes/images/media/document.png'; ?>" /></a></p>
+					<img src="<?php echo esc_url( home_url( '/wp-includes/images/media/document.png' ) ); ?>" /></a></p>
 					<p class="hide-if-no-js"><a title="C.V." href="#" class="wsuwp-profile-remove-link">Remove C.V.</a></p>
 				<?php else : ?>
 					 Upload C.V.</a></p>
@@ -455,10 +496,18 @@ class WSUWP_People_Directory {
 
 		?>
 			<p>To grant another user the ability to edit your profile, add them here.</p>
-			<p><input type="text" id="_wsuwp_profile_coeditor" name="_wsuwp_profile_coeditor" value="<?php echo get_post_meta( $post->ID, '_wsuwp_profile_coeditor', true ); ?>" class="widefat" /></p>
+			<p><input type="text" id="_wsuwp_profile_coeditor" name="_wsuwp_profile_coeditor" value="<?php echo esc_attr( get_post_meta( $post->ID, '_wsuwp_profile_coeditor', true ) ); ?>" class="widefat" /></p>
 		<?php
 
 	}
+
+	/**
+	 * Move and relabel the Featured Image metabox.
+	 */
+	public function featured_image_box() {  
+    remove_meta_box( 'postimagediv', $this->personnel_content_type, 'side' );  
+    add_meta_box( 'postimagediv', __('Profile Photo'), 'post_thumbnail_meta_box', $this->personnel_content_type, 'bio_above_editor', 'low' );  
+	}  
 
 	/**
 	 * Save post meta data.
@@ -483,7 +532,8 @@ class WSUWP_People_Directory {
 			return $post_id;
 		}
 
-		foreach ( $this->personnel_fields as $field ) {
+		// Sanitize and save AD fields. Or not! Unique handling will be required in this case.
+		foreach ( $this->ad_fields as $field ) {
 			if ( isset( $_POST[ $field ] ) && '' != $_POST[ $field ] ) {
 				update_post_meta( $post_id, $field, sanitize_text_field( $_POST[ $field ] ) );
 			} else {
@@ -491,46 +541,38 @@ class WSUWP_People_Directory {
 			}
 		}
 
-		if ( isset( $_POST['_wsuwp_profile_teaching'] ) && '' != $_POST['_wsuwp_profile_teaching'] ) {
-			update_post_meta( $post_id, '_wsuwp_profile_teaching', wp_kses_post( $_POST['_wsuwp_profile_teaching'] ) );
-		} else {
-			delete_post_meta( $post_id, '_wsuwp_profile_teaching' );
-		}
-
-		if ( isset( $_POST['_wsuwp_profile_research'] ) && '' != $_POST['_wsuwp_profile_research'] ) {
-			update_post_meta( $post_id, '_wsuwp_profile_research', wp_kses_post( $_POST['_wsuwp_profile_research'] ) );
-		} else {
-			delete_post_meta( $post_id, '_wsuwp_profile_research' );
-		}
-
-		foreach ( $this->repeatable_fields as $field ) {
-
+		// Sanitize and save basic fields.
+		foreach ( $this->basic_fields as $field ) {
 			if ( isset( $_POST[ $field ] ) && '' != $_POST[ $field ] ) {
-/*
-				array_walk( $_POST[ $field ], function( &$value, $key ) {
-					$value = sanitize_text_field( $value );
-    		} ); 
-				
-				if ( isset( $_POST[ $field ] ) && '' != $_POST[ $field ] ) {
-					update_post_meta( $post_id, $field, $_POST[ $field ] );
-				} else {
-					delete_post_meta( $post_id, $field );
-				}
-*/
-				$array = array();
+				update_post_meta( $post_id, $field, sanitize_text_field( $_POST[ $field ] ) );
+			} else {
+				delete_post_meta( $post_id, $field );
+			}
+		}
 
+		// Sanitize and save repeatable fields.
+		foreach ( $this->repeatable_fields as $field ) {
+			if ( isset( $_POST[ $field ] ) && '' != $_POST[ $field ] ) {
+				$array = array();
 				foreach ( $_POST[ $field ] as $value ) {
 					if ( isset( $value ) && '' != $value ) {
 						$array[] = sanitize_text_field( $value );
 					}
 				}
-
 				if ( isset( $array ) && '' != $array ) {
 					update_post_meta( $post_id, $field, $array );
 				} else {
 					delete_post_meta( $post_id, $field );
 				}
+			}
+		}
 
+		// Sanitize and save wp_editors.
+		foreach ( $this->wp_editors as $field ) {
+			if ( isset( $_POST[ $field ] ) && '' != $_POST[ $field ] ) {
+				update_post_meta( $post_id, $field, wp_kses_post( $_POST[ $field ] ) );
+			} else {
+				delete_post_meta( $post_id, $field );
 			}
 		}
 
@@ -540,14 +582,19 @@ class WSUWP_People_Directory {
 	 * Keys of meta fields to revision.
 	 */
 	public function add_meta_keys_to_revision( $keys ) {
-		foreach ( $this->personnel_fields as $field ) {
+
+		foreach ( $this->basic_fields as $field ) {
 			$keys[] = $field;
 		}
+
 		foreach ( $this->repeatable_fields as $field ) {
 			$keys[] = $field;
 		}
-		$keys[] = '_wsuwp_profile_teaching';
-		$keys[] = '_wsuwp_profile_research';
+
+		foreach ( $this->wp_editors as $field ) {
+			$keys[] = $field;
+		}
+
     return $keys;
 	}
 
@@ -563,7 +610,7 @@ class WSUWP_People_Directory {
 		?>
 		<tr>
 			<th><label for="wsuwp_people_organization_admin">Organization Administrator for</label></th>
-			<td><input type="text" id="wsuwp_people_organization_admin" name="wsuwp_people_organization_admin" value="<?php echo get_user_meta( $user->ID, 'wsuwp_people_organization_admin', true ); ?>" /></td>
+			<td><input type="text" id="wsuwp_people_organization_admin" name="wsuwp_people_organization_admin" value="<?php echo esc_attr( get_user_meta( $user->ID, 'wsuwp_people_organization_admin', true ) ); ?>" /></td>
 		</tr>
 		<?php
 	}
@@ -709,8 +756,8 @@ class WSUWP_People_Directory {
 
 		if ( $this->personnel_content_type == get_post_type() ) {
 			if ( is_single() ) {
-				wp_enqueue_style( 'wsuwp-people-profile-style', plugins_url( 'css/profile.css', __FILE__ ) );
-				wp_enqueue_script( 'wsuwp-people-profile-script', plugins_url( 'js/profile.js', __FILE__ ), array( 'jquery-ui-tabs' ), false, true );
+				wp_enqueue_style( 'wsuwp-people-profile-style', plugins_url( 'css/profile.css', __FILE__ ), array(), $this->personnel_plugin_version );
+				wp_enqueue_script( 'wsuwp-people-profile-script', plugins_url( 'js/profile.js', __FILE__ ), array( 'jquery-ui-tabs' ), $this->personnel_plugin_version, true );
 			}
 		}
 
