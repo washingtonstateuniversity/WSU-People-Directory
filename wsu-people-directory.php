@@ -604,6 +604,10 @@ class WSUWP_People_Directory {
 	 */
 	public function custom_json_api_prepare_post( $post_response, $post, $context ) {
 
+		if ( $this->personnel_content_type !== $post['post_type'] ) {
+			return $post_response;
+		}
+
     $post_response['wsuwp_profile_meta'] = get_post_meta( $post['ID'] );
 
     return $post_response;
