@@ -89,6 +89,7 @@ class WSUWP_People_Directory {
 		add_action( 'do_meta_boxes', array( $this, 'featured_image_box' ) ); 
 		add_action( 'save_post', array( $this, 'save_post' ), 10, 2 );
 		add_filter( 'wp_post_revision_meta_keys', array( $this, 'add_meta_keys_to_revision' ) );
+		add_filter( 'json_prepare_post', array( $this, 'custom_json_api_prepare_post' ), 10, 3 );
 
 		// Capabilities and related.
 		add_action( 'personal_options', array( $this, 'personal_options' ) );
@@ -596,6 +597,17 @@ class WSUWP_People_Directory {
 		}
 
     return $keys;
+	}
+
+	/**
+	 * Include meta in the REST API output.
+	 */
+	public function custom_json_api_prepare_post( $post_response, $post, $context ) {
+
+    $post_response['wsuwp_profile_meta'] = get_post_meta( $post['ID'] );
+
+    return $post_response;
+
 	}
 
 	/**
