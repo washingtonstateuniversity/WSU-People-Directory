@@ -4,3 +4,94 @@
 .degree {
 	font-style: italic;
 }
+.profile-photo {
+	padding-bottom: 1em;
+}
+
+/* Tabs */
+#profile-tabbed-content {
+	overflow: hidden;
+	padding-top: 0;
+}
+#profile-tabbed-content div {
+	background: #fff;
+	padding: 1.5em 2em 1em;
+}
+#profile-tabbed-content ul {
+  list-style: none;
+  margin: 0;
+	padding: 0;
+	white-space: nowrap;
+}
+#profile-tabbed-content li {
+  display: inline-block;
+	margin: 0;
+  padding: 0;
+  vertical-align: bottom;
+}
+#profile-tabbed-content a {
+  background: rgba( 255, 255, 255, 0.5 );
+	border-top-left-radius: 1px;
+  border-top-right-radius: 1px;
+	color: #981e32;
+	display: inline-block;
+	font-weight: bold;
+	margin-right: 1px;
+	padding: 0.5em 2em;
+	position: relative;
+}
+#profile-tabbed-content a:focus {
+	outline: 0;
+	color: #981e32;
+}
+#profile-tabbed-content a:hover {
+	background: #fff;
+	color: #c60c30;
+}
+#profile-tabbed-content li.ui-tabs-active a {
+  background: #fff;
+	color: #5e6a71;
+  position: relative;
+}
+
+/* Tabs for smaller screens */
+.size-small #profile-tabbed-content {
+	margin-bottom: 1px;
+}
+.size-small #profile-tabbed-content ul {
+	overflow: hidden;
+	position: relative;
+}
+.size-small #profile-tabbed-content ul::after {
+	content: "\F501";
+	font-family: Spine-Icons;
+	pointer-events: none;
+	position: absolute;
+	right: 1em;
+	top: 0.4em;
+	z-index: 2;
+	-moz-osx-font-smoothing: grayscale;
+	-webkit-font-smoothing:  antialiased;
+}
+.size-small #profile-tabbed-content ul.open::after {
+	color: #5e6a71;
+	content: "\F500";
+}
+.size-small #profile-tabbed-content li {
+	display: block;
+}
+.size-small #profile-tabbed-content a {
+	height: 100%;
+	left: 0;
+	position: absolute;
+	top: 0;
+	width: 100%;
+	width: calc( 100% - 4em );
+}
+.size-small #profile-tabbed-content li.ui-tabs-active a {
+	z-index: 1;
+}
+.size-small #profile-tabbed-content ul.open a {
+	display: block;
+	position: relative;
+}

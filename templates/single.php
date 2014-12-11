@@ -14,18 +14,11 @@
 
 				<header class="article-header">
 					<hgroup>
-					<?php if ( spine_get_option( 'articletitle_show' ) == 'true' ) : ?>
 						<h1 class="article-title"><?php the_title(); ?></h1>
-					<?php endif; ?>
 					</hgroup>
 				</header>
 
 				<div class="article-body">
-
-					<?php // Featured image.
-					if ( has_post_thumbnail() ) : ?>
-					<figure class="article-thumbnail"><?php the_post_thumbnail( array( 132, 132, true ) ); ?></figure>
-					<?php endif; ?>
 
 					<?php // Degree information.
 					$degrees = get_post_meta( get_the_ID(), '_wsuwp_profile_degree', true );
@@ -37,11 +30,45 @@
 					</ul>
 					<?php endif; ?>
 
-					<?php // Title and department info. ?>
+					<?php // Appointment, title, and department info.
+						$appt = get_post_meta( get_the_ID(), '_wsuwp_profile_ad_appointment', true );
+						$title = get_post_meta( get_the_ID(), '_wsuwp_profile_ad_title', true );
+						$dept = get_post_meta( get_the_ID(), '_wsuwp_profile_dept', true );
 
-					<?php the_content(); ?>
+						echo '<p>';
+						if ( $appt ) { echo '<strong>' . esc_attr( $ad_appt ) . ':</strong> '; }
+						if ( $title ) { echo esc_attr( $title ); }
+						echo '</p>';
 
-					<?php /*wp_link_pages( array( 'before' => '<div class="page-links">' . __( 'Pages:', 'spine' ), 'after' => '</div>' ) );*/ ?>
+						if ( $dept ) { echo '<p><strong>Department:</strong> <a href="#">' . esc_html( $dept ) . '</a></p>'; }
+					?>
+
+					<?php // Contact info.
+						$email = get_post_meta( get_the_ID(), '_wsuwp_profile_ad_email', true );
+						$phone = get_post_meta( get_the_ID(), '_wsuwp_profile_ad_phone', true );
+						$office = get_post_meta( get_the_ID(), '_wsuwp_profile_ad_office', true );
+						$alt_email = get_post_meta( get_the_ID(), '_wsuwp_profile_alt_email', true );
+						$alt_phone = get_post_meta( get_the_ID(), '_wsuwp_profile_alt_phone', true );
+
+						echo '<p><strong>Contact Information</strong><br />';
+
+						// Email.
+						if ( $email ) { echo '<a href="mailto:' . esc_attr( $email ) . '">' . esc_html( $email ) . '</a>'; }
+						if ( $email && $alt_email ) { echo ' | '; }
+						if ( $alt_email ) { echo '<a href="mailto:' . esc_attr( $alt_email ) . '">' . esc_html( $alt_email ) . '</a>'; }
+						echo '<br />';
+
+						// Phone.
+						if ( $phone ) { echo esc_html( $phone ); }
+						if ( $phone && $alt_phone ) { echo ' | '; }
+						if ( $alt_phone ) { echo esc_html( $alt_phone ); }
+						echo '<br />';
+
+						if ( $office ) { echo esc_html( $office ); }
+
+						echo '</p>';
+					?>
+
 				</div>
 <!--
 				<footer class="article-footer">
@@ -68,11 +95,6 @@
 				?>
 				</footer>
 -->
-				<?php // If the user viewing the post can edit it, show an edit link.
-				if ( current_user_can( 'edit_post', $post->ID ) ) : ?>
-				<dl class="editors"><?php edit_post_link( 'Edit', '<span class="edit-link">', '</span>' ); ?></dl>
-				<?php endif; ?>
-
 			</article>
 
 			<?php endwhile; ?>
@@ -81,40 +103,104 @@
 
 		<div class="column two">
 
-			<aside class="contact-info">
+			<aside>
 
-				<h2>Contact Information</h2>
-
-				<?php // Contact-specific "card" data also goes here. ?>
+				<?php if ( has_post_thumbnail() ) : ?>
+					<figure class="profile-photo"><?php the_post_thumbnail( 'medium' ); /* Perhaps we should define a new image size for this purpose. */ ?></figure>
+				<?php endif; ?>
 
 				<?php // Website.
 				$website = get_post_meta( get_the_ID(), '_wsuwp_profile_website', true );
 				if ( $website ) : ?>
-				<p><a href="<?php echo esc_url( $website ); ?>">My Website &raquo;</a></p>
+					<p><a href="<?php echo esc_url( $website ); ?>">My Website &raquo;</a></p>
 				<?php endif; ?>
 
 				<?php // Curriculum Vitae.
 				$cv = get_post_meta( get_the_ID(), '_wsuwp_profile_cv', true );
 				if ( $cv ) : ?>
-				<p><a href="<?php echo esc_url( wp_get_attachment_url( $cv ) ); ?>">My C.V &raquo;</a></p>
+					<p><a href="<?php echo esc_url( wp_get_attachment_url( $cv ) ); ?>">My C.V &raquo;</a></p>
 				<?php endif; ?>
 
 			</aside>
 
 		</div><!--/column two-->
- 
+
 	</section>
- 
-	<!--<footer class="main-footer">
+
+	<section class="row single gutter pad-ends">
+
+		<div class="column one" id="profile-tabbed-content">
+
+			<?php
+				$about    = get_the_content();
+				$teaching = get_post_meta( get_the_ID(), '_wsuwp_profile_teaching', true );
+				$research = get_post_meta( get_the_ID(), '_wsuwp_profile_research', true );
+				$extension = get_post_meta( get_the_ID(), '_wsuwp_profile_extension', true );
+				$publications = get_post_meta( get_the_ID(), '_wsuwp_profile_publications', true );
+			?>
+
+			<ul id="profile-tabs">
+			<?php
+				if ( $about ) echo '<li><a href="#about">About Me</a></li>';
+				if ( $teaching ) echo '<li><a href="#teaching">Teaching</a></li>';
+				if ( $research ) echo '<li><a href="#research">Research</a></li>';
+				if ( $extension ) echo '<li><a href="#extension">Extension</a></li>';
+				if ( $publications ) echo '<li><a href="#publications">Publications</a></li>';
+			?>
+			</ul>
+
+			<?php
+				if ( $about ) :
+					echo '<div id="about">';
+					the_content();
+					echo '</div>';
+				endif;
+			?>
+
+			<?php
+				if ( $teaching ) :
+					echo '<div id="teaching">' . wpautop( wp_kses_post( $teaching ) ) . '</div>';
+				endif;
+			?>
+
+			<?php
+				if ( $research ) :
+					echo '<div id="research">' . wpautop( wp_kses_post( $research ) ) . '</div>';
+				endif;
+			?>
+
+			<?php
+				if ( $extension ) :
+					echo '<div id="extension">' . wpautop( wp_kses_post( $extension ) ) . '</div>';
+				endif;
+			?>
+
+			<?php
+				if ( $publications ) :
+					echo '<div id="publications">' . wpautop( wp_kses_post( $publications ) ) . '</div>';
+				endif;
+			?>
+
+		</div>
+
+	</section>
+
+	<footer class="main-footer">
 		<section class="row halves pager prevnext gutter">
 			<div class="column one">
-				<?php previous_post_link(); ?> 
+
+				<?php // If the user viewing the post can edit it, show an edit link.
+				if ( current_user_can( 'edit_post', $post->ID ) ) : ?>
+				<dl class="editors"><?php edit_post_link( 'Edit', '<span class="edit-link">', '</span>' ); ?></dl>
+				<?php endif; ?>
+
+				<!--<?php previous_post_link(); ?> 
 			</div>
 			<div class="column two">
-				<?php next_post_link(); ?>
+				<?php next_post_link(); ?>-->
 			</div>
 		</section>
-	</footer>-->
+	</footer>
 
 </main><!--/#page-->
 

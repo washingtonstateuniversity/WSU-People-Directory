@@ -2,7 +2,7 @@
 
 <main class="spine-archive-index">
 
-<?php get_template_part('parts/headers'); ?> 
+<?php get_template_part('parts/headers'); ?>
 
 <section class="row side-right gutter pad-ends">
 
@@ -62,9 +62,9 @@
 	</div><!--/column-->
 
 	<div class="column two">
-		
+
 		<?php get_sidebar(); ?>
-		
+
 	</div><!--/column two-->
 
 </section>
