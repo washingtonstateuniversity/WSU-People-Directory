@@ -80,7 +80,7 @@ class WSUWP_People_Directory {
 		add_action( 'init', array( $this, 'register_personnel_content_type' ), 11 );
 		add_action( 'init', array( $this, 'add_taxonomies' ), 12 );
 
-		// Custom metaboxes and all that.
+		// Custom meta and all that.
 		add_action( 'admin_enqueue_scripts', array( $this, 'admin_enqueue_scripts' ) );
 		add_filter( 'enter_title_here', array( $this, 'enter_title_here' ) );
 		add_action( 'edit_form_after_title', array( $this, 'edit_form_after_title' ) );
@@ -89,7 +89,10 @@ class WSUWP_People_Directory {
 		add_action( 'do_meta_boxes', array( $this, 'featured_image_box' ) ); 
 		add_action( 'save_post', array( $this, 'save_post' ), 10, 2 );
 		add_filter( 'wp_post_revision_meta_keys', array( $this, 'add_meta_keys_to_revision' ) );
-		add_filter( 'json_prepare_post', array( $this, 'custom_json_api_prepare_post' ), 10, 3 );
+
+		// JSON output.
+		add_filter( 'json_prepare_post', array( $this, 'json_prepare_post' ), 10, 3 );
+		add_filter( 'json_query_vars', array( $this, 'json_query_vars' ) );
 
 		// Capabilities and related.
 		add_action( 'personal_options', array( $this, 'personal_options' ) );
@@ -381,11 +384,10 @@ class WSUWP_People_Directory {
 
 		<?php else : ?>
 
-		<!-- I hate require users to put in a name twice, but we would need to capture the last name in order to sort by it -->
-		<!--<p><label for="_wsuwp_profile_ad_name_first">First Name</label><br />
+		<p><label for="_wsuwp_profile_ad_name_first">First Name</label><br />
     <input type="text" id="_wsuwp_profile_ad_name_first" name="_wsuwp_profile_ad_name_first" value="<?php echo esc_attr( get_post_meta( $post->ID, '_wsuwp_profile_ad_name_first', true ) ); ?>" class="widefat" /></p>
     <p><label for="_wsuwp_profile_ad_name_last">Last Name</label><br />
-    <input type="text" id="_wsuwp_profile_ad_name_last" name="_wsuwp_profile_ad_name_last" value="<?php echo esc_attr( get_post_meta( $post->ID, '_wsuwp_profile_ad_name_last', true ) ); ?>" class="widefat" /></p>-->
+    <input type="text" id="_wsuwp_profile_ad_name_last" name="_wsuwp_profile_ad_name_last" value="<?php echo esc_attr( get_post_meta( $post->ID, '_wsuwp_profile_ad_name_last', true ) ); ?>" class="widefat" /></p>
     <p><label for="_wsuwp_profile_ad_title">Title</label><br />
 		<input type="text" id="_wsuwp_profile_ad_title" name="_wsuwp_profile_ad_title" value="<?php echo esc_attr( get_post_meta( $post->ID, '_wsuwp_profile_ad_title', true ) ); ?>" class="widefat" /></p>
 		<p><label for="_wsuwp_profile_ad_office">Location</label><br />
@@ -584,15 +586,9 @@ class WSUWP_People_Directory {
 	 */
 	public function add_meta_keys_to_revision( $keys ) {
 
-		foreach ( $this->basic_fields as $field ) {
-			$keys[] = $field;
-		}
+		$revisioned_fields = array_merge( $this->basic_fields, $this->repeatable_fields, $this->wp_editors );
 
-		foreach ( $this->repeatable_fields as $field ) {
-			$keys[] = $field;
-		}
-
-		foreach ( $this->wp_editors as $field ) {
+		foreach ( $revisioned_fields as $field ) {
 			$keys[] = $field;
 		}
 
@@ -602,15 +598,31 @@ class WSUWP_People_Directory {
 	/**
 	 * Include meta in the REST API output.
 	 */
-	public function custom_json_api_prepare_post( $post_response, $post, $context ) {
+	public function json_prepare_post( $post_response, $post, $context ) {
 
 		if ( $this->personnel_content_type !== $post['post_type'] ) {
 			return $post_response;
 		}
 
-    $post_response['wsuwp_profile_meta'] = get_post_meta( $post['ID'] );
+		$all_fields = array_merge( $this->ad_fields, $this->basic_fields, $this->repeatable_fields, $this->wp_editors );
+
+		foreach ( $all_fields as $field ) {
+			$post_response[ $field ] = get_post_meta( $post['ID'], $field, true );
+		}
 
     return $post_response;
+
+	}
+
+	/**
+	 * Add 'meta_key' to the list of public variables (leverage for ordering alphabetically by last name).
+	 * It seems this may have security implications, though I admit I don't understand what they would be.
+	 */
+	public function json_query_vars( $valid_vars ) {
+
+		$valid_vars[] = 'meta_key';
+
+		return $valid_vars;
 
 	}
 
