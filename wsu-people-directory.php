@@ -451,7 +451,7 @@ class WSUWP_People_Directory {
 
 		$degrees = get_post_meta( $post->ID, '_wsuwp_profile_degree', true );
 
-		if ( is_array( $degrees ) ) :
+		if ( $degrees && is_array( $degrees ) ) :
 			foreach ( $degrees as $index => $degree ) :
 			?>
 			<p class="wp-profile-repeatable"><label for="_wsuwp_profile_degree[<?php echo esc_attr( $index ); ?>]">Degree</label><br />
@@ -556,13 +556,12 @@ class WSUWP_People_Directory {
 		// Sanitize and save repeatable fields.
 		foreach ( $this->repeatable_fields as $field ) {
 			if ( isset( $_POST[ $field ] ) && '' != $_POST[ $field ] ) {
-				$array = array();
 				foreach ( $_POST[ $field ] as $value ) {
 					if ( isset( $value ) && '' != $value ) {
 						$array[] = sanitize_text_field( $value );
 					}
 				}
-				if ( isset( $array ) && '' != $array ) {
+				if ( $array ) {
 					update_post_meta( $post_id, $field, $array );
 				} else {
 					delete_post_meta( $post_id, $field );
