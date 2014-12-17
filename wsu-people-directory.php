@@ -215,7 +215,7 @@ class WSUWP_People_Directory {
 	 */
 	public function edit_form_after_title( $post ) {
 
-		do_meta_boxes( get_current_screen(), 'after_title', $post );
+		//do_meta_boxes( get_current_screen(), 'after_title', $post );
 
 		if ( $this->personnel_content_type === $post->post_type ) :
 			?>

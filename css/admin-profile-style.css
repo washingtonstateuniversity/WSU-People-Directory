@@ -14,7 +14,7 @@
 	line-height: 24px;
 }
 #wsuwp-profile-tabs > ul li a:focus {
-	outline: 0;
+	box-shadow: none;
 }
 #wsuwp-profile-tabs > ul li.ui-tabs-active a {
 	border-bottom: 1px solid #f1f1f1;
@@ -33,4 +33,11 @@
 }
 .postbox .inside .upload-set-wrapper>p:last-child {
 	margin-bottom: 1px;
+}
+#bio_above_editor-sortables,
+#teaching_above_editor-sortables,
+#research_above_editor-sortables,
+#extension_above_editor-sortables
+#publications_above_editor-sortables {
+	min-height: 10px;
 }
