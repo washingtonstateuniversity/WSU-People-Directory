@@ -19,7 +19,6 @@ jQuery(document).ready(function( $ ) {
 		$(this).parent().siblings( '.wp-profile-repeatable' ).each(function( index ) {
 			$(this).find( 'input, label' ).each(function() {
 				for ( var i = 0; i < attrs.length; i++ ) {
-					console.log(attrs);
 					if ( undefined != $(this).attr( attrs[i] ) ) {
 						$(this).attr( attrs[i], $(this).attr( attrs[i] ).replace( '0', index ) );
 					}
@@ -56,7 +55,7 @@ jQuery(document).ready(function( $ ) {
 			if ( upload_link.attr( 'data-type' ) == 'Photo' ) {
 				upload_link.html( '<img src="' + attachment.sizes.thumbnail.url + '" />' );
 			} else if ( upload_link.attr( 'data-type' ) == 'File' ) {
-				upload_link.html( '<img src="http://m1.wpdev.cahnrs.wsu.edu/directory/wp-includes/images/media/document.png" />' );
+				upload_link.html( '<img src="http://' + location.host + '/wp-includes/images/media/document.png" />' );
 			}
 
 			// Add a "Remove" link
