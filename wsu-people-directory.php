@@ -243,10 +243,10 @@ class WSUWP_People_Directory {
           <li><a href="#wsuwp-profile-extension" class="nav-tab">Extension</a></li>
 					<li><a href="#wsuwp-profile-publications" class="nav-tab">Publications</a></li>
 				</ul>
-				<div id="wsuwp-profile-default">
-					<p class="description">Consider including professional experience, previous employment, awards, honors, memberships, or other information you wish to share about yourself here.</p>
+				<div id="wsuwp-profile-default" class="wsuwp-profile-panel">
+					<?php do_meta_boxes( get_current_screen(), 'bio_above_editor', $post ); ?>
+          <p class="description">Consider including professional experience, previous employment, awards, honors, memberships, or other information you wish to share about yourself here.</p>
 			<?php
-			do_meta_boxes( get_current_screen(), 'bio_above_editor', $post ); // Metaboxes added this way don't show up for my Super Admin account - hoping it's a unique case...
 		endif;
 
 	}
@@ -260,36 +260,40 @@ class WSUWP_People_Directory {
 			?>
 				</div><!--wsuwp-profile-default-->
 
-				<div id="wsuwp-profile-teaching">
-					<p class="description">Your teaching responsibilities, classes you teach, etc.</p>
+				<div id="wsuwp-profile-teaching" class="wsuwp-profile-panel">
 					<h3 class="wpuwp-profile-label"><label for="_wsuwp_profile_teaching_name">Teaching Profile Display Name</label></h3>
 					<p class="description">(if different than default)</p>
 					<input type="text" id="_wsuwp_profile_teaching_name" name="_wsuwp_profile_teaching_name" value="<?php echo esc_attr( get_post_meta( $post->ID, '_wsuwp_profile_teaching_name', true ) ); ?>" class="widefat wsuwp-profile-namefield" /></p>
 					<?php do_meta_boxes( get_current_screen(), 'teaching_above_editor', $post ); ?>
+          <p class="description">Your teaching responsibilities, classes you teach, etc.</p>
 					<?php wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_teaching', true ), '_wsuwp_profile_teaching' ); ?>
 				</div>
 
-				<div id="wsuwp-profile-research">
-					<p class="description">Information about your research interests, recent funding/funded projects/grant submissions, grad students/program personnel/research team, research facilities, collaborators, patents, etc.</p>
+				<div id="wsuwp-profile-research" class="wsuwp-profile-panel">
+					
 					<h3 class="wpuwp-profile-label"><label for="_wsuwp_profile_research_name">Research Profile Display Name</label></h3>
 					<p class="description">(if different than default)</p>
 					<input type="text" id="_wsuwp_profile_research_name" name="_wsuwp_profile_research_name" value="<?php echo esc_attr( get_post_meta( $post->ID, '_wsuwp_profile_research_name', true ) ); ?>" class="widefat wsuwp-profile-namefield" /></p>
           <?php do_meta_boxes( get_current_screen(), 'research_above_editor', $post ); ?>
+          <p class="description">Information about your research interests, recent funding/funded projects/grant submissions, grad students/program personnel/research team, research facilities, collaborators, patents, etc.</p>
 					<?php wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_research', true ), '_wsuwp_profile_research' ); ?>
 				</div>
 
-				<div id="wsuwp-profile-extension">
-					<p class="description">Information about your Extension duties.</p>
+				<div id="wsuwp-profile-extension" class="wsuwp-profile-panel">
           <h3 class="wpuwp-profile-label"><label for="_wsuwp_profile_extension_name">Extension Profile Display Name</label></h3>
 					<p class="description">(if different than default)</p>
 					<input type="text" id="_wsuwp_profile_extension_name" name="_wsuwp_profile_extension_name" value="<?php echo esc_attr( get_post_meta( $post->ID, '_wsuwp_profile_extension_name', true ) ); ?>" class="widefat wsuwp-profile-namefield" /></p>
 					<?php do_meta_boxes( get_current_screen(), 'extension_above_editor', $post ); ?>
+          <p class="description">Information about your Extension duties.</p>
 					<?php wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_extension', true ), '_wsuwp_profile_extension' ); ?>
 				</div>
 
-				<div id="wsuwp-profile-publications">
-					<p>(This section would ideally include a way for users to dynamically pull in a feed from the pubs store, and a wp_editor for manually inputting book chapters, professional articles, peer-reviewed exhibitions, juried artistic works, and other publications that wouldn't be in the pubs store.)</p>
-					<?php do_meta_boxes( get_current_screen(), 'publications_above_editor', $post ); ?>
+				<div id="wsuwp-profile-publications" class="wsuwp-profile-panel">
+					<?php
+						// This section would ideally include a way for users to dynamically pull in a feed from the pubs store.
+          	//do_meta_boxes( get_current_screen(), 'publications_above_editor', $post );*/
+					?>
+          <p class="description">Book chapters, professional articles, peer-reviewed exhibitions, juried artistic works, and other publications.</p>
 					<?php wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_publications', true ), '_wsuwp_profile_publications' ); ?>
 				</div>
 
