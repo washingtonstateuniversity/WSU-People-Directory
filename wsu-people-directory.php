@@ -102,7 +102,8 @@ class WSUWP_People_Directory {
 		add_action( 'edit_form_after_title', array( $this, 'edit_form_after_title' ) );
 		add_action( 'edit_form_after_editor',	array( $this, 'edit_form_after_editor' ) );
 		add_action( 'add_meta_boxes', array( $this, 'add_meta_boxes' ), 10, 2 );
-		add_action( 'do_meta_boxes', array( $this, 'featured_image_box' ) ); 
+		add_action( 'do_meta_boxes', array( $this, 'featured_image_box' ) );
+		add_filter( 'admin_post_thumbnail_html', array( $this, 'featured_image_links' ) );
 		add_action( 'save_post', array( $this, 'save_post' ), 10, 2 );
 		add_filter( 'wp_post_revision_meta_keys', array( $this, 'add_meta_keys_to_revision' ) );
 
@@ -270,7 +271,6 @@ class WSUWP_People_Directory {
 				</div>
 
 				<div id="wsuwp-profile-research" class="wsuwp-profile-panel">
-					
 					<h3 class="wpuwp-profile-label"><label for="_wsuwp_profile_research_name">Research Profile Display Name</label></h3>
 					<p class="description">(if different than default)</p>
 					<input type="text" id="_wsuwp_profile_research_name" name="_wsuwp_profile_research_name" value="<?php echo esc_attr( get_post_meta( $post->ID, '_wsuwp_profile_research_name', true ) ); ?>" class="widefat wsuwp-profile-namefield" /></p>
@@ -527,7 +527,7 @@ class WSUWP_People_Directory {
 			<?php
 		endif;
 		?>
-    <p class="wsuwp-profile-add-repeatable"><a href="#">+ Add another</a></p>
+    <p class="wsuwp-profile-add-repeatable"><a href="#">+ Add another degree</a></p>
     <?php
 
 	}
@@ -547,7 +547,7 @@ class WSUWP_People_Directory {
 					<img src="<?php echo esc_url( home_url( '/wp-includes/images/media/document.png' ) ); ?>" /></a></p>
 					<p class="hide-if-no-js"><a title="C.V." href="#" class="wsuwp-profile-remove-link">Remove C.V.</a></p>
 				<?php else : ?>
-					 Upload C.V.</a></p>
+					 Set C.V.</a></p>
 				<?php endif; ?>
 			</div>
 		<?php
@@ -555,11 +555,25 @@ class WSUWP_People_Directory {
 	}
 
 	/**
-	 * Move and relabel the Featured Image metabox.
+	 * Move and re-label the Featured Image metabox.
 	 */
-	public function featured_image_box() {  
-    remove_meta_box( 'postimagediv', $this->personnel_content_type, 'side' );  
-    add_meta_box( 'postimagediv', __('Profile Photo'), 'post_thumbnail_meta_box', $this->personnel_content_type, 'bio_above_editor', 'low' );  
+	public function featured_image_box() {
+
+    remove_meta_box( 'postimagediv', $this->personnel_content_type, 'side' );
+
+    add_meta_box( 'postimagediv', __('Profile Photo'), 'post_thumbnail_meta_box', $this->personnel_content_type, 'bio_above_editor', 'low' );
+
+	}
+
+	/**
+	 * Change the text for the featured image links.
+	 */
+	public function featured_image_links( $content ) {
+
+    $content = str_replace( __('Set featured image'), __( 'Set profile photo' ), $content);
+    $content = str_replace( __('Remove featured image'), __( 'Remove profile photo' ), $content);
+
+    return $content;
 	}
 
 	/**
@@ -613,7 +627,7 @@ class WSUWP_People_Directory {
 					<img src="<?php echo esc_url( $image[0] ); ?>" /></a></p>
 					<p class="hide-if-no-js"><a title="teaching photo" href="#" class="wsuwp-profile-remove-link">Remove teaching photo</a></p>
 				<?php else : ?>
-					 Upload teaching photo</a></p>
+					 Set teaching photo</a></p>
 				<?php endif; ?>
 			</div>
 		<?php
@@ -671,7 +685,7 @@ class WSUWP_People_Directory {
 					<img src="<?php echo esc_url( $image[0] ); ?>" /></a></p>
 					<p class="hide-if-no-js"><a title="research photo" href="#" class="wsuwp-profile-remove-link">Remove research photo</a></p>
 				<?php else : ?>
-					 Upload research photo</a></p>
+					 Set research photo</a></p>
 				<?php endif; ?>
 			</div>
 		<?php
@@ -729,7 +743,7 @@ class WSUWP_People_Directory {
 					<img src="<?php echo esc_url( $image[0] ); ?>" /></a></p>
 					<p class="hide-if-no-js"><a title="extension photo" href="#" class="wsuwp-profile-remove-link">Remove extension photo</a></p>
 				<?php else : ?>
-					 Upload extension photo</a></p>
+					 Set extension photo</a></p>
 				<?php endif; ?>
 			</div>
 		<?php

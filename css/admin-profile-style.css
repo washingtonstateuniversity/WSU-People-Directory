@@ -35,10 +35,6 @@
 .wsuwp-profile-namefield {
 	margin-bottom: 1em;
 }
-#wp-_wsuwp_profile_teaching-wrap,
-#wp-_wsuwp_profile_research-wrap {
-	margin-bottom: 20px;
-}
 .postbox .inside .upload-set-wrapper>p:last-child {
 	margin-bottom: 1px;
 }
@@ -61,4 +57,23 @@
 	padding: 0;
 	position: absolute; 
   width: 1px; 
+}
+.small-image-notice {
+	text-decoration: none;
+}
+.small-image-notice:after {
+	clear: both;
+	content: '';
+	display: table
+}
+.small-image-notice img {
+	float: left;
+	margin-right: 12px;
+}
+.small-image-notice span {
+	color: #981e32;
+	text-decoration: underline;
+}
+.small-image-notice:hover span {
+	color: #c60c30;
 }

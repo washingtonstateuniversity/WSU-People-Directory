@@ -34,8 +34,10 @@ jQuery(document).ready(function( $ ) {
 
 		e.preventDefault();
 
-		var upload_input = $(this).parents( '.upload-set-wrapper' ).find( '.wsuwp-profile-upload' ),
-				upload_link  = $(this).parents( '.upload-set-wrapper' ).find( '.wsuwp-profile-upload-link' );
+		var container    = $(this).parents( '.upload-set-wrapper' ),
+				upload_input = container.find( '.wsuwp-profile-upload' ),
+				upload_link  = container.find( '.wsuwp-profile-upload-link' ),
+				remove_link  = container.find( '.wsuwp-profile-remove-link' );
 
 		custom_uploader = wp.media.frames.file_frame = wp.media({
 			title: 'Choose ' + upload_link.attr( 'data-type' ),
@@ -53,13 +55,20 @@ jQuery(document).ready(function( $ ) {
 
 			// Show an image or icon for chosen file
 			if ( upload_link.attr( 'data-type' ) == 'Photo' ) {
-				upload_link.html( '<img src="' + attachment.sizes.thumbnail.url + '" />' );
+				if ( attachment.sizes.hasOwnProperty( 'thumbnail' ) ) {
+					upload_link.html( '<img src="' + attachment.sizes.thumbnail.url + '" />' );
+				} else {
+					upload_link.addClass( 'small-image-notice' );
+					upload_link.html( '<img src="' + attachment.url + '" /><span>This image is smaller than the recommended ___&#215;___ pixel minimum.<br />Please consider uploading a larger image.</span>' );
+				}
 			} else if ( upload_link.attr( 'data-type' ) == 'File' ) {
 				upload_link.html( '<img src="http://' + location.host + '/wp-includes/images/media/document.png" />' );
 			}
 
 			// Add a "Remove" link
-			upload_link.after( '<p class="hide-if-no-js"><a href="#" class="wsuwp-profile-remove-link">Remove ' + upload_link.attr('title') + '</a></p>' );
+			if ( remove_link.length === 0 ) {
+				upload_link.after( '<p class="hide-if-no-js"><a href="#" class="wsuwp-profile-remove-link">Remove ' + upload_link.attr('title') + '</a></p>' );
+			}
 
 		});
 
@@ -75,13 +84,16 @@ jQuery(document).ready(function( $ ) {
 		var upload_input = $(this).parents( '.upload-set-wrapper' ).find( '.wsuwp-profile-upload' ),
 				upload_link  = $(this).parents( '.upload-set-wrapper' ).find( '.wsuwp-profile-upload-link' );
 
-		// Clear the input value
+		// Clear the input value.
 		upload_input.val( '' );
 
-		// Replace image with link title value
-		upload_link.html( 'Upload ' + upload_link.attr( 'title' ));
+		// Remove notice.
+		upload_link.removeClass( 'small-image-notice' );
 
-		// Remove the "Remove" link
+		// Replace image with link title value.
+		upload_link.html( 'Set ' + upload_link.attr( 'title' ));
+
+		// Remove the "Remove" link.
 		$(this).parent( '.hide-if-no-js' ).remove();
 
 	});
