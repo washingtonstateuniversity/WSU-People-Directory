@@ -29,7 +29,8 @@
 
 				<p>
 				<?php // Title.
-					echo 'Title placeholder<br />';
+					$title = get_post_meta( get_the_ID(), '_wsuwp_profile_ad_title', true );
+					if ( $title ) { echo esc_attr( $title ) . '<br />'; }
 				?>
 
 				<?php // Department.
@@ -39,16 +40,14 @@
 				}
 				?>
 
-				<?php // Office Location.
-					echo 'Office Location placeholder<br />';
-				?>
+				<?php // Contact Info.
+					$email = get_post_meta( get_the_ID(), '_wsuwp_profile_ad_email', true );
+					$phone = get_post_meta( get_the_ID(), '_wsuwp_profile_ad_phone', true );
+					$office = get_post_meta( get_the_ID(), '_wsuwp_profile_ad_office', true );
 
-				<?php // Phone Number.
-					echo 'Phone Number placeholder<br />';
-				?>
-
-				<?php // Email (use post meta instead).
-					echo '<a href="mailto:' . esc_attr( get_the_author_meta( 'user_email' ) ) . '">' . esc_html( get_the_author_meta( 'user_email' ) ) . '</a><br />';
+					if ( $email ) { echo '<a href="mailto:' . esc_attr( $email ) . '">' . esc_html( $email ) . '</a><br />'; }
+					if ( $phone ) { echo esc_html( $phone ) . '<br />'; }
+					if ( $office ) { echo esc_html( $office ); }
 				?>
 
 				</p>

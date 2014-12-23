@@ -1050,6 +1050,9 @@ class WSUWP_People_Directory {
 				wp_enqueue_style( 'wsuwp-people-profile-style', plugins_url( 'css/profile.css', __FILE__ ), array(), $this->personnel_plugin_version );
 				wp_enqueue_script( 'wsuwp-people-profile-script', plugins_url( 'js/profile.js', __FILE__ ), array( 'jquery-ui-tabs' ), $this->personnel_plugin_version, true );
 			}
+			if ( is_archive() ) {
+				wp_enqueue_style( 'wsuwp-people-archive-style', plugins_url( 'css/archive.css', __FILE__ ), array(), $this->personnel_plugin_version );
+			}
 		}
 
 	}
