@@ -118,6 +118,8 @@ class WSUWP_People_Directory {
 		add_filter( 'user_has_cap', array( $this, 'user_has_cap' ), 10, 3 );
 		//add_action( 'admin_menu', array( $this, 'admin_menu' ) );
 		add_action( 'pre_get_posts', array( $this, 'limit_media_library' ) );
+		//add_action( 'views_edit-' . $this->personnel_content_type, array( $this, 'edit_views' ) );
+		//add_filter( 'parse_query', array ( $this, 'parse_query' ) );
 
 		// Templates, scripts, styles, and filters for the front end.
 		add_filter( 'template_include', array( $this, 'template_include' ), 1 );
@@ -1016,6 +1018,76 @@ class WSUWP_People_Directory {
 			}
 
 		}
+
+	}
+
+	/**
+	 * Modify "All Profiles" views for all but administrators.
+	 * Probably not the most scalable.
+	 */
+	public function edit_views( $views ) {
+
+		if ( ! current_user_can( 'manage_options' ) ) {
+
+			unset( $views['all'] );
+			unset( $views['publish'] );
+			unset( $views['draft'] );
+			unset( $views['pending'] );
+			unset( $views['trash'] );
+
+			$current_user = wp_get_current_user();
+
+			$all_personnel = new WP_Query( array(
+        'post_type'   => $this->personnel_content_type,
+        'post_status' => 'publish',
+				'posts_per_page' => -1,
+				'author__not_in' => $current_user->ID,
+			) );
+
+			$posts = $all_personnel->get_posts();
+
+			foreach( $posts as $post ) {
+				if ( current_user_can( 'edit_post', $post->ID ) ) {
+					$users_editable_profiles[] = $post->ID;
+				}
+			}
+
+			if ( $users_editable_profiles ) {
+
+				$profile_ids = implode( ',', $users_editable_profiles );
+				$count = count( $users_editable_profiles );
+
+				$class = ( $_GET['sortby'] == 'last_name' ) ? ' class="current"' : '';
+				$url = admin_url('edit.php?post_type=' . $this->personnel_content_type . '&post_status=publish&sortby=last_name&profiles=' . $profile_ids );
+				$views['others'] = sprintf(__( '<a href="%s"'. $class .'>Others <span class="count">(%d)</span></a>' ), $url, $count );
+
+			}
+
+		}
+
+		return $views;
+
+	}
+
+	/**
+	 * Query parsing for "Others" view on "All Profiles" page.
+	 */
+	public function parse_query( $query ) {
+
+		$screen = get_current_screen();
+
+    if ( is_admin() && 'edit-' . $this->personnel_content_type == $screen->id &&
+        isset( $_GET['post_type'] ) && $_GET['post_type'] == $this->personnel_content_type && 
+        isset( $_GET['sortby'] ) && $_GET['sortby'] == 'last_name' &&
+				isset( $_GET['profiles'] ) && $_GET['profiles'] != '' )
+		{
+			$editables = explode( ',', $_GET['profiles'] );
+			set_query_var( 'meta_key', '_wsuwp_profile_ad_name_last' );
+			set_query_var( 'orderby', 'meta_value' );
+			// These two seem to prevent the "'views_'.$this->screen->id" hook from working properly.
+			//set_query_var( 'order', 'ASC' );
+			//set_query_var( 'post__in', $editables );
+    }
 
 	}
 
