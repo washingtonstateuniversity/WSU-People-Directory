@@ -59,7 +59,7 @@ jQuery(document).ready(function( $ ) {
 					upload_link.html( '<img src="' + attachment.sizes.thumbnail.url + '" />' );
 				} else {
 					upload_link.addClass( 'small-image-notice' );
-					upload_link.html( '<img src="' + attachment.url + '" /><span>This image is smaller than the recommended ___&#215;___ pixel minimum.<br />Please consider uploading a larger image.</span>' );
+					upload_link.html( '<img src="' + attachment.url + '" /><span class="description">This image is smaller than the recommended ___×___ pixel minimum.<br />Please consider uploading a larger image.</span>' );
 				}
 			} else if ( upload_link.attr( 'data-type' ) == 'File' ) {
 				upload_link.html( '<img src="http://' + location.host + '/wp-includes/images/media/document.png" />' );

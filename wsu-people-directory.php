@@ -103,7 +103,7 @@ class WSUWP_People_Directory {
 		add_action( 'edit_form_after_editor',	array( $this, 'edit_form_after_editor' ) );
 		add_action( 'add_meta_boxes', array( $this, 'add_meta_boxes' ), 10, 2 );
 		add_action( 'do_meta_boxes', array( $this, 'featured_image_box' ) );
-		add_filter( 'admin_post_thumbnail_html', array( $this, 'featured_image_links' ) );
+		add_filter( 'admin_post_thumbnail_html', array( $this, 'admin_post_thumbnail_html' ) );
 		add_action( 'save_post', array( $this, 'save_post' ), 10, 2 );
 		add_filter( 'wp_post_revision_meta_keys', array( $this, 'add_meta_keys_to_revision' ) );
 
@@ -568,10 +568,18 @@ class WSUWP_People_Directory {
 	/**
 	 * Change the text for the featured image links.
 	 */
-	public function featured_image_links( $content ) {
+	public function admin_post_thumbnail_html( $content ) {
 
-    $content = str_replace( __('Set featured image'), __( 'Set profile photo' ), $content);
-    $content = str_replace( __('Remove featured image'), __( 'Remove profile photo' ), $content);
+		$screen = get_current_screen();
+	
+		if ( $this->personnel_content_type == $screen->post_type ) {
+
+    	$content = str_replace( __('Set featured image'), __( 'Set profile photo' ), $content);
+    	$content = str_replace( __('Remove featured image'), __( 'Remove profile photo' ), $content);
+
+			$content .= '<p class="description"><strong>__×__ pixel</strong> minimum recommended.</p>';
+		
+		}
 
     return $content;
 	}
@@ -629,6 +637,7 @@ class WSUWP_People_Directory {
 				<?php else : ?>
 					 Set teaching photo</a></p>
 				<?php endif; ?>
+				<p class="description"><strong>__×__ pixel</strong> minimum recommended.</p>
 			</div>
 		<?php
 
@@ -687,6 +696,7 @@ class WSUWP_People_Directory {
 				<?php else : ?>
 					 Set research photo</a></p>
 				<?php endif; ?>
+				<p class="description"><strong>__×__ pixel</strong> minimum recommended.</p>
 			</div>
 		<?php
 
@@ -745,6 +755,7 @@ class WSUWP_People_Directory {
 				<?php else : ?>
 					 Set extension photo</a></p>
 				<?php endif; ?>
+				<p class="description"><strong>__×__ pixel</strong> minimum recommended.</p>
 			</div>
 		<?php
 
@@ -1051,7 +1062,7 @@ class WSUWP_People_Directory {
 		if ( $query->is_post_type_archive( $this->personnel_content_type ) && $query->is_main_query() && ! is_admin() ) {
 			$query->set( 'order', 'ASC' );
 			$query->set( 'orderby', 'meta_value' );
-			$query->set( 'meta_key', '_wsuwp_profile_name_last' );
+			$query->set( 'meta_key', '_wsuwp_profile_ad_name_last' );
 		}
 
 	}
