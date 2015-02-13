@@ -50,21 +50,6 @@ class WSUWP_People_Directory {
 		'_wsuwp_profile_alt_email',
 		'_wsuwp_profile_website',
 		'_wsuwp_profile_cv',
-		'_wsuwp_profile_teaching_name',
-		'_wsuwp_profile_teaching_phone',
-		'_wsuwp_profile_teaching_email',
-		'_wsuwp_profile_teaching_website',
-		'_wsuwp_profile_teaching_photo',
-		'_wsuwp_profile_research_name',
-		'_wsuwp_profile_research_phone',
-		'_wsuwp_profile_research_email',
-		'_wsuwp_profile_research_website',
-		'_wsuwp_profile_research_photo',
-		'_wsuwp_profile_extension_name',
-		'_wsuwp_profile_extension_phone',
-		'_wsuwp_profile_extension_email',
-		'_wsuwp_profile_extension_website',
-		'_wsuwp_profile_extension_photo',
 		'_wsuwp_profile_coeditor',
 	);
 
@@ -74,19 +59,19 @@ class WSUWP_People_Directory {
 	var $repeatable_fields = array(
 		'_wsuwp_profile_degree',
 		'_wsuwp_profile_title',
-		'_wsuwp_profile_teaching_title',
-		'_wsuwp_profile_research_title',
-		'_wsuwp_profile_extension_title',
 	);
 
 	/**
 	 * WP editors used throughout the metaboxes.
 	 */
 	var $wp_editors = array(
+		'_wsuwp_profile_experience',
+		'_wsuwp_profile_honors',
 		'_wsuwp_profile_teaching',
 		'_wsuwp_profile_research',
-		'_wsuwp_profile_extension',
+		'_wsuwp_profile_grants',
 		'_wsuwp_profile_publications',
+		'_wsuwp_profile_service',
 	);
 
 	public function __construct() {
@@ -230,7 +215,7 @@ class WSUWP_People_Directory {
 	}
 
 	/**
-	 * Add stuff after the title of the edit screen for the Personnel content type.
+	 * Add markup after the title of the edit screen for the Personnel content type.
 	 */
 	public function edit_form_after_title( $post ) {
 
@@ -238,65 +223,51 @@ class WSUWP_People_Directory {
 
 		if ( $this->personnel_content_type === $post->post_type ) :
 			?>
+			<?php do_meta_boxes( get_current_screen(), 'after_title', $post ); ?>
 			<div id="wsuwp-profile-tabs">
 				<ul>
-					<li><a href="#wsuwp-profile-default" class="nav-tab">Bio</a></li>
-					<li><a href="#wsuwp-profile-teaching" class="nav-tab">Teaching</a></li>
+					<li><a href="#wsuwp-profile-default" class="nav-tab">General</a></li>
 					<li><a href="#wsuwp-profile-research" class="nav-tab">Research</a></li>
-          <li><a href="#wsuwp-profile-extension" class="nav-tab">Extension</a></li>
-					<li><a href="#wsuwp-profile-publications" class="nav-tab">Publications</a></li>
+					<li><a href="#wsuwp-profile-teaching" class="nav-tab">Teaching</a></li>
+          <li><a href="#wsuwp-profile-service" class="nav-tab">Service</a></li>
 				</ul>
 				<div id="wsuwp-profile-default" class="wsuwp-profile-panel">
-					<?php do_meta_boxes( get_current_screen(), 'bio_above_editor', $post ); ?>
-          <p class="description">Consider including professional experience, previous employment, awards, honors, memberships, or other information you wish to share about yourself here.</p>
+          <h3>Biography</h3>
 			<?php
 		endif;
 
 	}
 
 	/**
-	 * Add stuff after the editor of the edit screen for the Personnel content type.
+	 * Add markup after the default editor of the edit screen for the Personnel content type.
 	 */
 	public function edit_form_after_editor( $post ) {
 
 		if ( $this->personnel_content_type === $post->post_type ) :
 			?>
+					<h3 class="wpuwp-profile-label">Professional Experience</h3>
+					<?php wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_experience', true ), '_wsuwp_profile_experience' ); ?>
+					<h3 class="wpuwp-profile-label">Honors and Awards</h3>
+					<?php wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_honors', true ), '_wsuwp_profile_honors' ); ?>
 				</div><!--wsuwp-profile-default-->
 
+				<div id="wsuwp-profile-research" class="wsuwp-profile-panel">
+					<h3>Research Interests</h3>
+					<?php wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_research', true ), '_wsuwp_profile_research' ); ?>
+					<h3>Grants, Contracts, and Fund Generation</h3>
+					<?php wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_grants', true ), '_wsuwp_profile_grants' ); ?>
+					<h3>Publications, Creative Work, and Presentations</h3>
+					<?php wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_publications', true ), '_wsuwp_profile_publications' ); ?>
+				</div>
+
 				<div id="wsuwp-profile-teaching" class="wsuwp-profile-panel">
-					<h3 class="wpuwp-profile-label"><label for="_wsuwp_profile_teaching_name">Teaching Profile Display Name</label></h3>
-					<p class="description">(if different than default)</p>
-					<input type="text" id="_wsuwp_profile_teaching_name" name="_wsuwp_profile_teaching_name" value="<?php echo esc_attr( get_post_meta( $post->ID, '_wsuwp_profile_teaching_name', true ) ); ?>" class="widefat wsuwp-profile-namefield" /></p>
-					<?php do_meta_boxes( get_current_screen(), 'teaching_above_editor', $post ); ?>
-          <p class="description">Your teaching responsibilities, classes you teach, etc.</p>
+					<h3>Credit Courses Taught, Additional Teaching, and Advising</h3>
 					<?php wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_teaching', true ), '_wsuwp_profile_teaching' ); ?>
 				</div>
 
-				<div id="wsuwp-profile-research" class="wsuwp-profile-panel">
-					<h3 class="wpuwp-profile-label"><label for="_wsuwp_profile_research_name">Research Profile Display Name</label></h3>
-					<p class="description">(if different than default)</p>
-					<input type="text" id="_wsuwp_profile_research_name" name="_wsuwp_profile_research_name" value="<?php echo esc_attr( get_post_meta( $post->ID, '_wsuwp_profile_research_name', true ) ); ?>" class="widefat wsuwp-profile-namefield" /></p>
-          <?php do_meta_boxes( get_current_screen(), 'research_above_editor', $post ); ?>
-          <p class="description">Information about your research interests, recent funding/funded projects/grant submissions, grad students/program personnel/research team, research facilities, collaborators, patents, etc.</p>
-					<?php wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_research', true ), '_wsuwp_profile_research' ); ?>
-				</div>
-
-				<div id="wsuwp-profile-extension" class="wsuwp-profile-panel">
-          <h3 class="wpuwp-profile-label"><label for="_wsuwp_profile_extension_name">Extension Profile Display Name</label></h3>
-					<p class="description">(if different than default)</p>
-					<input type="text" id="_wsuwp_profile_extension_name" name="_wsuwp_profile_extension_name" value="<?php echo esc_attr( get_post_meta( $post->ID, '_wsuwp_profile_extension_name', true ) ); ?>" class="widefat wsuwp-profile-namefield" /></p>
-					<?php do_meta_boxes( get_current_screen(), 'extension_above_editor', $post ); ?>
-          <p class="description">Information about your Extension duties.</p>
-					<?php wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_extension', true ), '_wsuwp_profile_extension' ); ?>
-				</div>
-
-				<div id="wsuwp-profile-publications" class="wsuwp-profile-panel">
-					<?php
-						// This section would ideally include a way for users to dynamically pull in a feed from the pubs store.
-          	//do_meta_boxes( get_current_screen(), 'publications_above_editor', $post );*/
-					?>
-          <p class="description">Book chapters, professional articles, peer-reviewed exhibitions, juried artistic works, and other publications.</p>
-					<?php wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_publications', true ), '_wsuwp_profile_publications' ); ?>
+				<div id="wsuwp-profile-service" class="wsuwp-profile-panel">
+          <h3>University, Professional Society, Community, and Review Activities</h3>
+					<?php wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_service', true ), '_wsuwp_profile_service' ); ?>
 				</div>
 
 			</div><!--wsuwp-profile-tabs-->
@@ -317,9 +288,18 @@ class WSUWP_People_Directory {
 		}
 
 		add_meta_box(
-			'wsuwp_profile_position_info',
+			'wsuwp_profile_a_position_info',
 			'Position and Contact Information',
 			array( $this, 'display_position_info_meta_box' ),
+			$this->personnel_content_type,
+			'side',
+			'high'
+		);
+
+		add_meta_box(
+			'wsuwp_profile_b_cv_upload',
+			'Curriculum Vitae',
+			array( $this, 'display_cv_upload_meta_box' ),
 			$this->personnel_content_type,
 			'side',
 			'high'
@@ -331,7 +311,7 @@ class WSUWP_People_Directory {
 			'Alternate Contact Information',
 			array( $this, 'display_bio_contact_meta_box' ),
 			$this->personnel_content_type,
-			'bio_above_editor',
+			'after_title',
 			'high'
 		);
 
@@ -340,74 +320,8 @@ class WSUWP_People_Directory {
 			'Degrees Earned',
 			array( $this, 'display_degree_info_meta_box' ),
 			$this->personnel_content_type,
-			'bio_above_editor',
+			'after_title',
 			'high'
-		);
-
-		add_meta_box(
-			'wsuwp_profile_cv_upload',
-			'Curriculum Vitae',
-			array( $this, 'display_cv_upload_meta_box' ),
-			$this->personnel_content_type,
-			'bio_above_editor',
-			'core'
-		);
-
-		// Teaching meta boxes.
-		add_meta_box(
-			'wsuwp_profile_teaching_contact',
-			'Teaching Contact Information',
-			array( $this, 'display_teaching_contact_meta_box' ),
-			$this->personnel_content_type,
-			'teaching_above_editor',
-			'high'
-		);
-
-		add_meta_box(
-			'wsuwp_profile_teaching_photo',
-			'Teaching Photo',
-			array( $this, 'display_teaching_photo_meta_box' ),
-			$this->personnel_content_type,
-			'teaching_above_editor',
-			'low'
-		);
-
-		// Research meta boxes.
-		add_meta_box(
-			'wsuwp_profile_research_contact',
-			'Research Contact Information',
-			array( $this, 'display_research_contact_meta_box' ),
-			$this->personnel_content_type,
-			'research_above_editor',
-			'high'
-		);
-
-		add_meta_box(
-			'wsuwp_profile_research_photo',
-			'Research Photo',
-			array( $this, 'display_research_photo_meta_box' ),
-			$this->personnel_content_type,
-			'research_above_editor',
-			'low'
-		);
-
-		// Extension meta boxes.
-		add_meta_box(
-			'wsuwp_profile_extension_contact',
-			'Extension Contact Information',
-			array( $this, 'display_extension_contact_meta_box' ),
-			$this->personnel_content_type,
-			'extension_above_editor',
-			'high'
-		);
-
-		add_meta_box(
-			'wsuwp_profile_extension_photo',
-			'Extension Photo',
-			array( $this, 'display_extension_photo_meta_box' ),
-			$this->personnel_content_type,
-			'extension_above_editor',
-			'low'
 		);
 
 		// Co-editor meta box.
@@ -476,7 +390,59 @@ class WSUWP_People_Directory {
 	}
 
 	/**
-	 * Display a meta box under the "Bio" tab to collect additional or alternate contact info.
+	 * Display a meta box used to upload a person's C.V.
+	 */
+	public function display_cv_upload_meta_box( $post ) {
+
+		$cv = get_post_meta( $post->ID, '_wsuwp_profile_cv', true );
+
+		?>
+			<div class="upload-set-wrapper">
+				<input type="hidden" class="wsuwp-profile-upload" name="_wsuwp_profile_cv" id="_wsuwp_profile_cv" value="<?php echo esc_attr( $cv ); ?>" />
+				<p class="hide-if-no-js"><a title="C.V." data-type="File" href="#" class="wsuwp-profile-upload-link">
+				<?php if ( $cv ) : ?>
+					<img src="<?php echo esc_url( home_url( '/wp-includes/images/media/document.png' ) ); ?>" /></a></p>
+					<p class="hide-if-no-js"><a title="C.V." href="#" class="wsuwp-profile-remove-link">Remove C.V.</a></p>
+				<?php else : ?>
+					 Set C.V.</a></p>
+				<?php endif; ?>
+			</div>
+		<?php
+
+	}
+
+	/**
+	 * Move and re-label the Featured Image metabox.
+	 */
+	public function featured_image_box() {
+
+    remove_meta_box( 'postimagediv', $this->personnel_content_type, 'side' );
+		
+		add_meta_box( 'postimagediv', 'Profile Photo', 'post_thumbnail_meta_box', $this->personnel_content_type, 'side', 'high' );
+
+	}
+
+	/**
+	 * Change the text for the featured image links.
+	 */
+	public function admin_post_thumbnail_html( $content ) {
+
+		$screen = get_current_screen();
+	
+		if ( $this->personnel_content_type == $screen->post_type ) {
+
+    	$content = str_replace( __( 'Set featured image' ), __( 'Set profile photo' ), $content );
+    	$content = str_replace( __( 'Remove featured image' ), __( 'Remove profile photo' ), $content );
+
+			$content .= '<p class="description"><strong>__×__ pixel</strong> minimum recommended.</p>';
+		
+		}
+
+    return $content;
+	}
+
+	/**
+	 * Display a meta box under the "General" tab to collect additional or alternate contact info.
 	 */
 	public function display_bio_contact_meta_box( $post ) {
 
@@ -531,235 +497,6 @@ class WSUWP_People_Directory {
 		?>
     <p class="wsuwp-profile-add-repeatable"><a href="#">+ Add another degree</a></p>
     <?php
-
-	}
-
-	/**
-	 * Display a meta box used to upload a person's C.V.
-	 */
-	public function display_cv_upload_meta_box( $post ) {
-
-		$cv = get_post_meta( $post->ID, '_wsuwp_profile_cv', true );
-
-		?>
-			<div class="upload-set-wrapper">
-				<input type="hidden" class="wsuwp-profile-upload" name="_wsuwp_profile_cv" id="_wsuwp_profile_cv" value="<?php echo esc_attr( $cv ); ?>" />
-				<p class="hide-if-no-js"><a title="C.V." data-type="File" href="#" class="wsuwp-profile-upload-link">
-				<?php if ( $cv ) : ?>
-					<img src="<?php echo esc_url( home_url( '/wp-includes/images/media/document.png' ) ); ?>" /></a></p>
-					<p class="hide-if-no-js"><a title="C.V." href="#" class="wsuwp-profile-remove-link">Remove C.V.</a></p>
-				<?php else : ?>
-					 Set C.V.</a></p>
-				<?php endif; ?>
-			</div>
-		<?php
-
-	}
-
-	/**
-	 * Move and re-label the Featured Image metabox.
-	 */
-	public function featured_image_box() {
-
-    remove_meta_box( 'postimagediv', $this->personnel_content_type, 'side' );
-
-    add_meta_box( 'postimagediv', __('Profile Photo'), 'post_thumbnail_meta_box', $this->personnel_content_type, 'bio_above_editor', 'low' );
-
-	}
-
-	/**
-	 * Change the text for the featured image links.
-	 */
-	public function admin_post_thumbnail_html( $content ) {
-
-		$screen = get_current_screen();
-	
-		if ( $this->personnel_content_type == $screen->post_type ) {
-
-    	$content = str_replace( __('Set featured image'), __( 'Set profile photo' ), $content);
-    	$content = str_replace( __('Remove featured image'), __( 'Remove profile photo' ), $content);
-
-			$content .= '<p class="description"><strong>__×__ pixel</strong> minimum recommended.</p>';
-		
-		}
-
-    return $content;
-	}
-
-	/**
-	 * Display a meta box under the "Teaching" tab to collect additional or alternate contact info.
-	 */
-	public function display_teaching_contact_meta_box( $post ) {
-
-		$teaching_titles = get_post_meta( $post->ID, '_wsuwp_profile_teaching_title', true );
-
-		if ( $teaching_titles && is_array( $teaching_titles ) ) :
-			foreach ( $teaching_titles as $index => $title ) :
-			?>
-			<p class="wp-profile-repeatable"><label for="_wsuwp_profile_teaching_title[<?php echo esc_attr( $index ); ?>]">Title</label><br />
-			<input type="text" id="_wsuwp_profile_teaching_title[<?php echo esc_attr( $index ); ?>]" name="_wsuwp_profile_teaching_title[<?php echo esc_attr( $index ); ?>]" value="<?php echo esc_attr( $title ); ?>" class="widefat" /></p>
-			<?php
-			endforeach;
-		else :
-			?>
-			<p class="wp-profile-repeatable"><label for="_wsuwp_profile_teaching_title[0]">Title</label><br />
-			<input type="text" id="_wsuwp_profile_teaching_title[0]" name="_wsuwp_profile_teaching_title[0]" value="<?php echo esc_attr( $teaching_titles ); ?>" class="widefat" /></p>
-			<?php
-		endif;
-		?>
-    <p class="wsuwp-profile-add-repeatable"><a href="#">+ Add another title</a></p>
-
-		<p><label for="_wsuwp_profile_teaching_phone">Phone Number <span class="description">(xxx-xxx-xxxx)</span></label><br />
-		<input type="text" id="_wsuwp_profile_teaching_phone" name="_wsuwp_profile_teaching_phone" value="<?php echo esc_attr( get_post_meta( $post->ID, '_wsuwp_profile_teaching_phone', true ) ); ?>" class="widefat" /></p>
-		<p><label for="_wsuwp_profile_teaching_email">Email Address</label><br />
-		<input type="text" id="_wsuwp_profile_teaching_email" name="_wsuwp_profile_teaching_email" value="<?php echo esc_attr( get_post_meta( $post->ID, '_wsuwp_profile_teaching_email', true ) ); ?>" class="widefat" /></p>
-		<p><label for="_wsuwp_profile_teaching_website">Website URL</label><br />
-		<input type="text" id="_wsuwp_profile_teaching_website" name="_wsuwp_profile_teaching_website" value="<?php echo esc_attr( get_post_meta( $post->ID, '_wsuwp_profile_teaching_website', true ) ); ?>" class="widefat" /></p>
-		<?php
-
-	}
-
-	/**
-	 * Display a metabox used to upload a person's Teaching photo.
-	 */
-	public function display_teaching_photo_meta_box( $post ) {
-
-		$teaching_photo = get_post_meta( $post->ID, '_wsuwp_profile_teaching_photo', true );
-
-		?>
-			<p class="description">If you would like to associate a different image with your teaching information, upload it here.</p>
-			<div class="upload-set-wrapper">
-				<input type="hidden" class="wsuwp-profile-upload" name="_wsuwp_profile_teaching_photo" id="_wsuwp_profile_teaching_photo" value="<?php echo esc_attr( $teaching_photo ); ?>" />
-				<p class="hide-if-no-js"><a title="teaching photo" data-type="Photo" href="#" class="wsuwp-profile-upload-link">
-				<?php if ( $teaching_photo ) :
-					$image = wp_get_attachment_image_src( $teaching_photo, 'thumbnail' );
-					?>
-					<img src="<?php echo esc_url( $image[0] ); ?>" /></a></p>
-					<p class="hide-if-no-js"><a title="teaching photo" href="#" class="wsuwp-profile-remove-link">Remove teaching photo</a></p>
-				<?php else : ?>
-					 Set teaching photo</a></p>
-				<?php endif; ?>
-				<p class="description"><strong>__×__ pixel</strong> minimum recommended.</p>
-			</div>
-		<?php
-
-	}
-
-	/**
-	 * Display a meta box under the "Research" tab to collect additional or alternate contact info.
-	 */
-	public function display_research_contact_meta_box( $post ) {
-
-		$research_titles = get_post_meta( $post->ID, '_wsuwp_profile_research_title', true );
-
-		if ( $research_titles && is_array( $research_titles ) ) :
-			foreach ( $research_titles as $index => $title ) :
-			?>
-			<p class="wp-profile-repeatable"><label for="_wsuwp_profile_research_title[<?php echo esc_attr( $index ); ?>]">Title</label><br />
-			<input type="text" id="_wsuwp_profile_research_title[<?php echo esc_attr( $index ); ?>]" name="_wsuwp_profile_research_title[<?php echo esc_attr( $index ); ?>]" value="<?php echo esc_attr( $title ); ?>" class="widefat" /></p>
-			<?php
-			endforeach;
-		else :
-			?>
-			<p class="wp-profile-repeatable"><label for="_wsuwp_profile_research_title[0]">Title</label><br />
-			<input type="text" id="_wsuwp_profile_research_title[0]" name="_wsuwp_profile_research_title[0]" value="<?php echo esc_attr( $research_titles ); ?>" class="widefat" /></p>
-			<?php
-		endif;
-		?>
-    <p class="wsuwp-profile-add-repeatable"><a href="#">+ Add another title</a></p>
-
-		<p><label for="_wsuwp_profile_research_phone">Phone Number <span class="description">(xxx-xxx-xxxx)</span></label><br />
-		<input type="text" id="_wsuwp_profile_research_phone" name="_wsuwp_profile_research_phone" value="<?php echo esc_attr( get_post_meta( $post->ID, '_wsuwp_profile_research_phone', true ) ); ?>" class="widefat" /></p>
-		<p><label for="_wsuwp_profile_research_email">Email Address</label><br />
-		<input type="text" id="_wsuwp_profile_research_email" name="_wsuwp_profile_research_email" value="<?php echo esc_attr( get_post_meta( $post->ID, '_wsuwp_profile_research_email', true ) ); ?>" class="widefat" /></p>
-		<p><label for="_wsuwp_profile_research_website">Website URL</label><br />
-		<input type="text" id="_wsuwp_profile_research_website" name="_wsuwp_profile_research_website" value="<?php echo esc_attr( get_post_meta( $post->ID, '_wsuwp_profile_research_website', true ) ); ?>" class="widefat" /></p>
-		<?php
-
-	}
-
-	/**
-	 * Display a metabox used to upload a person's Research photo.
-	 */
-	public function display_research_photo_meta_box( $post ) {
-
-		$research_photo = get_post_meta( $post->ID, '_wsuwp_profile_research_photo', true );
-
-		?>
-			<p class="description">If you would like to associate a different image with your research information, upload it here.</p>
-			<div class="upload-set-wrapper">
-				<input type="hidden" class="wsuwp-profile-upload" name="_wsuwp_profile_research_photo" id="_wsuwp_profile_research_photo" value="<?php echo esc_attr( $research_photo ); ?>" />
-				<p class="hide-if-no-js"><a title="research photo" data-type="Photo" href="#" class="wsuwp-profile-upload-link">
-				<?php if ( $research_photo ) :
-					$image = wp_get_attachment_image_src( $research_photo, 'thumbnail' );
-					?>
-					<img src="<?php echo esc_url( $image[0] ); ?>" /></a></p>
-					<p class="hide-if-no-js"><a title="research photo" href="#" class="wsuwp-profile-remove-link">Remove research photo</a></p>
-				<?php else : ?>
-					 Set research photo</a></p>
-				<?php endif; ?>
-				<p class="description"><strong>__×__ pixel</strong> minimum recommended.</p>
-			</div>
-		<?php
-
-	}
-
-	/**
-	 * Display a meta box under the "Extension" tab to collect additional or alternate contact info.
-	 */
-	public function display_extension_contact_meta_box( $post ) {
-
-		$extension_titles = get_post_meta( $post->ID, '_wsuwp_profile_extension_title', true );
-
-		if ( $extension_titles && is_array( $extension_titles ) ) :
-			foreach ( $extension_titles as $index => $title ) :
-			?>
-			<p class="wp-profile-repeatable"><label for="_wsuwp_profile_extension_title[<?php echo esc_attr( $index ); ?>]">Title</label><br />
-			<input type="text" id="_wsuwp_profile_extension_title[<?php echo esc_attr( $index ); ?>]" name="_wsuwp_profile_extension_title[<?php echo esc_attr( $index ); ?>]" value="<?php echo esc_attr( $title ); ?>" class="widefat" /></p>
-			<?php
-			endforeach;
-		else :
-			?>
-			<p class="wp-profile-repeatable"><label for="_wsuwp_profile_extension_title[0]">Title</label><br />
-			<input type="text" id="_wsuwp_profile_extension_title[0]" name="_wsuwp_profile_extension_title[0]" value="<?php echo esc_attr( $extension_titles ); ?>" class="widefat" /></p>
-			<?php
-		endif;
-		?>
-    <p class="wsuwp-profile-add-repeatable"><a href="#">+ Add another title</a></p>
-
-		<p><label for="_wsuwp_profile_extension_phone">Phone Number <span class="description">(xxx-xxx-xxxx)</span></label><br />
-		<input type="text" id="_wsuwp_profile_extension_phone" name="_wsuwp_profile_extension_phone" value="<?php echo esc_attr( get_post_meta( $post->ID, '_wsuwp_profile_extension_phone', true ) ); ?>" class="widefat" /></p>
-		<p><label for="_wsuwp_profile_extension_email">Email Address</label><br />
-		<input type="text" id="_wsuwp_profile_extension_email" name="_wsuwp_profile_extension_email" value="<?php echo esc_attr( get_post_meta( $post->ID, '_wsuwp_profile_extension_email', true ) ); ?>" class="widefat" /></p>
-		<p><label for="_wsuwp_profile_extension_website">Website URL</label><br />
-		<input type="text" id="_wsuwp_profile_extension_website" name="_wsuwp_profile_extension_website" value="<?php echo esc_attr( get_post_meta( $post->ID, '_wsuwp_profile_extension_website', true ) ); ?>" class="widefat" /></p>
-		<?php
-
-	}
-
-	/**
-	 * Display a metabox used to upload a person's Extension photo.
-	 */
-	public function display_extension_photo_meta_box( $post ) {
-
-		$extension_photo = get_post_meta( $post->ID, '_wsuwp_profile_extension_photo', true );
-
-		?>
-			<p class="description">If you would like to associate a different image with your extension information, upload it here.</p>
-			<div class="upload-set-wrapper">
-				<input type="hidden" class="wsuwp-profile-upload" name="_wsuwp_profile_extension_photo" id="_wsuwp_profile_extension_photo" value="<?php echo esc_attr( $extension_photo ); ?>" />
-				<p class="hide-if-no-js"><a title="extension photo" data-type="Photo" href="#" class="wsuwp-profile-upload-link">
-				<?php if ( $extension_photo ) :
-					$image = wp_get_attachment_image_src( $extension_photo, 'thumbnail' );
-					?>
-					<img src="<?php echo esc_url( $image[0] ); ?>" /></a></p>
-					<p class="hide-if-no-js"><a title="extension photo" href="#" class="wsuwp-profile-remove-link">Remove extension photo</a></p>
-				<?php else : ?>
-					 Set extension photo</a></p>
-				<?php endif; ?>
-				<p class="description"><strong>__×__ pixel</strong> minimum recommended.</p>
-			</div>
-		<?php
 
 	}
 
@@ -1096,16 +833,12 @@ class WSUWP_People_Directory {
 	 */
 	public function template_include( $template ) {
 
-		if ( $this->personnel_content_type == get_post_type() ) {
+		if ( $this->personnel_content_type == get_post_type() && is_single() ) {
+			$template = plugin_dir_path( __FILE__ ) . 'templates/single.php';
+		}
 
-			if ( is_single() ) {
-				$template = plugin_dir_path( __FILE__ ) . 'templates/single.php';
-			}
-
-			if ( is_archive() ) {
-				$template = plugin_dir_path( __FILE__ ) . 'templates/archive.php';
-			}
-
+		if ( is_post_type_archive( $this->personnel_content_type ) ) {
+			$template = plugin_dir_path( __FILE__ ) . 'templates/archive.php';
 		}
 
 		return $template;

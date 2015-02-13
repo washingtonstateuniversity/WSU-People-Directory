@@ -112,13 +112,13 @@
 				<?php // Website.
 				$website = get_post_meta( get_the_ID(), '_wsuwp_profile_website', true );
 				if ( $website ) : ?>
-					<p><a href="<?php echo esc_url( $website ); ?>">My Website &raquo;</a></p>
+					<p><a href="<?php echo esc_url( $website ); ?>">My Website <span class="dashicons dashicons-external"></span></a></p>
 				<?php endif; ?>
 
 				<?php // Curriculum Vitae.
 				$cv = get_post_meta( get_the_ID(), '_wsuwp_profile_cv', true );
 				if ( $cv ) : ?>
-					<p><a href="<?php echo esc_url( wp_get_attachment_url( $cv ) ); ?>">My C.V &raquo;</a></p>
+					<p><a href="<?php echo esc_url( wp_get_attachment_url( $cv ) ); ?>">My C.V <span class="dashicons dashicons-download"></span></a></p>
 				<?php endif; ?>
 
 			</aside>
@@ -132,27 +132,57 @@
 		<div class="column one" id="profile-tabbed-content">
 
 			<?php
-				$about    = get_the_content();
-				$teaching = get_post_meta( get_the_ID(), '_wsuwp_profile_teaching', true );
-				$research = get_post_meta( get_the_ID(), '_wsuwp_profile_research', true );
-				$extension = get_post_meta( get_the_ID(), '_wsuwp_profile_extension', true );
-				$publications = get_post_meta( get_the_ID(), '_wsuwp_profile_publications', true );
+				$about      = get_the_content();
+				$experience = get_post_meta( get_the_ID(), '_wsuwp_profile_experience', true );
+				$honors     = get_post_meta( get_the_ID(), '_wsuwp_profile_honors', true );
+				$research   = get_post_meta( get_the_ID(), '_wsuwp_profile_research', true );
+				$grants     = get_post_meta( get_the_ID(), '_wsuwp_profile_grants', true );
+				$pubs       = get_post_meta( get_the_ID(), '_wsuwp_profile_publications', true );
+				$teaching   = get_post_meta( get_the_ID(), '_wsuwp_profile_teaching', true );
+				$service    = get_post_meta( get_the_ID(), '_wsuwp_profile_service', true );
+				
 			?>
 
 			<ul id="profile-tabs">
 			<?php
-				if ( $about ) echo '<li><a href="#about">About Me</a></li>';
+				if ( $about || $experience || $honors ) echo '<li><a href="#about">About Me</a></li>';
+				if ( $research || $grants || $pubs ) echo '<li><a href="#research">Research</a></li>';
 				if ( $teaching ) echo '<li><a href="#teaching">Teaching</a></li>';
-				if ( $research ) echo '<li><a href="#research">Research</a></li>';
-				if ( $extension ) echo '<li><a href="#extension">Extension</a></li>';
-				if ( $publications ) echo '<li><a href="#publications">Publications</a></li>';
+				if ( $service ) echo '<li><a href="#service">Service</a></li>';
 			?>
 			</ul>
 
 			<?php
-				if ( $about ) :
+				if ( $about || $experience || $honors ) :
 					echo '<div id="about">';
 					the_content();
+					if ( $experience ) {
+						echo '<h2>Professional Experience</h2>';
+						echo wpautop( wp_kses_post( $experience ) );
+					}
+					if ( $honors ) {
+						echo '<h2>Honors and Awards</h2>';
+						echo wpautop( wp_kses_post( $honors ) );
+					}
+					echo '</div>';
+				endif;
+			?>
+
+			<?php
+				if ( $research || $grants || $pubs ) :
+					echo '<div id="research">';
+					if ( $research ) {
+						//echo '<h2>Research Interests</h2>';
+						echo wpautop( wp_kses_post( $research ) );
+					}
+					if ( $grants ) {
+						echo '<h2>Grants, Contracts, and Fund Generation</h2>';
+						echo wpautop( wp_kses_post( $grants ) );
+					}
+					if ( $pubs ) {
+						echo '<h2>Publications, Creative Work, and Presentations</h2>';
+						echo wpautop( wp_kses_post( $pubs ) );
+					}
 					echo '</div>';
 				endif;
 			?>
@@ -164,20 +194,8 @@
 			?>
 
 			<?php
-				if ( $research ) :
-					echo '<div id="research">' . wpautop( wp_kses_post( $research ) ) . '</div>';
-				endif;
-			?>
-
-			<?php
-				if ( $extension ) :
-					echo '<div id="extension">' . wpautop( wp_kses_post( $extension ) ) . '</div>';
-				endif;
-			?>
-
-			<?php
-				if ( $publications ) :
-					echo '<div id="publications">' . wpautop( wp_kses_post( $publications ) ) . '</div>';
+				if ( $service ) :
+					echo '<div id="service">' . wpautop( wp_kses_post( $service ) ) . '</div>';
 				endif;
 			?>
 
