@@ -27,18 +27,24 @@ class WSUWP_People_Directory {
 	var $personnel_content_type = 'wsuwp_people_profile';
 
 	/**
+	 * The slugs used to register the 'Personnel" taxonomies.
+	 *
+	 * @var string
+	 */
+	var $personnel_appointments = 'appointment';
+	var $personnel_classifications = 'classification';
+
+	/**
 	 * Fields used to capture Active Directory data.
 	 */
 	var $ad_fields = array(
 		'_wsuwp_profile_ad_nid',
 		'_wsuwp_profile_ad_name_first',
 		'_wsuwp_profile_ad_name_last',
-		'_wsuwp_profile_ad_dept',
 		'_wsuwp_profile_ad_title',
-		'_wsuwp_profile_ad_appointment',// Not sure if this information is in AD.
-		'_wsuwp_profile_ad_classification',// Ditto.
 		'_wsuwp_profile_ad_office',
 		'_wsuwp_profile_ad_phone',
+		'_wsuwp_profile_ad_phone_ext',
 		'_wsuwp_profile_ad_email',
 	);
 
@@ -46,6 +52,7 @@ class WSUWP_People_Directory {
 	 * Fields used to capture additional profile information.
 	 */
 	var $basic_fields = array(
+		'_wsuwp_profile_alt_office',
 		'_wsuwp_profile_alt_phone',
 		'_wsuwp_profile_alt_email',
 		'_wsuwp_profile_website',
@@ -79,6 +86,7 @@ class WSUWP_People_Directory {
 		// Custom content type and taxonomies.
 		//add_action( 'init', array( $this, 'process_upgrade_routine' ), 12 );
 		add_action( 'init', array( $this, 'register_personnel_content_type' ), 11 );
+		add_action( 'init', array( $this, 'register_taxonomies' ), 11 );
 		add_action( 'init', array( $this, 'add_taxonomies' ), 12 );
 
 		// Custom meta and all that.
@@ -88,9 +96,11 @@ class WSUWP_People_Directory {
 		add_action( 'edit_form_after_editor',	array( $this, 'edit_form_after_editor' ) );
 		add_action( 'add_meta_boxes', array( $this, 'add_meta_boxes' ), 10, 2 );
 		add_action( 'do_meta_boxes', array( $this, 'featured_image_box' ) );
-		add_filter( 'admin_post_thumbnail_html', array( $this, 'admin_post_thumbnail_html' ) );
 		add_action( 'save_post', array( $this, 'save_post' ), 10, 2 );
 		add_filter( 'wp_post_revision_meta_keys', array( $this, 'add_meta_keys_to_revision' ) );
+
+		// Modify taxonomy columns on "All Profiles" page.
+		add_filter( 'manage_taxonomies_for_wsuwp_people_profile_columns', array( $this, 'wsuwp_people_profile_columns' ) );
 
 		// JSON output.
 		add_filter( 'json_prepare_post', array( $this, 'json_prepare_post' ), 10, 3 );
@@ -131,13 +141,13 @@ class WSUWP_People_Directory {
 	}
 
 	/**
-	 * Register the project content type.
+	 * Register the profiles content type.
 	 */
 	public function register_personnel_content_type() {
 
 		$args = array(
 			'labels' => array(
-				'name' => 'Personnel',
+				'name' => 'Profiles',
 				'singular_name' => 'Profile',
 				'all_items' => 'All Profiles',
 				'view_item' => 'View Profile',
@@ -173,6 +183,55 @@ class WSUWP_People_Directory {
 		);
 
 		register_post_type( $this->personnel_content_type, $args );
+
+	}
+
+	/**
+	 * Register a couple taxonomies.
+	 */
+	public function register_taxonomies() {
+
+		$appointments = array(
+			'labels'            => array(
+				'name'          => 'Appointments',
+				'singular_name' => 'Appointment',
+				'search_items'  => 'Search Appointments',
+				'all_items'     => 'All Appointments',
+				'edit_item'     => 'Edit Appointment',
+				'update_item'   => 'Update Appointment',
+				'add_new_item'  => 'Add New Appointment',
+				'new_item_name' => 'New Appointment Name',
+				'menu_name'     => 'Appointments',
+			),
+			'description'  => 'Personnel Appointments',
+			'public'       => true,
+			'hierarchical' => true,
+			'show_ui'      => true,
+			'show_in_menu' => true,
+			'query_var'    => $this->personnel_appointments,
+		);
+		register_taxonomy( $this->personnel_appointments, $this->personnel_content_type, $appointments );
+
+		$classifications = array(
+			'labels'        => array(
+				'name'          => 'Classifications',
+				'singular_name' => 'Classification',
+				'search_items'  => 'Search Classifications',
+				'all_items'     => 'All Classifications',
+				'edit_item'     => 'Edit Classification',
+				'update_item'   => 'Update Classification',
+				'add_new_item'  => 'Add New Classification',
+				'new_item_name' => 'New Classification Name',
+				'menu_name'     => 'Classifications',
+			),
+			'description'   => 'Personnel Classifications',
+			'public'        => true,
+			'hierarchical'  => true,
+			'show_ui'       => true,
+			'show_in_menu'  => true,
+			'query_var'     => $this->personnel_classifications,
+		);
+		register_taxonomy( $this->personnel_classifications, $this->personnel_content_type, $classifications );
 
 	}
 
@@ -229,10 +288,11 @@ class WSUWP_People_Directory {
 					<li><a href="#wsuwp-profile-default" class="nav-tab">General</a></li>
 					<li><a href="#wsuwp-profile-research" class="nav-tab">Research</a></li>
 					<li><a href="#wsuwp-profile-teaching" class="nav-tab">Teaching</a></li>
-          <li><a href="#wsuwp-profile-service" class="nav-tab">Service</a></li>
+					<li><a href="#wsuwp-profile-service" class="nav-tab">Service</a></li>
+          <li><a href="#wsuwp-profile-publications" class="nav-tab">Publications</a></li>
 				</ul>
 				<div id="wsuwp-profile-default" class="wsuwp-profile-panel">
-          <h3>Biography</h3>
+					<h3>Biography</h3>
 			<?php
 		endif;
 
@@ -252,22 +312,29 @@ class WSUWP_People_Directory {
 				</div><!--wsuwp-profile-default-->
 
 				<div id="wsuwp-profile-research" class="wsuwp-profile-panel">
+					<p class="description">This panel is available because you have a Research appointment. The fields are optional.</p>
 					<h3>Research Interests</h3>
 					<?php wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_research', true ), '_wsuwp_profile_research' ); ?>
 					<h3>Grants, Contracts, and Fund Generation</h3>
 					<?php wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_grants', true ), '_wsuwp_profile_grants' ); ?>
-					<h3>Publications, Creative Work, and Presentations</h3>
-					<?php wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_publications', true ), '_wsuwp_profile_publications' ); ?>
 				</div>
 
 				<div id="wsuwp-profile-teaching" class="wsuwp-profile-panel">
+					<p class="description">This panel is available because you have a Teaching appointment. The fields are optional.</p>
 					<h3>Credit Courses Taught, Additional Teaching, and Advising</h3>
 					<?php wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_teaching', true ), '_wsuwp_profile_teaching' ); ?>
 				</div>
 
 				<div id="wsuwp-profile-service" class="wsuwp-profile-panel">
-          <h3>University, Professional Society, Community, and Review Activities</h3>
+					<p class="description">This panel is available because you have a Service/Extension appointment. The fields are optional.</p>
+					<h3>University, Professional Society, Community, and Review Activities</h3>
 					<?php wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_service', true ), '_wsuwp_profile_service' ); ?>
+				</div>
+
+				<div id="wsuwp-profile-publications" class="wsuwp-profile-panel">
+        	<!--<p class="description">You can manually enter publication information and dynamically populate your profile with web content that is attributed to you.</p>-->
+					<h3>Publications, Creative Work, and Presentations</h3>
+					<?php wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_publications', true ), '_wsuwp_profile_publications' ); ?>
 				</div>
 
 			</div><!--wsuwp-profile-tabs-->
@@ -324,15 +391,15 @@ class WSUWP_People_Directory {
 			'high'
 		);
 
-		// Co-editor meta box.
-		add_meta_box(
+		// Co-editor meta box (should probably be handled with editorial access manager).
+		/*add_meta_box(
 			'wsuwp_profile_coeditor',
 			'Editors',
 			array( $this, 'display_profile_coeditor_meta_box' ),
 			$this->personnel_content_type,
 			'advanced',
 			'high'
-		);
+		);*/
 
 	}
 
@@ -343,14 +410,15 @@ class WSUWP_People_Directory {
 
 		wp_nonce_field( 'wsuwsp_profile', 'wsuwsp_profile_nonce' );
 
-		$nid = get_post_meta( $post->ID, '_wsuwp_profile_ad_nid', true );
+		$nid        = get_post_meta( $post->ID, '_wsuwp_profile_ad_nid', true );
+		$name_first = get_post_meta( $post->ID, '_wsuwp_profile_ad_name_first', true );
+		$name_last  = get_post_meta( $post->ID, '_wsuwp_profile_ad_name_last', true );
+		$title      = get_post_meta( $post->ID, '_wsuwp_profile_ad_title', true );
+		$email      = get_post_meta( $post->ID, '_wsuwp_profile_ad_email', true );
+		$phone      = get_post_meta( $post->ID, '_wsuwp_profile_ad_phone', true );
+		$phone_ext  = get_post_meta( $post->ID, '_wsuwp_profile_ad_phone_ext', true );
+		$office     = get_post_meta( $post->ID, '_wsuwp_profile_ad_office', true );
 
-		?>
-
-		<!-- Just for testing. Capture the NID during post creation/save. -->
-    <input type="text" id="_wsuwp_profile_ad_nid" name="_wsuwp_profile_ad_nid" value="<?php echo esc_attr( $nid ); ?>" />
-
-		<?php
 		/**
 		 * Just an idea...
 		 * We'll pull this data from AD for all WSU people (who will presumably have a NID),
@@ -360,30 +428,42 @@ class WSUWP_People_Directory {
 		 */
 		if ( $nid ) : ?>
 
-		<p><?php echo esc_html( get_post_meta( $post->ID, '_wsuwp_profile_ad_name_first', true ) ) . ' ' . esc_html( get_post_meta( $post->ID, '_wsuwp_profile_ad_name_last', true ) ); ?></p>
-		<p><?php echo esc_html( get_post_meta( $post->ID, '_wsuwp_profile_ad_dept', true ) ); ?></p>
-		<p><?php echo esc_html( get_post_meta( $post->ID, '_wsuwp_profile_ad_appointment', true ) ); ?></p>
-		<p><?php echo esc_html( get_post_meta( $post->ID, '_wsuwp_profile_ad_classification', true ) ); ?></p>
-		<p><?php echo esc_html( get_post_meta( $post->ID, '_wsuwp_profile_ad_title', true ) ); ?></p>
-		<p><?php echo esc_html( get_post_meta( $post->ID, '_wsuwp_profile_ad_email', true ) ); ?></p>
-		<p><?php echo esc_html( get_post_meta( $post->ID, '_wsuwp_profile_ad_phone', true ) ); ?></p>
-		<p><?php echo esc_html( get_post_meta( $post->ID, '_wsuwp_profile_ad_office', true ) ); ?></p>
+		<?php if ( $name_first || $name_last ) : ?>
+		<p><?php
+		if ( $name_first ) { echo esc_html( $name_first ) . ' '; }
+		if ( $name_last ) { echo esc_html( $name_last ); }
+		?></p>
+		<?php endif; ?>
+		<?php if ( $title ) { echo '<p>' . esc_html( $title ) . '</p>'; } ?></p>
+		<?php if ( $office ) { echo '<p>' . esc_html( $office ) . '</p>'; } ?></p>
+		<?php if ( $phone ) { echo '<p>' . esc_html( $phone ); if ( $phone_ext ) { echo ' ' . esc_html( $phone_ext ); } echo '</p>'; } ?></p>
+		<?php if ( $email ) { echo '<p>' . esc_html( $email ) . '</p>'; } ?></p>
 		<p class="description">Notify <a href="#">HR</a> if any of this information is incorrect or needs updated.</p>
 
 		<?php else : ?>
 
+		<!--<p><label for="_wsuwp_profile_ad_name_first">Network ID</label><br />
+		<input type="text" id="_wsuwp_profile_ad_nid" name="_wsuwp_profile_ad_nid" value="<?php echo esc_attr( $nid ); ?>" class="widefat" /></p>-->
 		<p><label for="_wsuwp_profile_ad_name_first">First Name</label><br />
-    <input type="text" id="_wsuwp_profile_ad_name_first" name="_wsuwp_profile_ad_name_first" value="<?php echo esc_attr( get_post_meta( $post->ID, '_wsuwp_profile_ad_name_first', true ) ); ?>" class="widefat" /></p>
-    <p><label for="_wsuwp_profile_ad_name_last">Last Name</label><br />
-    <input type="text" id="_wsuwp_profile_ad_name_last" name="_wsuwp_profile_ad_name_last" value="<?php echo esc_attr( get_post_meta( $post->ID, '_wsuwp_profile_ad_name_last', true ) ); ?>" class="widefat" /></p>
-    <p><label for="_wsuwp_profile_ad_title">Title</label><br />
-		<input type="text" id="_wsuwp_profile_ad_title" name="_wsuwp_profile_ad_title" value="<?php echo esc_attr( get_post_meta( $post->ID, '_wsuwp_profile_ad_title', true ) ); ?>" class="widefat" /></p>
-		<p><label for="_wsuwp_profile_ad_office">Location</label><br />
-		<input type="text" id="_wsuwp_profile_ad_office" name="_wsuwp_profile_ad_office" value="<?php echo esc_attr( get_post_meta( $post->ID, '_wsuwp_profile_ad_office', true ) ); ?>" class="widefat" /></p>
-		<p><label for="_wsuwp_profile_ad_phone">Phone Number <span class="description">(xxx-xxx-xxxx)</span></label><br />
-		<input type="text" id="_wsuwp_profile_ad_phone" name="_wsuwp_profile_ad_phone" value="<?php echo esc_attr( get_post_meta( $post->ID, '_wsuwp_profile_ad_phone', true ) ); ?>" class="widefat" /></p>
+		<input type="text" id="_wsuwp_profile_ad_name_first" name="_wsuwp_profile_ad_name_first" value="<?php echo esc_attr( $name_first ); ?>" class="widefat" /></p>
+		<p><label for="_wsuwp_profile_ad_name_last">Last Name</label><br />
+		<input type="text" id="_wsuwp_profile_ad_name_last" name="_wsuwp_profile_ad_name_last" value="<?php echo esc_attr( $name_last ); ?>" class="widefat" /></p>
+		<p><label for="_wsuwp_profile_ad_title">Title</label><br />
+		<input type="text" id="_wsuwp_profile_ad_title" name="_wsuwp_profile_ad_title" value="<?php echo esc_attr( $title ); ?>" class="widefat" /></p>
+		<p><label for="_wsuwp_profile_ad_office">Office Location</label><br />
+		<input type="text" id="_wsuwp_profile_ad_office" name="_wsuwp_profile_ad_office" value="<?php echo esc_attr( $office ); ?>" class="widefat" /></p>
+		<div class="phone-fields">
+			<div>
+				<label for="_wsuwp_profile_ad_phone">Phone Number <span class="description">(xxx-xxx-xxxx)</span></label><br />
+				<input type="text" id="_wsuwp_profile_ad_phone" name="_wsuwp_profile_ad_phone" value="<?php echo esc_attr( $phone ); ?>" class="widefat" maxlength="12" />
+			</div>
+			<div>
+			 	<label for="_wsuwp_profile_ad_phone_ext">Ext</label><br />
+				<input type="text" id="_wsuwp_profile_ad_phone_ext" name="_wsuwp_profile_ad_phone_ext" value="<?php echo esc_attr( $phone_ext ); ?>" class="widefat" />
+			</div>
+		</div>
 		<p><label for="_wsuwp_profile_ad_email">Email Address</label><br />
-		<input type="text" id="_wsuwp_profile_ad_email" name="_wsuwp_profile_ad_email" value="<?php echo esc_attr( get_post_meta( $post->ID, '_wsuwp_profile_ad_email', true ) ); ?>" class="widefat" /></p>
+		<input type="text" id="_wsuwp_profile_ad_email" name="_wsuwp_profile_ad_email" value="<?php echo esc_attr( $email ); ?>" class="widefat" /></p>
 
 		<?php endif;
 
@@ -416,29 +496,10 @@ class WSUWP_People_Directory {
 	 */
 	public function featured_image_box() {
 
-    remove_meta_box( 'postimagediv', $this->personnel_content_type, 'side' );
-		
+		remove_meta_box( 'postimagediv', $this->personnel_content_type, 'side' );
+
 		add_meta_box( 'postimagediv', 'Profile Photo', 'post_thumbnail_meta_box', $this->personnel_content_type, 'side', 'high' );
 
-	}
-
-	/**
-	 * Change the text for the featured image links.
-	 */
-	public function admin_post_thumbnail_html( $content ) {
-
-		$screen = get_current_screen();
-	
-		if ( $this->personnel_content_type == $screen->post_type ) {
-
-    	$content = str_replace( __( 'Set featured image' ), __( 'Set profile photo' ), $content );
-    	$content = str_replace( __( 'Remove featured image' ), __( 'Remove profile photo' ), $content );
-
-			$content .= '<p class="description"><strong>__×__ pixel</strong> minimum recommended.</p>';
-		
-		}
-
-    return $content;
 	}
 
 	/**
@@ -462,7 +523,10 @@ class WSUWP_People_Directory {
 			<?php
 		endif;
 		?>
-    <p class="wsuwp-profile-add-repeatable"><a href="#">+ Add another title</a></p>
+		<p class="wsuwp-profile-add-repeatable"><a href="#">+ Add another title</a></p>
+
+		<p><label for="_wsuwp_profile_alt_office">Office</label><br />
+		<input type="text" id="_wsuwp_profile_alt_office" name="_wsuwp_profile_alt_office" value="<?php echo esc_attr( get_post_meta( $post->ID, '_wsuwp_profile_alt_office', true ) ); ?>" class="widefat" /></p>
 
 		<p><label for="_wsuwp_profile_alt_phone">Phone Number <span class="description">(xxx-xxx-xxxx)</span></label><br />
 		<input type="text" id="_wsuwp_profile_alt_phone" name="_wsuwp_profile_alt_phone" value="<?php echo esc_attr( get_post_meta( $post->ID, '_wsuwp_profile_alt_phone', true ) ); ?>" class="widefat" /></p>
@@ -495,8 +559,8 @@ class WSUWP_People_Directory {
 			<?php
 		endif;
 		?>
-    <p class="wsuwp-profile-add-repeatable"><a href="#">+ Add another degree</a></p>
-    <?php
+		<p class="wsuwp-profile-add-repeatable"><a href="#">+ Add another degree</a></p>
+		<?php
 
 	}
 
@@ -535,13 +599,19 @@ class WSUWP_People_Directory {
 			return $post_id;
 		}
 
-		// Sanitize and save AD fields. Or not! Unique handling will be required in this case.
-		foreach ( $this->ad_fields as $field ) {
+		// Sync these with AD.
+		/*foreach ( $this->ad_fields as $field ) {
 			if ( isset( $_POST[ $field ] ) && '' != $_POST[ $field ] ) {
 				update_post_meta( $post_id, $field, sanitize_text_field( $_POST[ $field ] ) );
 			} else {
 				delete_post_meta( $post_id, $field );
 			}
+		}*/
+
+		// Save "last_name first_name" data (for alpha sorting purposes).
+		if ( ( isset( $_POST['_wsuwp_profile_ad_name_last'] ) && '' != $_POST['_wsuwp_profile_ad_name_last'] ) &&
+				 ( isset( $_POST['_wsuwp_profile_ad_name_first'] ) && '' != $_POST['_wsuwp_profile_ad_name_first'] ) ) {
+			update_post_meta( $post_id, '_wsuwp_profile_name', sanitize_text_field( $_POST['_wsuwp_profile_ad_name_last'] ) . ' ' . sanitize_text_field( $_POST['_wsuwp_profile_ad_name_first'] ) );
 		}
 
 		// Sanitize and save basic fields.
@@ -594,7 +664,19 @@ class WSUWP_People_Directory {
 			$keys[] = $field;
 		}
 
-    return $keys;
+		return $keys;
+	}
+
+	/**
+	 * Taxonomy columns on the "All Profiles" screen.
+	 */
+	public function wsuwp_people_profile_columns( $columns ) {
+		unset($columns['category']);
+   	unset($columns['post_tag']);
+		$columns[] = $this->personnel_appointments;
+		$columns[] = $this->personnel_classifications;
+		$columns[] = 'wsuwp_university_location';
+    return $columns;
 	}
 
 	/**
@@ -612,7 +694,9 @@ class WSUWP_People_Directory {
 			$post_response[ $field ] = get_post_meta( $post['ID'], $field, true );
 		}
 
-    return $post_response;
+		$post_response['_wsuwp_profile_name'] = get_post_meta( $post['ID'], '_wsuwp_profile_name', true );
+
+		return $post_response;
 
 	}
 
@@ -669,11 +753,6 @@ class WSUWP_People_Directory {
 	 */
 	public function user_has_cap( $allcaps, $cap, $args ) {
 
-		// Bail out if we're not asking about a post:
-		//if ( 'edit_post' != $args[0] )
-		//	return $allcaps;
-		// This condition results in a "You are not allowed to edit posts as this user." message upon updating.
-
 		// Bail for users who can already edit others posts:
 		if ( $allcaps['edit_others_posts'] ) {
 			return $allcaps;
@@ -724,12 +803,12 @@ class WSUWP_People_Directory {
 	}
 
 	/**
-	 * Remove Profile menu page to avoid confusion.
+	 * Remove some items from the admin menu (should probably change permissions too).
 	 */
 	public function admin_menu() {
 
 		if ( ! current_user_can( 'manage_options' ) ) {
-			remove_menu_page( 'profile.php' );
+			remove_menu_page( 'profile.php' ); // Profile
 		}
 
 	}
@@ -740,7 +819,9 @@ class WSUWP_People_Directory {
 	 * This doesn't change the counts on the Media Library page.
 	 */
 	public function limit_media_library( $query ) {
+
 		if ( is_admin() && isset( $_REQUEST['action'] ) ) {
+
 			if ( 'upload' !== get_current_screen()->base && 'query-attachments' !== $_REQUEST['action'] ) {
 				return;
 			}
@@ -748,7 +829,9 @@ class WSUWP_People_Directory {
 			if ( ! current_user_can( 'manage_options' ) ) {
 				$query->set( 'author', wp_get_current_user()->ID );
 			}
+
 		}
+
 	}
 
 	/**
@@ -768,8 +851,8 @@ class WSUWP_People_Directory {
 			$current_user = wp_get_current_user();
 
 			$all_personnel = new WP_Query( array(
-        'post_type'   => $this->personnel_content_type,
-        'post_status' => 'publish',
+				'post_type'	 => $this->personnel_content_type,
+				'post_status' => 'publish',
 				'posts_per_page' => -1,
 				'author__not_in' => $current_user->ID,
 			) );
@@ -806,9 +889,9 @@ class WSUWP_People_Directory {
 
 		$screen = get_current_screen();
 
-    if ( is_admin() && 'edit-' . $this->personnel_content_type == $screen->id &&
-        isset( $_GET['post_type'] ) && $_GET['post_type'] == $this->personnel_content_type && 
-        isset( $_GET['sortby'] ) && $_GET['sortby'] == 'last_name' &&
+		if ( is_admin() && 'edit-' . $this->personnel_content_type == $screen->id &&
+				isset( $_GET['post_type'] ) && $_GET['post_type'] == $this->personnel_content_type &&
+				isset( $_GET['sortby'] ) && $_GET['sortby'] == 'last_name' &&
 				isset( $_GET['profiles'] ) && $_GET['profiles'] != '' )
 		{
 			$editables = explode( ',', $_GET['profiles'] );
@@ -817,7 +900,7 @@ class WSUWP_People_Directory {
 			// These two seem to prevent the "'views_'.$this->screen->id" hook from working properly.
 			//set_query_var( 'order', 'ASC' );
 			//set_query_var( 'post__in', $editables );
-    }
+		}
 
 	}
 
@@ -830,7 +913,7 @@ class WSUWP_People_Directory {
 			$template = plugin_dir_path( __FILE__ ) . 'templates/single.php';
 		}
 
-		if ( is_post_type_archive( $this->personnel_content_type ) ) {
+		if ( is_post_type_archive( $this->personnel_content_type ) || is_tax() || is_category() || is_tag() ) {
 			$template = plugin_dir_path( __FILE__ ) . 'templates/archive.php';
 		}
 
@@ -860,7 +943,7 @@ class WSUWP_People_Directory {
 	 */
 	public function profile_archives( $query ) {
 
-		if ( $query->is_post_type_archive( $this->personnel_content_type ) && $query->is_main_query() && ! is_admin() ) {
+		if ( ( $query->is_post_type_archive( $this->personnel_content_type ) || is_tax() || is_category() || is_tag() ) && $query->is_main_query() && ! is_admin() ) {
 			$query->set( 'order', 'ASC' );
 			$query->set( 'orderby', 'meta_value' );
 			$query->set( 'meta_key', '_wsuwp_profile_ad_name_last' );
