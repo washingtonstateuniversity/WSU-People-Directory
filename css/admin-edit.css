@@ -1,0 +1,5 @@
+.appointment-checklist,
+.classification-checklist,
+.inline-edit-row fieldset label.inline-edit-status {
+	display: none;
+}

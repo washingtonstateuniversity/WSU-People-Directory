@@ -95,7 +95,7 @@ class WSUWP_People_Directory {
 		add_action( 'edit_form_after_title', array( $this, 'edit_form_after_title' ) );
 		add_action( 'edit_form_after_editor',	array( $this, 'edit_form_after_editor' ) );
 		add_action( 'add_meta_boxes', array( $this, 'add_meta_boxes' ), 10, 2 );
-		add_action( 'do_meta_boxes', array( $this, 'featured_image_box' ) );
+		add_action( 'do_meta_boxes', array( $this, 'do_meta_boxes' ) );
 		add_action( 'save_post', array( $this, 'save_post' ), 10, 2 );
 		add_filter( 'wp_post_revision_meta_keys', array( $this, 'add_meta_keys_to_revision' ) );
 
@@ -172,7 +172,7 @@ class WSUWP_People_Directory {
 				'revisions'
 			),
 			'taxonomies' => array(
-				'category',
+				//'category',
 				'post_tag'
 			),
 			'has_archive' => true,
@@ -254,6 +254,11 @@ class WSUWP_People_Directory {
 		if ( ( 'post-new.php' == $hook || 'post.php' == $hook ) && $screen->post_type == $this->personnel_content_type ) {
 			wp_enqueue_style( 'wsuwp-people-admin-style', plugins_url( 'css/admin-profile-style.css', __FILE__ ) );
 			wp_enqueue_script( 'wsuwp-people-admin-script', plugins_url( 'js/admin-profile.js', __FILE__ ), array( 'jquery-ui-tabs' ), '', true );
+		}
+
+		if ( 'edit.php' == $hook && $screen->post_type == $this->personnel_content_type ) {
+			wp_enqueue_style( 'wsuwp-people-admin-style', plugins_url( 'css/admin-edit.css', __FILE__ ) );
+			wp_enqueue_script( 'wsuwp-people-admin-script', plugins_url( 'js/admin-edit.js', __FILE__ ) );
 		}
 
 	}
@@ -419,6 +424,9 @@ class WSUWP_People_Directory {
 		$phone_ext  = get_post_meta( $post->ID, '_wsuwp_profile_ad_phone_ext', true );
 		$office     = get_post_meta( $post->ID, '_wsuwp_profile_ad_office', true );
 
+		$appointments = wp_get_post_terms( $post->ID, $this->personnel_appointments, array( 'fields' => 'names' ) );
+		$classifications = wp_get_post_terms( $post->ID, $this->personnel_classifications, array( 'fields' => 'names' ) );
+
 		/**
 		 * Just an idea...
 		 * We'll pull this data from AD for all WSU people (who will presumably have a NID),
@@ -428,17 +436,71 @@ class WSUWP_People_Directory {
 		 */
 		if ( $nid ) : ?>
 
-		<p><?php echo esc_html( $nid ); ?></p>
-		<?php if ( $name_first || $name_last ) : ?>
-		<p><?php
-		if ( $name_first ) { echo esc_html( $name_first ) . ' '; }
-		if ( $name_last ) { echo esc_html( $name_last ); }
-		?></p>
-		<?php endif; ?>
-		<?php if ( $title ) { echo '<p>' . esc_html( $title ) . '</p>'; } ?></p>
-		<?php if ( $office ) { echo '<p>' . esc_html( $office ) . '</p>'; } ?></p>
-		<?php if ( $phone ) { echo '<p>' . esc_html( $phone ); if ( $phone_ext ) { echo ' ' . esc_html( $phone_ext ); } echo '</p>'; } ?></p>
-		<?php if ( $email ) { echo '<p>' . esc_html( $email ) . '</p>'; } ?></p>
+		<div class="profile-card">
+
+			<div>
+				<div>Network ID</div>
+				<div><?php echo esc_html( $nid ); ?></div>
+			</div>
+
+			<?php if ( $name_first || $name_last ) : ?>
+			<div>
+				<div>Name</div>
+				<div><?php if ( $name_first ) { echo esc_html( $name_first ) . ' '; } if ( $name_last ) { echo esc_html( $name_last ); } ?></div>
+      </div>
+			<?php endif; ?>
+
+			<?php if ( $appointments ) : ?>
+			<div>
+				<div>Appointment(s)</div>
+        <div>
+					<ul>
+						<?php foreach ( $appointments as $appointment ) { echo '<li>' . $appointment . '</li>'; } ?>
+					</ul>
+				</div>
+			</div>
+			<?php endif; ?>
+
+    	<?php if ( $classifications ) : ?>
+			<div>
+				<div>Classification</div>
+				<div>
+					<ul>
+						<?php foreach ( $classifications as $classification ) { echo '<li>' . $classification . '</li>'; } ?>
+					</ul>
+				</div>
+			</div>
+			<?php endif; ?>
+
+			<?php if ( $title ) : ?>
+			<div>
+				<div>Title</div>
+      	<div><?php echo esc_html( $title ); ?></div>
+			</div>
+			<?php endif; ?>
+
+			<?php if ( $office ) : ?>
+			<div>
+				<div>Office</div>
+      	<div><?php echo esc_html( $office ); ?></div>
+			</div>
+			<?php endif; ?>
+
+			<?php if ( $phone ) : ?>
+			<div>
+				<div>Phone</div>
+      	<div><?php echo esc_html( $phone ); if ( $phone_ext ) { echo ' ' . esc_html( $phone_ext ); } ?></div>
+			</div>
+			<?php endif; ?>
+
+			<?php if ( $email ) : ?>
+			<div>
+				<div>Email</div>
+      	<div><?php echo esc_html( $email ); ?></div>
+			</div>
+			<?php endif; ?>
+
+		</div>
 		<p class="description">Notify <a href="#">HR</a> if any of this information is incorrect or needs updated.</p>
 
 		<?php else : ?>
@@ -493,12 +555,16 @@ class WSUWP_People_Directory {
 	}
 
 	/**
-	 * Move and re-label the Featured Image metabox.
+	 * Remove or move certain meta boxes.
 	 */
-	public function featured_image_box() {
+	public function do_meta_boxes() {
 
+		// Remove "Appointment" and "Classification" meta boxes.
+		remove_meta_box( 'appointmentdiv', $this->personnel_content_type, 'side' );
+		remove_meta_box( 'classificationdiv', $this->personnel_content_type, 'side' );
+		
+		// Move and re-label the Featured Image meta box.
 		remove_meta_box( 'postimagediv', $this->personnel_content_type, 'side' );
-
 		add_meta_box( 'postimagediv', 'Profile Photo', 'post_thumbnail_meta_box', $this->personnel_content_type, 'side', 'high' );
 
 	}
@@ -672,7 +738,7 @@ class WSUWP_People_Directory {
 	 * Taxonomy columns on the "All Profiles" screen.
 	 */
 	public function wsuwp_people_profile_columns( $columns ) {
-		unset($columns['category']);
+		//unset($columns['category']);
    	unset($columns['post_tag']);
 		$columns[] = $this->personnel_appointments;
 		$columns[] = $this->personnel_classifications;
@@ -814,7 +880,7 @@ class WSUWP_People_Directory {
 			remove_menu_page( 'tools.php' ); // Tools
 			remove_menu_page( 'edit.php' ); // Posts
 			remove_menu_page( 'upload.php' ); // Media Library
-			//remove_submenu_page( 'edit.php?post_type=wsuwp_people_profile', 'post-new.php?post_type=wsuwp_people_profile' ); // Personnel -> Add New
+			remove_submenu_page( 'edit.php?post_type=wsuwp_people_profile', 'post-new.php?post_type=wsuwp_people_profile' ); // Personnel -> Add New
 		}
 
 	}

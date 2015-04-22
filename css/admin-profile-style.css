@@ -1,4 +1,28 @@
-/* Phone and extension  fields */
+/* "Card" display */
+.profile-card {
+	display: table;
+	margin-top: 1em;
+}
+.profile-card div {
+	display: table-row;
+}
+.profile-card div div {
+	display: table-cell;
+	padding-bottom: 0.75em;
+	vertical-align: top;
+}
+.profile-card div div:first-of-type {
+	font-weight: bold;
+	width: 45%;
+}
+.profile-card div div:last-of-type {
+	width: 55%;
+}
+.profile-card div div ul,
+.profile-card div div ul li:last-of-type {
+	margin: 0;
+}
+/* Phone and extension fields */
 .phone-fields {
 	display: table;
 }
@@ -13,6 +37,9 @@
 	width: 25%;
 }
 /* Tabs */
+#wsuwp-profile-tabs {
+	margin-bottom: 20px;
+}
 #wsuwp-profile-tabs > ul {
 	border-bottom: 1px solid #ccc;
 	margin: 20px 0 0;
@@ -83,27 +110,3 @@
 	position: absolute; 
   width: 1px; 
 }
-/* Hide the "Add New" links and tabs for the Classification and Appointments taxonomies. */
-#appointment-adder,
-#classification-adder,
-#appointment-tabs,
-#classification-tabs {
-	display: none;
-}
-#appointment-all.tabs-panel,
-#classification-all.tabs-panel {
-	background: none;
-	border: none;
-	padding: 0;
-}
-#appointmentchecklist,
-#classificationchecklist {
-	margin: 0;
-}
-#appointmentchecklist label,
-#appointmentchecklist input,
-#classificationchecklist label,
-#classificationchecklist input {
-	cursor: default;
-}
-
