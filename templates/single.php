@@ -154,7 +154,7 @@
 		$extension  = get_post_meta( get_the_ID(), '_wsuwp_profile_extension', true );
 		$pubs       = get_post_meta( get_the_ID(), '_wsuwp_profile_publications', true );
 		$u_cats     = wp_get_post_terms( get_the_ID(), 'wsuwp_university_category' );
-		$topics     = wp_get_post_terms( get_the_ID(), 'topics' );
+		$topics     = wp_get_post_terms( get_the_ID(), 'topic' );
 	?>
 
 	<?php if ( $about || $experience || $honors || $u_cats || $topics || has_tag() || $research || $grants || $teaching || $service || $extension || $pubs ) : ?>
