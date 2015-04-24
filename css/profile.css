@@ -1,14 +1,33 @@
-.has-featured-image .size-gt-small header.main-header {
+/* Overrides. */
+.has-featured-image .size-gt-small main header.main-header {
 	position: relative !important;
 }
+
+/* Position and contact info. */
 .degree {
 	font-style: italic;
 }
-.profile-photo {
-	padding-bottom: 1em;
+.department {
+	display: block;
+}
+.contact {
+	padding-bottom: 0;
+}
+.dashicons {
+	font-size: 14px;
+	height: 14px;
+	padding-top: 3px;
+	text-align: left;
+}
+.location {
+	display: inline-block;
+	padding-left: 20px;
+}
+.dashicons-location {
+	margin-left: -20px;
 }
 
-/* Tabs */
+/* Tabs. */
 #profile-tabbed-content {
 	overflow: hidden;
 	padding-top: 0;
@@ -17,20 +36,19 @@
 	background: #fff;
 	padding: 1.5em 2em 1em;
 }
-#profile-tabbed-content ul {
+#profile-tabs {
   list-style: none;
   margin: 0;
 	padding: 0;
 	white-space: nowrap;
 }
-#profile-tabbed-content li {
+#profile-tabs li {
   display: inline-block;
 	margin: 0;
   padding: 0;
   vertical-align: bottom;
 }
-#profile-tabbed-content a {
-  background: rgba( 255, 255, 255, 0.5 );
+#profile-tabs a {
 	border-top-left-radius: 1px;
   border-top-right-radius: 1px;
 	color: #981e32;
@@ -54,44 +72,60 @@
   position: relative;
 }
 
-/* Tabs for smaller screens */
-.size-small #profile-tabbed-content {
-	margin-bottom: 1px;
+@media screen and (max-width:791px) {
+	
+	/* Position and contact info. */
+	.dashicons {
+		font-size: 16px;
+		height: 16px;
+		padding-top: 5px;
+	}
+	
 }
-.size-small #profile-tabbed-content ul {
-	overflow: hidden;
-	position: relative;
-}
-.size-small #profile-tabbed-content ul::after {
-	content: "\F501";
-	font-family: Spine-Icons;
-	pointer-events: none;
-	position: absolute;
-	right: 1em;
-	top: 0.4em;
-	z-index: 2;
-	-moz-osx-font-smoothing: grayscale;
-	-webkit-font-smoothing:  antialiased;
-}
-.size-small #profile-tabbed-content ul.open::after {
-	color: #5e6a71;
-	content: "\F500";
-}
-.size-small #profile-tabbed-content li {
-	display: block;
-}
-.size-small #profile-tabbed-content a {
-	height: 100%;
-	left: 0;
-	position: absolute;
-	top: 0;
-	width: 100%;
-	width: calc( 100% - 4em );
-}
-.size-small #profile-tabbed-content li.ui-tabs-active a {
-	z-index: 1;
-}
-.size-small #profile-tabbed-content ul.open a {
-	display: block;
-	position: relative;
+
+@media only screen and (max-width:693px) {
+
+	/* Tabs. */
+	#profile-tabbed-content {
+		padding: 0 0 2rem 0;
+	}
+	#profile-tabs {
+		margin-bottom: 1px;
+		overflow: hidden;
+		position: relative;
+	}
+	#profile-tabs:after {
+		content: "\F501";
+		font-family: Spine-Icons;
+		pointer-events: none;
+		position: absolute;
+		right: 1em;
+		top: 0.4em;
+		z-index: 2;
+		-moz-osx-font-smoothing: grayscale;
+		-webkit-font-smoothing:  antialiased;
+	}
+	#profile-tabs.open:after {
+		color: #5e6a71;
+		content: "\F500";
+	}
+	#profile-tabs li {
+		display: block;
+	}
+	#profile-tabs a {
+		height: 100%;
+		left: 0;
+		position: absolute;
+		top: 0;
+		width: 100%;
+		width: calc( 100% - 4em );
+	}
+	#profile-tabs li.ui-tabs-active a {
+		z-index: 1;
+	}
+	#profile-tabs.open a {
+		display: block;
+		position: relative;
+	}
+	
 }

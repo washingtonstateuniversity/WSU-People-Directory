@@ -4,97 +4,129 @@
 
 	<?php get_template_part( 'parts/headers' ); ?>
 
-	<section class="row side-right gutter pad-ends">
+	<section class="row halves gutter pad-ends">
 
-		<div class="column one">
+  	<div class="column one">
 
 			<?php while ( have_posts() ) : the_post(); ?>
 
 			<article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
 
+				<?php if ( spine_get_option( 'articletitle_show' ) == 'true' ) : ?>
 				<header class="article-header">
-					<hgroup>
-						<h1 class="article-title"><?php the_title(); ?></h1>
-					</hgroup>
+					<h1 class="article-title"><?php the_title(); ?></h1>
 				</header>
+				<?php endif; ?>
 
 				<div class="article-body">
 
-					<?php // Degree information.
-					$degrees = get_post_meta( get_the_ID(), '_wsuwp_profile_degree', true );
-					if ( $degrees && is_array($degrees) ) : ?>
-					<ul>
-						<?php foreach ( $degrees as $degree ) : ?>
-						<li class="degree"><?php echo esc_html( $degree ); ?></li>
-						<?php endforeach; ?>
-					</ul>
-					<?php endif; ?>
+					<?php
+          	// Meta data (excluding the content areas).
+						$degrees    = get_post_meta( get_the_ID(), '_wsuwp_profile_degree', true );
+						$title      = get_post_meta( get_the_ID(), '_wsuwp_profile_ad_title', true );
+						$titles     = get_post_meta( get_the_ID(), '_wsuwp_profile_title', true );
+						$phone      = get_post_meta( get_the_ID(), '_wsuwp_profile_ad_phone', true );
+						$phone_ext  = get_post_meta( get_the_ID(), '_wsuwp_profile_ad_phone_ext', true );
+						$alt_phone  = get_post_meta( get_the_ID(), '_wsuwp_profile_alt_phone', true );
+						$office     = get_post_meta( get_the_ID(), '_wsuwp_profile_ad_office', true );
+						$alt_office = get_post_meta( get_the_ID(), '_wsuwp_profile_alt_office', true );
+						$email      = get_post_meta( get_the_ID(), '_wsuwp_profile_ad_email', true );
+						$alt_email  = get_post_meta( get_the_ID(), '_wsuwp_profile_alt_email', true );
+						$cv         = get_post_meta( get_the_ID(), '_wsuwp_profile_cv', true );
+						$website    = get_post_meta( get_the_ID(), '_wsuwp_profile_website', true );
 
-					<?php // Appointment, title, and department info.
-						$appt = get_post_meta( get_the_ID(), '_wsuwp_profile_ad_appointment', true );
-						$title = get_post_meta( get_the_ID(), '_wsuwp_profile_ad_title', true );
-						$dept = get_post_meta( get_the_ID(), '_wsuwp_profile_dept', true );
+						// Taxonomy data.
+						$departments     = wp_get_post_terms( get_the_ID(), 'cahnrs_unit' );
+						$appointments    = wp_get_post_terms( get_the_ID(), 'appointment', array( 'fields' => 'names' ) );
+						$classifications = wp_get_post_terms( get_the_ID(), 'classification', array( 'fields' => 'names' ) );
+						$locations       = wp_get_post_terms( get_the_ID(), 'wsuwp_university_location', array( 'fields' => 'names' ) );
 
-						echo '<p>';
-						if ( $appt ) { echo '<strong>' . esc_attr( $ad_appt ) . ':</strong> '; }
-						if ( $title ) { echo esc_attr( $title ); }
-						echo '</p>';
+						// Degrees.
+						if ( $degrees && is_array( $degrees ) ) {
+							echo '<ul>';
+							foreach ( $degrees as $degree ) {
+								echo '<li class="degree">' . esc_html( $degree ) . '</li>';
+							}
+							echo '</ul>';
+						}
 
-						if ( $dept ) { echo '<p><strong>Department:</strong> <a href="#">' . esc_html( $dept ) . '</a></p>'; }
-					?>
+						// Classification(s).
+						if ( $classifications ) {
+							echo '<p class="classifications">';
+							foreach ( $classifications as $classification ) {
+								echo '<span class="classification">' . esc_html( $classification ) . '</a></span>';
+							}
+							echo '</p>';
+						}
 
-					<?php // Contact info.
-						$email = get_post_meta( get_the_ID(), '_wsuwp_profile_ad_email', true );
-						$phone = get_post_meta( get_the_ID(), '_wsuwp_profile_ad_phone', true );
-						$office = get_post_meta( get_the_ID(), '_wsuwp_profile_ad_office', true );
-						$alt_email = get_post_meta( get_the_ID(), '_wsuwp_profile_alt_email', true );
-						$alt_phone = get_post_meta( get_the_ID(), '_wsuwp_profile_alt_phone', true );
+						// Title(s).
+						if ( $title || $titles ) {
+							echo '<p>';
+							if ( $title ) { echo esc_html( $title ); }
+							if ( $titles ) {
+            		foreach ( $titles as $additional_title ) :
+              		echo "/\n<br />" . esc_html( $additional_title );
+            		endforeach;
+							}
+							echo '</p>';
+            }
 
-						echo '<p><strong>Contact Information</strong><br />';
-
+						// Department(s).
+						if ( $departments ) {
+							echo '<p class="departments">';
+							foreach ( $departments as $department ) {
+								$dept = sanitize_term( $department, 'cahnrs_unit' );
+								echo '<span class="department"><a href="' . esc_attr( get_term_link( $dept, 'cahnrs_unit' ) ) . '">' . esc_html( $dept->name ) . '</a></span>';
+							}
+							echo '</p>';
+						}
+						
 						// Email.
-						if ( $email ) { echo '<a href="mailto:' . esc_attr( $email ) . '">' . esc_html( $email ) . '</a>'; }
-						if ( $email && $alt_email ) { echo ' | '; }
-						if ( $alt_email ) { echo '<a href="mailto:' . esc_attr( $alt_email ) . '">' . esc_html( $alt_email ) . '</a>'; }
-						echo '<br />';
+						if ( $email || $alt_email ) {
+							echo '<p class="contact email"><span class="dashicons dashicons-email"></span>';
+							if ( $email ) { echo '<a href="mailto:' . esc_attr( $email ) . '">' . esc_html( $email ) . '</a>'; }
+							if ( $email && $alt_email ) { echo ' | '; }
+							if ( $alt_email ) { echo '<a href="mailto:' . esc_attr( $alt_email ) . '">' . esc_html( $alt_email ) . '</a>'; }
+							echo '</p>';
+						}
 
 						// Phone.
-						if ( $phone ) { echo esc_html( $phone ); }
-						if ( $phone && $alt_phone ) { echo ' | '; }
-						if ( $alt_phone ) { echo esc_html( $alt_phone ); }
-						echo '<br />';
+						if ( $phone || $alt_phone ) {
+							echo '<p class="contact phone"><span class="dashicons dashicons-phone"></span>';
+							if ( $phone ) { echo esc_html( $phone ); }
+							if ( $phone && $alt_phone ) { echo ' | '; }
+							if ( $alt_phone ) { echo esc_html( $alt_phone ); }
+							echo '</p>';
+						}
 
-						if ( $office ) { echo esc_html( $office ); }
+						// Office and location(s).
+						if ( $office || $alt_office || $locations ) {
+							echo '<p class="contact location"><span class="dashicons dashicons-location"></span>';
+							if ( $office ) { echo esc_html( $office ); }
+							if ( $office && $alt_office ) { echo ' | '; }
+							if ( $alt_office ) { echo esc_html( $alt_office ); }
+							if ( $locations ) {
+								foreach ( $locations as $location ) {
+									echo "<br />\n" . $location;
+								}
+							}
+							echo '</p>';
+						}
 
-						echo '</p>';
+						// Curriculum Vitae.
+						if ( $cv ) {
+							echo '<p class="contact cv"><span class="dashicons dashicons-download"></span><a href="' . esc_url( wp_get_attachment_url( $cv ) ) . '">Curriculum Vitae</a></p>';
+						}
+
+						// Website.
+						if ( $website ) {
+							echo '<p class="contact website"><span class="dashicons dashicons-external"></span><a href="' . esc_url( $website ) . '">Website</a></p>';
+						}
+
 					?>
 
 				</div>
-<!--
-				<footer class="article-footer">
-				<?php
-				// Display site level categories attached to the post.
-				if ( has_category() ) {
-					echo '<dl class="categorized">';
-					echo '<dt><span class="categorized-default">Categorized</span></dt>';
-					foreach( get_the_category() as $category ) {
-						echo '<dd><a href="' . get_category_link( $category->cat_ID ) . '">' . $category->cat_name . '</a></dd>';
-					}
-					echo '</dl>';
-				}
 
-				// Display University tags attached to the post.
-				if ( has_tag() ) {
-					echo '<dl class="tagged">';
-					echo '<dt><span class="tagged-default">Tagged</span></dt>';
-					foreach( get_the_tags() as $tag ) {
-						echo '<dd><a href="' . get_tag_link( $tag->term_id ) . '">' . $tag->name . '</a></dd>';
-					}
-					echo '</dl>';
-				}
-				?>
-				</footer>
--->
 			</article>
 
 			<?php endwhile; ?>
@@ -103,123 +135,151 @@
 
 		<div class="column two">
 
-			<aside>
-
-				<?php if ( has_post_thumbnail() ) : ?>
-					<figure class="profile-photo"><?php the_post_thumbnail( 'medium' ); /* Perhaps we should define a new image size for this purpose. */ ?></figure>
-				<?php endif; ?>
-
-				<?php // Website.
-				$website = get_post_meta( get_the_ID(), '_wsuwp_profile_website', true );
-				if ( $website ) : ?>
-					<p><a href="<?php echo esc_url( $website ); ?>">My Website <span class="dashicons dashicons-external"></span></a></p>
-				<?php endif; ?>
-
-				<?php // Curriculum Vitae.
-				$cv = get_post_meta( get_the_ID(), '_wsuwp_profile_cv', true );
-				if ( $cv ) : ?>
-					<p><a href="<?php echo esc_url( wp_get_attachment_url( $cv ) ); ?>">My C.V <span class="dashicons dashicons-download"></span></a></p>
-				<?php endif; ?>
-
-			</aside>
+			<?php if ( has_post_thumbnail() ) : ?>
+				<figure class="profile-photo"><?php the_post_thumbnail( 'medium' ); /* Perhaps we should define a new image size for this purpose. */ ?></figure>
+			<?php endif; ?>
 
 		</div><!--/column two-->
 
 	</section>
 
+	<?php // Content areas meta.
+		$about      = get_the_content();
+		$experience = get_post_meta( get_the_ID(), '_wsuwp_profile_experience', true );
+		$honors     = get_post_meta( get_the_ID(), '_wsuwp_profile_honors', true );
+		$research   = get_post_meta( get_the_ID(), '_wsuwp_profile_research', true );
+		$grants     = get_post_meta( get_the_ID(), '_wsuwp_profile_grants', true );
+		$teaching   = get_post_meta( get_the_ID(), '_wsuwp_profile_teaching', true );
+		$service    = get_post_meta( get_the_ID(), '_wsuwp_profile_service', true );
+		$pubs       = get_post_meta( get_the_ID(), '_wsuwp_profile_publications', true );
+		$u_cats     = wp_get_post_terms( get_the_ID(), 'wsuwp_university_category' );
+		$topics     = wp_get_post_terms( get_the_ID(), 'topics' );
+	?>
+
+	<?php if ( $about || $experience || $honors || $u_cats || $topics || has_tag() || $research || $grants || $teaching || $service || $pubs ) : ?>
+
 	<section class="row single gutter pad-ends">
 
 		<div class="column one" id="profile-tabbed-content">
 
-			<?php
-				$about      = get_the_content();
-				$experience = get_post_meta( get_the_ID(), '_wsuwp_profile_experience', true );
-				$honors     = get_post_meta( get_the_ID(), '_wsuwp_profile_honors', true );
-				$research   = get_post_meta( get_the_ID(), '_wsuwp_profile_research', true );
-				$grants     = get_post_meta( get_the_ID(), '_wsuwp_profile_grants', true );
-				$pubs       = get_post_meta( get_the_ID(), '_wsuwp_profile_publications', true );
-				$teaching   = get_post_meta( get_the_ID(), '_wsuwp_profile_teaching', true );
-				$service    = get_post_meta( get_the_ID(), '_wsuwp_profile_service', true );
-				
-			?>
-
 			<ul id="profile-tabs">
 			<?php
-				if ( $about || $experience || $honors ) echo '<li><a href="#about">About Me</a></li>';
-				if ( $research || $grants || $pubs ) echo '<li><a href="#research">Research</a></li>';
+				if ( $about || $u_cats || $topics || has_tag() || $experience || $honors ) echo '<li><a href="#about">About Me</a></li>';
+				if ( $research || $grants ) echo '<li><a href="#research">Research</a></li>';
 				if ( $teaching ) echo '<li><a href="#teaching">Teaching</a></li>';
 				if ( $service ) echo '<li><a href="#service">Service</a></li>';
+				if ( $pubs ) echo '<li><a href="#publications">Publications</a></li>';
 			?>
 			</ul>
 
-			<?php
-				if ( $about || $experience || $honors ) :
+			<?php // About Me panel.
+				if ( $about || $u_cats || $topics || has_tag() || $experience || $honors ) {
 					echo '<div id="about">';
+
+					// Content.
 					the_content();
+
+					// Expertise. ish.
+					if ( $u_cats || $topics || has_tag() ) {
+						echo '<h2>Expertise</h2>';
+					}
+					if ( $u_cats ) {
+						echo '<dl class="categorized">';
+						//echo '<dt><span class="categorized-default">Categorized</span></dt>';
+						foreach ( $u_cats as $cat ) {
+							$cat = sanitize_term( $cat, 'wsuwp_university_category' );
+							echo '<dd><a href="' . esc_attr( get_term_link( $cat, 'wsuwp_university_category' ) ) . '">' . esc_html( $cat->name ) . '</a></dd>';
+						}
+						//echo '</dl>';
+					}
+					if ( $topics ) {
+						echo '<dl class="topics">';
+						foreach ( $topics as $topic ) {
+							$topic = sanitize_term( $topic, 'topic' );
+							echo '<dd><a href="' . esc_attr( get_term_link( $topic, 'topic' ) ) . '">' . esc_html( $topic->name ) . '</a></dd>';
+						}
+						echo '</dl>';
+					}
+					if ( has_tag() ) {
+						echo '<dl class="tagged">';
+						//echo '<dt><span class="tagged-default">Tagged</span></dt>';
+						foreach( get_the_tags() as $tag ) {
+							echo '<dd><a href="' . esc_attr( get_tag_link( $tag->term_id ) ) . '">' . esc_html( $tag->name ) . '</a></dd>';
+						}
+						echo '</dl>';
+					}
+
+					// Experience.
 					if ( $experience ) {
 						echo '<h2>Professional Experience</h2>';
 						echo wpautop( wp_kses_post( $experience ) );
 					}
+
+					// Honors.
 					if ( $honors ) {
 						echo '<h2>Honors and Awards</h2>';
 						echo wpautop( wp_kses_post( $honors ) );
 					}
+
 					echo '</div>';
-				endif;
+				}
 			?>
 
-			<?php
-				if ( $research || $grants || $pubs ) :
+			<?php // Research panel.
+				if ( $research || $grants ) :
 					echo '<div id="research">';
+
+					// Research.
 					if ( $research ) {
 						//echo '<h2>Research Interests</h2>';
 						echo wpautop( wp_kses_post( $research ) );
 					}
+
+					// Funding.
 					if ( $grants ) {
 						echo '<h2>Grants, Contracts, and Fund Generation</h2>';
 						echo wpautop( wp_kses_post( $grants ) );
 					}
-					if ( $pubs ) {
-						echo '<h2>Publications, Creative Work, and Presentations</h2>';
-						echo wpautop( wp_kses_post( $pubs ) );
-					}
+
 					echo '</div>';
 				endif;
 			?>
 
-			<?php
-				if ( $teaching ) :
+			<?php // Teaching panel.
+				if ( $teaching ) {
 					echo '<div id="teaching">' . wpautop( wp_kses_post( $teaching ) ) . '</div>';
-				endif;
+				}
 			?>
 
-			<?php
-				if ( $service ) :
+			<?php // Service panel.
+				if ( $service ) {
 					echo '<div id="service">' . wpautop( wp_kses_post( $service ) ) . '</div>';
-				endif;
+				}
+			?>
+
+			<?php // Publications panel.
+				if ( $pubs ) {
+					echo '<div id="publications">' . wpautop( wp_kses_post( $pubs ) ) . '</div>';
+				}
 			?>
 
 		</div>
 
 	</section>
 
-	<footer class="main-footer">
-		<section class="row halves pager prevnext gutter">
-			<div class="column one">
+	<?php endif; ?>
 
+	<footer class="main-footer">
+		<section class="row single gutter">
+			<div class="column one">
 				<?php // If the user viewing the post can edit it, show an edit link.
 				if ( current_user_can( 'edit_post', $post->ID ) ) : ?>
 				<dl class="editors"><?php edit_post_link( 'Edit', '<span class="edit-link">', '</span>' ); ?></dl>
 				<?php endif; ?>
-
-				<!--<?php previous_post_link(); ?> 
-			</div>
-			<div class="column two">
-				<?php next_post_link(); ?>-->
 			</div>
 		</section>
 	</footer>
 
-</main><!--/#page-->
+</main>
 
 <?php get_footer(); ?>

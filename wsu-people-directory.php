@@ -1000,7 +1000,7 @@ class WSUWP_People_Directory {
 
 		if ( $this->personnel_content_type == get_post_type() ) {
 			if ( is_single() ) {
-				wp_enqueue_style( 'wsuwp-people-profile-style', plugins_url( 'css/profile.css', __FILE__ ), array(), $this->personnel_plugin_version );
+				wp_enqueue_style( 'wsuwp-people-profile-style', plugins_url( 'css/profile.css', __FILE__ ), array( 'dashicons' ), $this->personnel_plugin_version );
 				wp_enqueue_script( 'wsuwp-people-profile-script', plugins_url( 'js/profile.js', __FILE__ ), array( 'jquery-ui-tabs' ), $this->personnel_plugin_version, true );
 			}
 			if ( is_archive() ) {

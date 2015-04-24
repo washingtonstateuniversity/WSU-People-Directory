@@ -1,3 +1,26 @@
 .wsuwp_people_profile {
-	clear:both;
+	border-top: 1px #e4e6e7 solid;
+	clear: both;
+	padding: 1em 0;
+}
+.profile-image {
+	float: right;
+}
+.profile-image img {
+	display: block;
+	width: 96px;
+}
+.wsuwp_people_profile p {
+	padding-bottom: 0;
+}
+.department {
+	display: block;
+}
+.contact span {
+	display: inline-block;
+}
+.phone, .office {
+	border-right: 1px solid #5e6a71;
+	margin-right: 0.5rem;
+	padding-right: 0.5rem;
 }
