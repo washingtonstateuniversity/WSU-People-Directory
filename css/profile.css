@@ -39,6 +39,7 @@
 #profile-tabs {
   list-style: none;
   margin: 0;
+	overflow: hidden;
 	padding: 0;
 	white-space: nowrap;
 }

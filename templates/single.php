@@ -151,12 +151,13 @@
 		$grants     = get_post_meta( get_the_ID(), '_wsuwp_profile_grants', true );
 		$teaching   = get_post_meta( get_the_ID(), '_wsuwp_profile_teaching', true );
 		$service    = get_post_meta( get_the_ID(), '_wsuwp_profile_service', true );
+		$extension  = get_post_meta( get_the_ID(), '_wsuwp_profile_extension', true );
 		$pubs       = get_post_meta( get_the_ID(), '_wsuwp_profile_publications', true );
 		$u_cats     = wp_get_post_terms( get_the_ID(), 'wsuwp_university_category' );
 		$topics     = wp_get_post_terms( get_the_ID(), 'topics' );
 	?>
 
-	<?php if ( $about || $experience || $honors || $u_cats || $topics || has_tag() || $research || $grants || $teaching || $service || $pubs ) : ?>
+	<?php if ( $about || $experience || $honors || $u_cats || $topics || has_tag() || $research || $grants || $teaching || $service || $extension || $pubs ) : ?>
 
 	<section class="row single gutter pad-ends">
 
@@ -168,6 +169,7 @@
 				if ( $research || $grants ) echo '<li><a href="#research">Research</a></li>';
 				if ( $teaching ) echo '<li><a href="#teaching">Teaching</a></li>';
 				if ( $service ) echo '<li><a href="#service">Service</a></li>';
+				if ( $extension ) echo '<li><a href="#extension">Extension</a></li>';
 				if ( $pubs ) echo '<li><a href="#publications">Publications</a></li>';
 			?>
 			</ul>
@@ -254,6 +256,12 @@
 			<?php // Service panel.
 				if ( $service ) {
 					echo '<div id="service">' . wpautop( wp_kses_post( $service ) ) . '</div>';
+				}
+			?>
+
+			<?php // Service panel.
+				if ( $extension ) {
+					echo '<div id="extension">' . wpautop( wp_kses_post( $extension ) ) . '</div>';
 				}
 			?>
 

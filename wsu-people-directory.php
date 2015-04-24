@@ -79,6 +79,7 @@ class WSUWP_People_Directory {
 		'_wsuwp_profile_grants',
 		'_wsuwp_profile_publications',
 		'_wsuwp_profile_service',
+		'_wsuwp_profile_extension',
 	);
 
 	public function __construct() {
@@ -294,6 +295,7 @@ class WSUWP_People_Directory {
 					<li><a href="#wsuwp-profile-research" class="nav-tab">Research</a></li>
 					<li><a href="#wsuwp-profile-teaching" class="nav-tab">Teaching</a></li>
 					<li><a href="#wsuwp-profile-service" class="nav-tab">Service</a></li>
+          <li><a href="#wsuwp-profile-extension" class="nav-tab">Extension</a></li>
           <li><a href="#wsuwp-profile-publications" class="nav-tab">Publications</a></li>
 				</ul>
 				<div id="wsuwp-profile-default" class="wsuwp-profile-panel">
@@ -325,15 +327,20 @@ class WSUWP_People_Directory {
 				</div>
 
 				<div id="wsuwp-profile-teaching" class="wsuwp-profile-panel">
-					<p class="description">This panel is available because you have a Teaching appointment. The fields are optional.</p>
+					<p class="description">This panel is available because you have a Teaching appointment. The field is optional.</p>
 					<h3>Credit Courses Taught, Additional Teaching, and Advising</h3>
 					<?php wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_teaching', true ), '_wsuwp_profile_teaching' ); ?>
 				</div>
 
 				<div id="wsuwp-profile-service" class="wsuwp-profile-panel">
-					<p class="description">This panel is available because you have a Service/Extension appointment. The fields are optional.</p>
+					<p class="description">This panel is available because you have a Service expectation. The field is optional.</p>
 					<h3>University, Professional Society, Community, and Review Activities</h3>
 					<?php wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_service', true ), '_wsuwp_profile_service' ); ?>
+				</div>
+
+				<div id="wsuwp-profile-extension" class="wsuwp-profile-panel">
+					<p class="description">This panel is available because you have a State/Extension appointment. The field is optional.</p>
+					<?php wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_extension', true ), '_wsuwp_profile_extension' ); ?>
 				</div>
 
 				<div id="wsuwp-profile-publications" class="wsuwp-profile-panel">
