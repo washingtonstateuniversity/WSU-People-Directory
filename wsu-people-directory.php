@@ -769,6 +769,10 @@ class WSUWP_People_Directory {
 			$post_response[ $field ] = get_post_meta( $post['ID'], $field, true );
 		}
 
+		// Syndicate the CV URL instead of attachment ID.
+		$cv = get_post_meta( $post['ID'], '_wsuwp_profile_cv', true );
+		$post_response['_wsuwp_profile_cv'] = esc_url( wp_get_attachment_url( $cv ) );
+
 		$post_response['_wsuwp_profile_name'] = get_post_meta( $post['ID'], '_wsuwp_profile_name', true );
 
 		return $post_response;
