@@ -113,6 +113,7 @@ class WSUWP_People_Directory {
 		add_action( 'personal_options_update', array( $this, 'edit_user_profile_update' ) );
 		add_filter( 'user_has_cap', array( $this, 'user_has_cap' ), 10, 3 );
 		add_action( 'admin_menu', array( $this, 'admin_menu' ) );
+		add_action( 'admin_bar_menu', array( $this, 'admin_bar_menu' ), 999 );
 		add_action( 'pre_get_posts', array( $this, 'limit_media_library' ) );
 		//add_action( 'views_edit-' . $this->personnel_content_type, array( $this, 'edit_views' ) );
 		//add_filter( 'parse_query', array ( $this, 'parse_query' ) );
@@ -888,6 +889,17 @@ class WSUWP_People_Directory {
 			remove_menu_page( 'edit.php' ); // Posts
 			remove_menu_page( 'upload.php' ); // Media Library
 			remove_submenu_page( 'edit.php?post_type=wsuwp_people_profile', 'post-new.php?post_type=wsuwp_people_profile' ); // Personnel -> Add New
+		}
+
+	}
+
+	/**
+	 * Remove the "Add New" menu from the toolbar.
+	 */
+	public function admin_bar_menu( $wp_admin_bar ) {
+
+		if ( ! current_user_can( 'manage_options' ) ) {
+			$wp_admin_bar->remove_node( 'new-content' );
 		}
 
 	}
