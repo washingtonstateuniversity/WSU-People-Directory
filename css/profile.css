@@ -73,6 +73,13 @@
   position: relative;
 }
 
+/* Expertise lists. */
+.categorized dd:not(:last-of-type):after,
+.topics dd:not(:last-of-type):after,
+.tagged dd:not(:last-of-type):after {
+	content: ','
+}
+
 @media screen and (max-width:791px) {
 	
 	/* Position and contact info. */
@@ -81,15 +88,16 @@
 		height: 16px;
 		padding-top: 5px;
 	}
+	/* Tabs. */
+	#profile-tabbed-content {
+		padding: 0 0 2rem 0;
+	}
 	
 }
 
 @media only screen and (max-width:693px) {
 
 	/* Tabs. */
-	#profile-tabbed-content {
-		padding: 0 0 2rem 0;
-	}
 	#profile-tabs {
 		margin-bottom: 1px;
 		overflow: hidden;

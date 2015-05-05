@@ -71,7 +71,7 @@ $args = array(
 );
 
 ?>
-	<footer class="main-footer archive-footer">
+	<footer class="main-footer archive-footer pad-ends">
 		<section class="row side-right pager prevnext gutter">
 			<div class="column one">
 				<?php echo paginate_links( $args ); ?>
