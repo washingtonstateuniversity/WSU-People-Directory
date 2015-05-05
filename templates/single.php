@@ -30,6 +30,7 @@
 						$alt_phone  = get_post_meta( get_the_ID(), '_wsuwp_profile_alt_phone', true );
 						$office     = get_post_meta( get_the_ID(), '_wsuwp_profile_ad_office', true );
 						$alt_office = get_post_meta( get_the_ID(), '_wsuwp_profile_alt_office', true );
+						$address    = get_post_meta( get_the_ID(), '_wsuwp_profile_ad_address', true );
 						$email      = get_post_meta( get_the_ID(), '_wsuwp_profile_ad_email', true );
 						$alt_email  = get_post_meta( get_the_ID(), '_wsuwp_profile_alt_email', true );
 						$cv         = get_post_meta( get_the_ID(), '_wsuwp_profile_cv', true );
@@ -105,6 +106,7 @@
 							if ( $office ) { echo esc_html( $office ); }
 							if ( $office && $alt_office ) { echo ' | '; }
 							if ( $alt_office ) { echo esc_html( $alt_office ); }
+							if ( $address ) { echo '<br />' . esc_html( $address ); }
 							if ( $locations ) {
 								foreach ( $locations as $location ) {
 									echo "<br />\n" . $location;
@@ -165,7 +167,7 @@
 
 			<ul id="profile-tabs">
 			<?php
-				if ( $about || $u_cats || $topics || has_tag() || $experience || $honors ) echo '<li><a href="#about">About Me</a></li>';
+				if ( $about || $u_cats || $topics || has_tag() || $experience || $honors ) echo '<li><a href="#about">About</a></li>';
 				if ( $research || $grants ) echo '<li><a href="#research">Research</a></li>';
 				if ( $teaching ) echo '<li><a href="#teaching">Teaching</a></li>';
 				if ( $service ) echo '<li><a href="#service">Service</a></li>';

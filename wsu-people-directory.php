@@ -43,6 +43,7 @@ class WSUWP_People_Directory {
 		'_wsuwp_profile_ad_name_last',
 		'_wsuwp_profile_ad_title',
 		'_wsuwp_profile_ad_office',
+		'_wsuwp_profile_ad_address',
 		'_wsuwp_profile_ad_phone',
 		'_wsuwp_profile_ad_phone_ext',
 		'_wsuwp_profile_ad_email',
@@ -292,7 +293,7 @@ class WSUWP_People_Directory {
 			<?php do_meta_boxes( get_current_screen(), 'after_title', $post ); ?>
 			<div id="wsuwp-profile-tabs">
 				<ul>
-					<li><a href="#wsuwp-profile-default" class="nav-tab">General</a></li>
+					<li><a href="#wsuwp-profile-default" class="nav-tab">About</a></li>
 					<li><a href="#wsuwp-profile-research" class="nav-tab">Research</a></li>
 					<li><a href="#wsuwp-profile-teaching" class="nav-tab">Teaching</a></li>
 					<li><a href="#wsuwp-profile-service" class="nav-tab">Service</a></li>
@@ -428,9 +429,11 @@ class WSUWP_People_Directory {
 		$name_last  = get_post_meta( $post->ID, '_wsuwp_profile_ad_name_last', true );
 		$title      = get_post_meta( $post->ID, '_wsuwp_profile_ad_title', true );
 		$email      = get_post_meta( $post->ID, '_wsuwp_profile_ad_email', true );
+		$office     = get_post_meta( $post->ID, '_wsuwp_profile_ad_office', true );
+		$address    = get_post_meta( $post->ID, '_wsuwp_profile_ad_address', true );
 		$phone      = get_post_meta( $post->ID, '_wsuwp_profile_ad_phone', true );
 		$phone_ext  = get_post_meta( $post->ID, '_wsuwp_profile_ad_phone_ext', true );
-		$office     = get_post_meta( $post->ID, '_wsuwp_profile_ad_office', true );
+		
 
 		$appointments = wp_get_post_terms( $post->ID, $this->personnel_appointments, array( 'fields' => 'names' ) );
 		$classifications = wp_get_post_terms( $post->ID, $this->personnel_classifications, array( 'fields' => 'names' ) );
@@ -494,6 +497,13 @@ class WSUWP_People_Directory {
 			</div>
 			<?php endif; ?>
 
+			<?php if ( $address ) : ?>
+			<div>
+				<div>Address</div>
+      	<div><?php echo esc_html( $address ); ?></div>
+			</div>
+			<?php endif; ?>
+
 			<?php if ( $phone ) : ?>
 			<div>
 				<div>Phone</div>
@@ -523,6 +533,8 @@ class WSUWP_People_Directory {
 		<input type="text" id="_wsuwp_profile_ad_title" name="_wsuwp_profile_ad_title" value="<?php echo esc_attr( $title ); ?>" class="widefat" /></p>
 		<p><label for="_wsuwp_profile_ad_office">Office Location</label><br />
 		<input type="text" id="_wsuwp_profile_ad_office" name="_wsuwp_profile_ad_office" value="<?php echo esc_attr( $office ); ?>" class="widefat" /></p>
+		<p><label for="_wsuwp_profile_ad_address">Physical/Mailing Address</label><br />
+		<input type="text" id="_wsuwp_profile_ad_address" name="_wsuwp_profile_ad_address" value="<?php echo esc_attr( $address ); ?>" class="widefat" /></p>
 		<div class="phone-fields">
 			<div>
 				<label for="_wsuwp_profile_ad_phone">Phone Number <span class="description">(xxx-xxx-xxxx)</span></label><br />
@@ -587,13 +599,13 @@ class WSUWP_People_Directory {
 		if ( $titles && is_array( $titles ) ) :
 			foreach ( $titles as $index => $title ) :
 			?>
-			<p class="wp-profile-repeatable"><label for="_wsuwp_profile_title[<?php echo esc_attr( $index ); ?>]">Title</label><br />
+			<p class="wp-profile-repeatable"><label for="_wsuwp_profile_title[<?php echo esc_attr( $index ); ?>]">Working Title</label><br />
 			<input type="text" id="_wsuwp_profile_title[<?php echo esc_attr( $index ); ?>]" name="_wsuwp_profile_title[<?php echo esc_attr( $index ); ?>]" value="<?php echo esc_attr( $title ); ?>" class="widefat" /></p>
 			<?php
 			endforeach;
 		else :
 			?>
-			<p class="wp-profile-repeatable"><label for="_wsuwp_profile_title[0]">Title</label><br />
+			<p class="wp-profile-repeatable"><label for="_wsuwp_profile_title[0]">Working Title</label><br />
 			<input type="text" id="_wsuwp_profile_title[0]" name="_wsuwp_profile_title[0]" value="<?php echo esc_attr( $titles ); ?>" class="widefat" /></p>
 			<?php
 		endif;
@@ -602,7 +614,6 @@ class WSUWP_People_Directory {
 
 		<p><label for="_wsuwp_profile_alt_office">Office</label><br />
 		<input type="text" id="_wsuwp_profile_alt_office" name="_wsuwp_profile_alt_office" value="<?php echo esc_attr( get_post_meta( $post->ID, '_wsuwp_profile_alt_office', true ) ); ?>" class="widefat" /></p>
-
 		<p><label for="_wsuwp_profile_alt_phone">Phone Number <span class="description">(xxx-xxx-xxxx)</span></label><br />
 		<input type="text" id="_wsuwp_profile_alt_phone" name="_wsuwp_profile_alt_phone" value="<?php echo esc_attr( get_post_meta( $post->ID, '_wsuwp_profile_alt_phone', true ) ); ?>" class="widefat" /></p>
 		<p><label for="_wsuwp_profile_alt_email">Email Address</label><br />
