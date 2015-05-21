@@ -150,6 +150,7 @@ jQuery(document).ready(function( $ ) {
 					$title.val( $('#_wsuwp_profile_ad_name_first').html() + ' ' + $('#_wsuwp_profile_ad_name_last').html() );
 				}
 
+				$('#_wsuwp_profile_ad_nid').attr('readonly',true);
 				$('#confirm-ad-data').addClass('profile-hide-button');
 				$('#load-ad-data').addClass('profile-hide-button');
 			}
