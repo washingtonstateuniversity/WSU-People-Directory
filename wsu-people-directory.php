@@ -115,6 +115,7 @@ class WSUWP_People_Directory {
 		add_filter( 'user_has_cap', array( $this, 'user_has_cap' ), 10, 3 );
 		add_action( 'admin_menu', array( $this, 'admin_menu' ) );
 		add_action( 'admin_bar_menu', array( $this, 'admin_bar_menu' ), 999 );
+		add_action( 'wp_dashboard_setup', array( $this, 'wp_dashboard_setup' ) );
 		add_action( 'pre_get_posts', array( $this, 'limit_media_library' ) );
 		//add_action( 'views_edit-' . $this->personnel_content_type, array( $this, 'edit_views' ) );
 		//add_filter( 'parse_query', array ( $this, 'parse_query' ) );
@@ -301,6 +302,7 @@ class WSUWP_People_Directory {
           <li><a href="#wsuwp-profile-publications" class="nav-tab">Publications</a></li>
 				</ul>
 				<div id="wsuwp-profile-default" class="wsuwp-profile-panel">
+					<p class="description">All fields are optional. Click the <i class="mce-ico mce-i-wp_help wsuwp-profile-help"></i>for notes and formatting examples.</p>
 					<h3>Biography</h3>
 			<?php
 		endif;
@@ -313,41 +315,166 @@ class WSUWP_People_Directory {
 	public function edit_form_after_editor( $post ) {
 
 		if ( $this->personnel_content_type === $post->post_type ) :
+			add_thickbox();
 			?>
-					<h3 class="wpuwp-profile-label">Professional Experience</h3>
+					<div id="wsuwp-profile-experience-lb" style="display:none;">
+						<p>Include additional courses for credit, in-service training, and other major professional development activities.</p>
+						<p>Formatting example:</p>
+						<ul>
+							<li>2006-2007<br />
+              Spanish for Professionals, Gonzaga University Certificate Summer Program</li>
+							<li>2004<br />
+              Indigenous Economic Development Course, International Economic Development Council</li>
+						</ul>
+					</div>
+					<h3 class="wpuwp-profile-label">Professional Experience <a href="#TB_inline?width=600&height=700&inlineId=wsuwp-profile-experience-lb" class="thickbox wsuwp-profile-help-link" title="Professional Experience"><i class="mce-ico mce-i-wp_help wsuwp-profile-help"></i></a></h3>
 					<?php wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_experience', true ), '_wsuwp_profile_experience' ); ?>
-					<h3 class="wpuwp-profile-label">Honors and Awards</h3>
+					<div id="wsuwp-profile-honors-lb" style="display:none;">
+						<p>Formatting example:</p>
+						<ul>
+							<li>2014<br />
+              Faculty Excellence in Extension Award, Washington State University</li>
+							<li>2004<br />
+              Gold Award for Digitally Curriculum, "Training Local Entrepreneurs,” Natural Resource Extension Professionals (ANREP)</li>
+						</ul>
+					</div>
+					<h3 class="wpuwp-profile-label">Honors and Awards <a href="#TB_inline?width=600&height=700&inlineId=wsuwp-profile-honors-lb" class="thickbox wsuwp-profile-help-link" title="Honors and Awards"><i class="mce-ico mce-i-wp_help wsuwp-profile-help"></i></a></h3>
 					<?php wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_honors', true ), '_wsuwp_profile_honors' ); ?>
 				</div><!--wsuwp-profile-default-->
 
 				<div id="wsuwp-profile-research" class="wsuwp-profile-panel">
-					<p class="description">This panel is available because you have a Research appointment. The fields are optional.</p>
-					<h3>Research Interests</h3>
+					<p class="description">All fields are optional. Click the <i class="mce-ico mce-i-wp_help wsuwp-profile-help"></i>for notes and formatting examples.</p>
+					<h3>Interests</h3>
 					<?php wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_research', true ), '_wsuwp_profile_research' ); ?>
-					<h3>Grants, Contracts, and Fund Generation</h3>
+					<div id="wsuwp-profile-funds-lb" style="display:none;">
+						<p>Include:</p>
+						<ul>
+							<li>Grants and Contracts</li>
+							<li>Gifts and Awards</li>
+							<li>Program Revenue Generation and Sponsorships</li>
+							<li>MOA’s and funding secured from Public, Non-profit, and Private entities</li>
+							<li>Unfunded Grant Proposals – Summarized by Year</li>
+						</ul>
+					  <p>Using the rubric below, indicate your contribution(s) to each grant (e.g., principal investigator, co-PI, cooperator), as well as the title, funding entity, total amount, amount of funds for which you had responsibility and authors as described in the example.</p>
+						<ol>
+							<li>Provided the initial idea</li>
+							<li>Developed research/program design and hypotheses</li>
+							<li>Authored or co-authored grant application</li>
+							<li>Developed and/or managed budget</li>
+							<li>Managed personnel, partnerships, and project activities</li>
+						</ol>
+					  <p>Formatting example:</p>
+					  <ul>
+							<li>Assessing the effects of global warming on nitrogen cycling in eastern Washington. Agriculture and Food Research Initiative, US Department of Agriculture. $428,802. P.I.: <strong>J. A. Smith</strong> and Co-P.I.: R. N. Jones. (3/08 – 3/12) <strong>(1, 3, 4, $300,000).</strong></li>
+						</ul>
+						<p><em>Notes:</em></p>
+					  <ul>
+							<li><em>Briefly explain why you are listed on a grant if none of the indicators above explain your contribution.</em></li>
+							<li><em>The following key will be included on your profile if content is included in this field:<br />
+            Key to indicators or description of contributions to Grants, Contracts and Fund Generation: 1 = Provided the initial idea; 2 = Developed research/program design and hypotheses; 3 = Authored or co-authored grant application; 4 = Developed and/or managed budget; 5 = Managed personnel, partnerships, and project activities.</em></li>
+						</ul>
+					</div>
+					<h3>Grants, Contracts, and Fund Generation <a href="#TB_inline?width=600&height=700&inlineId=wsuwp-profile-funds-lb" class="thickbox wsuwp-profile-help-link" title="Grants, Contracts, and Fund Generation"><i class="mce-ico mce-i-wp_help wsuwp-profile-help"></i></a></h3>
 					<?php wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_grants', true ), '_wsuwp_profile_grants' ); ?>
 				</div>
 
 				<div id="wsuwp-profile-teaching" class="wsuwp-profile-panel">
-					<p class="description">This panel is available because you have a Teaching appointment. The field is optional.</p>
-					<h3>Credit Courses Taught, Additional Teaching, and Advising</h3>
+					<p class="description">All fields are optional. Click the <i class="mce-ico mce-i-wp_help wsuwp-profile-help"></i>for notes and formatting examples.</p>
+					<div id="wsuwp-profile-teaching-lb" style="display:none;">
+						<p>Formatting example:</p>
+						<p><strong>Credit Courses Taught</strong></p>
+						<ul>
+							<li>2013<br />
+              Micro Economics and Local Development, graduate course. School of Economics, Everstate College – Spokane, WA</li>
+						</ul>
+						<p><strong>Additional Teaching</strong></p>
+						<ul>
+							<li>2012<br />
+              Micro Economics and Local Investing, undergraduate course. School of Economics, Everstate College – Spokane, WA (guest lecturer)</li>
+						</ul>
+						<p><strong>Advising</strong> (Graduate Students and Student Interns)</p>
+						<ul>
+							<li>2011<br />
+              Derek Ohlgren, MS, Civil and Environmental Engineering, Washington State University, (thesis committee)</li>
+						</ul>
+					</div>
+					<h3>Credit Courses Taught, Additional Teaching, and Advising <a href="#TB_inline?width=600&height=700&inlineId=wsuwp-profile-teaching-lb" class="thickbox wsuwp-profile-help-link" title="Credit Courses Taught, Additional Teaching, and Advising"><i class="mce-ico mce-i-wp_help wsuwp-profile-help"></i></a></h3>
 					<?php wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_teaching', true ), '_wsuwp_profile_teaching' ); ?>
 				</div>
 
 				<div id="wsuwp-profile-service" class="wsuwp-profile-panel">
-					<p class="description">This panel is available because you have a Service expectation. The field is optional.</p>
-					<h3>University, Professional Society, Community, and Review Activities</h3>
+					<p class="description">All fields are optional. Click the <i class="mce-ico mce-i-wp_help wsuwp-profile-help"></i>for notes and formatting examples.</p>
+					<div id="wsuwp-profile-service-lb" style="display:none;">
+						<p>Formatting example:</p>
+						<p><strong>University</strong></p>
+						<ul>
+							<li>2013<br />
+              Washington State University Strategic Plan Taskforce – Chair<br />
+              WSU Extension Director Search Committee – member</li>
+							<li>2010<br />
+              Washington State University Faculty Senate – Senator</li>
+						</ul>
+						<p><strong>Professional Society</strong></p>
+						<ul>
+							<li>2008<br />
+              National Associate of Economic Developers – Western Regional Chair</li>
+							<li>2007<br />
+              Extension Professionals Society – Conference Planning Chair</li>
+						</ul>
+						<p><strong>Community</strong></p>
+						<ul> 
+							<li>2012<br />
+              Washington Local Investment Coalition – President</li>
+							<li>2011 - Present<br />
+              Washington Banking Association Advisory Board - member</li>
+						</ul>
+						<p><strong>Review Activities</strong></p>
+						<ul>
+							<li>2010-Present<br />
+              Doe, J., C. Ray, D. Mee, (editors) Journal of Metropolitan Extension; a journal of the Society for Urban Extension. <a href="#">Read the Journal at W. Coyote</a> [Online Library]</li>
+						</ul>
+					</div>
+					<h3>University, Professional Society, Community, and Review Activities <a href="#TB_inline?width=600&height=700&inlineId=wsuwp-profile-service-lb" class="thickbox wsuwp-profile-help-link" title="University, Professional Society, Community, and Review Activities"><i class="mce-ico mce-i-wp_help wsuwp-profile-help"></i></a></h3>
 					<?php wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_service', true ), '_wsuwp_profile_service' ); ?>
 				</div>
 
 				<div id="wsuwp-profile-extension" class="wsuwp-profile-panel">
-					<p class="description">This panel is available because you have a State/Extension appointment. The field is optional.</p>
 					<?php wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_extension', true ), '_wsuwp_profile_extension' ); ?>
 				</div>
 
 				<div id="wsuwp-profile-publications" class="wsuwp-profile-panel">
-        	<!--<p class="description">You can manually enter publication information and dynamically populate your profile with web content that is attributed to you.</p>-->
-					<h3>Publications, Creative Work, and Presentations</h3>
+					<p class="description">All fields are optional. Click the <i class="mce-ico mce-i-wp_help wsuwp-profile-help"></i>for notes and formatting examples.</p>
+					<div id="wsuwp-profile-pubs-lb" style="display:none;">
+						<p>Include:</p>
+						<ul>
+							<li>Peer-reviewed Journal Articles. (The journal must have a professional organization or corporate entity with an editor that manages a blind, peer review process.)</li>
+							<li>Peer-reviewed Extension Publications. (The publication must have a formal publishing organization such as WSU Extension that manages a blind, peer review process.)</li>
+							<li>Peer-reviewed Curricula and Training Manuals (Published curricula and training manuals that have been formally peer reviewed by WSU Extension or another institution.)</li>
+							<li>Published Books, Book Chapters, or Monographs (Specify when an entry was peer reviewed according to the criteria described in A or B above.)</li>
+							<li>Creative Scholarship in Juried Events. (Abstracts, Posters, and Published Papers in Proceedings of a Professional Meeting or Conference. (Note: These are generally not peer reviewed but they may be peer approved or selected through a process.)</li>
+							<li>Educational Digital Media (Videos, computer programs, mobile aps, dynamic web-pages, social media, blogs, online modules, decision aids, email list-serves, etc.) (Designate products that received formal peer-review with an * and indicate the entity managing the review.)</li>
+							<li>Other Publications and Creative Works (Those products that did not receive formal peer review, and include popular press articles, newsletters, and other written works)</li>
+							<li>International, National, State, and Local Presentations.</li>
+						</ul>
+						<p>Using the rubric below, indicate your contribution(s) to each scholarly product in parentheses as shown in the example:</p>
+						<ol>
+							<li>Developed the initial idea</li>
+							<li>Obtained or provided funds or other resources</li>
+							<li>Collected data</li>
+							<li>Analyzed data</li>
+							<li>Wrote/created product</li>
+							<li>Edited product</li>
+						</ol>
+						<p>Formatting example:</p>
+						<p><strong>Smith, J. A.</strong>, and R. N. Jones. 2010. The effects of global warming on nitrogen cycling in eastern Washington. Northwestern Ecosystems 45:300-308. <strong>(1, 2, 4, 5)</strong></p>
+						<p><em>Notes:</em></p>
+						<ul>
+							<li><em>Briefly explain why you are listed on a publication if none of the indicators above explain your contribution.</em></li>
+							<li><em>The following key will be included on your profile if content is included in this field:<br />
+              Key to indicators or description of contributions to Publications and Creative Work: 1 = Developed the initial idea; 2 = Obtained or provided funds or other resources; 3 = Collected data; 4 = Analyzed data; 5 = Wrote/created product; 6 = Edited product.</em></li>
+						</ul>
+					</div>
+					<h3>Publications, Creative Work, and Presentations <a href="#TB_inline?width=600&height=550&inlineId=wsuwp-profile-pubs-lb" class="thickbox wsuwp-profile-help-link" title="Publications, Creative Work, and Presentations"><i class="mce-ico mce-i-wp_help wsuwp-profile-help"></i></a></h3>
 					<?php wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_publications', true ), '_wsuwp_profile_publications' ); ?>
 				</div>
 
@@ -569,6 +696,12 @@ class WSUWP_People_Directory {
 				<?php else : ?>
 					 Set C.V.</a></p>
 				<?php endif; ?>
+					<div id="wsuwp-profile-cvs-lb" style="display:none;">
+						<p>Include categorized documents here or something...</p>
+						<p>CAHNRS CV</p>
+						<p>Extension CV</p>
+					</div>
+        	<p>(<em><a href="#TB_inline?width=600&height=550&inlineId=wsuwp-profile-cvs-lb" class="thickbox wsuwp-profile-help-link" title="Download C.V. Template">Download C.V. template</a></em>)</p>
 			</div>
 		<?php
 
@@ -903,6 +1036,7 @@ class WSUWP_People_Directory {
 			remove_menu_page( 'tools.php' ); // Tools
 			remove_menu_page( 'edit.php' ); // Posts
 			remove_menu_page( 'upload.php' ); // Media Library
+			remove_menu_page( 'edit.php?post_type=page' ); // Pages
 			remove_submenu_page( 'edit.php?post_type=wsuwp_people_profile', 'post-new.php?post_type=wsuwp_people_profile' ); // Personnel -> Add New
 		}
 
@@ -917,6 +1051,37 @@ class WSUWP_People_Directory {
 			$wp_admin_bar->remove_node( 'new-content' );
 		}
 
+	}
+
+	/**
+	 * Modify dashboard widgets.
+	 */
+	public function wp_dashboard_setup() {
+
+		if ( ! current_user_can( 'manage_options' ) ) {
+
+			remove_meta_box( 'dashboard_right_now', 'dashboard', 'normal' );
+			remove_meta_box( 'dashboard_activity', 'dashboard', 'normal' );
+			remove_meta_box( 'dashboard_quick_press', 'dashboard', 'side' );
+			remove_meta_box( 'dashboard_primary', 'dashboard', 'side' );
+
+			wp_add_dashboard_widget(
+				'wsuwp_directory_dashboard_widget',
+				'Welcome to the CAHNRS Directory',
+				//$this->wsuwp_directory_dashboard_widget
+				array( $this, 'wsuwp_directory_dashboard_widget' )
+      );
+
+		}
+
+	}
+
+	/**
+	 * Contents for the dashboard widget.
+	 */
+	public function wsuwp_directory_dashboard_widget() {
+		echo '<p>Click the "Profiles" button to the left to get started.</p>';
+		echo '<p>This is just a placeholder. This space will contain more information and documentation about the directory.</p>';
 	}
 
 	/**

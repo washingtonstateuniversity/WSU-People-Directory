@@ -2,7 +2,6 @@
 .has-featured-image .size-gt-small main header.main-header {
 	position: relative !important;
 }
-
 /* Position and contact info. */
 .degree {
 	font-style: italic;
@@ -26,7 +25,6 @@
 .dashicons-location {
 	margin-left: -20px;
 }
-
 /* Tabs. */
 #profile-tabbed-content {
 	overflow: hidden;
@@ -72,12 +70,17 @@
 	color: #5e6a71;
   position: relative;
 }
-
 /* Expertise lists. */
 .categorized dd:not(:last-of-type):after,
 .topics dd:not(:last-of-type):after,
 .tagged dd:not(:last-of-type):after {
 	content: ','
+}
+/* Keys. */
+.key {
+	font-size: 12px;
+	font-style: italic;
+	line-height: 18px;
 }
 
 @media screen and (max-width:791px) {

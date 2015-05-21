@@ -78,6 +78,20 @@
 #poststuff .wsuwp-profile-panel > h3:first-of-type {
 	padding-top: 0;
 }
+.wsuwp-profile-help-link {
+	text-decoration: none;
+}
+i.mce-ico.mce-i-wp_help.wsuwp-profile-help {
+	color: #0074a2;
+	font-size: 16px;
+}
+a:hover i.mce-ico.mce-i-wp_help.wsuwp-profile-help {
+	color: #2ea2cc;
+}
+#TB_ajaxContent ul {
+	list-style: disc;
+	margin-left: 2em;
+}
 #postdivrich,
 .wp-editor-wrap:not(:last-of-type) {
 	margin-bottom: 16px;
