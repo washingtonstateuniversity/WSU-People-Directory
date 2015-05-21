@@ -556,7 +556,7 @@ class WSUWP_People_Directory {
 		$nid        = get_post_meta( $post->ID, '_wsuwp_profile_ad_nid', true );
 
 		?>
-		<label for="_wsuwp_profile_ad_name_first">Network ID</label><br />
+		<label for="_wsuwp_profile_ad_name_first">Network ID</label>:<br />
 		<input type="text" id="_wsuwp_profile_ad_nid" name="_wsuwp_profile_ad_nid" value="<?php echo esc_attr( $nid ); ?>" class="widefat" />
 
 		<span class="button" id="load-ad-data">Load</span>
@@ -589,37 +589,37 @@ class WSUWP_People_Directory {
 		<div class="profile-card">
 
 			<div>
-				<div>Given Name</div>
+				<div>Given Name:</div>
 				<div id="_wsuwp_profile_ad_name_first"><?php echo esc_html( $name_first ); ?></div>
 			</div>
 
 			<div>
-				<div>Surname</div>
+				<div>Surname:</div>
 				<div id="_wsuwp_profile_ad_name_last"><?php echo esc_html( $name_last ); ?></div>
 			</div>
 
 			<div>
-				<div>Title</div>
+				<div>Title:</div>
 				<div id="_wsuwp_profile_ad_title"><?php echo esc_html( $title ); ?></div>
 			</div>
 
 			<div>
-				<div>Office</div>
+				<div>Office:</div>
 				<div id="_wsuwp_profile_ad_office"><?php echo esc_html( $office ); ?></div>
 			</div>
 
 			<div>
-				<div>Street Address</div>
+				<div>Street Address:</div>
 				<div id="_wsuwp_profile_ad_address"><?php echo esc_html( $address ); ?></div>
 			</div>
 
 			<div>
-				<div>Phone</div>
+				<div>Phone:</div>
 				<div id="_wsuwp_profile_ad_phone"><?php echo esc_html( $phone ); if ( $phone_ext ) { echo ' ' . esc_html( $phone_ext ); } ?></div>
 			</div>
 
 			<div>
-				<div>Email</div>
+				<div>Email:</div>
 				<div id="_wsuwp_profile_ad_email"><?php echo esc_html( $email ); ?></div>
 			</div>
 
