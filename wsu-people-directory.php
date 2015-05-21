@@ -591,13 +591,13 @@ class WSUWP_People_Directory {
 			<div>
 				<div>Name</div>
 				<div><?php if ( $name_first ) { echo esc_html( $name_first ) . ' '; } if ( $name_last ) { echo esc_html( $name_last ); } ?></div>
-      </div>
+			</div>
 			<?php endif; ?>
 
 			<?php if ( $appointments ) : ?>
 			<div>
 				<div>Appointment(s)</div>
-        <div>
+				<div>
 					<ul>
 						<?php foreach ( $appointments as $appointment ) { echo '<li>' . $appointment . '</li>'; } ?>
 					</ul>
@@ -605,7 +605,7 @@ class WSUWP_People_Directory {
 			</div>
 			<?php endif; ?>
 
-    	<?php if ( $classifications ) : ?>
+			<?php if ( $classifications ) : ?>
 			<div>
 				<div>Classification</div>
 				<div>
@@ -619,56 +619,65 @@ class WSUWP_People_Directory {
 			<?php if ( $title ) : ?>
 			<div>
 				<div>Title</div>
-      	<div><?php echo esc_html( $title ); ?></div>
+				<div><?php echo esc_html( $title ); ?></div>
 			</div>
 			<?php endif; ?>
 
 			<?php if ( $office ) : ?>
 			<div>
 				<div>Office</div>
-      	<div><?php echo esc_html( $office ); ?></div>
+				<div><?php echo esc_html( $office ); ?></div>
 			</div>
 			<?php endif; ?>
 
 			<?php if ( $address ) : ?>
 			<div>
 				<div>Address</div>
-      	<div><?php echo esc_html( $address ); ?></div>
+				<div><?php echo esc_html( $address ); ?></div>
 			</div>
 			<?php endif; ?>
 
 			<?php if ( $phone ) : ?>
 			<div>
 				<div>Phone</div>
-      	<div><?php echo esc_html( $phone ); if ( $phone_ext ) { echo ' ' . esc_html( $phone_ext ); } ?></div>
+				<div><?php echo esc_html( $phone ); if ( $phone_ext ) { echo ' ' . esc_html( $phone_ext ); } ?></div>
 			</div>
 			<?php endif; ?>
 
 			<?php if ( $email ) : ?>
 			<div>
 				<div>Email</div>
-      	<div><?php echo esc_html( $email ); ?></div>
+				<div><?php echo esc_html( $email ); ?></div>
 			</div>
 			<?php endif; ?>
 
 		</div>
+
 		<p class="description">Notify <a href="#">HR</a> if any of this information is incorrect or needs updated.</p>
 		<?php else : ?>
+
 		<span class="button" id="load-ad-data">Load</span>
-			<span class="button button-primary profile-hide-button" id="confirm-ad-data">Confirm</span>
-			<input type="hidden" id="confirm-ad-hash" name="confirm_ad_hash" value="" />
+		<span class="button button-primary profile-hide-button" id="confirm-ad-data">Confirm</span>
+		<input type="hidden" id="confirm-ad-hash" name="confirm_ad_hash" value="" />
+
 		<p><label for="_wsuwp_profile_ad_name_first">Network ID</label><br />
 		<input type="text" id="_wsuwp_profile_ad_nid" name="_wsuwp_profile_ad_nid" value="<?php echo esc_attr( $nid ); ?>" class="widefat" /></p>
+
 		<p><label for="_wsuwp_profile_ad_name_first">First Name</label><br />
 		<input type="text" id="_wsuwp_profile_ad_name_first" name="_wsuwp_profile_ad_name_first" value="<?php echo esc_attr( $name_first ); ?>" class="widefat" /></p>
+
 		<p><label for="_wsuwp_profile_ad_name_last">Last Name</label><br />
 		<input type="text" id="_wsuwp_profile_ad_name_last" name="_wsuwp_profile_ad_name_last" value="<?php echo esc_attr( $name_last ); ?>" class="widefat" /></p>
+
 		<p><label for="_wsuwp_profile_ad_title">Title</label><br />
 		<input type="text" id="_wsuwp_profile_ad_title" name="_wsuwp_profile_ad_title" value="<?php echo esc_attr( $title ); ?>" class="widefat" /></p>
+
 		<p><label for="_wsuwp_profile_ad_office">Office Location</label><br />
 		<input type="text" id="_wsuwp_profile_ad_office" name="_wsuwp_profile_ad_office" value="<?php echo esc_attr( $office ); ?>" class="widefat" /></p>
+
 		<p><label for="_wsuwp_profile_ad_address">Physical/Mailing Address</label><br />
 		<input type="text" id="_wsuwp_profile_ad_address" name="_wsuwp_profile_ad_address" value="<?php echo esc_attr( $address ); ?>" class="widefat" /></p>
+
 		<div class="phone-fields">
 			<div>
 				<label for="_wsuwp_profile_ad_phone">Phone Number <span class="description">(xxx-xxx-xxxx)</span></label><br />
@@ -679,6 +688,7 @@ class WSUWP_People_Directory {
 				<input type="text" id="_wsuwp_profile_ad_phone_ext" name="_wsuwp_profile_ad_phone_ext" value="<?php echo esc_attr( $phone_ext ); ?>" class="widefat" />
 			</div>
 		</div>
+
 		<p><label for="_wsuwp_profile_ad_email">Email Address</label><br />
 		<input type="text" id="_wsuwp_profile_ad_email" name="_wsuwp_profile_ad_email" value="<?php echo esc_attr( $email ); ?>" class="widefat" /></p>
 
