@@ -835,15 +835,6 @@ class WSUWP_People_Directory {
 			return $post_id;
 		}
 
-		// Sync these with AD.
-		/*foreach ( $this->ad_fields as $field ) {
-			if ( isset( $_POST[ $field ] ) && '' != $_POST[ $field ] ) {
-				update_post_meta( $post_id, $field, sanitize_text_field( $_POST[ $field ] ) );
-			} else {
-				delete_post_meta( $post_id, $field );
-			}
-		}*/
-
 		// Save "last_name first_name" data (for alpha sorting purposes).
 		if ( ( isset( $_POST['_wsuwp_profile_ad_name_last'] ) && '' != $_POST['_wsuwp_profile_ad_name_last'] ) &&
 				 ( isset( $_POST['_wsuwp_profile_ad_name_first'] ) && '' != $_POST['_wsuwp_profile_ad_name_first'] ) ) {
