@@ -142,10 +142,9 @@ jQuery(document).ready(function( $ ) {
 
 		$.post(ajaxurl, data, function(response) {
 			if ( response.success ) {
-				// We really need a template.
-				console.log( 'good to go.' );
+				$('#confirm-ad-data').addClass('profile-hide-button');
+				$('#load-ad-data').addClass('profile-hide-button');
 			}
-		})
-
+		});
 	});
 });
