@@ -140,8 +140,16 @@ jQuery(document).ready(function( $ ) {
 			'post_id': $('#post_ID').val()
 		};
 
+		var $title = $('#title');
+
 		$.post(ajaxurl, data, function(response) {
 			if ( response.success ) {
+				// If a title has not yet been entered, use the given and surname from AD.
+				if ( '' === $title.val() ) {
+					$title.focus();
+					$title.val( $('#_wsuwp_profile_ad_name_first').val() + ' ' + $('#_wsuwp_profile_ad_name_last').val() );
+				}
+
 				$('#confirm-ad-data').addClass('profile-hide-button');
 				$('#load-ad-data').addClass('profile-hide-button');
 			}
