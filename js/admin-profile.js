@@ -117,14 +117,14 @@ jQuery(document).ready(function( $ ) {
 
 		$.post(ajaxurl, data, function(response) {
 			if ( response.success ) {
-				$given_name.val(response.data.given_name);
-				$surname.val(response.data.surname);
-				$title.val(response.data.title);
-				$office.val(response.data.office);
-				$address.val(response.data.street_address);
-				$phone.val(response.data.telephone_number);
-				$email.val(response.data.email);
-				$hash.val(response.data.confirm_ad_hash);
+				$given_name.html(response.data.given_name);
+				$surname.html(response.data.surname);
+				$title.html(response.data.title);
+				$office.html(response.data.office);
+				$address.html(response.data.street_address);
+				$phone.html(response.data.telephone_number);
+				$email.html(response.data.email);
+				$hash.html(response.data.confirm_ad_hash);
 
 				$confirm.removeClass('profile-hide-button');
 			}

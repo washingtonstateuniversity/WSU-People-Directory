@@ -585,117 +585,69 @@ class WSUWP_People_Directory {
 		$appointments = wp_get_post_terms( $post->ID, $this->personnel_appointments, array( 'fields' => 'names' ) );
 		$classifications = wp_get_post_terms( $post->ID, $this->personnel_classifications, array( 'fields' => 'names' ) );
 
-		/**
-		 * Just an idea...
-		 * We'll pull this data from AD for all WSU people (who will presumably have a NID),
-		 * but we don't want them to edit it here. We do, however, want to allow non-WSU folk
-		 * whom we're hosting a profile for to be able to add contact info.
-		 * So, let's leverage the NID to offer up a different presentation for those situations.
-		 */
-		if ( $nid ) : ?>
-
+		?>
 		<div class="profile-card">
 
-			<?php if ( $name_first || $name_last ) : ?>
 			<div>
-				<div>Name</div>
-				<div><?php if ( $name_first ) { echo esc_html( $name_first ) . ' '; } if ( $name_last ) { echo esc_html( $name_last ); } ?></div>
+				<div>Given Name</div>
+				<div id="_wsuwp_profile_ad_name_first"><?php echo esc_html( $name_first ); ?></div>
 			</div>
-			<?php endif; ?>
+
+			<div>
+				<div>Surname</div>
+				<div id="_wsuwp_profile_ad_name_last"><?php echo esc_html( $name_last ); ?></div>
+			</div>
+
+			<div>
+				<div>Title</div>
+				<div id="_wsuwp_profile_ad_title"><?php echo esc_html( $title ); ?></div>
+			</div>
+
+			<div>
+				<div>Office</div>
+				<div id="_wsuwp_profile_ad_office"><?php echo esc_html( $office ); ?></div>
+			</div>
+
+			<div>
+				<div>Street Address</div>
+				<div id="_wsuwp_profile_ad_address"><?php echo esc_html( $address ); ?></div>
+			</div>
+
+			<div>
+				<div>Phone</div>
+				<div id="_wsuwp_profile_ad_phone"><?php echo esc_html( $phone ); if ( $phone_ext ) { echo ' ' . esc_html( $phone_ext ); } ?></div>
+			</div>
+
+			<div>
+				<div>Email</div>
+				<div id="_wsuwp_profile_ad_email"><?php echo esc_html( $email ); ?></div>
+			</div>
 
 			<?php if ( $appointments ) : ?>
-			<div>
-				<div>Appointment(s)</div>
 				<div>
-					<ul>
-						<?php foreach ( $appointments as $appointment ) { echo '<li>' . $appointment . '</li>'; } ?>
-					</ul>
+					<div>Appointment(s)</div>
+					<div>
+						<ul>
+							<?php foreach ( $appointments as $appointment ) { echo '<li>' . $appointment . '</li>'; } ?>
+						</ul>
+					</div>
 				</div>
-			</div>
 			<?php endif; ?>
 
 			<?php if ( $classifications ) : ?>
-			<div>
-				<div>Classification</div>
 				<div>
-					<ul>
-						<?php foreach ( $classifications as $classification ) { echo '<li>' . $classification . '</li>'; } ?>
-					</ul>
+					<div>Classification</div>
+					<div>
+						<ul>
+							<?php foreach ( $classifications as $classification ) { echo '<li>' . $classification . '</li>'; } ?>
+						</ul>
+					</div>
 				</div>
-			</div>
 			<?php endif; ?>
-
-			<?php if ( $title ) : ?>
-			<div>
-				<div>Title</div>
-				<div><?php echo esc_html( $title ); ?></div>
-			</div>
-			<?php endif; ?>
-
-			<?php if ( $office ) : ?>
-			<div>
-				<div>Office</div>
-				<div><?php echo esc_html( $office ); ?></div>
-			</div>
-			<?php endif; ?>
-
-			<?php if ( $address ) : ?>
-			<div>
-				<div>Address</div>
-				<div><?php echo esc_html( $address ); ?></div>
-			</div>
-			<?php endif; ?>
-
-			<?php if ( $phone ) : ?>
-			<div>
-				<div>Phone</div>
-				<div><?php echo esc_html( $phone ); if ( $phone_ext ) { echo ' ' . esc_html( $phone_ext ); } ?></div>
-			</div>
-			<?php endif; ?>
-
-			<?php if ( $email ) : ?>
-			<div>
-				<div>Email</div>
-				<div><?php echo esc_html( $email ); ?></div>
-			</div>
-			<?php endif; ?>
-
 		</div>
 
 		<p class="description">Notify <a href="#">HR</a> if any of this information is incorrect or needs updated.</p>
-		<?php else : ?>
-
-		<p><label for="_wsuwp_profile_ad_name_first">First Name</label><br />
-		<input type="text" id="_wsuwp_profile_ad_name_first" name="_wsuwp_profile_ad_name_first" value="<?php echo esc_attr( $name_first ); ?>" class="widefat" /></p>
-
-		<p><label for="_wsuwp_profile_ad_name_last">Last Name</label><br />
-		<input type="text" id="_wsuwp_profile_ad_name_last" name="_wsuwp_profile_ad_name_last" value="<?php echo esc_attr( $name_last ); ?>" class="widefat" /></p>
-
-		<p><label for="_wsuwp_profile_ad_title">Title</label><br />
-		<input type="text" id="_wsuwp_profile_ad_title" name="_wsuwp_profile_ad_title" value="<?php echo esc_attr( $title ); ?>" class="widefat" /></p>
-
-		<p><label for="_wsuwp_profile_ad_office">Office Location</label><br />
-		<input type="text" id="_wsuwp_profile_ad_office" name="_wsuwp_profile_ad_office" value="<?php echo esc_attr( $office ); ?>" class="widefat" /></p>
-
-		<p><label for="_wsuwp_profile_ad_address">Physical/Mailing Address</label><br />
-		<input type="text" id="_wsuwp_profile_ad_address" name="_wsuwp_profile_ad_address" value="<?php echo esc_attr( $address ); ?>" class="widefat" /></p>
-
-		<div class="phone-fields">
-			<div>
-				<label for="_wsuwp_profile_ad_phone">Phone Number <span class="description">(xxx-xxx-xxxx)</span></label><br />
-				<input type="text" id="_wsuwp_profile_ad_phone" name="_wsuwp_profile_ad_phone" value="<?php echo esc_attr( $phone ); ?>" class="widefat" maxlength="12" />
-			</div>
-			<div>
-			 	<label for="_wsuwp_profile_ad_phone_ext">Ext</label><br />
-				<input type="text" id="_wsuwp_profile_ad_phone_ext" name="_wsuwp_profile_ad_phone_ext" value="<?php echo esc_attr( $phone_ext ); ?>" class="widefat" />
-			</div>
-		</div>
-
-		<p><label for="_wsuwp_profile_ad_email">Email Address</label><br />
-		<input type="text" id="_wsuwp_profile_ad_email" name="_wsuwp_profile_ad_email" value="<?php echo esc_attr( $email ); ?>" class="widefat" /></p>
-
-		<?php endif;
-
+		<?php
 	}
 
 	/**
