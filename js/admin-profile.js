@@ -124,7 +124,7 @@ jQuery(document).ready(function( $ ) {
 				$address.html(response.data.street_address);
 				$phone.html(response.data.telephone_number);
 				$email.html(response.data.email);
-				$hash.html(response.data.confirm_ad_hash);
+				$hash.val(response.data.confirm_ad_hash);
 
 				$confirm.removeClass('profile-hide-button');
 			}
@@ -147,7 +147,7 @@ jQuery(document).ready(function( $ ) {
 				// If a title has not yet been entered, use the given and surname from AD.
 				if ( '' === $title.val() ) {
 					$title.focus();
-					$title.val( $('#_wsuwp_profile_ad_name_first').val() + ' ' + $('#_wsuwp_profile_ad_name_last').val() );
+					$title.val( $('#_wsuwp_profile_ad_name_first').html() + ' ' + $('#_wsuwp_profile_ad_name_last').html() );
 				}
 
 				$('#confirm-ad-data').addClass('profile-hide-button');
