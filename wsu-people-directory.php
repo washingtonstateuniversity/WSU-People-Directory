@@ -501,13 +501,15 @@ class WSUWP_People_Directory {
 			return;
 		}
 
+		add_meta_box( 'wsuwp_profile_nid_entry', 'Network ID', array( $this, 'display_nid_entry_meta_box' ), $this->personnel_content_type, 'side', 'high' );
+
 		add_meta_box(
 			'wsuwp_profile_a_position_info',
 			'Position and Contact Information',
 			array( $this, 'display_position_info_meta_box' ),
 			$this->personnel_content_type,
 			'side',
-			'high'
+			'default'
 		);
 
 		add_meta_box(
@@ -516,7 +518,7 @@ class WSUWP_People_Directory {
 			array( $this, 'display_cv_upload_meta_box' ),
 			$this->personnel_content_type,
 			'side',
-			'high'
+			'default'
 		);
 
 		// Bio meta boxes.
@@ -550,6 +552,19 @@ class WSUWP_People_Directory {
 
 	}
 
+	public function display_nid_entry_meta_box( $post ) {
+		$nid        = get_post_meta( $post->ID, '_wsuwp_profile_ad_nid', true );
+
+		?>
+		<label for="_wsuwp_profile_ad_name_first">Network ID</label><br />
+		<input type="text" id="_wsuwp_profile_ad_nid" name="_wsuwp_profile_ad_nid" value="<?php echo esc_attr( $nid ); ?>" class="widefat" />
+
+		<span class="button" id="load-ad-data">Load</span>
+		<span class="button button-primary profile-hide-button" id="confirm-ad-data">Confirm</span>
+		<input type="hidden" id="confirm-ad-hash" name="confirm_ad_hash" value="" />
+		<?php
+	}
+
 	/**
 	 * Display a meta box used to show a person's "card".
 	 */
@@ -557,7 +572,6 @@ class WSUWP_People_Directory {
 
 		wp_nonce_field( 'wsuwsp_profile', 'wsuwsp_profile_nonce' );
 
-		$nid        = get_post_meta( $post->ID, '_wsuwp_profile_ad_nid', true );
 		$name_first = get_post_meta( $post->ID, '_wsuwp_profile_ad_name_first', true );
 		$name_last  = get_post_meta( $post->ID, '_wsuwp_profile_ad_name_last', true );
 		$title      = get_post_meta( $post->ID, '_wsuwp_profile_ad_title', true );
@@ -581,11 +595,6 @@ class WSUWP_People_Directory {
 		if ( $nid ) : ?>
 
 		<div class="profile-card">
-
-			<div>
-				<div>Network ID</div>
-				<div><?php echo esc_html( $nid ); ?></div>
-			</div>
 
 			<?php if ( $name_first || $name_last ) : ?>
 			<div>
@@ -655,13 +664,6 @@ class WSUWP_People_Directory {
 
 		<p class="description">Notify <a href="#">HR</a> if any of this information is incorrect or needs updated.</p>
 		<?php else : ?>
-
-		<span class="button" id="load-ad-data">Load</span>
-		<span class="button button-primary profile-hide-button" id="confirm-ad-data">Confirm</span>
-		<input type="hidden" id="confirm-ad-hash" name="confirm_ad_hash" value="" />
-
-		<p><label for="_wsuwp_profile_ad_name_first">Network ID</label><br />
-		<input type="text" id="_wsuwp_profile_ad_nid" name="_wsuwp_profile_ad_nid" value="<?php echo esc_attr( $nid ); ?>" class="widefat" /></p>
 
 		<p><label for="_wsuwp_profile_ad_name_first">First Name</label><br />
 		<input type="text" id="_wsuwp_profile_ad_name_first" name="_wsuwp_profile_ad_name_first" value="<?php echo esc_attr( $name_first ); ?>" class="widefat" /></p>
