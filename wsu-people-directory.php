@@ -1230,6 +1230,14 @@ class WSUWP_People_Directory {
 
 	}
 
+	/**
+	 * Given a WSU Network ID, retrieve information from active directory about
+	 * a user.
+	 *
+	 * @param string $nid The user's network ID.
+	 *
+	 * @return array List of predefined information we'll expect on the other side.
+	 */
 	private function get_nid_data( $nid ) {
 		if ( false === function_exists( 'wsuwp_get_wsu_ad_by_login' ) ) {
 			return array();
