@@ -98,4 +98,54 @@ jQuery(document).ready(function( $ ) {
 
 	});
 
+	$('#load-ad-data').on('click', function() {
+		var $given_name = $('#_wsuwp_profile_ad_name_first'),
+			$surname    = $('#_wsuwp_profile_ad_name_last'),
+			$title      = $('#_wsuwp_profile_ad_title'),
+			$office     = $('#_wsuwp_profile_ad_office'),
+			$address    = $('#_wsuwp_profile_ad_address'),
+			$phone      = $('#_wsuwp_profile_ad_phone'),
+			$email      = $('#_wsuwp_profile_ad_email'),
+			$hash       = $('#confirm-ad-hash'),
+			$confirm    = $('#confirm-ad-data');
+
+		var data = {
+			'action': 'wsu_people_get_data_by_nid',
+			'_ajax_nonce' : wsupeople_nid_nonce,
+			'network_id' : $('#_wsuwp_profile_ad_nid').val()
+		};
+
+		$.post(ajaxurl, data, function(response) {
+			if ( response.success ) {
+				$given_name.val(response.data.given_name);
+				$surname.val(response.data.surname);
+				$title.val(response.data.title);
+				$office.val(response.data.office);
+				$address.val(response.data.street_address);
+				$phone.val(response.data.telephone_number);
+				$email.val(response.data.email);
+				$hash.val(response.data.confirm_ad_hash);
+
+				$confirm.removeClass('profile-hide-button');
+			}
+		});
+	});
+
+	$('#confirm-ad-data').on('click', function() {
+		var data = {
+			'action': 'wsu_people_confirm_nid_data',
+			'_ajax_nonce' : wsupeople_nid_nonce,
+			'network_id' : $('#_wsuwp_profile_ad_nid').val(),
+			'confirm_ad_hash' : $('#confirm-ad-hash').val(),
+			'post_id': $('#post_ID').val()
+		};
+
+		$.post(ajaxurl, data, function(response) {
+			if ( response.success ) {
+				// We really need a template.
+				console.log( 'good to go.' );
+			}
+		})
+
+	});
 });

@@ -124,3 +124,7 @@ a:hover i.mce-ico.mce-i-wp_help.wsuwp-profile-help {
 	position: absolute; 
   width: 1px; 
 }
+
+.wp-core-ui .profile-hide-button {
+	display: none;
+}

@@ -125,6 +125,9 @@ class WSUWP_People_Directory {
 		add_action( 'wp_enqueue_scripts', array( $this, 'wp_enqueue_scripts' ), 11 );
 		add_action( 'pre_get_posts', array( $this, 'profile_archives' ) );
 
+		// Handle ajax requests from the admin.
+		add_action( 'wp_ajax_wsu_people_get_data_by_nid', array( $this, 'ajax_get_data_by_nid' ) );
+		add_action( 'wp_ajax_wsu_people_confirm_nid_data', array( $this, 'ajax_confirm_nid_data' ) );
 	}
 
 	/**
@@ -256,8 +259,11 @@ class WSUWP_People_Directory {
 		$screen = get_current_screen();
 
 		if ( ( 'post-new.php' == $hook || 'post.php' == $hook ) && $screen->post_type == $this->personnel_content_type ) {
+			$ajax_nonce = wp_create_nonce( 'wsu-people-nid-lookup' );
+
 			wp_enqueue_style( 'wsuwp-people-admin-style', plugins_url( 'css/admin-profile-style.css', __FILE__ ) );
 			wp_enqueue_script( 'wsuwp-people-admin-script', plugins_url( 'js/admin-profile.js', __FILE__ ), array( 'jquery-ui-tabs' ), '', true );
+			wp_localize_script( 'wsuwp-people-admin-script', 'wsupeople_nid_nonce', $ajax_nonce );
 		}
 
 		if ( 'edit.php' == $hook && $screen->post_type == $this->personnel_content_type ) {
@@ -647,9 +653,10 @@ class WSUWP_People_Directory {
 
 		</div>
 		<p class="description">Notify <a href="#">HR</a> if any of this information is incorrect or needs updated.</p>
-
 		<?php else : ?>
-
+		<span class="button" id="load-ad-data">Load</span>
+			<span class="button button-primary profile-hide-button" id="confirm-ad-data">Confirm</span>
+			<input type="hidden" id="confirm-ad-hash" name="confirm_ad_hash" value="" />
 		<p><label for="_wsuwp_profile_ad_name_first">Network ID</label><br />
 		<input type="text" id="_wsuwp_profile_ad_nid" name="_wsuwp_profile_ad_nid" value="<?php echo esc_attr( $nid ); ?>" class="widefat" /></p>
 		<p><label for="_wsuwp_profile_ad_name_first">First Name</label><br />
@@ -1222,6 +1229,113 @@ class WSUWP_People_Directory {
 
 	}
 
+	private function get_nid_data( $nid ) {
+		if ( false === function_exists( 'wsuwp_get_wsu_ad_by_login' ) ) {
+			return array();
+		}
+
+		// Get data from the WSUWP SSO Authentication plugin.
+		$nid_data = wsuwp_get_wsu_ad_by_login( $nid );
+
+		$return_data = array(
+			'given_name' => '',
+			'surname' => '',
+			'title' => '',
+			'office' => '',
+			'street_address' => '',
+			'telephone_number' => '',
+			'email' => '',
+			'confirm_ad_hash' => '',
+		);
+
+		if ( isset( $nid_data['givenname'][0] ) ) {
+			$return_data['given_name'] = $nid_data['givenname'][0];
+		}
+
+		if ( isset( $nid_data['sn'][0] ) ) {
+			$return_data['surname'] = $nid_data['sn'][0];
+		}
+
+		if ( isset( $nid_data['title'][0] ) ) {
+			$return_data['title'] = $nid_data['title'][0];
+		}
+
+		if ( isset( $nid_data['physicaldeliveryofficename'][0] ) ) {
+			$return_data['office'] = $nid_data['physicaldeliveryofficename'][0];
+		}
+
+		if ( isset( $nid_data['streetaddress'][0] ) ) {
+			$return_data['street_address'] = $nid_data['streetaddress'][0];
+		}
+
+		if ( isset( $nid_data['telephonenumber'][0] ) ) {
+			$return_data['telephone_number'] = $nid_data['telephonenumber'][0];
+		}
+
+		if ( isset( $nid_data['mail'][0] ) ) {
+			$return_data['email'] = $nid_data['mail'][0];
+		}
+
+		$hash = md5( serialize( $return_data ) );
+		$return_data['confirm_ad_hash'] = $hash;
+
+		return $return_data;
+	}
+
+	/**
+	 * Process an ajax request for AD information attached to a network ID. We'll return
+	 * the data here for confirmation. Confirmation will be handled elsewhere.
+	 */
+	public function ajax_get_data_by_nid() {
+		check_ajax_referer( 'wsu-people-nid-lookup' );
+
+		$nid = sanitize_text_field( $_POST['network_id'] );
+
+		if ( empty( $nid ) ) {
+			wp_send_json_error( 'Invalid or empty Network ID' );
+		}
+
+		$return_data = $this->get_nid_data( $nid );
+
+		wp_send_json_success( $return_data );
+	}
+
+	/**
+	 * Process an ajax request to confirm the AD information attached to a network ID. At
+	 * this point we'll do the lookup again and save the information to the current profile.
+	 */
+	public function ajax_confirm_nid_data() {
+		check_ajax_referer( 'wsu-people-nid-lookup' );
+
+		$nid = sanitize_text_field( $_POST['network_id'] );
+
+		if ( empty( $nid ) ) {
+			wp_send_json_error( 'Invalid or empty Network ID' );
+		}
+
+		$confirm_data = $this->get_nid_data( $nid );
+
+		if ( $confirm_data['confirm_ad_hash'] !== $_POST['confirm_ad_hash'] ) {
+			wp_send_json_error( 'Previously retrieved data does not match the data attached to this network ID.' );
+		}
+
+		if ( empty( absint( $_POST['post_id'] ) ) ) {
+			wp_send_json_error( 'Invalid profile post ID.' );
+		}
+
+		$post_id = $_POST['post_id'];
+
+		update_post_meta( $post_id, '_wsuwp_profile_ad_nid', $nid );
+		update_post_meta( $post_id, '_wsuwp_profile_ad_name_first', $confirm_data['given_name'] );
+		update_post_meta( $post_id, '_wsuwp_profile_ad_name_last', $confirm_data['surname'] );
+		update_post_meta( $post_id, '_wsuwp_profile_ad_title', $confirm_data['title'] );
+		update_post_meta( $post_id, '_wsuwp_profile_ad_office', $confirm_data['office'] );
+		update_post_meta( $post_id, '_wsuwp_profile_ad_address', $confirm_data['street_address'] );
+		update_post_meta( $post_id, '_wsuwp_profile_ad_phone', $confirm_data['telephone_number'] );
+		update_post_meta( $post_id, '_wsuwp_profile_ad_email', $confirm_data['email'] );
+
+		wp_send_json_success( 'Updated' );
+	}
 }
 
 $wsuwp_people_directory = new WSUWP_People_Directory();
