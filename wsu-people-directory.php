@@ -555,14 +555,17 @@ class WSUWP_People_Directory {
 	public function display_nid_entry_meta_box( $post ) {
 		$nid        = get_post_meta( $post->ID, '_wsuwp_profile_ad_nid', true );
 
+		$readonly = empty( trim( $nid ) ) ? '' : 'readonly';
+
 		?>
 		<label for="_wsuwp_profile_ad_name_first">Network ID</label>:<br />
-		<input type="text" id="_wsuwp_profile_ad_nid" name="_wsuwp_profile_ad_nid" value="<?php echo esc_attr( $nid ); ?>" class="widefat" />
+		<input type="text" id="_wsuwp_profile_ad_nid" name="_wsuwp_profile_ad_nid" value="<?php echo esc_attr( $nid ); ?>" class="widefat" <?php echo $readonly; ?> />
 
+		<?php if ( '' === $readonly ) : ?>
 		<span class="button" id="load-ad-data">Load</span>
 		<span class="button button-primary profile-hide-button" id="confirm-ad-data">Confirm</span>
 		<input type="hidden" id="confirm-ad-hash" name="confirm_ad_hash" value="" />
-		<?php
+		<?php endif;
 	}
 
 	/**
