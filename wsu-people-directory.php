@@ -125,6 +125,9 @@ class WSUWP_People_Directory {
 		add_action( 'wp_enqueue_scripts', array( $this, 'wp_enqueue_scripts' ), 11 );
 		add_action( 'pre_get_posts', array( $this, 'profile_archives' ) );
 
+		// Handle ajax requests from the admin.
+		add_action( 'wp_ajax_wsu_people_get_data_by_nid', array( $this, 'ajax_get_data_by_nid' ) );
+		add_action( 'wp_ajax_wsu_people_confirm_nid_data', array( $this, 'ajax_confirm_nid_data' ) );
 	}
 
 	/**
@@ -256,8 +259,11 @@ class WSUWP_People_Directory {
 		$screen = get_current_screen();
 
 		if ( ( 'post-new.php' == $hook || 'post.php' == $hook ) && $screen->post_type == $this->personnel_content_type ) {
+			$ajax_nonce = wp_create_nonce( 'wsu-people-nid-lookup' );
+
 			wp_enqueue_style( 'wsuwp-people-admin-style', plugins_url( 'css/admin-profile-style.css', __FILE__ ) );
 			wp_enqueue_script( 'wsuwp-people-admin-script', plugins_url( 'js/admin-profile.js', __FILE__ ), array( 'jquery-ui-tabs' ), '', true );
+			wp_localize_script( 'wsuwp-people-admin-script', 'wsupeople_nid_nonce', $ajax_nonce );
 		}
 
 		if ( 'edit.php' == $hook && $screen->post_type == $this->personnel_content_type ) {
@@ -495,13 +501,15 @@ class WSUWP_People_Directory {
 			return;
 		}
 
+		add_meta_box( 'wsuwp_profile_nid_entry', 'Network ID', array( $this, 'display_nid_entry_meta_box' ), $this->personnel_content_type, 'side', 'high' );
+
 		add_meta_box(
 			'wsuwp_profile_a_position_info',
 			'Position and Contact Information',
 			array( $this, 'display_position_info_meta_box' ),
 			$this->personnel_content_type,
 			'side',
-			'high'
+			'default'
 		);
 
 		add_meta_box(
@@ -510,7 +518,7 @@ class WSUWP_People_Directory {
 			array( $this, 'display_cv_upload_meta_box' ),
 			$this->personnel_content_type,
 			'side',
-			'high'
+			'default'
 		);
 
 		// Bio meta boxes.
@@ -544,6 +552,25 @@ class WSUWP_People_Directory {
 
 	}
 
+	public function display_nid_entry_meta_box( $post ) {
+		$nid        = get_post_meta( $post->ID, '_wsuwp_profile_ad_nid', true );
+
+		$readonly = empty( trim( $nid ) ) ? '' : 'readonly';
+
+		?>
+		<label for="_wsuwp_profile_ad_nid">Network ID</label>:
+		<input type="text" id="_wsuwp_profile_ad_nid" name="_wsuwp_profile_ad_nid" value="<?php echo esc_attr( $nid ); ?>" class="widefat" <?php echo $readonly; ?> />
+
+		<?php if ( '' === $readonly ) : ?>
+		<div class="load-ad-container">
+			<p class="description">Enter the WSU Network ID for this user to populate data from Active Directory.</p>
+			<span class="button" id="load-ad-data">Load</span>
+			<span class="button button-primary profile-hide-button" id="confirm-ad-data">Confirm</span>
+			<input type="hidden" id="confirm-ad-hash" name="confirm_ad_hash" value="" />
+		</div>
+		<?php endif;
+	}
+
 	/**
 	 * Display a meta box used to show a person's "card".
 	 */
@@ -551,7 +578,6 @@ class WSUWP_People_Directory {
 
 		wp_nonce_field( 'wsuwsp_profile', 'wsuwsp_profile_nonce' );
 
-		$nid        = get_post_meta( $post->ID, '_wsuwp_profile_ad_nid', true );
 		$name_first = get_post_meta( $post->ID, '_wsuwp_profile_ad_name_first', true );
 		$name_last  = get_post_meta( $post->ID, '_wsuwp_profile_ad_name_last', true );
 		$title      = get_post_meta( $post->ID, '_wsuwp_profile_ad_title', true );
@@ -565,118 +591,69 @@ class WSUWP_People_Directory {
 		$appointments = wp_get_post_terms( $post->ID, $this->personnel_appointments, array( 'fields' => 'names' ) );
 		$classifications = wp_get_post_terms( $post->ID, $this->personnel_classifications, array( 'fields' => 'names' ) );
 
-		/**
-		 * Just an idea...
-		 * We'll pull this data from AD for all WSU people (who will presumably have a NID),
-		 * but we don't want them to edit it here. We do, however, want to allow non-WSU folk
-		 * whom we're hosting a profile for to be able to add contact info.
-		 * So, let's leverage the NID to offer up a different presentation for those situations.
-		 */
-		if ( $nid ) : ?>
-
+		?>
 		<div class="profile-card">
 
 			<div>
-				<div>Network ID</div>
-				<div><?php echo esc_html( $nid ); ?></div>
+				<div>Given Name:</div>
+				<div id="_wsuwp_profile_ad_name_first"><?php echo esc_html( $name_first ); ?></div>
 			</div>
 
-			<?php if ( $name_first || $name_last ) : ?>
 			<div>
-				<div>Name</div>
-				<div><?php if ( $name_first ) { echo esc_html( $name_first ) . ' '; } if ( $name_last ) { echo esc_html( $name_last ); } ?></div>
-      </div>
-			<?php endif; ?>
+				<div>Surname:</div>
+				<div id="_wsuwp_profile_ad_name_last"><?php echo esc_html( $name_last ); ?></div>
+			</div>
+
+			<div>
+				<div>Title:</div>
+				<div id="_wsuwp_profile_ad_title"><?php echo esc_html( $title ); ?></div>
+			</div>
+
+			<div>
+				<div>Office:</div>
+				<div id="_wsuwp_profile_ad_office"><?php echo esc_html( $office ); ?></div>
+			</div>
+
+			<div>
+				<div>Street Address:</div>
+				<div id="_wsuwp_profile_ad_address"><?php echo esc_html( $address ); ?></div>
+			</div>
+
+			<div>
+				<div>Phone:</div>
+				<div id="_wsuwp_profile_ad_phone"><?php echo esc_html( $phone ); if ( $phone_ext ) { echo ' ' . esc_html( $phone_ext ); } ?></div>
+			</div>
+
+			<div>
+				<div>Email:</div>
+				<div id="_wsuwp_profile_ad_email"><?php echo esc_html( $email ); ?></div>
+			</div>
 
 			<?php if ( $appointments ) : ?>
-			<div>
-				<div>Appointment(s)</div>
-        <div>
-					<ul>
-						<?php foreach ( $appointments as $appointment ) { echo '<li>' . $appointment . '</li>'; } ?>
-					</ul>
-				</div>
-			</div>
-			<?php endif; ?>
-
-    	<?php if ( $classifications ) : ?>
-			<div>
-				<div>Classification</div>
 				<div>
-					<ul>
-						<?php foreach ( $classifications as $classification ) { echo '<li>' . $classification . '</li>'; } ?>
-					</ul>
+					<div>Appointment(s)</div>
+					<div>
+						<ul>
+							<?php foreach ( $appointments as $appointment ) { echo '<li>' . $appointment . '</li>'; } ?>
+						</ul>
+					</div>
 				</div>
-			</div>
 			<?php endif; ?>
 
-			<?php if ( $title ) : ?>
-			<div>
-				<div>Title</div>
-      	<div><?php echo esc_html( $title ); ?></div>
-			</div>
+			<?php if ( $classifications ) : ?>
+				<div>
+					<div>Classification</div>
+					<div>
+						<ul>
+							<?php foreach ( $classifications as $classification ) { echo '<li>' . $classification . '</li>'; } ?>
+						</ul>
+					</div>
+				</div>
 			<?php endif; ?>
-
-			<?php if ( $office ) : ?>
-			<div>
-				<div>Office</div>
-      	<div><?php echo esc_html( $office ); ?></div>
-			</div>
-			<?php endif; ?>
-
-			<?php if ( $address ) : ?>
-			<div>
-				<div>Address</div>
-      	<div><?php echo esc_html( $address ); ?></div>
-			</div>
-			<?php endif; ?>
-
-			<?php if ( $phone ) : ?>
-			<div>
-				<div>Phone</div>
-      	<div><?php echo esc_html( $phone ); if ( $phone_ext ) { echo ' ' . esc_html( $phone_ext ); } ?></div>
-			</div>
-			<?php endif; ?>
-
-			<?php if ( $email ) : ?>
-			<div>
-				<div>Email</div>
-      	<div><?php echo esc_html( $email ); ?></div>
-			</div>
-			<?php endif; ?>
-
 		</div>
+
 		<p class="description">Notify <a href="#">HR</a> if any of this information is incorrect or needs updated.</p>
-
-		<?php else : ?>
-
-		<p><label for="_wsuwp_profile_ad_name_first">Network ID</label><br />
-		<input type="text" id="_wsuwp_profile_ad_nid" name="_wsuwp_profile_ad_nid" value="<?php echo esc_attr( $nid ); ?>" class="widefat" /></p>
-		<p><label for="_wsuwp_profile_ad_name_first">First Name</label><br />
-		<input type="text" id="_wsuwp_profile_ad_name_first" name="_wsuwp_profile_ad_name_first" value="<?php echo esc_attr( $name_first ); ?>" class="widefat" /></p>
-		<p><label for="_wsuwp_profile_ad_name_last">Last Name</label><br />
-		<input type="text" id="_wsuwp_profile_ad_name_last" name="_wsuwp_profile_ad_name_last" value="<?php echo esc_attr( $name_last ); ?>" class="widefat" /></p>
-		<p><label for="_wsuwp_profile_ad_title">Title</label><br />
-		<input type="text" id="_wsuwp_profile_ad_title" name="_wsuwp_profile_ad_title" value="<?php echo esc_attr( $title ); ?>" class="widefat" /></p>
-		<p><label for="_wsuwp_profile_ad_office">Office Location</label><br />
-		<input type="text" id="_wsuwp_profile_ad_office" name="_wsuwp_profile_ad_office" value="<?php echo esc_attr( $office ); ?>" class="widefat" /></p>
-		<p><label for="_wsuwp_profile_ad_address">Physical/Mailing Address</label><br />
-		<input type="text" id="_wsuwp_profile_ad_address" name="_wsuwp_profile_ad_address" value="<?php echo esc_attr( $address ); ?>" class="widefat" /></p>
-		<div class="phone-fields">
-			<div>
-				<label for="_wsuwp_profile_ad_phone">Phone Number <span class="description">(xxx-xxx-xxxx)</span></label><br />
-				<input type="text" id="_wsuwp_profile_ad_phone" name="_wsuwp_profile_ad_phone" value="<?php echo esc_attr( $phone ); ?>" class="widefat" maxlength="12" />
-			</div>
-			<div>
-			 	<label for="_wsuwp_profile_ad_phone_ext">Ext</label><br />
-				<input type="text" id="_wsuwp_profile_ad_phone_ext" name="_wsuwp_profile_ad_phone_ext" value="<?php echo esc_attr( $phone_ext ); ?>" class="widefat" />
-			</div>
-		</div>
-		<p><label for="_wsuwp_profile_ad_email">Email Address</label><br />
-		<input type="text" id="_wsuwp_profile_ad_email" name="_wsuwp_profile_ad_email" value="<?php echo esc_attr( $email ); ?>" class="widefat" /></p>
-
-		<?php endif;
-
+		<?php
 	}
 
 	/**
@@ -817,15 +794,6 @@ class WSUWP_People_Directory {
 		if ( ! current_user_can( 'edit_post', $post_id ) ) {
 			return $post_id;
 		}
-
-		// Sync these with AD.
-		/*foreach ( $this->ad_fields as $field ) {
-			if ( isset( $_POST[ $field ] ) && '' != $_POST[ $field ] ) {
-				update_post_meta( $post_id, $field, sanitize_text_field( $_POST[ $field ] ) );
-			} else {
-				delete_post_meta( $post_id, $field );
-			}
-		}*/
 
 		// Save "last_name first_name" data (for alpha sorting purposes).
 		if ( ( isset( $_POST['_wsuwp_profile_ad_name_last'] ) && '' != $_POST['_wsuwp_profile_ad_name_last'] ) &&
@@ -1222,6 +1190,121 @@ class WSUWP_People_Directory {
 
 	}
 
+	/**
+	 * Given a WSU Network ID, retrieve information from active directory about
+	 * a user.
+	 *
+	 * @param string $nid The user's network ID.
+	 *
+	 * @return array List of predefined information we'll expect on the other side.
+	 */
+	private function get_nid_data( $nid ) {
+		if ( false === function_exists( 'wsuwp_get_wsu_ad_by_login' ) ) {
+			return array();
+		}
+
+		// Get data from the WSUWP SSO Authentication plugin.
+		$nid_data = wsuwp_get_wsu_ad_by_login( $nid );
+
+		$return_data = array(
+			'given_name' => '',
+			'surname' => '',
+			'title' => '',
+			'office' => '',
+			'street_address' => '',
+			'telephone_number' => '',
+			'email' => '',
+			'confirm_ad_hash' => '',
+		);
+
+		if ( isset( $nid_data['givenname'][0] ) ) {
+			$return_data['given_name'] = $nid_data['givenname'][0];
+		}
+
+		if ( isset( $nid_data['sn'][0] ) ) {
+			$return_data['surname'] = $nid_data['sn'][0];
+		}
+
+		if ( isset( $nid_data['title'][0] ) ) {
+			$return_data['title'] = $nid_data['title'][0];
+		}
+
+		if ( isset( $nid_data['physicaldeliveryofficename'][0] ) ) {
+			$return_data['office'] = $nid_data['physicaldeliveryofficename'][0];
+		}
+
+		if ( isset( $nid_data['streetaddress'][0] ) ) {
+			$return_data['street_address'] = $nid_data['streetaddress'][0];
+		}
+
+		if ( isset( $nid_data['telephonenumber'][0] ) ) {
+			$return_data['telephone_number'] = $nid_data['telephonenumber'][0];
+		}
+
+		if ( isset( $nid_data['mail'][0] ) ) {
+			$return_data['email'] = $nid_data['mail'][0];
+		}
+
+		$hash = md5( serialize( $return_data ) );
+		$return_data['confirm_ad_hash'] = $hash;
+
+		return $return_data;
+	}
+
+	/**
+	 * Process an ajax request for AD information attached to a network ID. We'll return
+	 * the data here for confirmation. Confirmation will be handled elsewhere.
+	 */
+	public function ajax_get_data_by_nid() {
+		check_ajax_referer( 'wsu-people-nid-lookup' );
+
+		$nid = sanitize_text_field( $_POST['network_id'] );
+
+		if ( empty( $nid ) ) {
+			wp_send_json_error( 'Invalid or empty Network ID' );
+		}
+
+		$return_data = $this->get_nid_data( $nid );
+
+		wp_send_json_success( $return_data );
+	}
+
+	/**
+	 * Process an ajax request to confirm the AD information attached to a network ID. At
+	 * this point we'll do the lookup again and save the information to the current profile.
+	 */
+	public function ajax_confirm_nid_data() {
+		check_ajax_referer( 'wsu-people-nid-lookup' );
+
+		$nid = sanitize_text_field( $_POST['network_id'] );
+
+		if ( empty( $nid ) ) {
+			wp_send_json_error( 'Invalid or empty Network ID' );
+		}
+
+		$confirm_data = $this->get_nid_data( $nid );
+
+		if ( $confirm_data['confirm_ad_hash'] !== $_POST['confirm_ad_hash'] ) {
+			wp_send_json_error( 'Previously retrieved data does not match the data attached to this network ID.' );
+		}
+
+		if ( empty( absint( $_POST['post_id'] ) ) ) {
+			wp_send_json_error( 'Invalid profile post ID.' );
+		}
+
+		$post_id = $_POST['post_id'];
+
+		update_post_meta( $post_id, '_wsuwp_profile_ad_nid', $nid );
+		update_post_meta( $post_id, '_wsuwp_profile_ad_name_first', $confirm_data['given_name'] );
+		update_post_meta( $post_id, '_wsuwp_profile_ad_name_last', $confirm_data['surname'] );
+		update_post_meta( $post_id, '_wsuwp_profile_ad_title', $confirm_data['title'] );
+		update_post_meta( $post_id, '_wsuwp_profile_ad_office', $confirm_data['office'] );
+		update_post_meta( $post_id, '_wsuwp_profile_ad_address', $confirm_data['street_address'] );
+		update_post_meta( $post_id, '_wsuwp_profile_ad_phone', $confirm_data['telephone_number'] );
+		update_post_meta( $post_id, '_wsuwp_profile_ad_email', $confirm_data['email'] );
+
+		wp_send_json_success( 'Updated' );
+	}
 }
 
 $wsuwp_people_directory = new WSUWP_People_Directory();
