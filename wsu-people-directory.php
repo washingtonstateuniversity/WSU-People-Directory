@@ -558,13 +558,16 @@ class WSUWP_People_Directory {
 		$readonly = empty( trim( $nid ) ) ? '' : 'readonly';
 
 		?>
-		<label for="_wsuwp_profile_ad_name_first">Network ID</label>:<br />
+		<label for="_wsuwp_profile_ad_nid">Network ID</label>:
 		<input type="text" id="_wsuwp_profile_ad_nid" name="_wsuwp_profile_ad_nid" value="<?php echo esc_attr( $nid ); ?>" class="widefat" <?php echo $readonly; ?> />
 
 		<?php if ( '' === $readonly ) : ?>
-		<span class="button" id="load-ad-data">Load</span>
-		<span class="button button-primary profile-hide-button" id="confirm-ad-data">Confirm</span>
-		<input type="hidden" id="confirm-ad-hash" name="confirm_ad_hash" value="" />
+		<div class="load-ad-container">
+			<p class="description">Enter the WSU Network ID for this user to populate data from Active Directory.</p>
+			<span class="button" id="load-ad-data">Load</span>
+			<span class="button button-primary profile-hide-button" id="confirm-ad-data">Confirm</span>
+			<input type="hidden" id="confirm-ad-hash" name="confirm_ad_hash" value="" />
+		</div>
 		<?php endif;
 	}
 

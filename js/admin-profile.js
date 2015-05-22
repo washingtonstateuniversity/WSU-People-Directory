@@ -151,8 +151,7 @@ jQuery(document).ready(function( $ ) {
 				}
 
 				$('#_wsuwp_profile_ad_nid').attr('readonly',true);
-				$('#confirm-ad-data').addClass('profile-hide-button');
-				$('#load-ad-data').addClass('profile-hide-button');
+				$('.load-ad-container').addClass('profile-hide-button');
 			}
 		});
 	});
