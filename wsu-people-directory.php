@@ -90,6 +90,7 @@ class WSUWP_People_Directory {
 		add_action( 'init', array( $this, 'register_personnel_content_type' ), 11 );
 		add_action( 'init', array( $this, 'register_taxonomies' ), 11 );
 		add_action( 'init', array( $this, 'add_taxonomies' ), 12 );
+		add_action( 'init', array( $this, 'image_sizes' ) );
 
 		// Custom meta and all that.
 		add_action( 'admin_enqueue_scripts', array( $this, 'admin_enqueue_scripts' ) );
@@ -249,6 +250,17 @@ class WSUWP_People_Directory {
 		register_taxonomy_for_object_type( 'wsuwp_university_category', $this->personnel_content_type );
 		register_taxonomy_for_object_type( 'wsuwp_university_location', $this->personnel_content_type );
 		//register_taxonomy_for_object_type( 'wsuwp_university_organizations', $this->personnel_content_type );
+	}
+
+	/**
+	 * Remove some images sizes.
+	 */
+	public function image_sizes() {
+
+		remove_image_size( 'spine-small_size' );
+		remove_image_size( 'spine-large_size' );
+		remove_image_size( 'spine-Xlarge_size' );
+		
 	}
 
 	/**
