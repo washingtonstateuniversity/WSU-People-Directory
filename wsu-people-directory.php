@@ -259,7 +259,7 @@ class WSUWP_People_Directory {
 
 		remove_image_size( 'spine-small_size' );
 		remove_image_size( 'spine-large_size' );
-		remove_image_size( 'spine-Xlarge_size' );
+		remove_image_size( 'spine-xlarge_size' );
 		
 	}
 

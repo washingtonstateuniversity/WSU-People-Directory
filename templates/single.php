@@ -55,7 +55,7 @@
 						if ( $classifications ) {
 							echo '<p class="classifications">';
 							foreach ( $classifications as $classification ) {
-								echo '<span class="classification">' . esc_html( $classification ) . '</a></span>';
+								echo esc_html( $classification );
 							}
 							echo '</p>';
 						}
@@ -63,11 +63,15 @@
 						// Title(s).
 						if ( $title || $titles ) {
 							echo '<p>';
-							if ( $title ) { echo esc_html( $title ); }
 							if ( $titles ) {
             		foreach ( $titles as $additional_title ) :
-              		echo "/\n<br />" . esc_html( $additional_title );
+              		echo esc_html( $additional_title );
+									if ( $additional_title !== end( $titles ) ) {
+										echo '<br />';
+									}
             		endforeach;
+							} else {
+								if ( $title ) { echo esc_html( $title ); }
 							}
 							echo '</p>';
             }
