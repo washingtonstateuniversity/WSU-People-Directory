@@ -355,8 +355,8 @@ class WSUWP_People_Directory {
 			?>
 				<h3 class="wpuwp-profile-label">Short Biography</h3>
 				<?php wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_bio_short', true ), '_wsuwp_profile_bio_short' ); ?>
-				<h3 class="wpuwp-profile-label">Marketing Biography</h3>
-				<?php wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_bio_marketing', true ), '_wsuwp_profile_bio_marketing' ); ?>
+				<?php /*<h3 class="wpuwp-profile-label">Marketing Biography</h3>
+				<?php wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_bio_marketing', true ), '_wsuwp_profile_bio_marketing' );*/ ?>
 			</div><!--wsuwp-profile-default-->
 
 			<div id="wsuwp-profile-cv" class="wsuwp-profile-panel">
