@@ -154,5 +154,16 @@ jQuery(document).ready(function( $ ) {
 				$('.load-ad-container').addClass('profile-hide-button');
 			}
 		});
+
 	});
+
+	// Add CV handling.
+	$('#add-cv').on('click', function() {
+		var $cv_tab = $('#wsuwp-profile-tabs a[href="#wsuwp-profile-cv"]').parent();
+		$(this).parent('li').hide();
+		$cv_tab.show();
+		var index = $cv_tab.index();
+		$('#wsuwp-profile-tabs').tabs( 'option', 'active', index );
+	});
+
 });
