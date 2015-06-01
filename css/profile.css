@@ -25,50 +25,46 @@
 .dashicons-location {
 	margin-left: -20px;
 }
-/* Tabs. */
-#profile-tabbed-content {
-	overflow: hidden;
-	padding-top: 0;
+/* Bio. */
+#profile-bio {
+	padding: 0 2rem 1rem;
 }
-#profile-tabbed-content div {
-	background: #fff;
-	padding: 1.5em 2em 1em;
+/* Accordion. */
+#profile-accordion > dl {
+	margin: 0 0 1px 1px;
+	padding: 0 0 0 2rem;
 }
-#profile-tabs {
-  list-style: none;
-  margin: 0;
-	overflow: hidden;
+#profile-accordion > dl:nth-of-type(odd) {
+	background-color: #fff;
+}
+#profile-accordion > dl:nth-of-type(even) {
+	background-color: #eff0f1;
+}
+#profile-accordion > dl > dt {
+	background: url(../images/plus-crimson.svg) 95% center no-repeat;
+	cursor: pointer;
+	display: block;
+	padding: 1rem 0;
+}
+#profile-accordion > dl > dt:hover {
+	background: url(../images/plus-red.svg) 95% center no-repeat;
+}
+#profile-accordion > dl.disclosed > dt {
+	background-image: url(../images/x-crimson.svg);
+}
+#profile-accordion > dl.disclosed > dt:hover {
+	background-image: url(../images/x-red.svg);
+}
+#profile-accordion > dl > dt > h4 {
+	color: #981e32;
 	padding: 0;
-	white-space: nowrap;
 }
-#profile-tabs li {
-  display: inline-block;
-	margin: 0;
-  padding: 0;
-  vertical-align: bottom;
-}
-#profile-tabs a {
-	border-top-left-radius: 1px;
-  border-top-right-radius: 1px;
-	color: #981e32;
-	display: inline-block;
-	font-weight: bold;
-	margin-right: 1px;
-	padding: 0.5em 2em;
-	position: relative;
-}
-#profile-tabbed-content a:focus {
-	outline: 0;
-	color: #981e32;
-}
-#profile-tabbed-content a:hover {
-	background: #fff;
+#profile-accordion > dl > dt > h4:hover {
 	color: #c60c30;
+	padding: 0;
 }
-#profile-tabbed-content li.ui-tabs-active a {
-  background: #fff;
-	color: #5e6a71;
-  position: relative;
+#profile-accordion > dl > dd {
+	padding: 0 0 2rem 0;
 }
 /* Expertise lists. */
 .categorized dd:not(:last-of-type):after,
@@ -82,62 +78,10 @@
 	font-style: italic;
 	line-height: 18px;
 }
-
 @media screen and (max-width:791px) {
-	
-	/* Position and contact info. */
 	.dashicons {
 		font-size: 16px;
 		height: 16px;
 		padding-top: 5px;
 	}
-	/* Tabs. */
-	#profile-tabbed-content {
-		padding: 0 0 2rem 0;
-	}
-	
-}
-
-@media only screen and (max-width:693px) {
-
-	/* Tabs. */
-	#profile-tabs {
-		margin-bottom: 1px;
-		overflow: hidden;
-		position: relative;
-	}
-	#profile-tabs:after {
-		content: "\F501";
-		font-family: Spine-Icons;
-		pointer-events: none;
-		position: absolute;
-		right: 1em;
-		top: 0.4em;
-		z-index: 2;
-		-moz-osx-font-smoothing: grayscale;
-		-webkit-font-smoothing:  antialiased;
-	}
-	#profile-tabs.open:after {
-		color: #5e6a71;
-		content: "\F500";
-	}
-	#profile-tabs li {
-		display: block;
-	}
-	#profile-tabs a {
-		height: 100%;
-		left: 0;
-		position: absolute;
-		top: 0;
-		width: 100%;
-		width: calc( 100% - 4em );
-	}
-	#profile-tabs li.ui-tabs-active a {
-		z-index: 1;
-	}
-	#profile-tabs.open a {
-		display: block;
-		position: relative;
-	}
-	
 }

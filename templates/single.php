@@ -150,98 +150,136 @@
 	</section>
 
 	<?php // Content areas meta.
-		$about      = get_the_content();
-		$experience = get_post_meta( get_the_ID(), '_wsuwp_profile_experience', true );
-		$honors     = get_post_meta( get_the_ID(), '_wsuwp_profile_honors', true );
-		$research   = get_post_meta( get_the_ID(), '_wsuwp_profile_research', true );
-		$grants     = get_post_meta( get_the_ID(), '_wsuwp_profile_grants', true );
-		$teaching   = get_post_meta( get_the_ID(), '_wsuwp_profile_teaching', true );
-		$service    = get_post_meta( get_the_ID(), '_wsuwp_profile_service', true );
-		$extension  = get_post_meta( get_the_ID(), '_wsuwp_profile_extension', true );
-		$pubs       = get_post_meta( get_the_ID(), '_wsuwp_profile_publications', true );
-		$u_cats     = wp_get_post_terms( get_the_ID(), 'wsuwp_university_category' );
-		$topics     = wp_get_post_terms( get_the_ID(), 'topic' );
+		$bio           = get_the_content();
+		$short_bio     = get_post_meta( get_the_ID(), '_wsuwp_profile_bio_short', true );
+		$marketing_bio = get_post_meta( get_the_ID(), '_wsuwp_profile_bio_marketing', true );
+		$u_cats        = wp_get_post_terms( get_the_ID(), 'wsuwp_university_category' );
+		$topics        = wp_get_post_terms( get_the_ID(), 'topic' );
+		// CV meta.
+		$cv_employment       = get_post_meta( get_the_ID(), '_wsuwp_profile_employment', true );
+		$cv_honors           = get_post_meta( get_the_ID(), '_wsuwp_profile_honors', true );
+		$cv_grants           = get_post_meta( get_the_ID(), '_wsuwp_profile_grants', true );
+		$cv_publications     = get_post_meta( get_the_ID(), '_wsuwp_profile_publications', true );
+		$cv_presentations    = get_post_meta( get_the_ID(), '_wsuwp_profile_presentations', true );
+		$cv_teaching         = get_post_meta( get_the_ID(), '_wsuwp_profile_teaching', true );
+		$cv_service          = get_post_meta( get_the_ID(), '_wsuwp_profile_service', true );
+		$cv_responsibilities = get_post_meta( get_the_ID(), '_wsuwp_profile_responsibilities', true );
+		$cv_societies        = get_post_meta( get_the_ID(), '_wsuwp_profile_societies', true );
+		$cv_professional_dev = get_post_meta( get_the_ID(), '_wsuwp_profile_experience', true );
 	?>
 
-	<?php if ( $about || $experience || $honors || $u_cats || $topics || has_tag() || $research || $grants || $teaching || $service || $extension || $pubs ) : ?>
+	<?php if ( $bio || $u_cats || $topics || has_tag() ) : ?>
 
-	<section class="row single gutter pad-ends">
+	<section class="row single pad-bottom">
 
-		<div class="column one" id="profile-tabbed-content">
+		<div class="column one">
 
-			<ul id="profile-tabs">
-			<?php
-				if ( $about || $u_cats || $topics || has_tag() || $experience || $honors ) echo '<li><a href="#about">About</a></li>';
-				if ( $research || $grants ) echo '<li><a href="#research">Research</a></li>';
-				if ( $teaching ) echo '<li><a href="#teaching">Teaching</a></li>';
-				if ( $service ) echo '<li><a href="#service">Service</a></li>';
-				if ( $extension ) echo '<li><a href="#extension">Extension</a></li>';
-				if ( $pubs ) echo '<li><a href="#publications">Publications</a></li>';
-			?>
-			</ul>
+			<div id="profile-bio">
+				<?php the_content(); ?>
+			</div>
 
-			<?php // About Me panel.
-				if ( $about || $u_cats || $topics || has_tag() || $experience || $honors ) {
-					echo '<div id="about">';
+			<?php if ( $u_cats || $topics || has_tag() || $cv_employment || $cv_honors || $cv_grants || $cv_publications || $cv_presentations || $cv_teaching || $cv_service || $cv_responsibilities || $cv_societies || $cv_professional_dev ) : ?>
 
-					// Content.
-					the_content();
+			<div id="profile-accordion">
 
-					// Expertise. ish.
-					if ( $u_cats || $topics || has_tag() ) {
-						echo '<h2>Expertise</h2>';
-					}
-					if ( $u_cats ) {
-						echo '<dl class="categorized">';
-						//echo '<dt><span class="categorized-default">Categorized</span></dt>';
-						foreach ( $u_cats as $cat ) {
-							$cat = sanitize_term( $cat, 'wsuwp_university_category' );
-							echo '<dd><a href="' . esc_attr( get_term_link( $cat, 'wsuwp_university_category' ) ) . '">' . esc_html( $cat->name ) . '</a></dd>';
+				<?php if ( $u_cats || $topics || has_tag() ) : ?>
+      	<dl>
+					<dt>
+						<h4>Expertise</h4>
+					</dt>
+					<dd>
+					<?php
+						if ( $u_cats ) {
+							echo '<dl class="categorized">';
+							//echo '<dt><span class="categorized-default">Categorized</span></dt>';
+							foreach ( $u_cats as $cat ) {
+								$cat = sanitize_term( $cat, 'wsuwp_university_category' );
+								echo '<dd><a href="' . esc_attr( get_term_link( $cat, 'wsuwp_university_category' ) ) . '">' . esc_html( $cat->name ) . '</a></dd>';
+							}
+							//echo '</dl>';
 						}
-						//echo '</dl>';
-					}
-					if ( $topics ) {
-						echo '<dl class="topics">';
-						foreach ( $topics as $topic ) {
-							$topic = sanitize_term( $topic, 'topic' );
-							echo '<dd><a href="' . esc_attr( get_term_link( $topic, 'topic' ) ) . '">' . esc_html( $topic->name ) . '</a></dd>';
+						if ( $topics ) {
+							echo '<dl class="topics">';
+							foreach ( $topics as $topic ) {
+								$topic = sanitize_term( $topic, 'topic' );
+								echo '<dd><a href="' . esc_attr( get_term_link( $topic, 'topic' ) ) . '">' . esc_html( $topic->name ) . '</a></dd>';
+							}
+							echo '</dl>';
 						}
-						echo '</dl>';
-					}
-					if ( has_tag() ) {
-						echo '<dl class="tagged">';
-						//echo '<dt><span class="tagged-default">Tagged</span></dt>';
-						foreach( get_the_tags() as $tag ) {
-							echo '<dd><a href="' . esc_attr( get_tag_link( $tag->term_id ) ) . '">' . esc_html( $tag->name ) . '</a></dd>';
+						if ( has_tag() ) {
+							echo '<dl class="tagged">';
+							//echo '<dt><span class="tagged-default">Tagged</span></dt>';
+							foreach( get_the_tags() as $tag ) {
+								echo '<dd><a href="' . esc_attr( get_tag_link( $tag->term_id ) ) . '">' . esc_html( $tag->name ) . '</a></dd>';
+							}
+							echo '</dl>';
 						}
-						echo '</dl>';
-					}
+					?>
+					</dd>
+				</dl>
+				<?php endif; ?>
 
-					// Experience.
-					if ( $experience ) {
-						echo '<h2>Professional Experience</h2>';
-						echo wpautop( wp_kses_post( $experience ) );
-					}
+				<?php if ( $cv_employment || $cv_honors || $cv_grants || $cv_publications || $cv_presentations || $cv_teaching || $cv_service || $cv_responsibilities || $cv_societies || $cv_professional_dev ) : ?>
+      	<dl>
+					<dt>
+						<h4>Curriculum Vitae</h4>
+					</dt>
+					<dd>
+						<?php
+							if ( $cv_employment ) {
+								echo '<h2>Employment</h2>';
+								echo wpautop( wp_kses_post( $cv_employment ) );
+							}
+							if ( $cv_honors ) {
+								echo '<h2>Honors and Awards</h2>';
+								echo wpautop( wp_kses_post( $cv_honors ) );
+							}
+							if ( $cv_grants ) {
+								echo '<h2>Grants, Contracts, and Fund Generation</h2>';
+								echo wpautop( wp_kses_post( $cv_grants ) );
+								echo '<p class="key">Key to indicators or description of contributions to Grants, Contracts and Fund Generation: 1 = Provided the initial idea; 2 = Developed research/program design and hypotheses; 3 = Authored or co-authored grant application; 4 = Developed and/or managed budget; 5 = Managed personnel, partnerships, and project activities.</p>';
+							}
+							if ( $cv_publications ) {
+								echo '<h2>Publications and Creative Work</h2>';
+								echo wpautop( wp_kses_post( $cv_publications ) );
+								echo '<p class="key">Key to indicators or description of contributions to Publications and Creative Work: 1 = Developed the initial idea; 2 = Obtained or provided funds or other resources; 3 = Collected data; 4 = Analyzed data; 5 = Wrote/created product; 6 = Edited product.</p>';
+							}
+							if ( $cv_presentations ) {
+								echo '<h2>Presentations</h2>';
+								echo wpautop( wp_kses_post( $cv_presentations ) );
+							}
+							if ( $cv_teaching ) {
+								echo '<h2>University Instruction</h2>';
+								echo wpautop( wp_kses_post( $cv_teaching ) );
+							}
+							if ( $cv_service ) {
+								echo '<h2>Professional Service</h2>';
+								echo wpautop( wp_kses_post( $cv_service ) );
+							}
+							if ( $cv_responsibilities ) {
+								echo '<h2>Administrative Responsibility</h2>';
+								echo wpautop( wp_kses_post( $cv_responsibilities ) );
+							}
+							if ( $cv_societies ) {
+								echo '<h2>Professional and Scholarly Organization Affiliations</h2>';
+								echo wpautop( wp_kses_post( $cv_societies ) );
+							}
+							if ( $cv_professional_dev ) {
+								echo '<h2>Professional Developlment</h2>';
+								echo wpautop( wp_kses_post( $cv_professional_dev ) );
+							}
+						?>
+					</dd>
+				</dl>
+				<?php endif; ?>
 
-					// Honors.
-					if ( $honors ) {
-						echo '<h2>Honors and Awards</h2>';
-						echo wpautop( wp_kses_post( $honors ) );
-					}
+			</div>
 
-					echo '</div>';
-				}
-			?>
+			<?php endif; ?>
 
-			<?php // Research panel.
-				if ( $research || $grants ) :
-					echo '<div id="research">';
-
-					// Research.
-					if ( $research ) {
-						//echo '<h2>Research Interests</h2>';
-						echo wpautop( wp_kses_post( $research ) );
-					}
+			<?php 
+				
+			/*
 
 					// Funding.
 					if ( $grants ) {
@@ -278,7 +316,7 @@
 					echo wpautop( wp_kses_post( $pubs ) );
 					echo '<p class="key">Key to indicators or description of contributions to Publications and Creative Work: 1 = Developed the initial idea; 2 = Obtained or provided funds or other resources; 3 = Collected data; 4 = Analyzed data; 5 = Wrote/created product; 6 = Edited product.</p>';
 					echo '</div>';
-				}
+				}*/
 			?>
 
 		</div>

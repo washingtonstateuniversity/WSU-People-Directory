@@ -117,7 +117,7 @@
   width: 1px; 
 }
 /* Help icons and lightboxes */
-a .wsuwp-profile-help-link {
+.wsuwp-profile-help-link {
 	text-decoration: none;
 }
 i.mce-ico.mce-i-wp_help.wsuwp-profile-help {

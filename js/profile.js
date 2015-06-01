@@ -1,5 +1,12 @@
-jQuery(document).ready( function($){
+jQuery(document).ready( function($) {
 
+	$('#profile-accordion > dl > dd').hide();
+
+	$('#profile-accordion dt').click( function() {
+		$(this).next('dd').toggle().parents('dl').toggleClass('disclosed');
+	})
+
+/*
 	// Tabs.
 	$( '#profile-tabbed-content' ).tabs();
 
@@ -8,5 +15,5 @@ jQuery(document).ready( function($){
 		$(this).closest( 'ul' ).toggleClass( 'open' );
 		event.preventDefault();
 	});
-
+*/
 });
