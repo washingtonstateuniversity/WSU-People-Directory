@@ -75,6 +75,9 @@ class WSUWP_People_Directory {
 	var $wp_editors = array(
 		'_wsuwp_profile_bio_short',
 		'_wsuwp_profile_bio_marketing',
+		'_wsuwp_profile_bio_college',
+		'_wsuwp_profile_bio_dept',
+		'_wsuwp_profile_bio_lab',
 		'_wsuwp_profile_employment',
 		'_wsuwp_profile_honors',
 		'_wsuwp_profile_grants',
@@ -116,9 +119,9 @@ class WSUWP_People_Directory {
 		add_filter( 'json_query_vars', array( $this, 'json_query_vars' ) );
 
 		// Capabilities and related.
-		add_action( 'personal_options', array( $this, 'personal_options' ) );
-		add_action( 'edit_user_profile_update', array( $this, 'edit_user_profile_update' ) );
-		add_action( 'personal_options_update', array( $this, 'edit_user_profile_update' ) );
+		//add_action( 'personal_options', array( $this, 'personal_options' ) ); // These ought to be handled through Editorial Access Manager
+		//add_action( 'edit_user_profile_update', array( $this, 'edit_user_profile_update' ) );
+		//add_action( 'personal_options_update', array( $this, 'edit_user_profile_update' ) );
 		add_filter( 'user_has_cap', array( $this, 'user_has_cap' ), 10, 3 );
 		add_action( 'admin_menu', array( $this, 'admin_menu' ) );
 		add_action( 'admin_bar_menu', array( $this, 'admin_bar_menu' ), 999 );
@@ -339,7 +342,7 @@ class WSUWP_People_Directory {
 					<?php endif; ?>
 				</ul>
 				<div id="wsuwp-profile-default" class="wsuwp-profile-panel">
-					<h3>Long Biography</h3>
+					<h3 class="wsuwp-profile-label">Long Biography</h3>
 			<?php
 		endif;
 
@@ -351,12 +354,53 @@ class WSUWP_People_Directory {
 	public function edit_form_after_editor( $post ) {
 
 		if ( $this->personnel_content_type === $post->post_type ) :
+
+			$wsuwp_profile_bio_settings = array(
+				'textarea_rows' => 5,
+			);
 			
 			?>
-				<h3 class="wpuwp-profile-label">Short Biography</h3>
-				<?php wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_bio_short', true ), '_wsuwp_profile_bio_short' ); ?>
-				<?php /*<h3 class="wpuwp-profile-label">Marketing Biography</h3>
-				<?php wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_bio_marketing', true ), '_wsuwp_profile_bio_marketing' );*/ ?>
+
+				<!--<h3 class="wsuwp-profile-label">Marketing Biography</h3>-->
+				<?php /*wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_bio_marketing', true ), '_wsuwp_profile_bio_marketing', $wsuwp_profile_bio_settings );*/ ?>
+
+				<h3 class="wsuwp-profile-label">Short Biography</h3>
+				<?php wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_bio_short', true ), '_wsuwp_profile_bio_short', $wsuwp_profile_bio_settings ); ?>
+
+				<h3 class="wsuwp-profile-label">College Biography</h3>
+				<?php wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_bio_college', true ), '_wsuwp_profile_bio_college', $wsuwp_profile_bio_settings ); ?>
+
+				<h3 class="wsuwp-profile-label">Department Biography</h3>
+				<?php wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_bio_dept', true ), '_wsuwp_profile_bio_dept', $wsuwp_profile_bio_settings ); ?>
+
+				<h3 class="wsuwp-profile-label">Lab Biography</h3>
+				<?php wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_bio_lab', true ), '_wsuwp_profile_bio_lab', $wsuwp_profile_bio_settings ); ?>
+
+				<?php // Bios per unit taxonomy item.
+					/* 
+					$units = wp_get_post_terms( $post->ID, 'cahnrs_unit' );
+					if ( $units ) :
+						?>
+						<p class="description">You can add specific bios for the following departments.</p>
+						<?php
+						foreach ( $units as $unit ) :
+							$unit_bio = get_post_meta( $post->ID, '_wsuwp_profile_bio_' . $unit->slug, true );
+							if ( $unit_bio ) :
+							?>
+								<h3 class="wsuwp-profile-label"><?php echo $unit->name; ?> Biography</h3>
+								<?php wp_editor( $unit_bio, '_wsuwp_profile_bio_' . $unit->slug, $wsuwp_profile_bio_settings ); ?>
+							<?php else : ?>
+								<p class="wsuwp-profile-add-bio"><a href="#">+ Add <?php echo $unit->name; ?> Biography</a></p>
+								<div class="wsuwp-profile-inactive-bio">
+									<h3 class="wsuwp-profile-label"><?php echo $unit->name; ?> Biography</h3>
+									<?php wp_editor( $unit_bio, '_wsuwp_profile_bio_' . $unit->slug, $wsuwp_profile_bio_settings ); ?>
+								</div>
+							<?php
+							endif;
+						endforeach;
+					endif; */
+				?>
+
 			</div><!--wsuwp-profile-default-->
 
 			<div id="wsuwp-profile-cv" class="wsuwp-profile-panel">
@@ -373,10 +417,10 @@ class WSUWP_People_Directory {
 					);
 				?>
 
-				<!--<h3>Research</h3>-->
-				<?php /*wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_research', true ), '_wsuwp_profile_research' );*/ ?>
-				<!--<h3>Extension</h3>-->
-				<?php /*wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_extension', true ), '_wsuwp_profile_extension' );*/ ?>
+				<!--<h3 class="wsuwp-profile-label">Research</h3>-->
+				<?php /*wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_research', true ), '_wsuwp_profile_research', $wsuwp_profile_cv_settings );*/ ?>
+				<!--<h3 class="wsuwp-profile-label">Extension</h3>-->
+				<?php /*wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_extension', true ), '_wsuwp_profile_extension', $wsuwp_profile_cv_settings );*/ ?>
 
 				<div id="wsuwp-profile-employment-lb" class="wsuwp-profile-lb">
 					<h4>Include</h4>
@@ -398,8 +442,8 @@ class WSUWP_People_Directory {
              Financial Manager for Neighborhood Action Partners, Springdale, MO. Supervised five staff and ten volunteers. Managed budgets for six programs with annual budget of $750,000.</li>
 					</ul>
 				</div>
-				<h3 class="wpuwp-profile-label">Employment <a href="#TB_inline?width=600&height=700&inlineId=wsuwp-profile-employment-lb" class="thickbox wsuwp-profile-help-link" title="Employment"><i class="mce-ico mce-i-wp_help wsuwp-profile-help"></i></a></h3>
-				<?php wp_editor( $employment, '_wsuwp_profile_employment', $wsuwp_profile_cv_settings ); ?>
+				<h3 class="wsuwp-profile-label">Employment <a href="#TB_inline?width=600&height=700&inlineId=wsuwp-profile-employment-lb" class="thickbox wsuwp-profile-help-link" title="Employment"><i class="mce-ico mce-i-wp_help wsuwp-profile-help"></i></a></h3>
+				<?php wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_employment', true ), '_wsuwp_profile_employment', $wsuwp_profile_cv_settings ); ?>
 
 				<div id="wsuwp-profile-honors-lb" class="wsuwp-profile-lb">
 					<h4>Formatting</h4>
@@ -410,7 +454,7 @@ class WSUWP_People_Directory {
              Gold Award for Digitally Curriculum, "Training Local Entrepreneurs,” Natural Resource Extension Professionals (ANREP)</li>
 					</ul>
 				</div>
-				<h3 class="wpuwp-profile-label">Honors and Awards <a href="#TB_inline?width=600&height=700&inlineId=wsuwp-profile-honors-lb" class="thickbox wsuwp-profile-help-link" title="Honors and Awards"><i class="mce-ico mce-i-wp_help wsuwp-profile-help"></i></a></h3>
+				<h3 class="wsuwp-profile-label">Honors and Awards <a href="#TB_inline?width=600&height=700&inlineId=wsuwp-profile-honors-lb" class="thickbox wsuwp-profile-help-link" title="Honors and Awards"><i class="mce-ico mce-i-wp_help wsuwp-profile-help"></i></a></h3>
 				<?php wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_honors', true ), '_wsuwp_profile_honors', $wsuwp_profile_cv_settings ); ?>
 
 				<div id="wsuwp-profile-funds-lb" class="wsuwp-profile-lb">
@@ -441,7 +485,7 @@ class WSUWP_People_Directory {
             Key to indicators or description of contributions to Grants, Contracts and Fund Generation: 1 = Provided the initial idea; 2 = Developed research/program design and hypotheses; 3 = Authored or co-authored grant application; 4 = Developed and/or managed budget; 5 = Managed personnel, partnerships, and project activities.</em></li>
 					</ul>
 				</div>
-				<h3>Grants, Contracts, and Fund Generation <a href="#TB_inline?width=600&height=700&inlineId=wsuwp-profile-funds-lb" class="thickbox wsuwp-profile-help-link" title="Grants, Contracts, and Fund Generation"><i class="mce-ico mce-i-wp_help wsuwp-profile-help"></i></a></h3>
+				<h3 class="wsuwp-profile-label">Grants, Contracts, and Fund Generation <a href="#TB_inline?width=600&height=700&inlineId=wsuwp-profile-funds-lb" class="thickbox wsuwp-profile-help-link" title="Grants, Contracts, and Fund Generation"><i class="mce-ico mce-i-wp_help wsuwp-profile-help"></i></a></h3>
 				<?php wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_grants', true ), '_wsuwp_profile_grants', $wsuwp_profile_cv_settings ); ?>
 
 				<div id="wsuwp-profile-pubs-lb" class="wsuwp-profile-lb">
@@ -473,7 +517,7 @@ class WSUWP_People_Directory {
              Key to indicators or description of contributions to Publications and Creative Work: 1 = Developed the initial idea; 2 = Obtained or provided funds or other resources; 3 = Collected data; 4 = Analyzed data; 5 = Wrote/created product; 6 = Edited product.</em></li>
 					</ul>
 				</div>
-				<h3>Publications and Creative Work <a href="#TB_inline?width=600&height=550&inlineId=wsuwp-profile-pubs-lb" class="thickbox wsuwp-profile-help-link" title="Publications and Creative Work"><i class="mce-ico mce-i-wp_help wsuwp-profile-help"></i></a></h3>
+				<h3 class="wsuwp-profile-label">Publications and Creative Work <a href="#TB_inline?width=600&height=550&inlineId=wsuwp-profile-pubs-lb" class="thickbox wsuwp-profile-help-link" title="Publications and Creative Work"><i class="mce-ico mce-i-wp_help wsuwp-profile-help"></i></a></h3>
 				<?php wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_publications', true ), '_wsuwp_profile_publications', $wsuwp_profile_cv_settings ); ?>
 
 				<div id="wsuwp-profile-presentations-lb" class="wsuwp-profile-lb">
@@ -490,7 +534,7 @@ class WSUWP_People_Directory {
 						<li><strong>Smith, J. <em>2013</em></strong>. <em>Thrips Management in Onions. Pacific Northwest Insect Management Conference, Portland, OR.</em> <strong>Invited Presentation</strong></li>
 					</ul>
 				</div>
-				<h3>Presentations <a href="#TB_inline?width=600&height=550&inlineId=wsuwp-profile-presentations-lb" class="thickbox wsuwp-profile-help-link" title="Presentations"><i class="mce-ico mce-i-wp_help wsuwp-profile-help"></i></a></h3>
+				<h3 class="wsuwp-profile-label">Presentations <a href="#TB_inline?width=600&height=550&inlineId=wsuwp-profile-presentations-lb" class="thickbox wsuwp-profile-help-link" title="Presentations"><i class="mce-ico mce-i-wp_help wsuwp-profile-help"></i></a></h3>
 				<?php wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_presentations', true ), '_wsuwp_profile_presentations', $wsuwp_profile_cv_settings ); ?>
 
 				<div id="wsuwp-profile-teaching-lb" class="wsuwp-profile-lb">
@@ -517,7 +561,7 @@ class WSUWP_People_Directory {
              Derek Ohlgren, MS, Civil and Environmental Engineering, Washington State University, (thesis committee)</li>
 					</ul>
 				</div>
-				<h3>University Instruction <a href="#TB_inline?width=600&height=700&inlineId=wsuwp-profile-teaching-lb" class="thickbox wsuwp-profile-help-link" title="University Instruction"><i class="mce-ico mce-i-wp_help wsuwp-profile-help"></i></a></h3>
+				<h3 class="wsuwp-profile-label">University Instruction <a href="#TB_inline?width=600&height=700&inlineId=wsuwp-profile-teaching-lb" class="thickbox wsuwp-profile-help-link" title="University Instruction"><i class="mce-ico mce-i-wp_help wsuwp-profile-help"></i></a></h3>
 				<?php wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_teaching', true ), '_wsuwp_profile_teaching', $wsuwp_profile_cv_settings ); ?>
 
 				<div id="wsuwp-profile-service-lb" class="wsuwp-profile-lb">
@@ -557,7 +601,7 @@ class WSUWP_People_Directory {
              Doe, J., C. Ray, D. Mee, (editors) Journal of Metropolitan Extension; a journal of the Society for Urban Extension. <a href="#">Read the Journal at W. Coyote</a> [Online Library]</li>
 					</ul>
 				</div>
-				<h3>Professional Service <a href="#TB_inline?width=600&height=700&inlineId=wsuwp-profile-service-lb" class="thickbox wsuwp-profile-help-link" title="Professional Service"><i class="mce-ico mce-i-wp_help wsuwp-profile-help"></i></a></h3>
+				<h3 class="wsuwp-profile-label">Professional Service <a href="#TB_inline?width=600&height=700&inlineId=wsuwp-profile-service-lb" class="thickbox wsuwp-profile-help-link" title="Professional Service"><i class="mce-ico mce-i-wp_help wsuwp-profile-help"></i></a></h3>
 				<?php wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_service', true ), '_wsuwp_profile_service', $wsuwp_profile_cv_settings ); ?>
 
 				<div id="wsuwp-profile-responsibilities-lb" class="wsuwp-profile-lb">
@@ -568,7 +612,7 @@ class WSUWP_People_Directory {
              WSU Extension County Director, Sage County. Responsible for administrative leadership of faculty /staff, budget development/ management, local government liaison and representing WSU to the public for youth, family and natural resources programs. Conducted the community economic development program. Annual office budget, $450,000.</li>
 					</ul>
 				</div>
-				<h3 class="wpuwp-profile-label">Administrative Responsibility <a href="#TB_inline?width=600&height=700&inlineId=wsuwp-profile-responsibilities-lb" class="thickbox wsuwp-profile-help-link" title="Administrative Responsibility"><i class="mce-ico mce-i-wp_help wsuwp-profile-help"></i></a></h3>
+				<h3 class="wsuwp-profile-label">Administrative Responsibility <a href="#TB_inline?width=600&height=700&inlineId=wsuwp-profile-responsibilities-lb" class="thickbox wsuwp-profile-help-link" title="Administrative Responsibility"><i class="mce-ico mce-i-wp_help wsuwp-profile-help"></i></a></h3>
 				<?php wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_responsibilities', true ), '_wsuwp_profile_responsibilities', $wsuwp_profile_cv_settings ); ?>
 
 				<div id="wsuwp-profile-societies-lb" class="wsuwp-profile-lb">
@@ -578,7 +622,7 @@ class WSUWP_People_Directory {
 						<li>National Association of Community Development Extension Professionals - Chair, 2011</li>
 					</ul>
 				</div>
-				<h3 class="wpuwp-profile-label">Professional and Scholarly Organization Affiliations <a href="#TB_inline?width=600&height=700&inlineId=wsuwp-profile-societies-lb" class="thickbox wsuwp-profile-help-link" title="Professional and Scholarly Organization Affiliations"><i class="mce-ico mce-i-wp_help wsuwp-profile-help"></i></a></h3>
+				<h3 class="wsuwp-profile-label">Professional and Scholarly Organization Affiliations <a href="#TB_inline?width=600&height=700&inlineId=wsuwp-profile-societies-lb" class="thickbox wsuwp-profile-help-link" title="Professional and Scholarly Organization Affiliations"><i class="mce-ico mce-i-wp_help wsuwp-profile-help"></i></a></h3>
 				<?php wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_societies', true ), '_wsuwp_profile_societies', $wsuwp_profile_cv_settings ); ?>
 
 				<div id="wsuwp-profile-experience-lb" class="wsuwp-profile-lb">
@@ -591,7 +635,7 @@ class WSUWP_People_Directory {
              <em>Indigenous Economic Development Course</em>, International Economic Development Council</li>
 					</ul>
 				</div>
-				<h3 class="wpuwp-profile-label">Professional Development <a href="#TB_inline?width=600&height=700&inlineId=wsuwp-profile-experience-lb" class="thickbox wsuwp-profile-help-link" title="Professional Experience"><i class="mce-ico mce-i-wp_help wsuwp-profile-help"></i></a></h3>
+				<h3 class="wsuwp-profile-label">Professional Development <a href="#TB_inline?width=600&height=700&inlineId=wsuwp-profile-experience-lb" class="thickbox wsuwp-profile-help-link" title="Professional Experience"><i class="mce-ico mce-i-wp_help wsuwp-profile-help"></i></a></h3>
 				<?php wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_experience', true ), '_wsuwp_profile_experience', $wsuwp_profile_cv_settings ); ?>
 
 			</div>
@@ -950,6 +994,19 @@ class WSUWP_People_Directory {
 			}
 		}
 
+		// Sanitize and save Unit bios.
+		/*$units = wp_get_post_terms( $post_id, 'cahnrs_unit', array( 'fields' => 'slugs' ) );
+		if ( $units ) {
+			foreach ( $units as $unit ) {
+				$field = '_wsuwp_profile_bio_' . $unit;
+				if ( isset( $_POST[ $field ] ) && '' != $_POST[ $field ] ) {
+					update_post_meta( $post_id, $field, wp_kses_post( $_POST[ $field ] ) );
+				} else {
+					delete_post_meta( $post_id, $field );
+				}
+			}
+		}*/
+
 	}
 
 	/**
@@ -1017,7 +1074,7 @@ class WSUWP_People_Directory {
 
 	/**
 	 * Add "Organization Administrator" field in profile.
-	 */
+	 
 	public function personal_options( $user ) {
 
 		if ( IS_PROFILE_PAGE ) {
@@ -1030,13 +1087,13 @@ class WSUWP_People_Directory {
 			<td><input type="text" id="wsuwp_people_organization_admin" name="wsuwp_people_organization_admin" value="<?php echo esc_attr( get_user_meta( $user->ID, 'wsuwp_people_organization_admin', true ) ); ?>" /></td>
 		</tr>
 		<?php
-	}
+	}*/
 
 	/**
-	 * Store the type of authentication assigned to a user.
+	 * Store the "Organization Administrator" value assigned to a user.
 	 *
 	 * @param int $user_id ID of the user being edited.
-	 */
+	 
 	public function edit_user_profile_update( $user_id ) {
 
 		if ( ! current_user_can( 'edit_users', $user_id ) ) {
@@ -1049,7 +1106,7 @@ class WSUWP_People_Directory {
 			delete_user_meta( $user_id, 'wsuwp_people_organization_admin' );
 		}
 
-	}
+	}*/
 
 	/**
 	 * Capability modifications.
