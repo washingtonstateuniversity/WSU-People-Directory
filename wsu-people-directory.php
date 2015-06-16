@@ -161,7 +161,6 @@ class WSUWP_People_Directory {
 	 * Register the profiles content type.
 	 */
 	public function register_personnel_content_type() {
-
 		$args = array(
 			'labels' => array(
 				'name' => 'Profiles',
@@ -184,13 +183,11 @@ class WSUWP_People_Directory {
 			'supports' => array(
 				'title',
 				'editor',
-				'author',
 				'thumbnail',
-				'revisions'
+				'revisions',
 			),
 			'taxonomies' => array(
-				//'category',
-				'post_tag'
+				'post_tag',
 			),
 			'has_archive' => true,
 			'rewrite' => array(
@@ -200,7 +197,6 @@ class WSUWP_People_Directory {
 		);
 
 		register_post_type( $this->personnel_content_type, $args );
-
 	}
 
 	/**
