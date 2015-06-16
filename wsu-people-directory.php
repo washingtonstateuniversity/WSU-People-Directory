@@ -844,6 +844,9 @@ class WSUWP_People_Directory {
 	 * Remove or move certain meta boxes.
 	 */
 	public function do_meta_boxes() {
+		// Remove the default publishing meta box.
+		remove_meta_box( 'submitdiv', $this->personnel_content_type, 'side' );
+		add_meta_box( 'submitdiv', 'Update Profile', array( $this, 'publish_meta_box' ), $this->personnel_content_type, 'side' );
 
 		// Remove "Appointment" and "Classification" meta boxes.
 		remove_meta_box( 'appointmentdiv', $this->personnel_content_type, 'side' );
@@ -853,6 +856,56 @@ class WSUWP_People_Directory {
 		remove_meta_box( 'postimagediv', $this->personnel_content_type, 'side' );
 		add_meta_box( 'postimagediv', 'Profile Photo', 'post_thumbnail_meta_box', $this->personnel_content_type, 'side', 'high' );
 
+	}
+
+	/**
+	 * Replace the default post publishing meta box with our own that guides the user through
+	 * a slightly different process for creating and saving a person.
+	 *
+	 * This was originally copied from WordPress core's `post_submit_meta_box()`.
+	 *
+	 * @param WP_Post $post The profile being edited/created.
+	 */
+	public function publish_meta_box( $post ) {
+		$post_type = $post->post_type;
+		$post_type_object = get_post_type_object( $post_type );
+		$can_publish = current_user_can( $post_type_object->cap->publish_posts );
+		?>
+		<div class="submitbox" id="submitpost">
+
+			<div id="major-publishing-actions">
+
+				<div id="delete-action">
+					<?php
+					if ( current_user_can( 'delete_post', $post->ID ) ) {
+						if ( ! EMPTY_TRASH_DAYS ) {
+							$delete_text = __('Delete Permanently');
+						} else {
+							$delete_text = __( 'Move to Trash' );
+						} ?>
+						<a class="submitdelete deletion" href="<?php echo get_delete_post_link( $post->ID ); ?>"><?php echo $delete_text; ?></a><?php
+					}
+					?>
+				</div>
+
+				<div id="publishing-action">
+					<span class="spinner"></span>
+					<?php
+					if ( $can_publish && ( ! in_array( $post->post_status, array( 'publish', 'future', 'private' ) ) || 0 == $post->ID ) ) { ?>
+						<input name="original_publish" type="hidden" id="original_publish"
+							   value="<?php esc_attr_e( 'Publish' ); ?>"/>
+						<?php submit_button( __( 'Publish' ), 'primary button-large', 'publish', false );
+					} else { ?>
+						<input name="original_publish" type="hidden" id="original_publish" value="<?php esc_attr_e( 'Update' ); ?>" />
+						<input name="save" type="submit" class="button button-primary button-large" id="publish" value="<?php esc_attr_e( 'Update' ); ?>" />
+					<?php
+					} ?>
+				</div>
+				<div class="clear"></div>
+			</div>
+		</div>
+
+	<?php
 	}
 
 	/**
