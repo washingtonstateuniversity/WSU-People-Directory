@@ -1329,9 +1329,12 @@ class WSUWP_People_Directory {
 
 	/**
 	 * Add templates for the Personnel custom content type.
+	 *
+	 * @param string $template
+	 *
+	 * @return string
 	 */
 	public function template_include( $template ) {
-
 		if ( $this->personnel_content_type == get_post_type() && is_single() ) {
 			$template = plugin_dir_path( __FILE__ ) . 'templates/single.php';
 		}
@@ -1341,14 +1344,12 @@ class WSUWP_People_Directory {
 		}
 
 		return $template;
-
 	}
 
 	/**
 	 * Enqueue the scripts and styles used on the front end.
 	 */
 	public function wp_enqueue_scripts() {
-
 		if ( $this->personnel_content_type == get_post_type() ) {
 			if ( is_single() ) {
 				wp_enqueue_style( 'wsuwp-people-profile-style', plugins_url( 'css/profile.css', __FILE__ ), array( 'dashicons' ), $this->personnel_plugin_version );
@@ -1358,20 +1359,19 @@ class WSUWP_People_Directory {
 				wp_enqueue_style( 'wsuwp-people-archive-style', plugins_url( 'css/archive.css', __FILE__ ), array(), $this->personnel_plugin_version );
 			}
 		}
-
 	}
 
 	/**
-	 * Order public Personnel query results alphabetically by last name
+	 * Order public Personnel query results alphabetically by last name.
+	 *
+	 * @param WP_Query $query
 	 */
 	public function profile_archives( $query ) {
-
 		if ( ( $query->is_post_type_archive( $this->personnel_content_type ) || is_tax() || is_category() || is_tag() ) && $query->is_main_query() && ! is_admin() ) {
 			$query->set( 'order', 'ASC' );
 			$query->set( 'orderby', 'meta_value' );
 			$query->set( 'meta_key', '_wsuwp_profile_ad_name_last' );
 		}
-
 	}
 
 	/**
