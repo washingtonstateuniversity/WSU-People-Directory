@@ -891,6 +891,19 @@ class WSUWP_People_Directory {
 	 * @param WP_Post $post
 	 */
 	public function display_additional_info_meta_box( $post ) {
+		?>
+		<div class="wsuwp-profile-additional">
+			<p><label for="_wsuwp_profile_alt_office">Office</label><br />
+				<input type="text" id="_wsuwp_profile_alt_office" name="_wsuwp_profile_alt_office" value="<?php echo esc_attr( get_post_meta( $post->ID, '_wsuwp_profile_alt_office', true ) ); ?>" class="widefat" /></p>
+			<p><label for="_wsuwp_profile_alt_phone">Phone Number <span class="description">(xxx-xxx-xxxx)</span></label><br />
+				<input type="text" id="_wsuwp_profile_alt_phone" name="_wsuwp_profile_alt_phone" value="<?php echo esc_attr( get_post_meta( $post->ID, '_wsuwp_profile_alt_phone', true ) ); ?>" class="widefat" /></p>
+			<p><label for="_wsuwp_profile_alt_email">Email Address</label><br />
+				<input type="text" id="_wsuwp_profile_alt_email" name="_wsuwp_profile_alt_email" value="<?php echo esc_attr( get_post_meta( $post->ID, '_wsuwp_profile_alt_email', true ) ); ?>" class="widefat" /></p>
+			<p><label for="_wsuwp_profile_website">Website URL</label><br />
+				<input type="text" id="_wsuwp_profile_website" name="_wsuwp_profile_website" value="<?php echo esc_attr( get_post_meta( $post->ID, '_wsuwp_profile_website', true ) ); ?>" class="widefat" /></p>
+		</div>
+		<div class="wsuwp-profile-additional">
+		<?php
 		$titles = get_post_meta( $post->ID, '_wsuwp_profile_title', true );
 		$degrees = get_post_meta( $post->ID, '_wsuwp_profile_degree', true );
 
@@ -914,15 +927,6 @@ class WSUWP_People_Directory {
 		?>
 		<p class="wsuwp-profile-add-repeatable"><a href="#">+ Add another title</a></p>
 
-		<p><label for="_wsuwp_profile_alt_office">Office</label><br />
-		<input type="text" id="_wsuwp_profile_alt_office" name="_wsuwp_profile_alt_office" value="<?php echo esc_attr( get_post_meta( $post->ID, '_wsuwp_profile_alt_office', true ) ); ?>" class="widefat" /></p>
-		<p><label for="_wsuwp_profile_alt_phone">Phone Number <span class="description">(xxx-xxx-xxxx)</span></label><br />
-		<input type="text" id="_wsuwp_profile_alt_phone" name="_wsuwp_profile_alt_phone" value="<?php echo esc_attr( get_post_meta( $post->ID, '_wsuwp_profile_alt_phone', true ) ); ?>" class="widefat" /></p>
-		<p><label for="_wsuwp_profile_alt_email">Email Address</label><br />
-		<input type="text" id="_wsuwp_profile_alt_email" name="_wsuwp_profile_alt_email" value="<?php echo esc_attr( get_post_meta( $post->ID, '_wsuwp_profile_alt_email', true ) ); ?>" class="widefat" /></p>
-		<p><label for="_wsuwp_profile_website">Website URL</label><br />
-		<input type="text" id="_wsuwp_profile_website" name="_wsuwp_profile_website" value="<?php echo esc_attr( get_post_meta( $post->ID, '_wsuwp_profile_website', true ) ); ?>" class="widefat" /></p>
-
 		<?php
 		if ( $degrees && is_array( $degrees ) ) {
 			foreach ( $degrees as $index => $degree ) {
@@ -943,6 +947,8 @@ class WSUWP_People_Directory {
 		}
 		?>
 		<p class="wsuwp-profile-add-repeatable"><a href="#">+ Add another degree</a></p>
+		</div>
+		<div class="clear"></div>
 	<?php
 	}
 

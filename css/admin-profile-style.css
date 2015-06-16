@@ -1,3 +1,18 @@
+.wsuwp-profile-additional {
+	width: 45%;
+	float: left;
+	margin-right: 25px;
+	min-width: 250px;
+}
+
+.wsuwp-profile-add-repeatable {
+	text-align: right;
+}
+
+.wsuwp-profile-add-repeatable a {
+	text-decoration: none;
+}
+
 /* "Card" display */
 .profile-card {
 	display: table;
