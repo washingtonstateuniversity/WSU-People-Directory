@@ -894,19 +894,23 @@ class WSUWP_People_Directory {
 		$titles = get_post_meta( $post->ID, '_wsuwp_profile_title', true );
 		$degrees = get_post_meta( $post->ID, '_wsuwp_profile_degree', true );
 
-		if ( $titles && is_array( $titles ) ) :
-			foreach ( $titles as $index => $title ) :
+		if ( $titles && is_array( $titles ) ) {
+			foreach ( $titles as $index => $title ) {
+				?>
+				<p class="wp-profile-repeatable">
+					<label for="_wsuwp_profile_title[<?php echo esc_attr( $index ); ?>]">Working Title</label><br />
+					<input type="text" id="_wsuwp_profile_title[<?php echo esc_attr( $index ); ?>]" name="_wsuwp_profile_title[<?php echo esc_attr( $index ); ?>]" value="<?php echo esc_attr( $title ); ?>" class="widefat" />
+				</p>
+				<?php
+			}
+		} else {
 			?>
-			<p class="wp-profile-repeatable"><label for="_wsuwp_profile_title[<?php echo esc_attr( $index ); ?>]">Working Title</label><br />
-			<input type="text" id="_wsuwp_profile_title[<?php echo esc_attr( $index ); ?>]" name="_wsuwp_profile_title[<?php echo esc_attr( $index ); ?>]" value="<?php echo esc_attr( $title ); ?>" class="widefat" /></p>
+			<p class="wp-profile-repeatable">
+				<label for="_wsuwp_profile_title[0]">Working Title</label><br />
+				<input type="text" id="_wsuwp_profile_title[0]" name="_wsuwp_profile_title[0]" value="<?php echo esc_attr( $titles ); ?>" class="widefat" />
+			</p>
 			<?php
-			endforeach;
-		else :
-			?>
-			<p class="wp-profile-repeatable"><label for="_wsuwp_profile_title[0]">Working Title</label><br />
-			<input type="text" id="_wsuwp_profile_title[0]" name="_wsuwp_profile_title[0]" value="<?php echo esc_attr( $titles ); ?>" class="widefat" /></p>
-			<?php
-		endif;
+		}
 		?>
 		<p class="wsuwp-profile-add-repeatable"><a href="#">+ Add another title</a></p>
 
@@ -918,20 +922,25 @@ class WSUWP_People_Directory {
 		<input type="text" id="_wsuwp_profile_alt_email" name="_wsuwp_profile_alt_email" value="<?php echo esc_attr( get_post_meta( $post->ID, '_wsuwp_profile_alt_email', true ) ); ?>" class="widefat" /></p>
 		<p><label for="_wsuwp_profile_website">Website URL</label><br />
 		<input type="text" id="_wsuwp_profile_website" name="_wsuwp_profile_website" value="<?php echo esc_attr( get_post_meta( $post->ID, '_wsuwp_profile_website', true ) ); ?>" class="widefat" /></p>
+
 		<?php
-		if ( $degrees && is_array( $degrees ) ) :
-			foreach ( $degrees as $index => $degree ) :
+		if ( $degrees && is_array( $degrees ) ) {
+			foreach ( $degrees as $index => $degree ) {
 				?>
-				<p class="wp-profile-repeatable"><label for="_wsuwp_profile_degree[<?php echo esc_attr( $index ); ?>]">Degree</label><br />
-					<input type="text" id="_wsuwp_profile_degree[<?php echo esc_attr( $index ); ?>]" name="_wsuwp_profile_degree[<?php echo esc_attr( $index ); ?>]" value="<?php echo esc_attr( $degree ); ?>" class="widefat" /></p>
-			<?php
-			endforeach;
-		else :
+				<p class="wp-profile-repeatable">
+					<label for="_wsuwp_profile_degree[<?php echo esc_attr( $index ); ?>]">Degree</label><br />
+					<input type="text" id="_wsuwp_profile_degree[<?php echo esc_attr( $index ); ?>]" name="_wsuwp_profile_degree[<?php echo esc_attr( $index ); ?>]" value="<?php echo esc_attr( $degree ); ?>" class="widefat" />
+				</p>
+				<?php
+			}
+		} else {
 			?>
-			<p class="wp-profile-repeatable"><label for="_wsuwp_profile_degree[0]">Degree</label><br />
-				<input type="text" id="_wsuwp_profile_degree[0]" name="_wsuwp_profile_degree[0]" value="<?php echo esc_attr( $degrees ); ?>" class="widefat" /></p>
-		<?php
-		endif;
+			<p class="wp-profile-repeatable">
+				<label for="_wsuwp_profile_degree[0]">Degree</label><br />
+				<input type="text" id="_wsuwp_profile_degree[0]" name="_wsuwp_profile_degree[0]" value="<?php echo esc_attr( $degrees ); ?>" class="widefat" />
+			</p>
+			<?php
+		}
 		?>
 		<p class="wsuwp-profile-add-repeatable"><a href="#">+ Add another degree</a></p>
 	<?php
