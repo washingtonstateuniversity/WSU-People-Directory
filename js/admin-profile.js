@@ -151,7 +151,10 @@ jQuery(document).ready(function( $ ) {
 				}
 
 				$('#_wsuwp_profile_ad_nid').attr('readonly',true);
-				$('.load-ad-container').addClass('profile-hide-button');
+				$('.load-ad-container .description').html("The WSU Network ID used to populate this profile's data from Active Directory.");
+				$('#load-ad-data').addClass('profile-hide-button');
+				$('#confirm-ad-data').addClass('profile-hide-button');
+				$('#publish').removeClass('profile-hide-button');
 			}
 		});
 

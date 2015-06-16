@@ -107,7 +107,7 @@ class WSUWP_People_Directory {
 		add_action( 'edit_form_after_title', array( $this, 'edit_form_after_title' ) );
 		add_action( 'edit_form_after_editor',	array( $this, 'edit_form_after_editor' ) );
 		add_action( 'add_meta_boxes', array( $this, 'add_meta_boxes' ), 10, 2 );
-		add_action( 'do_meta_boxes', array( $this, 'do_meta_boxes' ) );
+		add_action( 'do_meta_boxes', array( $this, 'do_meta_boxes' ), 10, 3 );
 		add_action( 'save_post', array( $this, 'save_post' ), 10, 2 );
 		add_filter( 'wp_post_revision_meta_keys', array( $this, 'add_meta_keys_to_revision' ) );
 
@@ -652,12 +652,9 @@ class WSUWP_People_Directory {
 	 * @param string $post_type The slug of the current post type.
 	 */
 	public function add_meta_boxes( $post_type ) {
-
 		if ( $this->personnel_content_type !== $post_type ) {
 			return;
 		}
-
-		add_meta_box( 'wsuwp_profile_nid_entry', 'Network ID', array( $this, 'display_nid_entry_meta_box' ), $this->personnel_content_type, 'side', 'high' );
 
 		add_meta_box(
 			'wsuwp_profile_a_position_info',
@@ -706,25 +703,6 @@ class WSUWP_People_Directory {
 			'high'
 		);*/
 
-	}
-
-	public function display_nid_entry_meta_box( $post ) {
-		$nid        = get_post_meta( $post->ID, '_wsuwp_profile_ad_nid', true );
-
-		$readonly = empty( trim( $nid ) ) ? '' : 'readonly';
-
-		?>
-		<label for="_wsuwp_profile_ad_nid">Network ID</label>:
-		<input type="text" id="_wsuwp_profile_ad_nid" name="_wsuwp_profile_ad_nid" value="<?php echo esc_attr( $nid ); ?>" class="widefat" <?php echo $readonly; ?> />
-
-		<?php if ( '' === $readonly ) : ?>
-		<div class="load-ad-container">
-			<p class="description">Enter the WSU Network ID for this user to populate data from Active Directory.</p>
-			<span class="button" id="load-ad-data">Load</span>
-			<span class="button button-primary profile-hide-button" id="confirm-ad-data">Confirm</span>
-			<input type="hidden" id="confirm-ad-hash" name="confirm_ad_hash" value="" />
-		</div>
-		<?php endif;
 	}
 
 	/**
@@ -841,9 +819,21 @@ class WSUWP_People_Directory {
 	}
 
 	/**
-	 * Remove or move certain meta boxes.
+	 * Remove, move, and replace meta boxes as they are created and output.
+	 *
+	 * @param string  $post_type The current post type meta boxes are displayed for.
+	 * @param string  $context   The context in which meta boxes are being output.
+	 * @param WP_Post $post      The post object.
 	 */
-	public function do_meta_boxes() {
+	public function do_meta_boxes( $post_type, $context, $post ) {
+		if ( $this->personnel_content_type !== $post_type ) {
+			return;
+		}
+
+		$box_title = ( 'auto-draft' === $post->post_status ) ? 'Create Profile' : 'Update Profile';
+
+		remove_meta_box( 'submitdiv', $this->personnel_content_type, 'side' );
+		add_meta_box( 'submitdiv', $box_title, array( $this, 'publish_meta_box' ), $this->personnel_content_type, 'side' );
 
 		// Remove "Appointment" and "Classification" meta boxes.
 		remove_meta_box( 'appointmentdiv', $this->personnel_content_type, 'side' );
@@ -852,7 +842,79 @@ class WSUWP_People_Directory {
 		// Move and re-label the Featured Image meta box.
 		remove_meta_box( 'postimagediv', $this->personnel_content_type, 'side' );
 		add_meta_box( 'postimagediv', 'Profile Photo', 'post_thumbnail_meta_box', $this->personnel_content_type, 'side', 'high' );
+	}
 
+	/**
+	 * Replace the default post publishing meta box with our own that guides the user through
+	 * a slightly different process for creating and saving a person.
+	 *
+	 * This was originally copied from WordPress core's `post_submit_meta_box()`.
+	 *
+	 * @param WP_Post $post The profile being edited/created.
+	 */
+	public function publish_meta_box( $post ) {
+		$post_type = $post->post_type;
+		$post_type_object = get_post_type_object( $post_type );
+		$can_publish = current_user_can( $post_type_object->cap->publish_posts );
+
+		$nid        = get_post_meta( $post->ID, '_wsuwp_profile_ad_nid', true );
+
+		$readonly = empty( trim( $nid ) ) ? '' : 'readonly';
+		?>
+		<div class="submitbox" id="submitpost">
+
+			<div id="misc-publishing-actions">
+				<div class="misc-pub-section">
+					<label for="_wsuwp_profile_ad_nid">Network ID</label>:
+					<input type="text" id="_wsuwp_profile_ad_nid" name="_wsuwp_profile_ad_nid" value="<?php echo esc_attr( $nid ); ?>" class="widefat" <?php echo $readonly; ?> />
+
+				<?php if ( '' === $readonly ) : ?>
+					<div class="load-ad-container">
+						<p class="description">Enter the WSU Network ID for this user to populate data from Active Directory.</p>
+					</div>
+				<?php else : ?>
+					<div class="load-ad-container">
+						<p class="description">The WSU Network ID used to populate this profile's data from Active Directory.</p>
+					</div>
+				<?php endif; ?>
+				</div>
+			</div>
+			<div id="major-publishing-actions">
+
+				<div id="delete-action">
+					<?php
+					if ( 'auto-draft' !== $post->post_status && current_user_can( 'delete_post', $post->ID ) ) {
+						if ( ! EMPTY_TRASH_DAYS ) {
+							$delete_text = __('Delete Permanently');
+						} else {
+							$delete_text = __( 'Move to Trash' );
+						} ?>
+						<a class="submitdelete deletion" href="<?php echo get_delete_post_link( $post->ID ); ?>"><?php echo $delete_text; ?></a><?php
+					}
+					?>
+				</div>
+
+				<div id="publishing-action">
+					<span class="spinner"></span>
+					<?php
+					if ( $can_publish && ( ! in_array( $post->post_status, array( 'publish', 'future', 'private' ) ) || 0 == $post->ID ) ) { ?>
+						<span class="button" id="load-ad-data">Load</span>
+						<span class="button button-primary profile-hide-button" id="confirm-ad-data">Confirm</span>
+						<input type="hidden" id="confirm-ad-hash" name="confirm_ad_hash" value="" />
+						<input name="original_publish" type="hidden" id="original_publish"
+							   value="<?php esc_attr_e( 'Publish' ); ?>"/>
+						<?php submit_button( __( 'Publish' ), 'primary button-large profile-hide-button', 'publish', false );
+					} else { ?>
+						<input name="original_publish" type="hidden" id="original_publish" value="<?php esc_attr_e( 'Update' ); ?>" />
+						<input name="save" type="submit" class="button button-primary button-large" id="publish" value="<?php esc_attr_e( 'Update' ); ?>" />
+					<?php
+					} ?>
+				</div>
+				<div class="clear"></div>
+			</div>
+		</div>
+
+	<?php
 	}
 
 	/**
