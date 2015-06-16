@@ -58,7 +58,6 @@ class WSUWP_People_Directory {
 		'_wsuwp_profile_alt_email',
 		'_wsuwp_profile_website',
 		'_wsuwp_profile_cv',
-		'_wsuwp_profile_coeditor',
 	);
 
 	/**
@@ -670,17 +669,6 @@ class WSUWP_People_Directory {
 			'after_title',
 			'high'
 		);
-
-		// Co-editor meta box (should probably be handled with editorial access manager).
-		/*add_meta_box(
-			'wsuwp_profile_coeditor',
-			'Editors',
-			array( $this, 'display_profile_coeditor_meta_box' ),
-			$this->personnel_content_type,
-			'advanced',
-			'high'
-		);*/
-
 	}
 
 	/**
@@ -957,18 +945,6 @@ class WSUWP_People_Directory {
 	}
 
 	/**
-	 * Display a meta box used to assign additional editorship of a profile.
-	 */
-	public function display_profile_coeditor_meta_box( $post ) {
-
-		?>
-			<p>To grant another user the ability to edit your profile, add them here.</p>
-			<p><input type="text" id="_wsuwp_profile_coeditor" name="_wsuwp_profile_coeditor" value="<?php echo esc_attr( get_post_meta( $post->ID, '_wsuwp_profile_coeditor', true ) ); ?>" class="widefat" /></p>
-		<?php
-
-	}
-
-	/**
 	 * Save post meta data.
 	 */
 	public function save_post( $post_id ) {
@@ -1181,11 +1157,10 @@ class WSUWP_People_Directory {
 			return $allcaps;
 		}
 
-		// Bail if the user isn't an Organization Administrator or listed as a coeditor:
-		$coeditor = get_post_meta( $post->ID, '_wsuwp_profile_coeditor', true );
+		// Bail if the user isn't an Organization Administrator:
 		$dept = get_post_meta( $post->ID, '_wsuwp_profile_dept', true );
 		$org_admin = get_user_meta( $args[1], 'wsuwp_people_organization_admin', true );
-		if ( ( $args[1] != $coeditor ) && ( $org_admin != $dept ) ) {
+		if ( $org_admin != $dept ) {
 			return $allcaps;
 		}
 
