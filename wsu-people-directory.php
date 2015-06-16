@@ -95,7 +95,6 @@ class WSUWP_People_Directory {
 	public function __construct() {
 
 		// Custom content type and taxonomies.
-		//add_action( 'init', array( $this, 'process_upgrade_routine' ), 12 );
 		add_action( 'init', array( $this, 'register_personnel_content_type' ), 11 );
 		add_action( 'init', array( $this, 'register_taxonomies' ), 11 );
 		add_action( 'init', array( $this, 'add_taxonomies' ), 12 );
@@ -138,23 +137,6 @@ class WSUWP_People_Directory {
 		// Handle ajax requests from the admin.
 		add_action( 'wp_ajax_wsu_people_get_data_by_nid', array( $this, 'ajax_get_data_by_nid' ) );
 		add_action( 'wp_ajax_wsu_people_confirm_nid_data', array( $this, 'ajax_confirm_nid_data' ) );
-	}
-
-	/**
-	 * Process any upgrade routines between versions or on initial activation.
-	 * (Taken verbatim from the Unversity Center plugin)
-	 */
-	public function process_upgrade_routine() {
-
-		$db_version = get_option( 'wsuwp_people_version', '0.0.0' );
-
-		// Flush rewrite rules if on an early or non existing DB version.
-		if ( version_compare( $db_version, '0.1.0', '<' ) ) {
-			flush_rewrite_rules();
-		}
-
-		update_option( 'wsuwp_people_version', $this->personnel_plugin_version );
-
 	}
 
 	/**
