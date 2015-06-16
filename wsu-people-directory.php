@@ -1048,7 +1048,6 @@ class WSUWP_People_Directory {
 	 * Keys of meta fields to revision.
 	 */
 	public function add_meta_keys_to_revision( $keys ) {
-
 		$revisioned_fields = array_merge( $this->basic_fields, $this->repeatable_fields, $this->wp_editors );
 
 		foreach ( $revisioned_fields as $field ) {
@@ -1096,7 +1095,6 @@ class WSUWP_People_Directory {
 		$post_response['_wsuwp_profile_name'] = get_post_meta( $post['ID'], '_wsuwp_profile_name', true );
 
 		return $post_response;
-
 	}
 
 	/**
@@ -1108,7 +1106,6 @@ class WSUWP_People_Directory {
 		$valid_vars[] = 'meta_key';
 
 		return $valid_vars;
-
 	}
 
 	/**
