@@ -871,9 +871,10 @@ class WSUWP_People_Directory {
 				<?php if ( '' === $readonly ) : ?>
 					<div class="load-ad-container">
 						<p class="description">Enter the WSU Network ID for this user to populate data from Active Directory.</p>
-						<span class="button" id="load-ad-data">Load</span>
-						<span class="button button-primary profile-hide-button" id="confirm-ad-data">Confirm</span>
-						<input type="hidden" id="confirm-ad-hash" name="confirm_ad_hash" value="" />
+					</div>
+				<?php else : ?>
+					<div class="load-ad-container">
+						<p class="description">The WSU Network ID used to populate this profile's data from Active Directory.</p>
 					</div>
 				<?php endif; ?>
 				</div>
@@ -882,7 +883,7 @@ class WSUWP_People_Directory {
 
 				<div id="delete-action">
 					<?php
-					if ( current_user_can( 'delete_post', $post->ID ) ) {
+					if ( 'auto-draft' !== $post->post_status && current_user_can( 'delete_post', $post->ID ) ) {
 						if ( ! EMPTY_TRASH_DAYS ) {
 							$delete_text = __('Delete Permanently');
 						} else {
@@ -897,9 +898,12 @@ class WSUWP_People_Directory {
 					<span class="spinner"></span>
 					<?php
 					if ( $can_publish && ( ! in_array( $post->post_status, array( 'publish', 'future', 'private' ) ) || 0 == $post->ID ) ) { ?>
+						<span class="button" id="load-ad-data">Load</span>
+						<span class="button button-primary profile-hide-button" id="confirm-ad-data">Confirm</span>
+						<input type="hidden" id="confirm-ad-hash" name="confirm_ad_hash" value="" />
 						<input name="original_publish" type="hidden" id="original_publish"
 							   value="<?php esc_attr_e( 'Publish' ); ?>"/>
-						<?php submit_button( __( 'Publish' ), 'primary button-large', 'publish', false );
+						<?php submit_button( __( 'Publish' ), 'primary button-large profile-hide-button', 'publish', false );
 					} else { ?>
 						<input name="original_publish" type="hidden" id="original_publish" value="<?php esc_attr_e( 'Update' ); ?>" />
 						<input name="save" type="submit" class="button button-primary button-large" id="publish" value="<?php esc_attr_e( 'Update' ); ?>" />
