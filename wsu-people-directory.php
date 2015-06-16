@@ -273,21 +273,25 @@ class WSUWP_People_Directory {
 
 	/**
 	 * Change the "Enter title here" text for the Personnel content type.
+	 *
+	 * @param string $title The placeholder text displayed in the title input field.
+	 *
+	 * @return string
 	 */
 	public function enter_title_here( $title ) {
-
 		$screen = get_current_screen();
 
-		if ( $this->personnel_content_type == $screen->post_type ) {
+		if ( $this->personnel_content_type === $screen->post_type ) {
 			$title = 'Enter name here';
 		}
 
 		return $title;
-
 	}
 
 	/**
 	 * Add markup after the title of the edit screen for the Personnel content type.
+	 *
+	 * @param WP_Post $post
 	 */
 	public function edit_form_after_title( $post ) {
 
@@ -327,6 +331,8 @@ class WSUWP_People_Directory {
 
 	/**
 	 * Add markup after the default editor of the edit screen for the Personnel content type.
+	 *
+	 * @param WP_Post $post
 	 */
 	public function edit_form_after_editor( $post ) {
 
@@ -673,6 +679,8 @@ class WSUWP_People_Directory {
 
 	/**
 	 * Display a meta box used to show a person's "card".
+	 *
+	 * @param WP_Post $post
 	 */
 	public function display_position_info_meta_box( $post ) {
 
@@ -758,6 +766,8 @@ class WSUWP_People_Directory {
 
 	/**
 	 * Display a meta box used to upload a person's C.V.
+	 *
+	 * @param WP_Post $post
 	 */
 	public function display_cv_upload_meta_box( $post ) {
 
@@ -885,6 +895,8 @@ class WSUWP_People_Directory {
 
 	/**
 	 * Display a meta box under the "General" tab to collect additional or alternate contact info.
+	 *
+	 * @param WP_Post $post
 	 */
 	public function display_bio_contact_meta_box( $post ) {
 
@@ -920,6 +932,8 @@ class WSUWP_People_Directory {
 
 	/**
 	 * Display a meta box used to enter a persons degree information.
+	 *
+	 * @param WP_Post $post
 	 */
 	public function display_degree_info_meta_box( $post ) {
 
@@ -945,7 +959,11 @@ class WSUWP_People_Directory {
 	}
 
 	/**
-	 * Save post meta data.
+	 * Save data associated with a profile.
+	 *
+	 * @param int $post_id
+	 *
+	 * @return mixed
 	 */
 	public function save_post( $post_id ) {
 
