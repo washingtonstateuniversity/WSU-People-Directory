@@ -91,8 +91,10 @@ class WSUWP_People_Directory {
 		'_wsuwp_profile_extension',*/
 	);
 
+	/**
+	 * Start the plugin and apply associated hooks.
+	 */
 	public function __construct() {
-
 		// Custom content type and taxonomies.
 		add_action( 'init', array( $this, 'register_personnel_content_type' ), 11 );
 		add_action( 'init', array( $this, 'register_taxonomies' ), 11 );
@@ -117,9 +119,6 @@ class WSUWP_People_Directory {
 		add_filter( 'json_query_vars', array( $this, 'json_query_vars' ) );
 
 		// Capabilities and related.
-		//add_action( 'personal_options', array( $this, 'personal_options' ) ); // These ought to be handled through Editorial Access Manager
-		//add_action( 'edit_user_profile_update', array( $this, 'edit_user_profile_update' ) );
-		//add_action( 'personal_options_update', array( $this, 'edit_user_profile_update' ) );
 		add_filter( 'user_has_cap', array( $this, 'user_has_cap' ), 10, 3 );
 		add_action( 'admin_menu', array( $this, 'admin_menu' ) );
 		add_action( 'admin_bar_menu', array( $this, 'admin_bar_menu' ), 999 );
@@ -1049,7 +1048,6 @@ class WSUWP_People_Directory {
 	 * Keys of meta fields to revision.
 	 */
 	public function add_meta_keys_to_revision( $keys ) {
-
 		$revisioned_fields = array_merge( $this->basic_fields, $this->repeatable_fields, $this->wp_editors );
 
 		foreach ( $revisioned_fields as $field ) {
@@ -1061,14 +1059,18 @@ class WSUWP_People_Directory {
 
 	/**
 	 * Taxonomy columns on the "All Profiles" screen.
+	 *
+	 * @param array $columns
+	 *
+	 * @return array
 	 */
 	public function wsuwp_people_profile_columns( $columns ) {
-		//unset($columns['category']);
-   	unset($columns['post_tag']);
+		unset($columns['post_tag']);
 		$columns[] = $this->personnel_appointments;
 		$columns[] = $this->personnel_classifications;
 		$columns[] = 'wsuwp_university_location';
-    return $columns;
+
+		return $columns;
 	}
 
 	/**
@@ -1093,7 +1095,6 @@ class WSUWP_People_Directory {
 		$post_response['_wsuwp_profile_name'] = get_post_meta( $post['ID'], '_wsuwp_profile_name', true );
 
 		return $post_response;
-
 	}
 
 	/**
@@ -1105,44 +1106,7 @@ class WSUWP_People_Directory {
 		$valid_vars[] = 'meta_key';
 
 		return $valid_vars;
-
 	}
-
-	/**
-	 * Add "Organization Administrator" field in profile.
-	 
-	public function personal_options( $user ) {
-
-		if ( IS_PROFILE_PAGE ) {
-			return;
-		}
-
-		?>
-		<tr>
-			<th><label for="wsuwp_people_organization_admin">Organization Administrator for</label></th>
-			<td><input type="text" id="wsuwp_people_organization_admin" name="wsuwp_people_organization_admin" value="<?php echo esc_attr( get_user_meta( $user->ID, 'wsuwp_people_organization_admin', true ) ); ?>" /></td>
-		</tr>
-		<?php
-	}*/
-
-	/**
-	 * Store the "Organization Administrator" value assigned to a user.
-	 *
-	 * @param int $user_id ID of the user being edited.
-	 
-	public function edit_user_profile_update( $user_id ) {
-
-		if ( ! current_user_can( 'edit_users', $user_id ) ) {
-			return;
-		}
-
-		if ( isset( $_POST['wsuwp_people_organization_admin'] ) && '' != $_POST['wsuwp_people_organization_admin'] ) {
-			update_user_meta( $user_id, 'wsuwp_people_organization_admin', sanitize_text_field( $_POST['wsuwp_people_organization_admin'] ) );
-		} else {
-			delete_user_meta( $user_id, 'wsuwp_people_organization_admin' );
-		}
-
-	}*/
 
 	/**
 	 * Capability modifications.
