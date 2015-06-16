@@ -107,7 +107,7 @@ class WSUWP_People_Directory {
 		add_action( 'edit_form_after_title', array( $this, 'edit_form_after_title' ) );
 		add_action( 'edit_form_after_editor',	array( $this, 'edit_form_after_editor' ) );
 		add_action( 'add_meta_boxes', array( $this, 'add_meta_boxes' ), 10, 2 );
-		add_action( 'do_meta_boxes', array( $this, 'do_meta_boxes' ) );
+		add_action( 'do_meta_boxes', array( $this, 'do_meta_boxes' ), 10, 3 );
 		add_action( 'save_post', array( $this, 'save_post' ), 10, 2 );
 		add_filter( 'wp_post_revision_meta_keys', array( $this, 'add_meta_keys_to_revision' ) );
 
@@ -841,12 +841,21 @@ class WSUWP_People_Directory {
 	}
 
 	/**
-	 * Remove or move certain meta boxes.
+	 * Remove, move, and replace meta boxes as they are created and output.
+	 *
+	 * @param string  $post_type The current post type meta boxes are displayed for.
+	 * @param string  $context   The context in which meta boxes are being output.
+	 * @param WP_Post $post      The post object.
 	 */
-	public function do_meta_boxes() {
-		// Remove the default publishing meta box.
+	public function do_meta_boxes( $post_type, $context, $post ) {
+		if ( $this->personnel_content_type !== $post_type ) {
+			return;
+		}
+
+		$box_title = ( 'auto-draft' === $post->post_status ) ? 'Create Profile' : 'Update Profile';
+
 		remove_meta_box( 'submitdiv', $this->personnel_content_type, 'side' );
-		add_meta_box( 'submitdiv', 'Update Profile', array( $this, 'publish_meta_box' ), $this->personnel_content_type, 'side' );
+		add_meta_box( 'submitdiv', $box_title, array( $this, 'publish_meta_box' ), $this->personnel_content_type, 'side' );
 
 		// Remove "Appointment" and "Classification" meta boxes.
 		remove_meta_box( 'appointmentdiv', $this->personnel_content_type, 'side' );
@@ -855,7 +864,6 @@ class WSUWP_People_Directory {
 		// Move and re-label the Featured Image meta box.
 		remove_meta_box( 'postimagediv', $this->personnel_content_type, 'side' );
 		add_meta_box( 'postimagediv', 'Profile Photo', 'post_thumbnail_meta_box', $this->personnel_content_type, 'side', 'high' );
-
 	}
 
 	/**
