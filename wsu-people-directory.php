@@ -659,18 +659,9 @@ class WSUWP_People_Directory {
 
 		// Bio meta boxes.
 		add_meta_box(
-			'wsuwp_profile_contact_info',
-			'Alternate Contact Information',
-			array( $this, 'display_bio_contact_meta_box' ),
-			$this->personnel_content_type,
-			'after_title',
-			'high'
-		);
-
-		add_meta_box(
-			'wsuwp_profile_degree_info',
-			'Degrees Earned',
-			array( $this, 'display_degree_info_meta_box' ),
+			'wsuwp_profile_additional_info',
+			'Additional Profile Information',
+			array( $this, 'display_additional_info_meta_box' ),
 			$this->personnel_content_type,
 			'after_title',
 			'high'
@@ -894,13 +885,14 @@ class WSUWP_People_Directory {
 	}
 
 	/**
-	 * Display a meta box under the "General" tab to collect additional or alternate contact info.
+	 * Display a meta box to collect alternate contact information as well as additional working
+	 * title and degree data for the profile.
 	 *
 	 * @param WP_Post $post
 	 */
-	public function display_bio_contact_meta_box( $post ) {
-
+	public function display_additional_info_meta_box( $post ) {
 		$titles = get_post_meta( $post->ID, '_wsuwp_profile_title', true );
+		$degrees = get_post_meta( $post->ID, '_wsuwp_profile_degree', true );
 
 		if ( $titles && is_array( $titles ) ) :
 			foreach ( $titles as $index => $title ) :
@@ -927,35 +919,22 @@ class WSUWP_People_Directory {
 		<p><label for="_wsuwp_profile_website">Website URL</label><br />
 		<input type="text" id="_wsuwp_profile_website" name="_wsuwp_profile_website" value="<?php echo esc_attr( get_post_meta( $post->ID, '_wsuwp_profile_website', true ) ); ?>" class="widefat" /></p>
 		<?php
-
-	}
-
-	/**
-	 * Display a meta box used to enter a persons degree information.
-	 *
-	 * @param WP_Post $post
-	 */
-	public function display_degree_info_meta_box( $post ) {
-
-		$degrees = get_post_meta( $post->ID, '_wsuwp_profile_degree', true );
-
 		if ( $degrees && is_array( $degrees ) ) :
 			foreach ( $degrees as $index => $degree ) :
-			?>
-			<p class="wp-profile-repeatable"><label for="_wsuwp_profile_degree[<?php echo esc_attr( $index ); ?>]">Degree</label><br />
-			<input type="text" id="_wsuwp_profile_degree[<?php echo esc_attr( $index ); ?>]" name="_wsuwp_profile_degree[<?php echo esc_attr( $index ); ?>]" value="<?php echo esc_attr( $degree ); ?>" class="widefat" /></p>
+				?>
+				<p class="wp-profile-repeatable"><label for="_wsuwp_profile_degree[<?php echo esc_attr( $index ); ?>]">Degree</label><br />
+					<input type="text" id="_wsuwp_profile_degree[<?php echo esc_attr( $index ); ?>]" name="_wsuwp_profile_degree[<?php echo esc_attr( $index ); ?>]" value="<?php echo esc_attr( $degree ); ?>" class="widefat" /></p>
 			<?php
 			endforeach;
 		else :
 			?>
 			<p class="wp-profile-repeatable"><label for="_wsuwp_profile_degree[0]">Degree</label><br />
-			<input type="text" id="_wsuwp_profile_degree[0]" name="_wsuwp_profile_degree[0]" value="<?php echo esc_attr( $degrees ); ?>" class="widefat" /></p>
-			<?php
+				<input type="text" id="_wsuwp_profile_degree[0]" name="_wsuwp_profile_degree[0]" value="<?php echo esc_attr( $degrees ); ?>" class="widefat" /></p>
+		<?php
 		endif;
 		?>
 		<p class="wsuwp-profile-add-repeatable"><a href="#">+ Add another degree</a></p>
-		<?php
-
+	<?php
 	}
 
 	/**
