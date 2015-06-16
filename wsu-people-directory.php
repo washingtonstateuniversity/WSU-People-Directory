@@ -1060,14 +1060,18 @@ class WSUWP_People_Directory {
 
 	/**
 	 * Taxonomy columns on the "All Profiles" screen.
+	 *
+	 * @param array $columns
+	 *
+	 * @return array
 	 */
 	public function wsuwp_people_profile_columns( $columns ) {
-		//unset($columns['category']);
-   	unset($columns['post_tag']);
+		unset($columns['post_tag']);
 		$columns[] = $this->personnel_appointments;
 		$columns[] = $this->personnel_classifications;
 		$columns[] = 'wsuwp_university_location';
-    return $columns;
+
+		return $columns;
 	}
 
 	/**
