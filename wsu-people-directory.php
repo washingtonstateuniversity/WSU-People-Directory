@@ -652,12 +652,9 @@ class WSUWP_People_Directory {
 	 * @param string $post_type The slug of the current post type.
 	 */
 	public function add_meta_boxes( $post_type ) {
-
 		if ( $this->personnel_content_type !== $post_type ) {
 			return;
 		}
-
-		add_meta_box( 'wsuwp_profile_nid_entry', 'Network ID', array( $this, 'display_nid_entry_meta_box' ), $this->personnel_content_type, 'side', 'high' );
 
 		add_meta_box(
 			'wsuwp_profile_a_position_info',
@@ -706,25 +703,6 @@ class WSUWP_People_Directory {
 			'high'
 		);*/
 
-	}
-
-	public function display_nid_entry_meta_box( $post ) {
-		$nid        = get_post_meta( $post->ID, '_wsuwp_profile_ad_nid', true );
-
-		$readonly = empty( trim( $nid ) ) ? '' : 'readonly';
-
-		?>
-		<label for="_wsuwp_profile_ad_nid">Network ID</label>:
-		<input type="text" id="_wsuwp_profile_ad_nid" name="_wsuwp_profile_ad_nid" value="<?php echo esc_attr( $nid ); ?>" class="widefat" <?php echo $readonly; ?> />
-
-		<?php if ( '' === $readonly ) : ?>
-		<div class="load-ad-container">
-			<p class="description">Enter the WSU Network ID for this user to populate data from Active Directory.</p>
-			<span class="button" id="load-ad-data">Load</span>
-			<span class="button button-primary profile-hide-button" id="confirm-ad-data">Confirm</span>
-			<input type="hidden" id="confirm-ad-hash" name="confirm_ad_hash" value="" />
-		</div>
-		<?php endif;
 	}
 
 	/**
@@ -878,9 +856,28 @@ class WSUWP_People_Directory {
 		$post_type = $post->post_type;
 		$post_type_object = get_post_type_object( $post_type );
 		$can_publish = current_user_can( $post_type_object->cap->publish_posts );
+
+		$nid        = get_post_meta( $post->ID, '_wsuwp_profile_ad_nid', true );
+
+		$readonly = empty( trim( $nid ) ) ? '' : 'readonly';
 		?>
 		<div class="submitbox" id="submitpost">
 
+			<div id="misc-publishing-actions">
+				<div class="misc-pub-section">
+					<label for="_wsuwp_profile_ad_nid">Network ID</label>:
+					<input type="text" id="_wsuwp_profile_ad_nid" name="_wsuwp_profile_ad_nid" value="<?php echo esc_attr( $nid ); ?>" class="widefat" <?php echo $readonly; ?> />
+
+				<?php if ( '' === $readonly ) : ?>
+					<div class="load-ad-container">
+						<p class="description">Enter the WSU Network ID for this user to populate data from Active Directory.</p>
+						<span class="button" id="load-ad-data">Load</span>
+						<span class="button button-primary profile-hide-button" id="confirm-ad-data">Confirm</span>
+						<input type="hidden" id="confirm-ad-hash" name="confirm_ad_hash" value="" />
+					</div>
+				<?php endif; ?>
+				</div>
+			</div>
 			<div id="major-publishing-actions">
 
 				<div id="delete-action">
