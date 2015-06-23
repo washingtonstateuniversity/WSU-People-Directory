@@ -69,14 +69,19 @@ class WSUWP_People_Directory {
 	);
 
 	/**
-	 * WP editors used throughout the metaboxes.
+	 * WP editors for biographies.
 	 */
-	var $wp_editors = array(
-		'_wsuwp_profile_bio_short',
-		'_wsuwp_profile_bio_marketing',
+	var $wp_bio_editors = array(
+		//'_wsuwp_profile_bio_marketing',
 		'_wsuwp_profile_bio_college',
 		'_wsuwp_profile_bio_dept',
 		'_wsuwp_profile_bio_lab',
+	);
+
+	/**
+	 * WP editors for C.V.
+	 */
+	var $wp_cv_editors = array(
 		'_wsuwp_profile_employment',
 		'_wsuwp_profile_honors',
 		'_wsuwp_profile_grants',
@@ -90,7 +95,7 @@ class WSUWP_People_Directory {
 		/*'_wsuwp_profile_research',
 		'_wsuwp_profile_extension',*/
 	);
-
+	
 	/**
 	 * Start the plugin and apply associated hooks.
 	 */
@@ -301,28 +306,49 @@ class WSUWP_People_Directory {
 			<?php do_meta_boxes( get_current_screen(), 'after_title', $post ); ?>
 			<div id="wsuwp-profile-tabs">
 				<ul>
-					<li><a href="#wsuwp-profile-default" class="nav-tab">Biography</a></li>
+					<li class="wsuwp-profile-tab wsuwp-profile-bio-tab"><a href="#wsuwp-profile-default" class="nav-tab">Official Biography</a></li>
 					<?php
-						$employment       = get_post_meta( $post->ID, '_wsuwp_profile_employment', true );
-						$honors           = get_post_meta( $post->ID, '_wsuwp_profile_honors', true );
-						$funds            = get_post_meta( $post->ID, '_wsuwp_profile_grants', true );
-						$pubs             = get_post_meta( $post->ID, '_wsuwp_profile_publications', true );
-						$presentations    = get_post_meta( $post->ID, '_wsuwp_profile_presentations', true );
-						$teaching         = get_post_meta( $post->ID, '_wsuwp_profile_teaching', true );
-						$service          = get_post_meta( $post->ID, '_wsuwp_profile_service', true );
-						$responsibilities = get_post_meta( $post->ID, '_wsuwp_profile_responsibilities', true );
-						$societies        = get_post_meta( $post->ID, '_wsuwp_profile_societies', true );
-						$experience       = get_post_meta( $post->ID, '_wsuwp_profile_experience', true );
+						// Add tabs for saved biographies, and build an array to check against.
+						$profile_bios = array();
+						foreach ( $this->wp_bio_editors as $bio ) {
+							$meta = get_post_meta( $post->ID, $bio, true );
+							$profile_bios[] = $meta;
+							if ( $meta ) {
+								?>
+								<li class="wsuwp-profile-tab wsuwp-profile-bio-tab">
+									<a href="#<?php echo substr( $bio, 1 ); ?>" class="nav-tab"><?php echo ucfirst( substr( strrchr( $bio, '_' ), 1 ) ); ?> Biography</a>
+								</li>
+								<?php
+							}
+						}
+
+						// Build an array of CV field values to check against.
+						$profile_cv_data = array();
+						foreach ( $this->wp_cv_editors as $cv_meta_field ) {
+							$cv_data = get_post_meta( $post->ID, $cv_meta_field, true );
+							if ( $cv_data ) {
+								$profile_cv_data[] = $cv_data;
+							}
+						}
+
+						// Display CV tab if any of the fields have been saved.
+						if ( $profile_cv_data ) {
+							echo '<li class="wsuwp-profile-tab"><a href="#wsuwp-profile-cv" class="nav-tab">C.V.</a></li>';
+						}
+						
+						// Display "+ Add Bio" link if any biographies are still empty.
+						if ( array_search( '', $profile_bios ) !== false ) {
+							echo '<li><a id="add-bio">+ Add Biography</a></li>';
+						}
+
+						//  Display "+ Add Bio" link if none of the fields have value.
+						if ( empty( $profile_cv_data ) ) {
+							echo '<li><a id="add-cv">+ Add C.V.</a></li>';
+						}
+
 					?>
-					<?php if ( $employment || $honors || $funds || $pubs || $presentations || $teaching || $service || $responsibilities || $societies || $experience ) : ?>
-						<li><a href="#wsuwp-profile-cv" class="nav-tab">C.V.</a></li>
-					<?php else : ?>
-          	<li style="display:none;"><a href="#wsuwp-profile-cv" class="nav-tab">C.V.</a></li>
-						<li><a id="add-cv">+ Add C.V.</a></li>
-					<?php endif; ?>
 				</ul>
 				<div id="wsuwp-profile-default" class="wsuwp-profile-panel">
-					<h3 class="wsuwp-profile-label">Long Biography</h3>
 			<?php
 		endif;
 
@@ -336,56 +362,60 @@ class WSUWP_People_Directory {
 	public function edit_form_after_editor( $post ) {
 
 		if ( $this->personnel_content_type === $post->post_type ) :
-
-			$wsuwp_profile_bio_settings = array(
-				'textarea_rows' => 5,
-			);
 			
 			?>
-
-				<!--<h3 class="wsuwp-profile-label">Marketing Biography</h3>-->
-				<?php /*wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_bio_marketing', true ), '_wsuwp_profile_bio_marketing', $wsuwp_profile_bio_settings );*/ ?>
-
-				<h3 class="wsuwp-profile-label">Short Biography</h3>
-				<?php wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_bio_short', true ), '_wsuwp_profile_bio_short', $wsuwp_profile_bio_settings ); ?>
-
-				<h3 class="wsuwp-profile-label">College Biography</h3>
-				<?php wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_bio_college', true ), '_wsuwp_profile_bio_college', $wsuwp_profile_bio_settings ); ?>
-
-				<h3 class="wsuwp-profile-label">Department Biography</h3>
-				<?php wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_bio_dept', true ), '_wsuwp_profile_bio_dept', $wsuwp_profile_bio_settings ); ?>
-
-				<h3 class="wsuwp-profile-label">Lab Biography</h3>
-				<?php wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_bio_lab', true ), '_wsuwp_profile_bio_lab', $wsuwp_profile_bio_settings ); ?>
-
-				<?php // Bios per unit taxonomy item.
-					/* 
-					$units = wp_get_post_terms( $post->ID, 'cahnrs_unit' );
-					if ( $units ) :
-						?>
-						<p class="description">You can add specific bios for the following departments.</p>
-						<?php
-						foreach ( $units as $unit ) :
-							$unit_bio = get_post_meta( $post->ID, '_wsuwp_profile_bio_' . $unit->slug, true );
-							if ( $unit_bio ) :
-							?>
-								<h3 class="wsuwp-profile-label"><?php echo $unit->name; ?> Biography</h3>
-								<?php wp_editor( $unit_bio, '_wsuwp_profile_bio_' . $unit->slug, $wsuwp_profile_bio_settings ); ?>
-							<?php else : ?>
-								<p class="wsuwp-profile-add-bio"><a href="#">+ Add <?php echo $unit->name; ?> Biography</a></p>
-								<div class="wsuwp-profile-inactive-bio">
-									<h3 class="wsuwp-profile-label"><?php echo $unit->name; ?> Biography</h3>
-									<?php wp_editor( $unit_bio, '_wsuwp_profile_bio_' . $unit->slug, $wsuwp_profile_bio_settings ); ?>
-								</div>
-							<?php
-							endif;
-						endforeach;
-					endif; */
-				?>
-
 			</div><!--wsuwp-profile-default-->
 
-			<div id="wsuwp-profile-cv" class="wsuwp-profile-panel">
+			<?php 
+				foreach ( $this->wp_bio_editors as $bio_meta_field ) {
+					$bio = get_post_meta( $post->ID, $bio_meta_field, true );
+					if ( $bio ) {
+						?>
+						<div id="<?php echo substr( $bio_meta_field, 1 ); ?>" class="wsuwp-profile-panel">
+							<?php wp_editor( $bio, $bio_meta_field ); ?>
+							<p>
+								Assign profile photo
+                	<select class="wsuwp-profile-bio-photo">
+										<option></option>
+										<option value="one">1</option>
+										<option value="two">2</option>
+										<option value="three">3</option>
+									</select>
+								to this biography.
+							</p>
+						</div>
+						<?php
+					}
+				}
+			?>
+
+			<div id="wsuwp-profile-bio-template" class="wsuwp-profile-panel">
+				<p>
+					This is my
+					<select class="wsuwp-profile-bio-type">
+						<option></option>
+						<?php foreach ( $this->wp_bio_editors as $bio ) : ?>
+							<?php if ( ! get_post_meta( $post->ID, $bio, true ) ) : /* Somehow check for ones added without saving */ ?>
+							<option value="<?php echo substr( $bio, 1 ); ?>"><?php echo ucfirst( substr( strrchr( $bio, '_' ), 1 ) ); ?></option>
+							<?php endif; ?>
+						<?php endforeach; ?>
+					</select> biography.
+				</p>
+				<div class="wsuwp-profile-bio-details-container">
+					<textarea class="wsuwp-profile-new-bio"></textarea>
+					<p>Assign profile photo
+						<select class="wsuwp-profile-bio-photo">
+							<option></option>
+							<option>1</option>
+							<option>2</option>
+							<option>3</option>
+						</select>
+					to this biography.</p>
+				</div>
+			</div><!--wsuwp-profile-bio-template-->
+			
+
+			<div id="wsuwp-profile-cv" class="wsuwp-profile-panel" style="display:none;">
 
 				<p class="description">All sections are optional - headings for sections left blank will not be displayed.<br />
         Click the <i class="mce-ico mce-i-wp_help wsuwp-profile-help"></i>for section notes and formatting examples.</p>
@@ -1021,7 +1051,8 @@ class WSUWP_People_Directory {
 		}
 
 		// Sanitize and save wp_editors.
-		foreach ( $this->wp_editors as $field ) {
+		$wp_editors = array_merge( $this->wp_bio_editors, $this->wp_cv_editors );
+		foreach ( $wp_editors as $field ) {
 			if ( isset( $_POST[ $field ] ) && '' != $_POST[ $field ] ) {
 				update_post_meta( $post_id, $field, wp_kses_post( $_POST[ $field ] ) );
 			} else {
@@ -1029,26 +1060,13 @@ class WSUWP_People_Directory {
 			}
 		}
 
-		// Sanitize and save Unit bios.
-		/*$units = wp_get_post_terms( $post_id, 'cahnrs_unit', array( 'fields' => 'slugs' ) );
-		if ( $units ) {
-			foreach ( $units as $unit ) {
-				$field = '_wsuwp_profile_bio_' . $unit;
-				if ( isset( $_POST[ $field ] ) && '' != $_POST[ $field ] ) {
-					update_post_meta( $post_id, $field, wp_kses_post( $_POST[ $field ] ) );
-				} else {
-					delete_post_meta( $post_id, $field );
-				}
-			}
-		}*/
-
 	}
 
 	/**
 	 * Keys of meta fields to revision.
 	 */
 	public function add_meta_keys_to_revision( $keys ) {
-		$revisioned_fields = array_merge( $this->basic_fields, $this->repeatable_fields, $this->wp_editors );
+		$revisioned_fields = array_merge( $this->basic_fields, $this->repeatable_fields, $this->wp_bio_editors, $this->wp_cv_editors );
 
 		foreach ( $revisioned_fields as $field ) {
 			$keys[] = $field;
@@ -1082,7 +1100,7 @@ class WSUWP_People_Directory {
 			return $post_response;
 		}
 
-		$all_fields = array_merge( $this->ad_fields, $this->basic_fields, $this->repeatable_fields, $this->wp_editors );
+		$all_fields = array_merge( $this->ad_fields, $this->basic_fields, $this->repeatable_fields, $this->wp_bio_editors, $this->wp_cv_editors );
 
 		foreach ( $all_fields as $field ) {
 			$post_response[ $field ] = get_post_meta( $post['ID'], $field, true );
@@ -1204,7 +1222,6 @@ class WSUWP_People_Directory {
 			wp_add_dashboard_widget(
 				'wsuwp_directory_dashboard_widget',
 				'Welcome to the CAHNRS Directory',
-				//$this->wsuwp_directory_dashboard_widget
 				array( $this, 'wsuwp_directory_dashboard_widget' )
       );
 
@@ -1473,6 +1490,7 @@ class WSUWP_People_Directory {
 
 		wp_send_json_success( 'Updated' );
 	}
+
 }
 
 $wsuwp_people_directory = new WSUWP_People_Directory();

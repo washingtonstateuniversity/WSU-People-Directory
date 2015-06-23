@@ -20,7 +20,6 @@
   <div class="profile-body">
     <?php
     	$title = get_post_meta( get_the_ID(), '_wsuwp_profile_ad_title', true );
-			$depts = wp_get_post_terms( get_the_ID(), 'cahnrs_unit' );
 			$phone = get_post_meta( get_the_ID(), '_wsuwp_profile_ad_phone', true );
 			$phone_ext = get_post_meta( get_the_ID(), '_wsuwp_profile_ad_phone_ext', true );
 			$office = get_post_meta( get_the_ID(), '_wsuwp_profile_ad_office', true );
@@ -29,13 +28,16 @@
 			if ( $title ) {
 				echo '<p class="title">' . esc_html( $title ) . '</p>';
 			}
-			if ( $depts ) {
-				echo '<p class="departments">';
-				foreach ( $depts as $dept ) :
-					$dept = sanitize_term( $dept, 'cahnrs_unit' );
-					echo '<span class="department"><a href="' . esc_url( get_term_link( $dept, 'cahnrs_unit' ) ) . '">' . esc_html( $dept->name ) . '</a></span>';
-				endforeach;
-				echo '</p>';
+			if ( ! is_tax( 'cahnrs_unit' ) ) {
+				$depts = wp_get_post_terms( get_the_ID(), 'cahnrs_unit' );
+				if ( $depts ) {
+					echo '<p class="departments">';
+					foreach ( $depts as $dept ) :
+						$dept = sanitize_term( $dept, 'cahnrs_unit' );
+						echo '<span class="department"><a href="' . esc_url( get_term_link( $dept, 'cahnrs_unit' ) ) . '">' . esc_html( $dept->name ) . '</a></span>';
+					endforeach;
+					echo '</p>';
+				}
 			}
 			if ( $phone || $office || $email ) {
 				echo '<p class="contact">';

@@ -70,7 +70,8 @@
 	font-weight: bold;
 	line-height: 24px;
 }
-#wsuwp-profile-tabs > ul li a#add-cv {
+#wsuwp-profile-tabs > ul li a#add-cv,
+#wsuwp-profile-tabs > ul li a#add-bio {
 	border: none;
 	cursor: pointer;
 	font-weight: normal;
@@ -85,10 +86,20 @@
 	color: #000;
 }
 /* Tab panels */
+#wsuwp-profile-bio-template,
+.wsuwp-profile-bio-details-container {
+	display: none;
+}
 .wsuwp-profile-panel {
 	border: 1px solid #ccc;
 	border-top: none;
 	padding: 20px;
+}
+.wsuwp-profile-panel p:nth-child(1) {
+	margin-top: 0;
+}
+.wsuwp-profile-panel p:nth-last-child(1) {
+	margin-bottom: 0;
 }
 #wp-content-editor-tools {
 	padding-top: 0;
