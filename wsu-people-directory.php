@@ -65,7 +65,9 @@ class WSUWP_People_Directory {
 	);
 
 	/**
-	 * Repeatable fields used throughout the metaboxes.
+	 * Fields use to store data with multiple values as meta for a person.
+	 *
+	 * @var array
 	 */
 	var $repeatable_fields = array(
 		'_wsuwp_profile_degree',
@@ -76,7 +78,6 @@ class WSUWP_People_Directory {
 	 * WP editors for biographies.
 	 */
 	var $wp_bio_editors = array(
-		//'_wsuwp_profile_bio_marketing',
 		'_wsuwp_profile_bio_college',
 		'_wsuwp_profile_bio_dept',
 		'_wsuwp_profile_bio_lab',
@@ -238,30 +239,26 @@ class WSUWP_People_Directory {
 	}
 
 	/**
-	 * Add WSUWP University Taxonomies.
+	 * Add support for WSU University Taxonomies.
 	 */
 	public function add_taxonomies() {
 		register_taxonomy_for_object_type( 'wsuwp_university_category', $this->personnel_content_type );
 		register_taxonomy_for_object_type( 'wsuwp_university_location', $this->personnel_content_type );
-		//register_taxonomy_for_object_type( 'wsuwp_university_organizations', $this->personnel_content_type );
 	}
 
 	/**
 	 * Remove some images sizes.
 	 */
 	public function image_sizes() {
-
 		remove_image_size( 'spine-small_size' );
 		remove_image_size( 'spine-large_size' );
 		remove_image_size( 'spine-xlarge_size' );
-		
 	}
 
 	/**
 	 * Enqueue the scripts and styles used in the admin interface.
 	 */
 	public function admin_enqueue_scripts( $hook ) {
-
 		$screen = get_current_screen();
 
 		if ( ( 'post-new.php' == $hook || 'post.php' == $hook ) && $screen->post_type == $this->personnel_content_type ) {
@@ -302,9 +299,6 @@ class WSUWP_People_Directory {
 	 * @param WP_Post $post
 	 */
 	public function edit_form_after_title( $post ) {
-
-		//do_meta_boxes( get_current_screen(), 'after_title', $post );
-
 		if ( $this->personnel_content_type === $post->post_type ) :
 			?>
 			<?php do_meta_boxes( get_current_screen(), 'after_title', $post ); ?>
@@ -424,19 +418,15 @@ class WSUWP_People_Directory {
 				<p class="description">All sections are optional - headings for sections left blank will not be displayed.<br />
         Click the <i class="mce-ico mce-i-wp_help wsuwp-profile-help"></i>for section notes and formatting examples.</p>
 
-				<?php add_thickbox(); ?>
-
 				<?php
-					$wsuwp_profile_cv_settings = array(
-						'media_buttons' => false,
-						'textarea_rows' => 5,
-					);
-				?>
+				add_thickbox();
 
-				<!--<h3 class="wsuwp-profile-label">Research</h3>-->
-				<?php /*wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_research', true ), '_wsuwp_profile_research', $wsuwp_profile_cv_settings );*/ ?>
-				<!--<h3 class="wsuwp-profile-label">Extension</h3>-->
-				<?php /*wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_extension', true ), '_wsuwp_profile_extension', $wsuwp_profile_cv_settings );*/ ?>
+				$wsuwp_profile_cv_settings = array(
+					'media_buttons' => false,
+					'textarea_rows' => 5,
+				);
+
+				?>
 
 				<div id="wsuwp-profile-employment-lb" class="wsuwp-profile-lb">
 					<h4>Include</h4>
