@@ -1086,7 +1086,7 @@ class WSUWP_People_Directory {
 	}
 
 	/**
-	 * Include meta in the REST API output.
+	 * Provide formatted results for profiles via the WP JSON API.
 	 */
 	public function json_prepare_post( $post_response, $post, $context ) {
 
@@ -1094,17 +1094,84 @@ class WSUWP_People_Directory {
 			return $post_response;
 		}
 
-		$all_fields = array_merge( $this->ad_fields, $this->basic_fields, $this->repeatable_fields, $this->wp_bio_editors, $this->wp_cv_editors );
+		// Basic profile information directly from Active Directory.
+		$post_response['first_name']     = esc_html( get_post_meta( $post['ID'], '_wsuwp_profile_ad_name_first', true ) );
+		$post_response['last_name']      = esc_html( get_post_meta( $post['ID'], '_wsuwp_profile_ad_name_last' , true ) );
+		$post_response['position_title'] = esc_html( get_post_meta( $post['ID'], '_wsuwp_profile_ad_title' , true ) );
+		$post_response['office']         = esc_html( get_post_meta( $post['ID'], '_wsuwp_profile_ad_office' , true ) );
+		$post_response['address']        = esc_html( get_post_meta( $post['ID'], '_wsuwp_profile_ad_address', true ) );
+		$post_response['phone']          = esc_html( get_post_meta( $post['ID'], '_wsuwp_profile_ad_phone', true ) );
+		$post_response['phone_ext']      = esc_html( get_post_meta( $post['ID'], '_wsuwp_profile_ad_phone_ext', true ) );
+		$post_response['email']          = esc_html( get_post_meta( $post['ID'], '_wsuwp_profile_ad_email', true ) );
 
-		foreach ( $all_fields as $field ) {
-			$post_response[ $field ] = get_post_meta( $post['ID'], $field, true );
+		// Alternative, custom information inserted to possibly override official Active Directory information.
+		$post_response['office_alt']     = esc_html( get_post_meta( $post['ID'], '_wsuwp_profile_alt_office', true ) );
+		$post_response['phone_alt']      = esc_html( get_post_meta( $post['ID'], '_wsuwp_profile_alt_phone', true ) );
+		$post_response['email_alt']      = esc_html( get_post_meta( $post['ID'], '_wsuwp_profile_alt_email', true ) );
+
+		$post_response['website']        = esc_url( get_post_meta( $post['ID'], '_wsuwp_profile_website', true ) );
+
+		$cv_id = get_post_meta( $post['ID'], '_wsuwp_profile_cv', true );
+		$cv_url = wp_get_attachment_url( $cv_id );
+
+		if ( $cv_url ) {
+			$post_response['cv_attachment'] = esc_url( $cv_url );
+		} else {
+			$post_response['cv_attachment'] = false;
 		}
 
-		// Syndicate the CV URL instead of attachment ID.
-		$cv = get_post_meta( $post['ID'], '_wsuwp_profile_cv', true );
-		$post_response['_wsuwp_profile_cv'] = esc_url( wp_get_attachment_url( $cv ) );
+		// Look for a primary profile photo to send.
+		$thumbnail_id = get_post_thumbnail_id( $post['ID'] );
+		if ( $thumbnail_id ) {
+			$thumbnail_url = wp_get_attachment_image_src( $thumbnail_id );
+			if ( $thumbnail_url ) {
+				$post_response['profile_photo'] = esc_url( $thumbnail_url );
+			} else {
+				$post_response['profile_photo'] = false;
+			}
+		}
 
-		$post_response['_wsuwp_profile_name'] = get_post_meta( $post['ID'], '_wsuwp_profile_name', true );
+		// Process additional biographies if attached to the profile.
+		$college_bio    = get_post_meta( $post['ID'], '_wsuwp_profile_bio_college', true );
+		$lab_bio        = get_post_meta( $post['ID'], '_wsuwp_profile_bio_lab', true );
+		$department_bio = get_post_meta( $post['ID'], '_wsuwp_profile_bio_dept', true );
+
+		if ( $college_bio ) {
+			$college_bio = apply_filters( 'the_content', $college_bio );
+			$college_bio = wp_kses_post( $college_bio );
+		}
+
+		if ( $lab_bio ) {
+			$lab_bio = apply_filters( 'the_content', $lab_bio );
+			$lab_bio = wp_kses_post( $lab_bio );
+		}
+
+		if ( $department_bio ) {
+			$department_bio = apply_filters( 'the_content', $department_bio );
+			$department_bio = wp_kses_post( $department_bio );
+		}
+
+		$post_response['bio_college']    = $college_bio;
+		$post_response['bio_lab']        = $lab_bio;
+		$post_response['bio_department'] = $department_bio;
+
+		// Retrieve the array of stored working titles for the profile.
+		$working_titles = get_post_meta( $post['ID'], '_wsuwp_profile_title', true );
+		if ( is_array( $working_titles ) ) {
+			$working_titles = array_map( 'esc_html', $working_titles );
+		} else {
+			$working_titles = array();
+		}
+		$post_response['working_titles'] = $working_titles;
+
+		// Retrieve the array of stored degrees for the profile.
+		$degrees = get_post_meta( $post['ID'], '_wsuwp_profile_degree', true );
+		if ( is_array( $degrees ) ) {
+			$degrees = array_map( 'esc_html', $degrees );
+		} else {
+			$degrees = array();
+		}
+		$post_response['degrees'] = $degrees;
 
 		return $post_response;
 	}
