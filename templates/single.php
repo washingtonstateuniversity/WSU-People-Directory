@@ -182,7 +182,7 @@
 
 			<div id="profile-accordion">
 
-				<?php if ( $u_cats || $topics || has_tag() ) : ?>
+				<?php if ( ( $u_cats && ! is_wp_error( $u_cats ) ) || ( $topics && ! is_wp_error( $topics ) ) || has_tag() ) : ?>
       			<dl>
 					<dt>
 						<h4>Expertise</h4>
