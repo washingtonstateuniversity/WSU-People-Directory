@@ -277,48 +277,6 @@
 
 			<?php endif; ?>
 
-			<?php 
-				
-			/*
-
-					// Funding.
-					if ( $grants ) {
-						echo '<h2>Grants, Contracts, and Fund Generation</h2>';
-						echo wpautop( wp_kses_post( $grants ) );
-						echo '<p class="key">Key to indicators or description of contributions to Grants, Contracts and Fund Generation: 1 = Provided the initial idea; 2 = Developed research/program design and hypotheses; 3 = Authored or co-authored grant application; 4 = Developed and/or managed budget; 5 = Managed personnel, partnerships, and project activities.</p>';
-					}
-
-					echo '</div>';
-				endif;
-			?>
-
-			<?php // Teaching panel.
-				if ( $teaching ) {
-					echo '<div id="teaching">' . wpautop( wp_kses_post( $teaching ) ) . '</div>';
-				}
-			?>
-
-			<?php // Service panel.
-				if ( $service ) {
-					echo '<div id="service">' . wpautop( wp_kses_post( $service ) ) . '</div>';
-				}
-			?>
-
-			<?php // Service panel.
-				if ( $extension ) {
-					echo '<div id="extension">' . wpautop( wp_kses_post( $extension ) ) . '</div>';
-				}
-			?>
-
-			<?php // Publications panel.
-				if ( $pubs ) {
-					echo '<div id="publications">';
-					echo wpautop( wp_kses_post( $pubs ) );
-					echo '<p class="key">Key to indicators or description of contributions to Publications and Creative Work: 1 = Developed the initial idea; 2 = Obtained or provided funds or other resources; 3 = Collected data; 4 = Analyzed data; 5 = Wrote/created product; 6 = Edited product.</p>';
-					echo '</div>';
-				}*/
-			?>
-
 		</div>
 
 	</section>
