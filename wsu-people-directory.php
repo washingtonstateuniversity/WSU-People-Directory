@@ -1397,31 +1397,31 @@ class WSUWP_People_Directory {
 		);
 
 		if ( isset( $nid_data['givenname'][0] ) ) {
-			$return_data['given_name'] = $nid_data['givenname'][0];
+			$return_data['given_name'] = sanitize_text_field( $nid_data['givenname'][0] );
 		}
 
 		if ( isset( $nid_data['sn'][0] ) ) {
-			$return_data['surname'] = $nid_data['sn'][0];
+			$return_data['surname'] = sanitize_text_field( $nid_data['sn'][0] );
 		}
 
 		if ( isset( $nid_data['title'][0] ) ) {
-			$return_data['title'] = $nid_data['title'][0];
+			$return_data['title'] = sanitize_text_field( $nid_data['title'][0] );
 		}
 
 		if ( isset( $nid_data['physicaldeliveryofficename'][0] ) ) {
-			$return_data['office'] = $nid_data['physicaldeliveryofficename'][0];
+			$return_data['office'] = sanitize_text_field( $nid_data['physicaldeliveryofficename'][0] );
 		}
 
 		if ( isset( $nid_data['streetaddress'][0] ) ) {
-			$return_data['street_address'] = $nid_data['streetaddress'][0];
+			$return_data['street_address'] = sanitize_text_field( $nid_data['streetaddress'][0] );
 		}
 
 		if ( isset( $nid_data['telephonenumber'][0] ) ) {
-			$return_data['telephone_number'] = $nid_data['telephonenumber'][0];
+			$return_data['telephone_number'] = sanitize_text_field( $nid_data['telephonenumber'][0] );
 		}
 
 		if ( isset( $nid_data['mail'][0] ) ) {
-			$return_data['email'] = $nid_data['mail'][0];
+			$return_data['email'] = sanitize_text_field( $nid_data['mail'][0] );
 		}
 
 		$hash = md5( serialize( $return_data ) );
@@ -1461,6 +1461,7 @@ class WSUWP_People_Directory {
 			wp_send_json_error( 'Invalid or empty Network ID' );
 		}
 
+		// Data is sanitized before return.
 		$confirm_data = $this->get_nid_data( $nid );
 
 		if ( $confirm_data['confirm_ad_hash'] !== $_POST['confirm_ad_hash'] ) {
@@ -1486,5 +1487,4 @@ class WSUWP_People_Directory {
 	}
 
 }
-
 $wsuwp_people_directory = new WSUWP_People_Directory();
