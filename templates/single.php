@@ -325,17 +325,6 @@
 
 	<?php endif; ?>
 
-	<footer class="main-footer">
-		<section class="row single gutter">
-			<div class="column one">
-				<?php // If the user viewing the post can edit it, show an edit link.
-				if ( current_user_can( 'edit_post', $post->ID ) ) : ?>
-				<dl class="editors"><?php edit_post_link( 'Edit', '<span class="edit-link">', '</span>' ); ?></dl>
-				<?php endif; ?>
-			</div>
-		</section>
-	</footer>
-
 </main>
 
 <?php get_footer();
