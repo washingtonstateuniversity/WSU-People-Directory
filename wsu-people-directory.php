@@ -1124,6 +1124,9 @@ class WSUWP_People_Directory {
 	 * Capability modifications.
 	 */
 	public function user_has_cap( $allcaps, $cap, $args ) {
+		if ( empty( $allcaps ) ) {
+			return $allcaps;
+		}
 
 		// Bail for users who can already edit others posts:
 		if ( $allcaps['edit_others_posts'] ) {
