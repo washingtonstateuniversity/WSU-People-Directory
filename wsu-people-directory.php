@@ -1,12 +1,12 @@
 <?php
 /*
 Plugin Name: WSU People Directory
-Plugin URI:	#
+Plugin URI:	https://web.wsu.edu/wordpress/plugins/wsu-people-directory/
 Description: A plugin to maintain a central directory of people.
-Author:	washingtonstateuniversity, CAHNRS, philcable, danialbleile
+Author:	washingtonstateuniversity, CAHNRS, philcable, danialbleile, jeremyfelt
 Version: 0.1.0
 License: GPLv2 or later
-License URI: http://www.gnu.org/licenses/gpl-2.0.html
+License URI: https://www.gnu.org/licenses/gpl-2.0.html
 */
 
 class WSUWP_People_Directory {
