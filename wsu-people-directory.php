@@ -35,7 +35,9 @@ class WSUWP_People_Directory {
 	var $personnel_classifications = 'classification';
 
 	/**
-	 * Fields used to capture Active Directory data.
+	 * Fields used to store Active Directory data as meta for a person.
+	 *
+	 * @var array
 	 */
 	var $ad_fields = array(
 		'_wsuwp_profile_ad_nid',
@@ -50,7 +52,9 @@ class WSUWP_People_Directory {
 	);
 
 	/**
-	 * Fields used to capture additional profile information.
+	 * Fields used to store additional profile information as meta for a person.
+	 *
+	 * @var array
 	 */
 	var $basic_fields = array(
 		'_wsuwp_profile_alt_office',
