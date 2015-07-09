@@ -1,4 +1,3 @@
-WSU-People-Directory
-====================
+# WSU People Directory
 
-A plugin to maintain a central directory of people.
+A WordPress plugin to maintain a central directory of people at Washington State University.
