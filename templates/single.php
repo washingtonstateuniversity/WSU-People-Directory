@@ -6,7 +6,7 @@
 
 	<section class="row halves gutter pad-ends">
 
-  	<div class="column one">
+  		<div class="column one">
 
 			<?php while ( have_posts() ) : the_post(); ?>
 
@@ -21,7 +21,7 @@
 				<div class="article-body">
 
 					<?php
-          	// Meta data (excluding the content areas).
+          				// Meta data (excluding the content areas).
 						$degrees    = get_post_meta( get_the_ID(), '_wsuwp_profile_degree', true );
 						$title      = get_post_meta( get_the_ID(), '_wsuwp_profile_ad_title', true );
 						$titles     = get_post_meta( get_the_ID(), '_wsuwp_profile_title', true );
@@ -52,7 +52,7 @@
 						}
 
 						// Classification(s).
-						if ( $classifications ) {
+						if ( $classifications && ! is_wp_error( $classifications ) ) {
 							echo '<p class="classifications">';
 							foreach ( $classifications as $classification ) {
 								echo esc_html( $classification );
@@ -77,7 +77,7 @@
             }
 
 						// Department(s).
-						if ( $departments ) {
+						if ( $departments && ! is_wp_error( $departments ) ) {
 							echo '<p class="departments">';
 							foreach ( $departments as $department ) {
 								$dept = sanitize_term( $department, 'cahnrs_unit' );
@@ -111,7 +111,7 @@
 							if ( $office && $alt_office ) { echo ' | '; }
 							if ( $alt_office ) { echo esc_html( $alt_office ); }
 							if ( $address ) { echo '<br />' . esc_html( $address ); }
-							if ( $locations ) {
+							if ( $locations && ! is_wp_error( $locations ) ) {
 								foreach ( $locations as $location ) {
 									echo "<br />\n" . $location;
 								}
@@ -183,13 +183,13 @@
 			<div id="profile-accordion">
 
 				<?php if ( $u_cats || $topics || has_tag() ) : ?>
-      	<dl>
+      			<dl>
 					<dt>
 						<h4>Expertise</h4>
 					</dt>
 					<dd>
 					<?php
-						if ( $u_cats ) {
+						if ( $u_cats && ! is_wp_error( $u_cats ) ) {
 							echo '<dl class="categorized">';
 							//echo '<dt><span class="categorized-default">Categorized</span></dt>';
 							foreach ( $u_cats as $cat ) {
@@ -198,7 +198,7 @@
 							}
 							//echo '</dl>';
 						}
-						if ( $topics ) {
+						if ( $topics && ! is_wp_error( $topics ) ) {
 							echo '<dl class="topics">';
 							foreach ( $topics as $topic ) {
 								$topic = sanitize_term( $topic, 'topic' );
@@ -220,7 +220,7 @@
 				<?php endif; ?>
 
 				<?php if ( $cv_employment || $cv_honors || $cv_grants || $cv_publications || $cv_presentations || $cv_teaching || $cv_service || $cv_responsibilities || $cv_societies || $cv_professional_dev ) : ?>
-      	<dl>
+				<dl>
 					<dt>
 						<h4>Curriculum Vitae</h4>
 					</dt>
@@ -338,4 +338,4 @@
 
 </main>
 
-<?php get_footer(); ?>
+<?php get_footer();
