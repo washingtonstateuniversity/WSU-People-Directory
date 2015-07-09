@@ -6,7 +6,7 @@
 
 	<section class="row halves gutter pad-ends">
 
-  	<div class="column one">
+  		<div class="column one">
 
 			<?php while ( have_posts() ) : the_post(); ?>
 
@@ -21,7 +21,7 @@
 				<div class="article-body">
 
 					<?php
-          	// Meta data (excluding the content areas).
+          				// Meta data (excluding the content areas).
 						$degrees    = get_post_meta( get_the_ID(), '_wsuwp_profile_degree', true );
 						$title      = get_post_meta( get_the_ID(), '_wsuwp_profile_ad_title', true );
 						$titles     = get_post_meta( get_the_ID(), '_wsuwp_profile_title', true );
@@ -52,7 +52,7 @@
 						}
 
 						// Classification(s).
-						if ( $classifications ) {
+						if ( $classifications && ! is_wp_error( $classifications ) ) {
 							echo '<p class="classifications">';
 							foreach ( $classifications as $classification ) {
 								echo esc_html( $classification );
@@ -77,7 +77,7 @@
             }
 
 						// Department(s).
-						if ( $departments ) {
+						if ( $departments && ! is_wp_error( $departments ) ) {
 							echo '<p class="departments">';
 							foreach ( $departments as $department ) {
 								$dept = sanitize_term( $department, 'cahnrs_unit' );
@@ -111,7 +111,7 @@
 							if ( $office && $alt_office ) { echo ' | '; }
 							if ( $alt_office ) { echo esc_html( $alt_office ); }
 							if ( $address ) { echo '<br />' . esc_html( $address ); }
-							if ( $locations ) {
+							if ( $locations && ! is_wp_error( $locations ) ) {
 								foreach ( $locations as $location ) {
 									echo "<br />\n" . $location;
 								}
@@ -182,14 +182,14 @@
 
 			<div id="profile-accordion">
 
-				<?php if ( $u_cats || $topics || has_tag() ) : ?>
-      	<dl>
+				<?php if ( ( $u_cats && ! is_wp_error( $u_cats ) ) || ( $topics && ! is_wp_error( $topics ) ) || has_tag() ) : ?>
+      			<dl>
 					<dt>
 						<h4>Expertise</h4>
 					</dt>
 					<dd>
 					<?php
-						if ( $u_cats ) {
+						if ( $u_cats && ! is_wp_error( $u_cats ) ) {
 							echo '<dl class="categorized">';
 							//echo '<dt><span class="categorized-default">Categorized</span></dt>';
 							foreach ( $u_cats as $cat ) {
@@ -198,7 +198,7 @@
 							}
 							//echo '</dl>';
 						}
-						if ( $topics ) {
+						if ( $topics && ! is_wp_error( $topics ) ) {
 							echo '<dl class="topics">';
 							foreach ( $topics as $topic ) {
 								$topic = sanitize_term( $topic, 'topic' );
@@ -220,7 +220,7 @@
 				<?php endif; ?>
 
 				<?php if ( $cv_employment || $cv_honors || $cv_grants || $cv_publications || $cv_presentations || $cv_teaching || $cv_service || $cv_responsibilities || $cv_societies || $cv_professional_dev ) : ?>
-      	<dl>
+				<dl>
 					<dt>
 						<h4>Curriculum Vitae</h4>
 					</dt>
@@ -277,65 +277,12 @@
 
 			<?php endif; ?>
 
-			<?php 
-				
-			/*
-
-					// Funding.
-					if ( $grants ) {
-						echo '<h2>Grants, Contracts, and Fund Generation</h2>';
-						echo wpautop( wp_kses_post( $grants ) );
-						echo '<p class="key">Key to indicators or description of contributions to Grants, Contracts and Fund Generation: 1 = Provided the initial idea; 2 = Developed research/program design and hypotheses; 3 = Authored or co-authored grant application; 4 = Developed and/or managed budget; 5 = Managed personnel, partnerships, and project activities.</p>';
-					}
-
-					echo '</div>';
-				endif;
-			?>
-
-			<?php // Teaching panel.
-				if ( $teaching ) {
-					echo '<div id="teaching">' . wpautop( wp_kses_post( $teaching ) ) . '</div>';
-				}
-			?>
-
-			<?php // Service panel.
-				if ( $service ) {
-					echo '<div id="service">' . wpautop( wp_kses_post( $service ) ) . '</div>';
-				}
-			?>
-
-			<?php // Service panel.
-				if ( $extension ) {
-					echo '<div id="extension">' . wpautop( wp_kses_post( $extension ) ) . '</div>';
-				}
-			?>
-
-			<?php // Publications panel.
-				if ( $pubs ) {
-					echo '<div id="publications">';
-					echo wpautop( wp_kses_post( $pubs ) );
-					echo '<p class="key">Key to indicators or description of contributions to Publications and Creative Work: 1 = Developed the initial idea; 2 = Obtained or provided funds or other resources; 3 = Collected data; 4 = Analyzed data; 5 = Wrote/created product; 6 = Edited product.</p>';
-					echo '</div>';
-				}*/
-			?>
-
 		</div>
 
 	</section>
 
 	<?php endif; ?>
 
-	<footer class="main-footer">
-		<section class="row single gutter">
-			<div class="column one">
-				<?php // If the user viewing the post can edit it, show an edit link.
-				if ( current_user_can( 'edit_post', $post->ID ) ) : ?>
-				<dl class="editors"><?php edit_post_link( 'Edit', '<span class="edit-link">', '</span>' ); ?></dl>
-				<?php endif; ?>
-			</div>
-		</section>
-	</footer>
-
 </main>
 
-<?php get_footer(); ?>
+<?php get_footer();

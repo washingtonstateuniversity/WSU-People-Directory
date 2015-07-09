@@ -1,12 +1,12 @@
 <?php
 /*
 Plugin Name: WSU People Directory
-Plugin URI:	#
+Plugin URI:	https://web.wsu.edu/wordpress/plugins/wsu-people-directory/
 Description: A plugin to maintain a central directory of people.
-Author:	washingtonstateuniversity, CAHNRS, philcable, danialbleile
+Author:	washingtonstateuniversity, CAHNRS, philcable, danialbleile, jeremyfelt
 Version: 0.1.0
 License: GPLv2 or later
-License URI: http://www.gnu.org/licenses/gpl-2.0.html
+License URI: https://www.gnu.org/licenses/gpl-2.0.html
 */
 
 class WSUWP_People_Directory {
@@ -35,7 +35,9 @@ class WSUWP_People_Directory {
 	var $personnel_classifications = 'classification';
 
 	/**
-	 * Fields used to capture Active Directory data.
+	 * Fields used to store Active Directory data as meta for a person.
+	 *
+	 * @var array
 	 */
 	var $ad_fields = array(
 		'_wsuwp_profile_ad_nid',
@@ -50,7 +52,9 @@ class WSUWP_People_Directory {
 	);
 
 	/**
-	 * Fields used to capture additional profile information.
+	 * Fields used to store additional profile information as meta for a person.
+	 *
+	 * @var array
 	 */
 	var $basic_fields = array(
 		'_wsuwp_profile_alt_office',
@@ -61,7 +65,9 @@ class WSUWP_People_Directory {
 	);
 
 	/**
-	 * Repeatable fields used throughout the metaboxes.
+	 * Fields use to store data with multiple values as meta for a person.
+	 *
+	 * @var array
 	 */
 	var $repeatable_fields = array(
 		'_wsuwp_profile_degree',
@@ -72,7 +78,6 @@ class WSUWP_People_Directory {
 	 * WP editors for biographies.
 	 */
 	var $wp_bio_editors = array(
-		//'_wsuwp_profile_bio_marketing',
 		'_wsuwp_profile_bio_college',
 		'_wsuwp_profile_bio_dept',
 		'_wsuwp_profile_bio_lab',
@@ -234,30 +239,26 @@ class WSUWP_People_Directory {
 	}
 
 	/**
-	 * Add WSUWP University Taxonomies.
+	 * Add support for WSU University Taxonomies.
 	 */
 	public function add_taxonomies() {
 		register_taxonomy_for_object_type( 'wsuwp_university_category', $this->personnel_content_type );
 		register_taxonomy_for_object_type( 'wsuwp_university_location', $this->personnel_content_type );
-		//register_taxonomy_for_object_type( 'wsuwp_university_organizations', $this->personnel_content_type );
 	}
 
 	/**
 	 * Remove some images sizes.
 	 */
 	public function image_sizes() {
-
 		remove_image_size( 'spine-small_size' );
 		remove_image_size( 'spine-large_size' );
 		remove_image_size( 'spine-xlarge_size' );
-		
 	}
 
 	/**
 	 * Enqueue the scripts and styles used in the admin interface.
 	 */
 	public function admin_enqueue_scripts( $hook ) {
-
 		$screen = get_current_screen();
 
 		if ( ( 'post-new.php' == $hook || 'post.php' == $hook ) && $screen->post_type == $this->personnel_content_type ) {
@@ -298,9 +299,6 @@ class WSUWP_People_Directory {
 	 * @param WP_Post $post
 	 */
 	public function edit_form_after_title( $post ) {
-
-		//do_meta_boxes( get_current_screen(), 'after_title', $post );
-
 		if ( $this->personnel_content_type === $post->post_type ) :
 			?>
 			<?php do_meta_boxes( get_current_screen(), 'after_title', $post ); ?>
@@ -420,19 +418,15 @@ class WSUWP_People_Directory {
 				<p class="description">All sections are optional - headings for sections left blank will not be displayed.<br />
         Click the <i class="mce-ico mce-i-wp_help wsuwp-profile-help"></i>for section notes and formatting examples.</p>
 
-				<?php add_thickbox(); ?>
-
 				<?php
-					$wsuwp_profile_cv_settings = array(
-						'media_buttons' => false,
-						'textarea_rows' => 5,
-					);
-				?>
+				add_thickbox();
 
-				<!--<h3 class="wsuwp-profile-label">Research</h3>-->
-				<?php /*wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_research', true ), '_wsuwp_profile_research', $wsuwp_profile_cv_settings );*/ ?>
-				<!--<h3 class="wsuwp-profile-label">Extension</h3>-->
-				<?php /*wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_extension', true ), '_wsuwp_profile_extension', $wsuwp_profile_cv_settings );*/ ?>
+				$wsuwp_profile_cv_settings = array(
+					'media_buttons' => false,
+					'textarea_rows' => 5,
+				);
+
+				?>
 
 				<div id="wsuwp-profile-employment-lb" class="wsuwp-profile-lb">
 					<h4>Include</h4>
@@ -1130,6 +1124,9 @@ class WSUWP_People_Directory {
 	 * Capability modifications.
 	 */
 	public function user_has_cap( $allcaps, $cap, $args ) {
+		if ( empty( $allcaps ) ) {
+			return $allcaps;
+		}
 
 		// Bail for users who can already edit others posts:
 		if ( $allcaps['edit_others_posts'] ) {
@@ -1403,31 +1400,31 @@ class WSUWP_People_Directory {
 		);
 
 		if ( isset( $nid_data['givenname'][0] ) ) {
-			$return_data['given_name'] = $nid_data['givenname'][0];
+			$return_data['given_name'] = sanitize_text_field( $nid_data['givenname'][0] );
 		}
 
 		if ( isset( $nid_data['sn'][0] ) ) {
-			$return_data['surname'] = $nid_data['sn'][0];
+			$return_data['surname'] = sanitize_text_field( $nid_data['sn'][0] );
 		}
 
 		if ( isset( $nid_data['title'][0] ) ) {
-			$return_data['title'] = $nid_data['title'][0];
+			$return_data['title'] = sanitize_text_field( $nid_data['title'][0] );
 		}
 
 		if ( isset( $nid_data['physicaldeliveryofficename'][0] ) ) {
-			$return_data['office'] = $nid_data['physicaldeliveryofficename'][0];
+			$return_data['office'] = sanitize_text_field( $nid_data['physicaldeliveryofficename'][0] );
 		}
 
 		if ( isset( $nid_data['streetaddress'][0] ) ) {
-			$return_data['street_address'] = $nid_data['streetaddress'][0];
+			$return_data['street_address'] = sanitize_text_field( $nid_data['streetaddress'][0] );
 		}
 
 		if ( isset( $nid_data['telephonenumber'][0] ) ) {
-			$return_data['telephone_number'] = $nid_data['telephonenumber'][0];
+			$return_data['telephone_number'] = sanitize_text_field( $nid_data['telephonenumber'][0] );
 		}
 
 		if ( isset( $nid_data['mail'][0] ) ) {
-			$return_data['email'] = $nid_data['mail'][0];
+			$return_data['email'] = sanitize_text_field( $nid_data['mail'][0] );
 		}
 
 		$hash = md5( serialize( $return_data ) );
@@ -1467,6 +1464,7 @@ class WSUWP_People_Directory {
 			wp_send_json_error( 'Invalid or empty Network ID' );
 		}
 
+		// Data is sanitized before return.
 		$confirm_data = $this->get_nid_data( $nid );
 
 		if ( $confirm_data['confirm_ad_hash'] !== $_POST['confirm_ad_hash'] ) {
@@ -1492,5 +1490,4 @@ class WSUWP_People_Directory {
 	}
 
 }
-
 $wsuwp_people_directory = new WSUWP_People_Directory();
