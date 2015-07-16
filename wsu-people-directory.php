@@ -1125,7 +1125,7 @@ class WSUWP_People_Directory {
 		if ( $thumbnail_id ) {
 			$thumbnail = wp_get_attachment_image_src( $thumbnail_id );
 			if ( $thumbnail ) {
-				$post_response['profile_photo'] = esc_url( $thumbnail['url'] );
+				$post_response['profile_photo'] = esc_url( $thumbnail[0] );
 			} else {
 				$post_response['profile_photo'] = false;
 			}
