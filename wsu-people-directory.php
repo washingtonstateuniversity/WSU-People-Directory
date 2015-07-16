@@ -1123,9 +1123,9 @@ class WSUWP_People_Directory {
 		// Look for a primary profile photo to send.
 		$thumbnail_id = get_post_thumbnail_id( $post['ID'] );
 		if ( $thumbnail_id ) {
-			$thumbnail_url = wp_get_attachment_image_src( $thumbnail_id );
-			if ( $thumbnail_url ) {
-				$post_response['profile_photo'] = esc_url( $thumbnail_url );
+			$thumbnail = wp_get_attachment_image_src( $thumbnail_id );
+			if ( $thumbnail ) {
+				$post_response['profile_photo'] = esc_url( $thumbnail['url'] );
 			} else {
 				$post_response['profile_photo'] = false;
 			}
