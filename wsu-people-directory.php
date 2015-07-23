@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: WSU People Directory
-Plugin URI:	https://web.wsu.edu/wordpress/plugins/wsu-people-directory/
+Plugin URI: https://web.wsu.edu/wordpress/plugins/wsu-people-directory/
 Description: A plugin to maintain a central directory of people.
 Author:	washingtonstateuniversity, CAHNRS, philcable, danialbleile, jeremyfelt
 Version: 0.1.2
@@ -137,9 +137,7 @@ class WSUWP_People_Directory {
 		//add_action( 'views_edit-' . $this->personnel_content_type, array( $this, 'edit_views' ) );
 		//add_filter( 'parse_query', array ( $this, 'parse_query' ) );
 
-		// Templates, scripts, styles, and filters for the front end.
-		add_filter( 'template_include', array( $this, 'template_include' ), 1 );
-		add_action( 'wp_enqueue_scripts', array( $this, 'wp_enqueue_scripts' ), 11 );
+		// Modify 'wsuwp_people_profile' content type query.
 		add_action( 'pre_get_posts', array( $this, 'profile_archives' ) );
 
 		// Handle ajax requests from the admin.
@@ -797,12 +795,6 @@ class WSUWP_People_Directory {
 				<?php else : ?>
 					 Set C.V.</a></p>
 				<?php endif; ?>
-					<div id="wsuwp-profile-cvs-lb" style="display:none;">
-						<p>Include categorized documents here or something...</p>
-						<p>CAHNRS CV</p>
-						<p>Extension CV</p>
-					</div>
-        	<p>(<em><a href="#TB_inline?width=600&height=550&inlineId=wsuwp-profile-cvs-lb" class="thickbox wsuwp-profile-help-link" title="Download C.V. Template">Download C.V. template</a></em>)</p>
 			</div>
 		<?php
 
@@ -1390,40 +1382,6 @@ class WSUWP_People_Directory {
 			//set_query_var( 'post__in', $editables );
 		}
 
-	}
-
-	/**
-	 * Add templates for the Personnel custom content type.
-	 *
-	 * @param string $template
-	 *
-	 * @return string
-	 */
-	public function template_include( $template ) {
-		if ( $this->personnel_content_type == get_post_type() && is_single() ) {
-			$template = plugin_dir_path( __FILE__ ) . 'templates/single.php';
-		}
-
-		if ( is_post_type_archive( $this->personnel_content_type ) || is_tax() || is_category() || is_tag() ) {
-			$template = plugin_dir_path( __FILE__ ) . 'templates/archive.php';
-		}
-
-		return $template;
-	}
-
-	/**
-	 * Enqueue the scripts and styles used on the front end.
-	 */
-	public function wp_enqueue_scripts() {
-		if ( $this->personnel_content_type == get_post_type() ) {
-			if ( is_single() ) {
-				wp_enqueue_style( 'wsuwp-people-profile-style', plugins_url( 'css/profile.css', __FILE__ ), array( 'dashicons' ), $this->personnel_plugin_version );
-				wp_enqueue_script( 'wsuwp-people-profile-script', plugins_url( 'js/profile.js', __FILE__ ), array( 'jquery-ui-tabs' ), $this->personnel_plugin_version, true );
-			}
-			if ( is_archive() ) {
-				wp_enqueue_style( 'wsuwp-people-archive-style', plugins_url( 'css/archive.css', __FILE__ ), array(), $this->personnel_plugin_version );
-			}
-		}
 	}
 
 	/**
