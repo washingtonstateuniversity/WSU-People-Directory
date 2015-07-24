@@ -242,6 +242,7 @@ class WSUWP_People_Directory {
 	public function add_taxonomies() {
 		register_taxonomy_for_object_type( 'wsuwp_university_category', $this->personnel_content_type );
 		register_taxonomy_for_object_type( 'wsuwp_university_location', $this->personnel_content_type );
+		register_taxonomy_for_object_type( 'wsuwp_university_org', $this->personnel_content_type );
 	}
 
 	/**
