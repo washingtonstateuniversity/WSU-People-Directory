@@ -1070,6 +1070,7 @@ class WSUWP_People_Directory {
 	 * @return array
 	 */
 	public function wsuwp_people_profile_columns( $columns ) {
+		$columns[] = 'wsuwp_university_org';
 		$columns[] = 'wsuwp_university_location';
 
 		return $columns;
