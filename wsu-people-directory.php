@@ -1070,9 +1070,6 @@ class WSUWP_People_Directory {
 	 * @return array
 	 */
 	public function wsuwp_people_profile_columns( $columns ) {
-		unset($columns['post_tag']);
-		$columns[] = $this->personnel_appointments;
-		$columns[] = $this->personnel_classifications;
 		$columns[] = 'wsuwp_university_location';
 
 		return $columns;
