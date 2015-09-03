@@ -754,7 +754,7 @@ class WSUWP_People_Directory {
 			<?php endif; ?>
 		</div>
 
-		<p class="description">Notify <a href="#">HR</a> if any of this information is incorrect or needs updated.</p>
+		<!--<p class="description">Notify <a href="#">HR</a> if any of this information is incorrect or needs updated.</p>-->
 		<?php
 	}
 
