@@ -823,7 +823,7 @@ class WSUWP_People_Directory {
 
 		// Remove "Appointment" and "Classification" meta boxes.
 		remove_meta_box( 'appointmentdiv', $this->personnel_content_type, 'side' );
-		remove_meta_box( 'classificationdiv', $this->personnel_content_type, 'side' );
+		//remove_meta_box( 'classificationdiv', $this->personnel_content_type, 'side' );
 	}
 
 	/**
