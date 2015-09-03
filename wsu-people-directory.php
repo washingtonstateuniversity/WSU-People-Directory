@@ -116,7 +116,7 @@ class WSUWP_People_Directory {
 		add_filter( 'enter_title_here', array( $this, 'enter_title_here' ) );
 		add_action( 'edit_form_after_title', array( $this, 'edit_form_after_title' ) );
 		add_action( 'edit_form_after_editor',	array( $this, 'edit_form_after_editor' ) );
-		add_action( 'add_meta_boxes', array( $this, 'add_meta_boxes' ), 10, 2 );
+		add_action( 'add_meta_boxes', array( $this, 'add_meta_boxes' ), 10, 1 );
 		add_action( 'do_meta_boxes', array( $this, 'do_meta_boxes' ), 10, 3 );
 		add_action( 'save_post', array( $this, 'save_post' ), 10, 2 );
 		add_filter( 'wp_post_revision_meta_keys', array( $this, 'add_meta_keys_to_revision' ) );
@@ -662,24 +662,6 @@ class WSUWP_People_Directory {
 		}
 
 		add_meta_box(
-			'wsuwp_profile_a_position_info',
-			'Position and Contact Information',
-			array( $this, 'display_position_info_meta_box' ),
-			$this->personnel_content_type,
-			'side',
-			'default'
-		);
-
-		add_meta_box(
-			'wsuwp_profile_b_cv_upload',
-			'Curriculum Vitae',
-			array( $this, 'display_cv_upload_meta_box' ),
-			$this->personnel_content_type,
-			'side',
-			'default'
-		);
-
-		add_meta_box(
 			'wsuwp_profile_additional_info',
 			'Additional Profile Information',
 			array( $this, 'display_additional_info_meta_box' ),
@@ -815,15 +797,33 @@ class WSUWP_People_Directory {
 		$box_title = ( 'auto-draft' === $post->post_status ) ? 'Create Profile' : 'Update Profile';
 
 		remove_meta_box( 'submitdiv', $this->personnel_content_type, 'side' );
-		add_meta_box( 'submitdiv', $box_title, array( $this, 'publish_meta_box' ), $this->personnel_content_type, 'side' );
+		add_meta_box( 'submitdiv', $box_title, array( $this, 'publish_meta_box' ), $this->personnel_content_type, 'side', 'high' );
 
-		// Remove "Appointment" and "Classification" meta boxes.
-		remove_meta_box( 'appointmentdiv', $this->personnel_content_type, 'side' );
-		remove_meta_box( 'classificationdiv', $this->personnel_content_type, 'side' );
+		add_meta_box(
+			'wsuwp_profile_position_info',
+			'Position and Contact Information',
+			array( $this, 'display_position_info_meta_box' ),
+			$this->personnel_content_type,
+			'side',
+			'high'
+		);
 		
 		// Move and re-label the Featured Image meta box.
 		remove_meta_box( 'postimagediv', $this->personnel_content_type, 'side' );
 		add_meta_box( 'postimagediv', 'Profile Photo', 'post_thumbnail_meta_box', $this->personnel_content_type, 'side', 'high' );
+
+		add_meta_box(
+			'wsuwp_profile_cv_upload',
+			'Curriculum Vitae',
+			array( $this, 'display_cv_upload_meta_box' ),
+			$this->personnel_content_type,
+			'side',
+			'high'
+		);
+
+		// Remove "Appointment" and "Classification" meta boxes.
+		remove_meta_box( 'appointmentdiv', $this->personnel_content_type, 'side' );
+		remove_meta_box( 'classificationdiv', $this->personnel_content_type, 'side' );
 	}
 
 	/**
