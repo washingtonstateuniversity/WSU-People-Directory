@@ -1168,6 +1168,79 @@ class WSUWP_People_Directory {
 		}
 		$post_response['degrees'] = $degrees;
 
+		// Process C.V. content if attached to the profile.
+		$cv_employment       = get_post_meta( $post['ID'], '_wsuwp_profile_employment', true );
+		$cv_honors           = get_post_meta( $post['ID'], '_wsuwp_profile_honors', true );
+		$cv_grants           = get_post_meta( $post['ID'], '_wsuwp_profile_grants', true );
+		$cv_pubs             = get_post_meta( $post['ID'], '_wsuwp_profile_publications', true );
+		$cv_presentations    = get_post_meta( $post['ID'], '_wsuwp_profile_presentations', true );
+		$cv_teaching         = get_post_meta( $post['ID'], '_wsuwp_profile_teaching', true );
+		$cv_service          = get_post_meta( $post['ID'], '_wsuwp_profile_service', true );
+		$cv_responsibilities = get_post_meta( $post['ID'], '_wsuwp_profile_responsibilities', true );
+		$cv_affiliations     = get_post_meta( $post['ID'], '_wsuwp_profile_societies', true );
+		$cv_experience       = get_post_meta( $post['ID'], '_wsuwp_profile_experience', true );
+
+		if ( $cv_employment ) {
+			$cv_employment = apply_filters( 'the_content', $cv_employment );
+			$cv_employment = wp_kses_post( $cv_employment );
+		}
+
+		if ( $cv_honors ) {
+			$cv_honors = apply_filters( 'the_content', $cv_honors );
+			$cv_honors = wp_kses_post( $cv_honors );
+		}
+
+		if ( $cv_grants ) {
+			$cv_grants = apply_filters( 'the_content', $cv_grants );
+			$cv_grants = wp_kses_post( $cv_grants );
+		}
+
+		if ( $cv_pubs ) {
+			$cv_pubs = apply_filters( 'the_content', $cv_pubs );
+			$cv_pubs = wp_kses_post( $cv_pubs );
+		}
+
+		if ( $cv_presentations ) {
+			$cv_presentations = apply_filters( 'the_content', $cv_presentations );
+			$cv_presentations = wp_kses_post( $cv_presentations );
+		}
+
+		if ( $cv_teaching ) {
+			$cv_teaching = apply_filters( 'the_content', $cv_teaching );
+			$cv_teaching = wp_kses_post( $cv_teaching );
+		}
+
+		if ( $cv_service ) {
+			$cv_service = apply_filters( 'the_content', $cv_service );
+			$cv_service = wp_kses_post( $cv_service );
+		}
+
+		if ( $cv_responsibilities ) {
+			$cv_responsibilities = apply_filters( 'the_content', $cv_responsibilities );
+			$cv_responsibilities = wp_kses_post( $cv_responsibilities );
+		}
+
+		if ( $cv_affiliations ) {
+			$cv_affiliations = apply_filters( 'the_content', $cv_affiliations );
+			$cv_affiliations = wp_kses_post( $cv_affiliations );
+		}
+
+		if ( $cv_experience ) {
+			$cv_experience = apply_filters( 'the_content', $cv_experience );
+			$cv_experience = wp_kses_post( $cv_experience );
+		}
+
+		$data['cv_employment']      = $cv_employment;
+		$data['cv_honors']          = $cv_honors;
+		$data['cv_grants']          = $cv_grants;
+		$data['cv_publications']    = $cv_publications;
+		$data['cv_presentations']   = $cv_presentations;
+		$data['cv_teaching']        = $cv_teaching;
+		$data['cv_service']         = $cv_service;
+		$data['cv_responsibilites'] = $cv_responsibilites;
+		$data['cv_affiliations']    = $cv_affiliations;
+		$data['cv_experience']      = $cv_experience;
+
 		return $post_response;
 	}
 
