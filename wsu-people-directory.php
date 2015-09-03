@@ -1280,7 +1280,7 @@ class WSUWP_People_Directory {
 
 			wp_add_dashboard_widget(
 				'wsuwp_directory_dashboard_widget',
-				'Welcome to the CAHNRS Directory',
+				'Welcome to the WSU Personnel Directory',
 				array( $this, 'wsuwp_directory_dashboard_widget' )
       );
 
