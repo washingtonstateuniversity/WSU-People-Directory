@@ -173,6 +173,7 @@ class WSUWP_People_Directory {
 				'editor',
 				'thumbnail',
 				'revisions',
+				'author',
 			),
 			'taxonomies' => array(
 				'post_tag',
