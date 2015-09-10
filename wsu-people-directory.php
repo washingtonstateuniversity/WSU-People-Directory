@@ -4,7 +4,7 @@ Plugin Name: WSU People Directory
 Plugin URI: https://web.wsu.edu/wordpress/plugins/wsu-people-directory/
 Description: A plugin to maintain a central directory of people.
 Author:	washingtonstateuniversity, CAHNRS, philcable, danialbleile, jeremyfelt
-Version: 0.1.4
+Version: 0.1.5
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 */
@@ -17,7 +17,7 @@ class WSUWP_People_Directory {
 	 *
 	 * @var string
 	 */
-	var $personnel_plugin_version = '0.1.4';
+	var $personnel_plugin_version = '0.1.5';
 
 	/**
 	 * The slug used to register the "Personnel" custom content type.
@@ -116,7 +116,7 @@ class WSUWP_People_Directory {
 		add_filter( 'enter_title_here', array( $this, 'enter_title_here' ) );
 		add_action( 'edit_form_after_title', array( $this, 'edit_form_after_title' ) );
 		add_action( 'edit_form_after_editor',	array( $this, 'edit_form_after_editor' ) );
-		add_action( 'add_meta_boxes', array( $this, 'add_meta_boxes' ), 10, 2 );
+		add_action( 'add_meta_boxes', array( $this, 'add_meta_boxes' ), 10, 1 );
 		add_action( 'do_meta_boxes', array( $this, 'do_meta_boxes' ), 10, 3 );
 		add_action( 'save_post', array( $this, 'save_post' ), 10, 2 );
 		add_filter( 'wp_post_revision_meta_keys', array( $this, 'add_meta_keys_to_revision' ) );
@@ -173,6 +173,7 @@ class WSUWP_People_Directory {
 				'editor',
 				'thumbnail',
 				'revisions',
+				'author',
 			),
 			'taxonomies' => array(
 				'post_tag',
@@ -662,25 +663,6 @@ class WSUWP_People_Directory {
 		}
 
 		add_meta_box(
-			'wsuwp_profile_a_position_info',
-			'Position and Contact Information',
-			array( $this, 'display_position_info_meta_box' ),
-			$this->personnel_content_type,
-			'side',
-			'default'
-		);
-
-		add_meta_box(
-			'wsuwp_profile_b_cv_upload',
-			'Curriculum Vitae',
-			array( $this, 'display_cv_upload_meta_box' ),
-			$this->personnel_content_type,
-			'side',
-			'default'
-		);
-
-		// Bio meta boxes.
-		add_meta_box(
 			'wsuwp_profile_additional_info',
 			'Additional Profile Information',
 			array( $this, 'display_additional_info_meta_box' ),
@@ -773,7 +755,7 @@ class WSUWP_People_Directory {
 			<?php endif; ?>
 		</div>
 
-		<p class="description">Notify <a href="#">HR</a> if any of this information is incorrect or needs updated.</p>
+		<!--<p class="description">Notify <a href="#">HR</a> if any of this information is incorrect or needs updated.</p>-->
 		<?php
 	}
 
@@ -816,15 +798,33 @@ class WSUWP_People_Directory {
 		$box_title = ( 'auto-draft' === $post->post_status ) ? 'Create Profile' : 'Update Profile';
 
 		remove_meta_box( 'submitdiv', $this->personnel_content_type, 'side' );
-		add_meta_box( 'submitdiv', $box_title, array( $this, 'publish_meta_box' ), $this->personnel_content_type, 'side' );
+		add_meta_box( 'submitdiv', $box_title, array( $this, 'publish_meta_box' ), $this->personnel_content_type, 'side', 'high' );
 
-		// Remove "Appointment" and "Classification" meta boxes.
-		remove_meta_box( 'appointmentdiv', $this->personnel_content_type, 'side' );
-		remove_meta_box( 'classificationdiv', $this->personnel_content_type, 'side' );
+		add_meta_box(
+			'wsuwp_profile_position_info',
+			'Position and Contact Information',
+			array( $this, 'display_position_info_meta_box' ),
+			$this->personnel_content_type,
+			'side',
+			'high'
+		);
 		
 		// Move and re-label the Featured Image meta box.
 		remove_meta_box( 'postimagediv', $this->personnel_content_type, 'side' );
 		add_meta_box( 'postimagediv', 'Profile Photo', 'post_thumbnail_meta_box', $this->personnel_content_type, 'side', 'high' );
+
+		add_meta_box(
+			'wsuwp_profile_cv_upload',
+			'Curriculum Vitae',
+			array( $this, 'display_cv_upload_meta_box' ),
+			$this->personnel_content_type,
+			'side',
+			'high'
+		);
+
+		// Remove "Appointment" and "Classification" meta boxes.
+		remove_meta_box( 'appointmentdiv', $this->personnel_content_type, 'side' );
+		//remove_meta_box( 'classificationdiv', $this->personnel_content_type, 'side' );
 	}
 
 	/**
@@ -840,7 +840,7 @@ class WSUWP_People_Directory {
 		$post_type_object = get_post_type_object( $post_type );
 		$can_publish = current_user_can( $post_type_object->cap->publish_posts );
 
-		$nid        = get_post_meta( $post->ID, '_wsuwp_profile_ad_nid', true );
+		$nid = get_post_meta( $post->ID, '_wsuwp_profile_ad_nid', true );
 
 		$readonly = empty( trim( $nid ) ) ? '' : 'readonly';
 		?>
@@ -927,50 +927,55 @@ class WSUWP_People_Directory {
 			</p>
 		</div>
 		<div class="wsuwp-profile-additional">
-		<?php
-		$titles = get_post_meta( $post->ID, '_wsuwp_profile_title', true );
-		$degrees = get_post_meta( $post->ID, '_wsuwp_profile_degree', true );
-
-		if ( $titles && is_array( $titles ) ) {
-			foreach ( $titles as $index => $title ) {
-				?>
-				<p class="wp-profile-repeatable">
-					<label for="_wsuwp_profile_title[<?php echo esc_attr( $index ); ?>]">Working Title</label><br />
-					<input type="text" id="_wsuwp_profile_title[<?php echo esc_attr( $index ); ?>]" name="_wsuwp_profile_title[<?php echo esc_attr( $index ); ?>]" value="<?php echo esc_attr( $title ); ?>" class="widefat" />
-				</p>
-				<?php
-			}
-		} else {
-			?>
-			<p class="wp-profile-repeatable">
-				<label for="_wsuwp_profile_title[0]">Working Title</label><br />
-				<input type="text" id="_wsuwp_profile_title[0]" name="_wsuwp_profile_title[0]" value="<?php echo esc_attr( $titles ); ?>" class="widefat" />
-			</p>
 			<?php
-		}
-		?>
-		<p class="wsuwp-profile-add-repeatable"><a href="#">+ Add another title</a></p>
-
-		<?php
-		if ( $degrees && is_array( $degrees ) ) {
-			foreach ( $degrees as $index => $degree ) {
-				?>
-				<p class="wp-profile-repeatable">
-					<label for="_wsuwp_profile_degree[<?php echo esc_attr( $index ); ?>]">Degree</label><br />
-					<input type="text" id="_wsuwp_profile_degree[<?php echo esc_attr( $index ); ?>]" name="_wsuwp_profile_degree[<?php echo esc_attr( $index ); ?>]" value="<?php echo esc_attr( $degree ); ?>" class="widefat" />
-				</p>
-				<?php
-			}
-		} else {
-			?>
-			<p class="wp-profile-repeatable">
-				<label for="_wsuwp_profile_degree[0]">Degree</label><br />
-				<input type="text" id="_wsuwp_profile_degree[0]" name="_wsuwp_profile_degree[0]" value="<?php echo esc_attr( $degrees ); ?>" class="widefat" />
-			</p>
-			<?php
-		}
-		?>
-		<p class="wsuwp-profile-add-repeatable"><a href="#">+ Add another degree</a></p>
+      $titles = get_post_meta( $post->ID, '_wsuwp_profile_title', true );
+      $degrees = get_post_meta( $post->ID, '_wsuwp_profile_degree', true );
+      ?>
+      <div>
+        <?php
+        if ( $titles && is_array( $titles ) ) {
+          foreach ( $titles as $index => $title ) {
+            ?>
+            <p class="wp-profile-repeatable">
+              <label for="_wsuwp_profile_title[<?php echo esc_attr( $index ); ?>]">Working Title</label><br />
+              <input type="text" id="_wsuwp_profile_title[<?php echo esc_attr( $index ); ?>]" name="_wsuwp_profile_title[<?php echo esc_attr( $index ); ?>]" value="<?php echo esc_attr( $title ); ?>" class="widefat" />
+            </p>
+            <?php
+          }
+        } else {
+          ?>
+          <p class="wp-profile-repeatable">
+            <label for="_wsuwp_profile_title[0]">Working Title</label><br />
+            <input type="text" id="_wsuwp_profile_title[0]" name="_wsuwp_profile_title[0]" value="<?php echo esc_attr( $titles ); ?>" class="widefat" />
+          </p>
+          <?php
+        }
+        ?>
+        <p class="wsuwp-profile-add-repeatable"><a href="#">+ Add another title</a></p>
+      </div>
+  
+      <div>
+        <?php
+        if ( $degrees && is_array( $degrees ) ) {
+          foreach ( $degrees as $index => $degree ) {
+            ?>
+						<p class="wp-profile-repeatable">
+							<label for="_wsuwp_profile_degree[<?php echo esc_attr( $index ); ?>]">Degree</label><br />
+							<input type="text" id="_wsuwp_profile_degree[<?php echo esc_attr( $index ); ?>]" name="_wsuwp_profile_degree[<?php echo esc_attr( $index ); ?>]" value="<?php echo esc_attr( $degree ); ?>" class="widefat" />
+						</p>
+            <?php
+          }
+        } else {
+          ?>
+					<p class="wp-profile-repeatable">
+						<label for="_wsuwp_profile_degree[0]">Degree</label><br />
+						<input type="text" id="_wsuwp_profile_degree[0]" name="_wsuwp_profile_degree[0]" value="<?php echo esc_attr( $degrees ); ?>" class="widefat" />
+					</p>
+          <?php
+        }
+        ?>
+				<p class="wsuwp-profile-add-repeatable"><a href="#">+ Add another degree</a></p>
+			</div>
 		</div>
 		<div class="clear"></div>
 	<?php
@@ -1164,6 +1169,79 @@ class WSUWP_People_Directory {
 		}
 		$post_response['degrees'] = $degrees;
 
+		// Process C.V. content if attached to the profile.
+		$cv_employment       = get_post_meta( $post['ID'], '_wsuwp_profile_employment', true );
+		$cv_honors           = get_post_meta( $post['ID'], '_wsuwp_profile_honors', true );
+		$cv_grants           = get_post_meta( $post['ID'], '_wsuwp_profile_grants', true );
+		$cv_pubs             = get_post_meta( $post['ID'], '_wsuwp_profile_publications', true );
+		$cv_presentations    = get_post_meta( $post['ID'], '_wsuwp_profile_presentations', true );
+		$cv_teaching         = get_post_meta( $post['ID'], '_wsuwp_profile_teaching', true );
+		$cv_service          = get_post_meta( $post['ID'], '_wsuwp_profile_service', true );
+		$cv_responsibilities = get_post_meta( $post['ID'], '_wsuwp_profile_responsibilities', true );
+		$cv_affiliations     = get_post_meta( $post['ID'], '_wsuwp_profile_societies', true );
+		$cv_experience       = get_post_meta( $post['ID'], '_wsuwp_profile_experience', true );
+
+		if ( $cv_employment ) {
+			$cv_employment = apply_filters( 'the_content', $cv_employment );
+			$cv_employment = wp_kses_post( $cv_employment );
+		}
+
+		if ( $cv_honors ) {
+			$cv_honors = apply_filters( 'the_content', $cv_honors );
+			$cv_honors = wp_kses_post( $cv_honors );
+		}
+
+		if ( $cv_grants ) {
+			$cv_grants = apply_filters( 'the_content', $cv_grants );
+			$cv_grants = wp_kses_post( $cv_grants );
+		}
+
+		if ( $cv_pubs ) {
+			$cv_pubs = apply_filters( 'the_content', $cv_pubs );
+			$cv_pubs = wp_kses_post( $cv_pubs );
+		}
+
+		if ( $cv_presentations ) {
+			$cv_presentations = apply_filters( 'the_content', $cv_presentations );
+			$cv_presentations = wp_kses_post( $cv_presentations );
+		}
+
+		if ( $cv_teaching ) {
+			$cv_teaching = apply_filters( 'the_content', $cv_teaching );
+			$cv_teaching = wp_kses_post( $cv_teaching );
+		}
+
+		if ( $cv_service ) {
+			$cv_service = apply_filters( 'the_content', $cv_service );
+			$cv_service = wp_kses_post( $cv_service );
+		}
+
+		if ( $cv_responsibilities ) {
+			$cv_responsibilities = apply_filters( 'the_content', $cv_responsibilities );
+			$cv_responsibilities = wp_kses_post( $cv_responsibilities );
+		}
+
+		if ( $cv_affiliations ) {
+			$cv_affiliations = apply_filters( 'the_content', $cv_affiliations );
+			$cv_affiliations = wp_kses_post( $cv_affiliations );
+		}
+
+		if ( $cv_experience ) {
+			$cv_experience = apply_filters( 'the_content', $cv_experience );
+			$cv_experience = wp_kses_post( $cv_experience );
+		}
+
+		$data['cv_employment']      = $cv_employment;
+		$data['cv_honors']          = $cv_honors;
+		$data['cv_grants']          = $cv_grants;
+		$data['cv_publications']    = $cv_publications;
+		$data['cv_presentations']   = $cv_presentations;
+		$data['cv_teaching']        = $cv_teaching;
+		$data['cv_service']         = $cv_service;
+		$data['cv_responsibilites'] = $cv_responsibilites;
+		$data['cv_affiliations']    = $cv_affiliations;
+		$data['cv_experience']      = $cv_experience;
+
 		return $post_response;
 	}
 
@@ -1276,7 +1354,7 @@ class WSUWP_People_Directory {
 
 			wp_add_dashboard_widget(
 				'wsuwp_directory_dashboard_widget',
-				'Welcome to the CAHNRS Directory',
+				'Welcome to the WSU Personnel Directory',
 				array( $this, 'wsuwp_directory_dashboard_widget' )
       );
 
