@@ -1231,16 +1231,16 @@ class WSUWP_People_Directory {
 			$cv_experience = wp_kses_post( $cv_experience );
 		}
 
-		$data['cv_employment']      = $cv_employment;
-		$data['cv_honors']          = $cv_honors;
-		$data['cv_grants']          = $cv_grants;
-		$data['cv_publications']    = $cv_publications;
-		$data['cv_presentations']   = $cv_presentations;
-		$data['cv_teaching']        = $cv_teaching;
-		$data['cv_service']         = $cv_service;
-		$data['cv_responsibilites'] = $cv_responsibilites;
-		$data['cv_affiliations']    = $cv_affiliations;
-		$data['cv_experience']      = $cv_experience;
+		$post_response['cv_employment']      = $cv_employment;
+		$post_response['cv_honors']          = $cv_honors;
+		$post_response['cv_grants']          = $cv_grants;
+		$post_response['cv_publications']    = $cv_publications;
+		$post_response['cv_presentations']   = $cv_presentations;
+		$post_response['cv_teaching']        = $cv_teaching;
+		$post_response['cv_service']         = $cv_service;
+		$post_response['cv_responsibilites'] = $cv_responsibilites;
+		$post_response['cv_affiliations']    = $cv_affiliations;
+		$post_response['cv_experience']      = $cv_experience;
 
 		return $post_response;
 	}
