@@ -1238,7 +1238,7 @@ class WSUWP_People_Directory {
 		$post_response['cv_presentations']   = $cv_presentations;
 		$post_response['cv_teaching']        = $cv_teaching;
 		$post_response['cv_service']         = $cv_service;
-		$post_response['cv_responsibilites'] = $cv_responsibilites;
+		$post_response['cv_responsibilites'] = $cv_responsibilities;
 		$post_response['cv_affiliations']    = $cv_affiliations;
 		$post_response['cv_experience']      = $cv_experience;
 
