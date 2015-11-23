@@ -1173,7 +1173,7 @@ class WSUWP_People_Directory {
 		$cv_employment       = get_post_meta( $post['ID'], '_wsuwp_profile_employment', true );
 		$cv_honors           = get_post_meta( $post['ID'], '_wsuwp_profile_honors', true );
 		$cv_grants           = get_post_meta( $post['ID'], '_wsuwp_profile_grants', true );
-		$cv_pubs             = get_post_meta( $post['ID'], '_wsuwp_profile_publications', true );
+		$cv_publications     = get_post_meta( $post['ID'], '_wsuwp_profile_publications', true );
 		$cv_presentations    = get_post_meta( $post['ID'], '_wsuwp_profile_presentations', true );
 		$cv_teaching         = get_post_meta( $post['ID'], '_wsuwp_profile_teaching', true );
 		$cv_service          = get_post_meta( $post['ID'], '_wsuwp_profile_service', true );
@@ -1196,9 +1196,9 @@ class WSUWP_People_Directory {
 			$cv_grants = wp_kses_post( $cv_grants );
 		}
 
-		if ( $cv_pubs ) {
-			$cv_pubs = apply_filters( 'the_content', $cv_pubs );
-			$cv_pubs = wp_kses_post( $cv_pubs );
+		if ( $cv_publications ) {
+			$cv_publications = apply_filters( 'the_content', $cv_publications );
+			$cv_publications = wp_kses_post( $cv_publications );
 		}
 
 		if ( $cv_presentations ) {
@@ -1238,7 +1238,7 @@ class WSUWP_People_Directory {
 		$post_response['cv_presentations']   = $cv_presentations;
 		$post_response['cv_teaching']        = $cv_teaching;
 		$post_response['cv_service']         = $cv_service;
-		$post_response['cv_responsibilites'] = $cv_responsibilites;
+		$post_response['cv_responsibilites'] = $cv_responsibilities;
 		$post_response['cv_affiliations']    = $cv_affiliations;
 		$post_response['cv_experience']      = $cv_experience;
 
