@@ -183,6 +183,8 @@ class WSUWP_People_Directory {
 				'slug' => 'profile',
 				'with_front' => false
 			),
+			'show_in_rest' => true,
+			'rest_base' => 'people',
 		);
 
 		register_post_type( $this->personnel_content_type, $args );
