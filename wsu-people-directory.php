@@ -1414,19 +1414,15 @@ class WSUWP_People_Directory {
 	 * This doesn't change the counts on the Media Library page.
 	 */
 	public function limit_media_library( $query ) {
-
 		if ( is_admin() && isset( $_REQUEST['action'] ) ) {
-
-			if ( 'upload' !== get_current_screen()->base && 'query-attachments' !== $_REQUEST['action'] ) {
+			if ( ! get_current_screen() || ( 'upload' !== get_current_screen()->base && 'query-attachments' !== $_REQUEST['action'] ) ) {
 				return;
 			}
 
 			if ( ! current_user_can( 'manage_options' ) ) {
 				$query->set( 'author', wp_get_current_user()->ID );
 			}
-
 		}
-
 	}
 
 	/**
