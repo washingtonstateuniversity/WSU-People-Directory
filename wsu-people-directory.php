@@ -341,6 +341,7 @@ class WSUWP_People_Directory {
 			'show_ui'      => true,
 			'show_in_menu' => true,
 			'query_var'    => $this->personnel_appointments,
+			'show_in_rest' => true,
 		);
 		register_taxonomy( $this->personnel_appointments, $this->personnel_content_type, $appointments );
 
@@ -362,6 +363,7 @@ class WSUWP_People_Directory {
 			'show_ui'       => true,
 			'show_in_menu'  => true,
 			'query_var'     => $this->personnel_classifications,
+			'show_in_rest'  => true,
 		);
 		register_taxonomy( $this->personnel_classifications, $this->personnel_content_type, $classifications );
 
