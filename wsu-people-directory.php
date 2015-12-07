@@ -112,6 +112,10 @@ class WSUWP_People_Directory {
 	 * @var array
 	 */
 	var $rest_response_fields = array(
+		'nid' => array(
+			'meta_key' => '_wsuwp_profile_ad_nid',
+			'sanitize' => 'esc_html',
+		),
 		'first_name' => array(
 			'meta_key' => '_wsuwp_profile_ad_name_first',
 			'sanitize' => 'esc_html',
@@ -252,6 +256,9 @@ class WSUWP_People_Directory {
 
 		// Modify taxonomy columns on "All Profiles" page.
 		add_filter( 'manage_taxonomies_for_wsuwp_people_profile_columns', array( $this, 'wsuwp_people_profile_columns' ) );
+
+		// Allow queries by meta data.
+		add_filter( 'rest_query_vars', array( $this, 'rest_query_vars' ) );
 
 		// Register custom fields with the REST API.
 		add_action( 'rest_api_init', array( $this, 'register_api_fields' ) );
@@ -1211,6 +1218,14 @@ class WSUWP_People_Directory {
 		$columns[] = 'wsuwp_university_location';
 
 		return $columns;
+	}
+
+	/**
+	 * Allow queries by meta data.
+	 */
+	public function rest_query_vars( $valid_vars ) {
+		$valid_vars = array_merge( $valid_vars, array( 'meta_key', 'meta_value' ) );
+		return $valid_vars;
 	}
 
 	/**
