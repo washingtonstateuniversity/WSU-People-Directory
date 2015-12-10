@@ -4,7 +4,7 @@ Plugin Name: WSU People Directory
 Plugin URI: https://web.wsu.edu/wordpress/plugins/wsu-people-directory/
 Description: A plugin to maintain a central directory of people.
 Author:	washingtonstateuniversity, CAHNRS, philcable, danialbleile, jeremyfelt
-Version: 0.1.5
+Version: 0.2.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 */
@@ -17,7 +17,7 @@ class WSUWP_People_Directory {
 	 *
 	 * @var string
 	 */
-	var $personnel_plugin_version = '0.1.5';
+	var $personnel_plugin_version = '0.2.0';
 
 	/**
 	 * The slug used to register the "Personnel" custom content type.
@@ -100,7 +100,140 @@ class WSUWP_People_Directory {
 		/*'_wsuwp_profile_research',
 		'_wsuwp_profile_extension',*/
 	);
-	
+
+	/**
+	 * Additional fields that we add to REST API responses requesting people directory
+	 * information. Each key includes the meta key used to store the data in post meta
+	 * and the sanitization method used in the `get_callback` when we register the
+	 * field with the API.
+	 *
+	 * @since 0.2.0
+	 *
+	 * @var array
+	 */
+	var $rest_response_fields = array(
+		'nid' => array(
+			'meta_key' => '_wsuwp_profile_ad_nid',
+			'sanitize' => 'esc_html',
+		),
+		'first_name' => array(
+			'meta_key' => '_wsuwp_profile_ad_name_first',
+			'sanitize' => 'esc_html',
+		),
+		'last_name' => array(
+			'meta_key' => '_wsuwp_profile_ad_name_last',
+			'sanitize' => 'esc_html',
+		),
+		'position_title' => array(
+			'meta_key' => '_wsuwp_profile_ad_title',
+			'sanitize' => 'esc_html',
+		),
+		'office' => array(
+			'meta_key' => '_wsuwp_profile_ad_office',
+			'sanitize' => 'esc_html',
+		),
+		'address' => array(
+			'meta_key' => '_wsuwp_profile_ad_address',
+			'sanitize' => 'esc_html',
+		),
+		'phone' => array(
+			'meta_key' => '_wsuwp_profile_ad_phone',
+			'sanitize' => 'esc_html',
+		),
+		'phone_ext' => array(
+			'meta_key' => '_wsuwp_profile_ad_phone_ext',
+			'sanitize' => 'esc_html',
+		),
+		'email' => array(
+			'meta_key' => '_wsuwp_profile_ad_email',
+			'sanitize' => 'esc_html',
+		),
+		'office_alt' => array(
+			'meta_key' => '_wsuwp_profile_alt_office',
+			'sanitize' => 'esc_html',
+		),
+		'phone_alt' => array(
+			'meta_key' => '_wsuwp_profile_alt_phone',
+			'sanitize' => 'esc_html',
+		),
+		'email_alt' => array(
+			'meta_key' => '_wsuwp_profile_alt_email',
+			'sanitize' => 'esc_html',
+		),
+		'website' => array(
+			'meta_key' => '_wsuwp_profile_website',
+			'sanitize' => 'esc_url',
+		),
+		'bio_college' => array(
+			'meta_key' => '_wsuwp_profile_bio_college',
+			'sanitize' => 'the_content',
+		),
+		'bio_lab' => array(
+			'meta_key' => '_wsuwp_profile_bio_lab',
+			'sanitize' => 'the_content',
+		),
+		'bio_department' => array(
+			'meta_key' => '_wsuwp_profile_bio_dept',
+			'sanitize' => 'the_content',
+		),
+		'cv_employment' => array(
+			'meta_key' => '_wsuwp_profile_employment',
+			'sanitize' => 'the_content',
+		),
+		'cv_honors' => array(
+			'meta_key' => '_wsuwp_profile_honors',
+			'sanitize' => 'the_content',
+		),
+		'cv_grants' => array(
+			'meta_key' => '_wsuwp_profile_grants',
+			'sanitize' => 'the_content',
+		),
+		'cv_publications' => array(
+			'meta_key' => '_wsuwp_profile_publications',
+			'sanitize' => 'the_content',
+		),
+		'cv_presentations' => array(
+			'meta_key' => '_wsuwp_profile_presentations',
+			'sanitize' => 'the_content',
+		),
+		'cv_teaching' => array(
+			'meta_key' => '_wsuwp_profile_teaching',
+			'sanitize' => 'the_content',
+		),
+		'cv_service' => array(
+			'meta_key' => '_wsuwp_profile_service',
+			'sanitize' => 'the_content',
+		),
+		'cv_responsibilities' => array(
+			'meta_key' => '_wsuwp_profile_responsibilities',
+			'sanitize' => 'the_content',
+		),
+		'cv_affiliations' => array(
+			'meta_key' => '_wsuwp_profile_societies',
+			'sanitize' => 'the_content',
+		),
+		'cv_experience' => array(
+			'meta_key' => '_wsuwp_profile_experience',
+			'sanitize' => 'the_content',
+		),
+		'working_titles' => array(
+			'meta_key' => '_wsuwp_profile_title',
+			'sanitize' => 'esc_html_map',
+		),
+		'degrees' => array(
+			'meta_key' => '_wsuwp_profile_degree',
+			'sanitize' => 'esc_html_map',
+		),
+		'cv_attachment' => array(
+			'meta_key' => '_wsuwp_profile_cv',
+			'sanitize' => 'custom',
+		),
+		'profile_photo' => array(
+			'meta_key' => '',
+			'sanitize' => 'custom',
+		),
+	);
+
 	/**
 	 * Start the plugin and apply associated hooks.
 	 */
@@ -124,9 +257,11 @@ class WSUWP_People_Directory {
 		// Modify taxonomy columns on "All Profiles" page.
 		add_filter( 'manage_taxonomies_for_wsuwp_people_profile_columns', array( $this, 'wsuwp_people_profile_columns' ) );
 
-		// JSON output.
-		add_filter( 'json_prepare_post', array( $this, 'json_prepare_post' ), 10, 3 );
-		add_filter( 'json_query_vars', array( $this, 'json_query_vars' ) );
+		// Allow queries by meta data.
+		add_filter( 'rest_query_vars', array( $this, 'rest_query_vars' ) );
+
+		// Register custom fields with the REST API.
+		add_action( 'rest_api_init', array( $this, 'register_api_fields' ) );
 
 		// Capabilities and related.
 		add_filter( 'user_has_cap', array( $this, 'user_has_cap' ), 10, 3 );
@@ -183,6 +318,8 @@ class WSUWP_People_Directory {
 				'slug' => 'profile',
 				'with_front' => false
 			),
+			'show_in_rest' => true,
+			'rest_base' => 'people',
 		);
 
 		register_post_type( $this->personnel_content_type, $args );
@@ -211,6 +348,7 @@ class WSUWP_People_Directory {
 			'show_ui'      => true,
 			'show_in_menu' => true,
 			'query_var'    => $this->personnel_appointments,
+			'show_in_rest' => true,
 		);
 		register_taxonomy( $this->personnel_appointments, $this->personnel_content_type, $appointments );
 
@@ -232,6 +370,7 @@ class WSUWP_People_Directory {
 			'show_ui'       => true,
 			'show_in_menu'  => true,
 			'query_var'     => $this->personnel_classifications,
+			'show_in_rest'  => true,
 		);
 		register_taxonomy( $this->personnel_classifications, $this->personnel_content_type, $classifications );
 
@@ -1082,178 +1221,94 @@ class WSUWP_People_Directory {
 	}
 
 	/**
-	 * Provide formatted results for profiles via the WP JSON API.
+	 * Allow queries by meta data.
 	 */
-	public function json_prepare_post( $post_response, $post, $context ) {
-
-		if ( $this->personnel_content_type !== $post['post_type'] ) {
-			return $post_response;
-		}
-
-		// Basic profile information directly from Active Directory.
-		$post_response['first_name']     = esc_html( get_post_meta( $post['ID'], '_wsuwp_profile_ad_name_first', true ) );
-		$post_response['last_name']      = esc_html( get_post_meta( $post['ID'], '_wsuwp_profile_ad_name_last' , true ) );
-		$post_response['position_title'] = esc_html( get_post_meta( $post['ID'], '_wsuwp_profile_ad_title' , true ) );
-		$post_response['office']         = esc_html( get_post_meta( $post['ID'], '_wsuwp_profile_ad_office' , true ) );
-		$post_response['address']        = esc_html( get_post_meta( $post['ID'], '_wsuwp_profile_ad_address', true ) );
-		$post_response['phone']          = esc_html( get_post_meta( $post['ID'], '_wsuwp_profile_ad_phone', true ) );
-		$post_response['phone_ext']      = esc_html( get_post_meta( $post['ID'], '_wsuwp_profile_ad_phone_ext', true ) );
-		$post_response['email']          = esc_html( get_post_meta( $post['ID'], '_wsuwp_profile_ad_email', true ) );
-
-		// Alternative, custom information inserted to possibly override official Active Directory information.
-		$post_response['office_alt']     = esc_html( get_post_meta( $post['ID'], '_wsuwp_profile_alt_office', true ) );
-		$post_response['phone_alt']      = esc_html( get_post_meta( $post['ID'], '_wsuwp_profile_alt_phone', true ) );
-		$post_response['email_alt']      = esc_html( get_post_meta( $post['ID'], '_wsuwp_profile_alt_email', true ) );
-
-		$post_response['website']        = esc_url( get_post_meta( $post['ID'], '_wsuwp_profile_website', true ) );
-
-		$cv_id = get_post_meta( $post['ID'], '_wsuwp_profile_cv', true );
-		$cv_url = wp_get_attachment_url( $cv_id );
-
-		if ( $cv_url ) {
-			$post_response['cv_attachment'] = esc_url( $cv_url );
-		} else {
-			$post_response['cv_attachment'] = false;
-		}
-
-		// Look for a primary profile photo to send.
-		$thumbnail_id = get_post_thumbnail_id( $post['ID'] );
-		if ( $thumbnail_id ) {
-			$thumbnail = wp_get_attachment_image_src( $thumbnail_id );
-			if ( $thumbnail ) {
-				$post_response['profile_photo'] = esc_url( $thumbnail[0] );
-			} else {
-				$post_response['profile_photo'] = false;
-			}
-		}
-
-		// Process additional biographies if attached to the profile.
-		$college_bio    = get_post_meta( $post['ID'], '_wsuwp_profile_bio_college', true );
-		$lab_bio        = get_post_meta( $post['ID'], '_wsuwp_profile_bio_lab', true );
-		$department_bio = get_post_meta( $post['ID'], '_wsuwp_profile_bio_dept', true );
-
-		if ( $college_bio ) {
-			$college_bio = apply_filters( 'the_content', $college_bio );
-			$college_bio = wp_kses_post( $college_bio );
-		}
-
-		if ( $lab_bio ) {
-			$lab_bio = apply_filters( 'the_content', $lab_bio );
-			$lab_bio = wp_kses_post( $lab_bio );
-		}
-
-		if ( $department_bio ) {
-			$department_bio = apply_filters( 'the_content', $department_bio );
-			$department_bio = wp_kses_post( $department_bio );
-		}
-
-		$post_response['bio_college']    = $college_bio;
-		$post_response['bio_lab']        = $lab_bio;
-		$post_response['bio_department'] = $department_bio;
-
-		// Retrieve the array of stored working titles for the profile.
-		$working_titles = get_post_meta( $post['ID'], '_wsuwp_profile_title', true );
-		if ( is_array( $working_titles ) ) {
-			$working_titles = array_map( 'esc_html', $working_titles );
-		} else {
-			$working_titles = array();
-		}
-		$post_response['working_titles'] = $working_titles;
-
-		// Retrieve the array of stored degrees for the profile.
-		$degrees = get_post_meta( $post['ID'], '_wsuwp_profile_degree', true );
-		if ( is_array( $degrees ) ) {
-			$degrees = array_map( 'esc_html', $degrees );
-		} else {
-			$degrees = array();
-		}
-		$post_response['degrees'] = $degrees;
-
-		// Process C.V. content if attached to the profile.
-		$cv_employment       = get_post_meta( $post['ID'], '_wsuwp_profile_employment', true );
-		$cv_honors           = get_post_meta( $post['ID'], '_wsuwp_profile_honors', true );
-		$cv_grants           = get_post_meta( $post['ID'], '_wsuwp_profile_grants', true );
-		$cv_pubs             = get_post_meta( $post['ID'], '_wsuwp_profile_publications', true );
-		$cv_presentations    = get_post_meta( $post['ID'], '_wsuwp_profile_presentations', true );
-		$cv_teaching         = get_post_meta( $post['ID'], '_wsuwp_profile_teaching', true );
-		$cv_service          = get_post_meta( $post['ID'], '_wsuwp_profile_service', true );
-		$cv_responsibilities = get_post_meta( $post['ID'], '_wsuwp_profile_responsibilities', true );
-		$cv_affiliations     = get_post_meta( $post['ID'], '_wsuwp_profile_societies', true );
-		$cv_experience       = get_post_meta( $post['ID'], '_wsuwp_profile_experience', true );
-
-		if ( $cv_employment ) {
-			$cv_employment = apply_filters( 'the_content', $cv_employment );
-			$cv_employment = wp_kses_post( $cv_employment );
-		}
-
-		if ( $cv_honors ) {
-			$cv_honors = apply_filters( 'the_content', $cv_honors );
-			$cv_honors = wp_kses_post( $cv_honors );
-		}
-
-		if ( $cv_grants ) {
-			$cv_grants = apply_filters( 'the_content', $cv_grants );
-			$cv_grants = wp_kses_post( $cv_grants );
-		}
-
-		if ( $cv_pubs ) {
-			$cv_pubs = apply_filters( 'the_content', $cv_pubs );
-			$cv_pubs = wp_kses_post( $cv_pubs );
-		}
-
-		if ( $cv_presentations ) {
-			$cv_presentations = apply_filters( 'the_content', $cv_presentations );
-			$cv_presentations = wp_kses_post( $cv_presentations );
-		}
-
-		if ( $cv_teaching ) {
-			$cv_teaching = apply_filters( 'the_content', $cv_teaching );
-			$cv_teaching = wp_kses_post( $cv_teaching );
-		}
-
-		if ( $cv_service ) {
-			$cv_service = apply_filters( 'the_content', $cv_service );
-			$cv_service = wp_kses_post( $cv_service );
-		}
-
-		if ( $cv_responsibilities ) {
-			$cv_responsibilities = apply_filters( 'the_content', $cv_responsibilities );
-			$cv_responsibilities = wp_kses_post( $cv_responsibilities );
-		}
-
-		if ( $cv_affiliations ) {
-			$cv_affiliations = apply_filters( 'the_content', $cv_affiliations );
-			$cv_affiliations = wp_kses_post( $cv_affiliations );
-		}
-
-		if ( $cv_experience ) {
-			$cv_experience = apply_filters( 'the_content', $cv_experience );
-			$cv_experience = wp_kses_post( $cv_experience );
-		}
-
-		$data['cv_employment']      = $cv_employment;
-		$data['cv_honors']          = $cv_honors;
-		$data['cv_grants']          = $cv_grants;
-		$data['cv_publications']    = $cv_publications;
-		$data['cv_presentations']   = $cv_presentations;
-		$data['cv_teaching']        = $cv_teaching;
-		$data['cv_service']         = $cv_service;
-		$data['cv_responsibilites'] = $cv_responsibilites;
-		$data['cv_affiliations']    = $cv_affiliations;
-		$data['cv_experience']      = $cv_experience;
-
-		return $post_response;
+	public function rest_query_vars( $valid_vars ) {
+		$valid_vars = array_merge( $valid_vars, array( 'meta_key', 'meta_value' ) );
+		return $valid_vars;
 	}
 
 	/**
-	 * Add 'meta_key' to the list of public variables (leverage for ordering alphabetically by last name).
-	 * It seems this may have security implications, though I admit I don't understand what they would be.
+	 * Register the custom meta fields attached to a REST API response containing profile data.
+	 *
+	 * @since 0.2.0
 	 */
-	public function json_query_vars( $valid_vars ) {
+	public function register_api_fields() {
+		$args = array(
+			'get_callback' => array( $this, 'get_api_meta_data' ),
+			'update_callback' => null,
+			'schema' => null,
+		);
+		foreach( $this->rest_response_fields as $field_name => $value ) {
+			register_api_field( $this->personnel_content_type, $field_name, $args );
+		}
+	}
 
-		$valid_vars[] = 'meta_key';
+	/**
+	 * Return the value of a post meta field sanitized against a whitelist with the provided method.
+	 *
+	 * @since 0.2.0
+	 *
+	 * @param array           $object     The current post being processed.
+	 * @param string          $field_name Name of the field being retrieved.
+	 * @param WP_Rest_Request $request    The full current REST request.
+	 *
+	 * @return mixed Meta data associated with the post and field name.
+	 */
+	public function get_api_meta_data( $object, $field_name, $request ) {
+		if ( ! array_key_exists( $field_name, $this->rest_response_fields ) ) {
+			return '';
+		}
 
-		return $valid_vars;
+		if ( 'esc_html' === $this->rest_response_fields[ $field_name ]['sanitize'] ) {
+			return esc_html( get_post_meta( $object['id'], $this->rest_response_fields[ $field_name ]['meta_key'], true ) );
+		}
+
+		if ( 'esc_html_map' === $this->rest_response_fields[ $field_name ]['sanitize'] ) {
+			$data = get_post_meta( $object['id'], $this->rest_response_fields[ $field_name ]['meta_key'], true );
+			if ( is_array( $data ) ) {
+				$data = array_map( 'esc_html', $data );
+			} else {
+				$data = array();
+			}
+
+			return $data;
+		}
+
+		if ( 'esc_url' === $this->rest_response_fields[ $field_name ]['sanitize'] ) {
+			return esc_url( get_post_meta( $object['id'], $this->rest_response_fields[ $field_name ]['meta_key'], true ) );
+		}
+
+		if ( 'the_content' === $this->rest_response_fields[ $field_name ]['sanitize'] ) {
+			$data = get_post_meta( $object['id'], $this->rest_response_fields[ $field_name ]['meta_key'], true );
+			$data = apply_filters( 'the_content', $data );
+			return wp_kses_post( $data );
+		}
+
+		if ( 'cv_attachment' === $field_name ) {
+			$cv_id = get_post_meta( $object['id'], $this->rest_response_fields[ $field_name ]['meta_key'], true );
+			$cv_url = wp_get_attachment_url( $cv_id );
+
+			if ( $cv_url ) {
+				return esc_url( $cv_url );
+			} else {
+				return false;
+			}
+		}
+
+		if ( 'profile_photo' === $field_name ) {
+			$thumbnail_id = get_post_thumbnail_id( $object['id'] );
+			if ( $thumbnail_id ) {
+				$thumbnail = wp_get_attachment_image_src( $thumbnail_id );
+				if ( $thumbnail ) {
+					return esc_url( $thumbnail[0] );
+				} else {
+					return false;
+				}
+			}
+		}
+
+		return '';
 	}
 
 	/**
@@ -1376,19 +1431,15 @@ class WSUWP_People_Directory {
 	 * This doesn't change the counts on the Media Library page.
 	 */
 	public function limit_media_library( $query ) {
-
 		if ( is_admin() && isset( $_REQUEST['action'] ) ) {
-
-			if ( 'upload' !== get_current_screen()->base && 'query-attachments' !== $_REQUEST['action'] ) {
+			if ( ! get_current_screen() || ( 'upload' !== get_current_screen()->base && 'query-attachments' !== $_REQUEST['action'] ) ) {
 				return;
 			}
 
 			if ( ! current_user_can( 'manage_options' ) ) {
 				$query->set( 'author', wp_get_current_user()->ID );
 			}
-
 		}
-
 	}
 
 	/**
