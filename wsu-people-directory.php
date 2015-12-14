@@ -1240,7 +1240,7 @@ class WSUWP_People_Directory {
 			'schema' => null,
 		);
 		foreach( $this->rest_response_fields as $field_name => $value ) {
-			register_api_field( $this->personnel_content_type, $field_name, $args );
+			register_rest_field( $this->personnel_content_type, $field_name, $args );
 		}
 	}
 
