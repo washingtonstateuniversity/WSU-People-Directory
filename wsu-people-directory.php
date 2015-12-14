@@ -4,7 +4,7 @@ Plugin Name: WSU People Directory
 Plugin URI: https://web.wsu.edu/wordpress/plugins/wsu-people-directory/
 Description: A plugin to maintain a central directory of people.
 Author:	washingtonstateuniversity, CAHNRS, philcable, danialbleile, jeremyfelt
-Version: 0.2.0
+Version: 0.2.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 */
@@ -17,7 +17,7 @@ class WSUWP_People_Directory {
 	 *
 	 * @var string
 	 */
-	var $personnel_plugin_version = '0.2.0';
+	var $personnel_plugin_version = '0.2.1';
 
 	/**
 	 * The slug used to register the "Personnel" custom content type.
