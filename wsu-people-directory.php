@@ -510,7 +510,7 @@ class WSUWP_People_Directory {
 						?>
 						<div id="<?php echo substr( $bio_meta_field, 1 ); ?>" class="wsuwp-profile-panel">
 							<?php wp_editor( $bio, $bio_meta_field ); ?>
-							<p>
+							<!--<p>
 								Assign profile photo
                 	<select class="wsuwp-profile-bio-photo">
 										<option></option>
@@ -519,7 +519,7 @@ class WSUWP_People_Directory {
 										<option value="three">3</option>
 									</select>
 								to this biography.
-							</p>
+							</p>-->
 						</div>
 						<?php
 					}
