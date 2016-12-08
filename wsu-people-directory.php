@@ -4,7 +4,7 @@ Plugin Name: WSU People Directory
 Plugin URI: https://web.wsu.edu/wordpress/plugins/wsu-people-directory/
 Description: A plugin to maintain a central directory of people.
 Author:	washingtonstateuniversity, CAHNRS, philcable, danialbleile, jeremyfelt
-Version: 0.2.1
+Version: 0.2.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 */
@@ -17,7 +17,7 @@ class WSUWP_People_Directory {
 	 *
 	 * @var string
 	 */
-	var $personnel_plugin_version = '0.2.1';
+	var $personnel_plugin_version = '0.2.2';
 
 	/**
 	 * The slug used to register the "Personnel" custom content type.
@@ -257,8 +257,10 @@ class WSUWP_People_Directory {
 		// Modify taxonomy columns on "All Profiles" page.
 		add_filter( 'manage_taxonomies_for_wsuwp_people_profile_columns', array( $this, 'wsuwp_people_profile_columns' ) );
 
-		// Allow queries by meta data.
-		add_filter( 'rest_query_vars', array( $this, 'rest_query_vars' ) );
+		// Allow REST get_items() queries by additional data.
+		add_action( 'init', array( $this, 'register_wsu_nid_query_var' ) );
+		add_filter( "rest_{$this->personnel_content_type}_query", array( $this, 'rest_query_vars' ), 10, 2 );
+		add_action( 'pre_get_posts', array( $this, 'handle_wsu_nid_query_var' ) );
 
 		// Register custom fields with the REST API.
 		add_action( 'rest_api_init', array( $this, 'register_api_fields' ) );
@@ -510,7 +512,7 @@ class WSUWP_People_Directory {
 						?>
 						<div id="<?php echo substr( $bio_meta_field, 1 ); ?>" class="wsuwp-profile-panel">
 							<?php wp_editor( $bio, $bio_meta_field ); ?>
-							<p>
+							<!--<p>
 								Assign profile photo
                 	<select class="wsuwp-profile-bio-photo">
 										<option></option>
@@ -519,7 +521,7 @@ class WSUWP_People_Directory {
 										<option value="three">3</option>
 									</select>
 								to this biography.
-							</p>
+							</p>-->
 						</div>
 						<?php
 					}
@@ -1221,11 +1223,44 @@ class WSUWP_People_Directory {
 	}
 
 	/**
-	 * Allow queries by meta data.
+	 * Registers the wsu_nid parameter.
+	 *
+	 * @since 0.2.2
 	 */
-	public function rest_query_vars( $valid_vars ) {
-		$valid_vars = array_merge( $valid_vars, array( 'meta_key', 'meta_value' ) );
+	public function register_wsu_nid_query_var() {
+		global $wp;
+		$wp->add_query_var( 'wsu_nid' );
+	}
+
+	/**
+	 * Retrieves a passed wsu_nid with a REST request and adds to the query vars.
+	 *
+	 * @since 0.2.2
+	 *
+	 * @param array           $valid_vars
+	 * @param WP_REST_Request $request
+	 *
+	 * @return array
+	 */
+	public function rest_query_vars( $valid_vars, $request ) {
+		$valid_vars['wsu_nid'] = $request->get_param( 'wsu_nid' );
+
 		return $valid_vars;
+	}
+
+	/**
+	 * Sets a meta query for WSU NID when the wsu_nid parameters is included as
+	 * part of a query.
+	 *
+	 * @since 0.2.2
+	 *
+	 * @param WP_Query $query
+	 */
+	public function handle_wsu_nid_query_var( $query ) {
+		if ( isset( $query->query['wsu_nid'] ) && $query->query['wsu_nid'] ) {
+			$query->set( 'meta_key', '_wsuwp_profile_ad_nid' );
+			$query->set( 'meta_value', sanitize_text_field( $query->query['wsu_nid'] ) );
+		}
 	}
 
 	/**
