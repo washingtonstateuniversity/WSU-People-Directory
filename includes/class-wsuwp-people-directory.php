@@ -1369,13 +1369,18 @@ class WSUWP_People_Directory {
 			return $allcaps;
 		}
 
+		// Bail out if we're not asking about a post:
+		if ( 'edit_post' !== $args[0] ) {
+			return $allcaps;
+		}
+
 		// Bail for users who can already edit others posts:
 		if ( $allcaps['edit_others_posts'] ) {
 			return $allcaps;
 		}
 
 		// Bail for users who can't publish posts:
-		if ( ! isset( $allcaps['publish_posts'] ) or ! $allcaps['publish_posts'] ) {
+		if ( ! isset( $allcaps['publish_posts'] ) || ! $allcaps['publish_posts'] ) {
 			return $allcaps;
 		}
 
