@@ -331,7 +331,7 @@ class WSUWP_People_Directory {
 			'has_archive' => true,
 			'rewrite' => array(
 				'slug' => 'profile',
-				'with_front' => false
+				'with_front' => false,
 			),
 			'show_in_rest' => true,
 			'rest_base' => 'people',
@@ -415,7 +415,7 @@ class WSUWP_People_Directory {
 	public function admin_enqueue_scripts( $hook ) {
 		$screen = get_current_screen();
 
-		if ( ( 'post-new.php' == $hook || 'post.php' == $hook ) && $screen->post_type == $this->personnel_content_type ) {
+		if ( ( 'post-new.php' === $hook || 'post.php' === $hook ) && $screen->post_type === $this->personnel_content_type ) {
 			$ajax_nonce = wp_create_nonce( 'wsu-people-nid-lookup' );
 
 			wp_enqueue_style( 'wsuwp-people-admin-style', plugins_url( 'css/admin-profile-style.css', __FILE__ ) );
@@ -423,7 +423,7 @@ class WSUWP_People_Directory {
 			wp_localize_script( 'wsuwp-people-admin-script', 'wsupeople_nid_nonce', $ajax_nonce );
 		}
 
-		if ( 'edit.php' == $hook && $screen->post_type == $this->personnel_content_type ) {
+		if ( 'edit.php' === $hook && $screen->post_type === $this->personnel_content_type ) {
 			wp_enqueue_style( 'wsuwp-people-admin-style', plugins_url( 'css/admin-edit.css', __FILE__ ) );
 			wp_enqueue_script( 'wsuwp-people-admin-script', plugins_url( 'js/admin-edit.js', __FILE__ ) );
 		}
@@ -460,44 +460,43 @@ class WSUWP_People_Directory {
 				<ul>
 					<li class="wsuwp-profile-tab wsuwp-profile-bio-tab"><a href="#wsuwp-profile-default" class="nav-tab">Official Biography</a></li>
 					<?php
-						// Add tabs for saved biographies, and build an array to check against.
-						$profile_bios = array();
-						foreach ( $this->wp_bio_editors as $bio ) {
-							$meta = get_post_meta( $post->ID, $bio, true );
-							$profile_bios[] = $meta;
-							if ( $meta ) {
-								?>
-								<li class="wsuwp-profile-tab wsuwp-profile-bio-tab">
-									<a href="#<?php echo substr( $bio, 1 ); ?>" class="nav-tab"><?php echo ucfirst( substr( strrchr( $bio, '_' ), 1 ) ); ?> Biography</a>
-								</li>
-								<?php
-							}
+					// Add tabs for saved biographies, and build an array to check against.
+					$profile_bios = array();
+					foreach ( $this->wp_bio_editors as $bio ) {
+						$meta = get_post_meta( $post->ID, $bio, true );
+						$profile_bios[] = $meta;
+						if ( $meta ) {
+							?>
+							<li class="wsuwp-profile-tab wsuwp-profile-bio-tab">
+								<a href="#<?php echo esc_attr( substr( $bio, 1 ) ); ?>" class="nav-tab"><?php echo esc_html( ucfirst( substr( strrchr( $bio, '_' ), 1 ) ) ); ?> Biography</a>
+							</li>
+							<?php
 						}
+					}
 
-						// Build an array of CV field values to check against.
-						$profile_cv_data = array();
-						foreach ( $this->wp_cv_editors as $cv_meta_field ) {
-							$cv_data = get_post_meta( $post->ID, $cv_meta_field, true );
-							if ( $cv_data ) {
-								$profile_cv_data[] = $cv_data;
-							}
+					// Build an array of CV field values to check against.
+					$profile_cv_data = array();
+					foreach ( $this->wp_cv_editors as $cv_meta_field ) {
+						$cv_data = get_post_meta( $post->ID, $cv_meta_field, true );
+						if ( $cv_data ) {
+							$profile_cv_data[] = $cv_data;
 						}
+					}
 
-						// Display CV tab if any of the fields have been saved.
-						if ( $profile_cv_data ) {
-							echo '<li class="wsuwp-profile-tab"><a href="#wsuwp-profile-cv" class="nav-tab">C.V.</a></li>';
-						}
+					// Display CV tab if any of the fields have been saved.
+					if ( $profile_cv_data ) {
+						echo '<li class="wsuwp-profile-tab"><a href="#wsuwp-profile-cv" class="nav-tab">C.V.</a></li>';
+					}
 
-						// Display "+ Add Bio" link if any biographies are still empty.
-						if ( array_search( '', $profile_bios ) !== false ) {
-							echo '<li><a id="add-bio">+ Add Biography</a></li>';
-						}
+					// Display "+ Add Bio" link if any biographies are still empty.
+					if ( array_search( '', $profile_bios, true ) !== false ) {
+						echo '<li><a id="add-bio">+ Add Biography</a></li>';
+					}
 
-						//  Display "+ Add Bio" link if none of the fields have value.
-						if ( empty( $profile_cv_data ) ) {
-							echo '<li><a id="add-cv">+ Add C.V.</a></li>';
-						}
-
+					//  Display "+ Add Bio" link if none of the fields have value.
+					if ( empty( $profile_cv_data ) ) {
+						echo '<li><a id="add-cv">+ Add C.V.</a></li>';
+					}
 					?>
 				</ul>
 				<div id="wsuwp-profile-default" class="wsuwp-profile-panel">
@@ -519,26 +518,25 @@ class WSUWP_People_Directory {
 			</div><!--wsuwp-profile-default-->
 
 			<?php
-				foreach ( $this->wp_bio_editors as $bio_meta_field ) {
-					$bio = get_post_meta( $post->ID, $bio_meta_field, true );
-					if ( $bio ) {
-						?>
-						<div id="<?php echo substr( $bio_meta_field, 1 ); ?>" class="wsuwp-profile-panel">
-							<?php wp_editor( $bio, $bio_meta_field ); ?>
-							<!--<p>
-								Assign profile photo
-                	<select class="wsuwp-profile-bio-photo">
-										<option></option>
-										<option value="one">1</option>
-										<option value="two">2</option>
-										<option value="three">3</option>
-									</select>
-								to this biography.
-							</p>-->
-						</div>
-						<?php
-					}
+			foreach ( $this->wp_bio_editors as $bio_meta_field ) {
+				$bio = get_post_meta( $post->ID, $bio_meta_field, true );
+				if ( $bio ) {
+					?>
+					<div id="<?php echo esc_attr( substr( $bio_meta_field, 1 ) ); ?>" class="wsuwp-profile-panel">
+						<?php wp_editor( $bio, $bio_meta_field ); ?>
+						<!--<p>Assign profile photo
+							<select class="wsuwp-profile-bio-photo">
+								<option></option>
+								<option value="one">1</option>
+								<option value="two">2</option>
+								<option value="three">3</option>
+							</select>
+						to this biography.
+						</p>-->
+					</div>
+					<?php
 				}
+			}
 			?>
 
 			<div id="wsuwp-profile-bio-template" class="wsuwp-profile-panel">
@@ -548,7 +546,7 @@ class WSUWP_People_Directory {
 						<option></option>
 						<?php foreach ( $this->wp_bio_editors as $bio ) : ?>
 							<?php if ( ! get_post_meta( $post->ID, $bio, true ) ) : /* Somehow check for ones added without saving */ ?>
-							<option value="<?php echo substr( $bio, 1 ); ?>"><?php echo ucfirst( substr( strrchr( $bio, '_' ), 1 ) ); ?></option>
+							<option value="<?php echo esc_attr( substr( $bio, 1 ) ); ?>"><?php echo esc_html( ucfirst( substr( strrchr( $bio, '_' ), 1 ) ) ); ?></option>
 							<?php endif; ?>
 						<?php endforeach; ?>
 					</select> biography.
@@ -570,7 +568,7 @@ class WSUWP_People_Directory {
 			<div id="wsuwp-profile-cv" class="wsuwp-profile-panel" style="display:none;">
 
 				<p class="description">All sections are optional - headings for sections left blank will not be displayed.<br />
-        Click the <i class="mce-ico mce-i-wp_help wsuwp-profile-help"></i>for section notes and formatting examples.</p>
+				Click the <i class="mce-ico mce-i-wp_help wsuwp-profile-help"></i>for section notes and formatting examples.</p>
 
 				<?php
 				add_thickbox();
@@ -592,14 +590,14 @@ class WSUWP_People_Directory {
 					<p><strong>University Related</strong></p>
 					<ul>
 						<li><em>2005-Present</em><br />
-             WSU Extension Community Economic Development Specialist. Serving rural communities through economic development education and applied research with an emphasis in access to capital options for small business financing, small business development, and creating entrepreneurial ecosystems in communities.</li>
+						WSU Extension Community Economic Development Specialist. Serving rural communities through economic development education and applied research with an emphasis in access to capital options for small business financing, small business development, and creating entrepreneurial ecosystems in communities.</li>
 						<li><em>2001-2004</em><br />
-             WSU Extension County Director, Sage County. Responsible for administrative leadership for 3 faculty and 2 staff with program oversight for youth, family, natural resources programs. Conducted the community economic development program. Annual office budget, 450,000.</li>
+						WSU Extension County Director, Sage County. Responsible for administrative leadership for 3 faculty and 2 staff with program oversight for youth, family, natural resources programs. Conducted the community economic development program. Annual office budget, 450,000.</li>
 					</ul>
 					<p><strong>Other</strong></p>
 					<ul>
 						<li><em>2000-1997</em><br />
-             Financial Manager for Neighborhood Action Partners, Springdale, MO. Supervised five staff and ten volunteers. Managed budgets for six programs with annual budget of $750,000.</li>
+						Financial Manager for Neighborhood Action Partners, Springdale, MO. Supervised five staff and ten volunteers. Managed budgets for six programs with annual budget of $750,000.</li>
 					</ul>
 				</div>
 				<h3 class="wsuwp-profile-label">Employment <a href="#TB_inline?width=600&height=700&inlineId=wsuwp-profile-employment-lb" class="thickbox wsuwp-profile-help-link" title="Employment"><i class="mce-ico mce-i-wp_help wsuwp-profile-help"></i></a></h3>
@@ -609,9 +607,9 @@ class WSUWP_People_Directory {
 					<h4>Formatting</h4>
 					<ul>
 						<li><em>2014</em><br />
-             Faculty Excellence in Extension Award, Washington State University</li>
+						Faculty Excellence in Extension Award, Washington State University</li>
 						<li><em>2004</em><br />
-             Gold Award for Digitally Curriculum, "Training Local Entrepreneurs,” Natural Resource Extension Professionals (ANREP)</li>
+						Gold Award for Digitally Curriculum, "Training Local Entrepreneurs,” Natural Resource Extension Professionals (ANREP)</li>
 					</ul>
 				</div>
 				<h3 class="wsuwp-profile-label">Honors and Awards <a href="#TB_inline?width=600&height=700&inlineId=wsuwp-profile-honors-lb" class="thickbox wsuwp-profile-help-link" title="Honors and Awards"><i class="mce-ico mce-i-wp_help wsuwp-profile-help"></i></a></h3>
@@ -642,7 +640,7 @@ class WSUWP_People_Directory {
 					<ul>
 						<li><em>Briefly explain why you are listed on a grant if none of the indicators above explain your contribution.</em></li>
 						<li><em>The following key will be included on your profile if content is inserted in this section:<br />
-            Key to indicators or description of contributions to Grants, Contracts and Fund Generation: 1 = Provided the initial idea; 2 = Developed research/program design and hypotheses; 3 = Authored or co-authored grant application; 4 = Developed and/or managed budget; 5 = Managed personnel, partnerships, and project activities.</em></li>
+						Key to indicators or description of contributions to Grants, Contracts and Fund Generation: 1 = Provided the initial idea; 2 = Developed research/program design and hypotheses; 3 = Authored or co-authored grant application; 4 = Developed and/or managed budget; 5 = Managed personnel, partnerships, and project activities.</em></li>
 					</ul>
 				</div>
 				<h3 class="wsuwp-profile-label">Grants, Contracts, and Fund Generation <a href="#TB_inline?width=600&height=700&inlineId=wsuwp-profile-funds-lb" class="thickbox wsuwp-profile-help-link" title="Grants, Contracts, and Fund Generation"><i class="mce-ico mce-i-wp_help wsuwp-profile-help"></i></a></h3>
@@ -674,7 +672,7 @@ class WSUWP_People_Directory {
 					<ul>
 						<li><em>Briefly explain why you are listed on a publication if none of the indicators above explain your contribution.</em></li>
 						<li><em>The following key will be included on your profile if content is inserted in this section:<br />
-             Key to indicators or description of contributions to Publications and Creative Work: 1 = Developed the initial idea; 2 = Obtained or provided funds or other resources; 3 = Collected data; 4 = Analyzed data; 5 = Wrote/created product; 6 = Edited product.</em></li>
+						Key to indicators or description of contributions to Publications and Creative Work: 1 = Developed the initial idea; 2 = Obtained or provided funds or other resources; 3 = Collected data; 4 = Analyzed data; 5 = Wrote/created product; 6 = Edited product.</em></li>
 					</ul>
 				</div>
 				<h3 class="wsuwp-profile-label">Publications and Creative Work <a href="#TB_inline?width=600&height=550&inlineId=wsuwp-profile-pubs-lb" class="thickbox wsuwp-profile-help-link" title="Publications and Creative Work"><i class="mce-ico mce-i-wp_help wsuwp-profile-help"></i></a></h3>
@@ -708,17 +706,17 @@ class WSUWP_People_Directory {
 					<p><strong>Credit Courses Taught</strong></p>
 					<ul>
 						<li><em>2013</em><br />
-             Micro Economics and Local Development, graduate course. School of Economics, Everstate College – Spokane, WA</li>
+						Micro Economics and Local Development, graduate course. School of Economics, Everstate College – Spokane, WA</li>
 					</ul>
 					<p><strong>Additional Teaching</strong></p>
 					<ul>
 						<li><em>2012</em><br />
-             Micro Economics and Local Investing, undergraduate course. School of Economics, Everstate College – Spokane, WA (guest lecturer)</li>
+						Micro Economics and Local Investing, undergraduate course. School of Economics, Everstate College – Spokane, WA (guest lecturer)</li>
 					</ul>
 					<p><strong>Advising</strong></p>
 					<ul>
 						<li><em>2011</em><br />
-             Derek Ohlgren, MS, Civil and Environmental Engineering, Washington State University, (thesis committee)</li>
+						Derek Ohlgren, MS, Civil and Environmental Engineering, Washington State University, (thesis committee)</li>
 					</ul>
 				</div>
 				<h3 class="wsuwp-profile-label">University Instruction <a href="#TB_inline?width=600&height=700&inlineId=wsuwp-profile-teaching-lb" class="thickbox wsuwp-profile-help-link" title="University Instruction"><i class="mce-ico mce-i-wp_help wsuwp-profile-help"></i></a></h3>
@@ -736,29 +734,29 @@ class WSUWP_People_Directory {
 					<p><strong>University</strong></p>
 					<ul>
 						<li><em>2013</em><br />
-             Washington State University Strategic Plan Taskforce – Chair<br />
-             WSU Extension Director Search Committee – member</li>
+						Washington State University Strategic Plan Taskforce – Chair<br />
+						WSU Extension Director Search Committee – member</li>
 						<li><em>2010</em><br />
-             Washington State University Faculty Senate – Senator</li>
+						Washington State University Faculty Senate – Senator</li>
 					</ul>
 					<p><strong>Professional Society</strong></p>
 					<ul>
 						<li><em>2008</em><br />
-             National Associate of Economic Developers – Western Regional Chair</li>
+						National Associate of Economic Developers – Western Regional Chair</li>
 						<li><em>2007</em><br />
-             Extension Professionals Society – Conference Planning Chair</li>
+						Extension Professionals Society – Conference Planning Chair</li>
 					</ul>
 					<p><strong>Community</strong></p>
 					<ul>
 						<li><em>2012</em><br />
-             Washington Local Investment Coalition – President</li>
+						Washington Local Investment Coalition – President</li>
 						<li><em>2011 - Present</em><br />
-             Washington Banking Association Advisory Board - member</li>
+						Washington Banking Association Advisory Board - member</li>
 					</ul>
 					<p><strong>Review Activities</strong></p>
 					<ul>
 						<li><em>2010-Present</em><br />
-             Doe, J., C. Ray, D. Mee, (editors) Journal of Metropolitan Extension; a journal of the Society for Urban Extension. <a href="#">Read the Journal at W. Coyote</a> [Online Library]</li>
+						Doe, J., C. Ray, D. Mee, (editors) Journal of Metropolitan Extension; a journal of the Society for Urban Extension. <a href="#">Read the Journal at W. Coyote</a> [Online Library]</li>
 					</ul>
 				</div>
 				<h3 class="wsuwp-profile-label">Professional Service <a href="#TB_inline?width=600&height=700&inlineId=wsuwp-profile-service-lb" class="thickbox wsuwp-profile-help-link" title="Professional Service"><i class="mce-ico mce-i-wp_help wsuwp-profile-help"></i></a></h3>
@@ -769,7 +767,7 @@ class WSUWP_People_Directory {
 					<h4>Formatting</h4>
 					<ul>
 						<li><em>2001-2004</em><br />
-             WSU Extension County Director, Sage County. Responsible for administrative leadership of faculty /staff, budget development/ management, local government liaison and representing WSU to the public for youth, family and natural resources programs. Conducted the community economic development program. Annual office budget, $450,000.</li>
+						WSU Extension County Director, Sage County. Responsible for administrative leadership of faculty /staff, budget development/ management, local government liaison and representing WSU to the public for youth, family and natural resources programs. Conducted the community economic development program. Annual office budget, $450,000.</li>
 					</ul>
 				</div>
 				<h3 class="wsuwp-profile-label">Administrative Responsibility <a href="#TB_inline?width=600&height=700&inlineId=wsuwp-profile-responsibilities-lb" class="thickbox wsuwp-profile-help-link" title="Administrative Responsibility"><i class="mce-ico mce-i-wp_help wsuwp-profile-help"></i></a></h3>
@@ -790,9 +788,9 @@ class WSUWP_People_Directory {
 					<h4>Formatting</h4>
 					<ul>
 						<li><em>2006-2007</em><br />
-             <em>Spanish for Professionals</em>, Gonzaga University Certificate Summer Program</li>
+						<em>Spanish for Professionals</em>, Gonzaga University Certificate Summer Program</li>
 						<li><em>2004</em><br />
-             <em>Indigenous Economic Development Course</em>, International Economic Development Council</li>
+						<em>Indigenous Economic Development Course</em>, International Economic Development Council</li>
 					</ul>
 				</div>
 				<h3 class="wsuwp-profile-label">Professional Development <a href="#TB_inline?width=600&height=700&inlineId=wsuwp-profile-experience-lb" class="thickbox wsuwp-profile-help-link" title="Professional Experience"><i class="mce-ico mce-i-wp_help wsuwp-profile-help"></i></a></h3>
@@ -836,15 +834,13 @@ class WSUWP_People_Directory {
 		wp_nonce_field( 'wsuwsp_profile', 'wsuwsp_profile_nonce' );
 
 		$name_first = get_post_meta( $post->ID, '_wsuwp_profile_ad_name_first', true );
-		$name_last  = get_post_meta( $post->ID, '_wsuwp_profile_ad_name_last', true );
-		$title      = get_post_meta( $post->ID, '_wsuwp_profile_ad_title', true );
-		$email      = get_post_meta( $post->ID, '_wsuwp_profile_ad_email', true );
-		$office     = get_post_meta( $post->ID, '_wsuwp_profile_ad_office', true );
-		$address    = get_post_meta( $post->ID, '_wsuwp_profile_ad_address', true );
-		$phone      = get_post_meta( $post->ID, '_wsuwp_profile_ad_phone', true );
-		$phone_ext  = get_post_meta( $post->ID, '_wsuwp_profile_ad_phone_ext', true );
-
-
+		$name_last = get_post_meta( $post->ID, '_wsuwp_profile_ad_name_last', true );
+		$title = get_post_meta( $post->ID, '_wsuwp_profile_ad_title', true );
+		$email = get_post_meta( $post->ID, '_wsuwp_profile_ad_email', true );
+		$office = get_post_meta( $post->ID, '_wsuwp_profile_ad_office', true );
+		$address = get_post_meta( $post->ID, '_wsuwp_profile_ad_address', true );
+		$phone = get_post_meta( $post->ID, '_wsuwp_profile_ad_phone', true );
+		$phone_ext = get_post_meta( $post->ID, '_wsuwp_profile_ad_phone_ext', true );
 		$appointments = wp_get_post_terms( $post->ID, $this->personnel_appointments, array( 'fields' => 'names' ) );
 		$classifications = wp_get_post_terms( $post->ID, $this->personnel_classifications, array( 'fields' => 'names' ) );
 
@@ -878,7 +874,8 @@ class WSUWP_People_Directory {
 
 			<div>
 				<div>Phone:</div>
-				<div id="_wsuwp_profile_ad_phone"><?php echo esc_html( $phone ); if ( $phone_ext ) { echo ' ' . esc_html( $phone_ext ); } ?></div>
+				<div id="_wsuwp_profile_ad_phone"><?php echo esc_html( $phone );
+				if ( $phone_ext ) { echo ' ' . esc_html( $phone_ext ); } ?></div>
 			</div>
 
 			<div>
@@ -891,7 +888,7 @@ class WSUWP_People_Directory {
 					<div>Appointment(s)</div>
 					<div>
 						<ul>
-							<?php foreach ( $appointments as $appointment ) { echo '<li>' . $appointment . '</li>'; } ?>
+							<?php foreach ( $appointments as $appointment ) { echo '<li>' . esc_html( $appointment ) . '</li>'; } ?>
 						</ul>
 					</div>
 				</div>
@@ -902,7 +899,7 @@ class WSUWP_People_Directory {
 					<div>Classification</div>
 					<div>
 						<ul>
-							<?php foreach ( $classifications as $classification ) { echo '<li>' . $classification . '</li>'; } ?>
+							<?php foreach ( $classifications as $classification ) { echo '<li>' . esc_html( $classification ) . '</li>'; } ?>
 						</ul>
 					</div>
 				</div>
@@ -1003,7 +1000,7 @@ class WSUWP_People_Directory {
 			<div id="misc-publishing-actions">
 				<div class="misc-pub-section">
 					<label for="_wsuwp_profile_ad_nid">Network ID</label>:
-					<input type="text" id="_wsuwp_profile_ad_nid" name="_wsuwp_profile_ad_nid" value="<?php echo esc_attr( $nid ); ?>" class="widefat" <?php echo $readonly; ?> />
+					<input type="text" id="_wsuwp_profile_ad_nid" name="_wsuwp_profile_ad_nid" value="<?php echo esc_attr( $nid ); ?>" class="widefat" <?php echo esc_attr( $readonly ); ?> />
 
 				<?php if ( '' === $readonly ) : ?>
 					<div class="load-ad-container">
@@ -1022,11 +1019,11 @@ class WSUWP_People_Directory {
 					<?php
 					if ( 'auto-draft' !== $post->post_status && current_user_can( 'delete_post', $post->ID ) ) {
 						if ( ! EMPTY_TRASH_DAYS ) {
-							$delete_text = __('Delete Permanently');
+							$delete_text = __( 'Delete Permanently' );
 						} else {
 							$delete_text = __( 'Move to Trash' );
 						} ?>
-						<a class="submitdelete deletion" href="<?php echo get_delete_post_link( $post->ID ); ?>"><?php echo $delete_text; ?></a><?php
+						<a class="submitdelete deletion" href="<?php echo get_delete_post_link( $post->ID ); ?>"><?php echo esc_html( $delete_text ); ?></a><?php
 					}
 					?>
 				</div>
@@ -1034,7 +1031,7 @@ class WSUWP_People_Directory {
 				<div id="publishing-action">
 					<span class="spinner"></span>
 					<?php
-					if ( $can_publish && ( ! in_array( $post->post_status, array( 'publish', 'future', 'private' ) ) || 0 == $post->ID ) ) { ?>
+					if ( $can_publish && ( ! in_array( $post->post_status, array( 'publish', 'future', 'private' ), true ) || 0 === $post->ID ) ) { ?>
 						<span class="button" id="load-ad-data">Load</span>
 						<span class="button button-primary profile-hide-button" id="confirm-ad-data">Confirm</span>
 						<input type="hidden" id="confirm-ad-hash" name="confirm_ad_hash" value="" />
@@ -1082,52 +1079,52 @@ class WSUWP_People_Directory {
 		</div>
 		<div class="wsuwp-profile-additional">
 			<?php
-      $titles = get_post_meta( $post->ID, '_wsuwp_profile_title', true );
-      $degrees = get_post_meta( $post->ID, '_wsuwp_profile_degree', true );
-      ?>
-      <div>
-        <?php
-        if ( $titles && is_array( $titles ) ) {
-          foreach ( $titles as $index => $title ) {
-            ?>
-            <p class="wp-profile-repeatable">
-              <label for="_wsuwp_profile_title[<?php echo esc_attr( $index ); ?>]">Working Title</label><br />
-              <input type="text" id="_wsuwp_profile_title[<?php echo esc_attr( $index ); ?>]" name="_wsuwp_profile_title[<?php echo esc_attr( $index ); ?>]" value="<?php echo esc_attr( $title ); ?>" class="widefat" />
-            </p>
-            <?php
-          }
-        } else {
-          ?>
-          <p class="wp-profile-repeatable">
-            <label for="_wsuwp_profile_title[0]">Working Title</label><br />
-            <input type="text" id="_wsuwp_profile_title[0]" name="_wsuwp_profile_title[0]" value="<?php echo esc_attr( $titles ); ?>" class="widefat" />
-          </p>
-          <?php
-        }
-        ?>
-        <p class="wsuwp-profile-add-repeatable"><a href="#">+ Add another title</a></p>
-      </div>
+			$titles = get_post_meta( $post->ID, '_wsuwp_profile_title', true );
+			$degrees = get_post_meta( $post->ID, '_wsuwp_profile_degree', true );
+			?>
+			<div>
+	        <?php
+			if ( $titles && is_array( $titles ) ) {
+				foreach ( $titles as $index => $title ) {
+					?>
+					<p class="wp-profile-repeatable">
+						<label for="_wsuwp_profile_title[<?php echo esc_attr( $index ); ?>]">Working Title</label><br />
+						<input type="text" id="_wsuwp_profile_title[<?php echo esc_attr( $index ); ?>]" name="_wsuwp_profile_title[<?php echo esc_attr( $index ); ?>]" value="<?php echo esc_attr( $title ); ?>" class="widefat" />
+					</p>
+					<?php
+				}
+			} else {
+				?>
+				<p class="wp-profile-repeatable">
+					<label for="_wsuwp_profile_title[0]">Working Title</label><br />
+					<input type="text" id="_wsuwp_profile_title[0]" name="_wsuwp_profile_title[0]" value="<?php echo esc_attr( $titles ); ?>" class="widefat" />
+				</p>
+				<?php
+			}
+			?>
+			<p class="wsuwp-profile-add-repeatable"><a href="#">+ Add another title</a></p>
+			</div>
 
-      <div>
-        <?php
-        if ( $degrees && is_array( $degrees ) ) {
-          foreach ( $degrees as $index => $degree ) {
-            ?>
+			<div>
+				<?php
+				if ( $degrees && is_array( $degrees ) ) {
+					foreach ( $degrees as $index => $degree ) {
+						?>
 						<p class="wp-profile-repeatable">
 							<label for="_wsuwp_profile_degree[<?php echo esc_attr( $index ); ?>]">Degree</label><br />
 							<input type="text" id="_wsuwp_profile_degree[<?php echo esc_attr( $index ); ?>]" name="_wsuwp_profile_degree[<?php echo esc_attr( $index ); ?>]" value="<?php echo esc_attr( $degree ); ?>" class="widefat" />
 						</p>
-            <?php
-          }
-        } else {
-          ?>
+						<?php
+					}
+				} else {
+					?>
 					<p class="wp-profile-repeatable">
 						<label for="_wsuwp_profile_degree[0]">Degree</label><br />
 						<input type="text" id="_wsuwp_profile_degree[0]" name="_wsuwp_profile_degree[0]" value="<?php echo esc_attr( $degrees ); ?>" class="widefat" />
 					</p>
-          <?php
-        }
-        ?>
+					<?php
+				}
+				?>
 				<p class="wsuwp-profile-add-repeatable"><a href="#">+ Add another degree</a></p>
 			</div>
 		</div>
@@ -1144,13 +1141,7 @@ class WSUWP_People_Directory {
 	 */
 	public function save_post( $post_id ) {
 
-		if ( ! isset( $_POST['wsuwsp_profile_nonce'] ) ) {
-			return $post_id;
-		}
-
-		$nonce = $_POST['wsuwsp_profile_nonce'];
-
-		if ( ! wp_verify_nonce( $nonce, 'wsuwsp_profile' ) ) {
+		if ( ! isset( $_POST['wsuwsp_profile_nonce'] ) || ! wp_verify_nonce( $_POST['wsuwsp_profile_nonce'], 'wsuwsp_profile' ) ) {
 			return $post_id;
 		}
 
@@ -1163,14 +1154,14 @@ class WSUWP_People_Directory {
 		}
 
 		// Save "last_name first_name" data (for alpha sorting purposes).
-		if ( ( isset( $_POST['_wsuwp_profile_ad_name_last'] ) && '' != $_POST['_wsuwp_profile_ad_name_last'] ) &&
-				 ( isset( $_POST['_wsuwp_profile_ad_name_first'] ) && '' != $_POST['_wsuwp_profile_ad_name_first'] ) ) {
+		if ( ( isset( $_POST['_wsuwp_profile_ad_name_last'] ) && '' !== $_POST['_wsuwp_profile_ad_name_last'] ) &&
+				 ( isset( $_POST['_wsuwp_profile_ad_name_first'] ) && '' !== $_POST['_wsuwp_profile_ad_name_first'] ) ) {
 			update_post_meta( $post_id, '_wsuwp_profile_name', sanitize_text_field( $_POST['_wsuwp_profile_ad_name_last'] ) . ' ' . sanitize_text_field( $_POST['_wsuwp_profile_ad_name_first'] ) );
 		}
 
 		// Sanitize and save basic fields.
 		foreach ( $this->basic_fields as $field ) {
-			if ( isset( $_POST[ $field ] ) && '' != $_POST[ $field ] ) {
+			if ( isset( $_POST[ $field ] ) && '' !== $_POST[ $field ] ) {
 				update_post_meta( $post_id, $field, sanitize_text_field( $_POST[ $field ] ) );
 			} else {
 				delete_post_meta( $post_id, $field );
@@ -1179,10 +1170,10 @@ class WSUWP_People_Directory {
 
 		// Sanitize and save repeatable fields.
 		foreach ( $this->repeatable_fields as $field ) {
-			if ( isset( $_POST[ $field ] ) && '' != $_POST[ $field ] ) {
+			if ( isset( $_POST[ $field ] ) && '' !== $_POST[ $field ] ) {
 				$array = array();
 				foreach ( $_POST[ $field ] as $value ) {
-					if ( isset( $value ) && '' != $value ) {
+					if ( isset( $value ) && '' !== $value ) {
 						$array[] = sanitize_text_field( $value );
 					}
 				}
@@ -1191,21 +1182,18 @@ class WSUWP_People_Directory {
 				} else {
 					delete_post_meta( $post_id, $field );
 				}
-
 			}
-
 		}
 
 		// Sanitize and save wp_editors.
 		$wp_editors = array_merge( $this->wp_bio_editors, $this->wp_cv_editors );
 		foreach ( $wp_editors as $field ) {
-			if ( isset( $_POST[ $field ] ) && '' != $_POST[ $field ] ) {
+			if ( isset( $_POST[ $field ] ) && '' !== $_POST[ $field ] ) {
 				update_post_meta( $post_id, $field, wp_kses_post( $_POST[ $field ] ) );
 			} else {
 				delete_post_meta( $post_id, $field );
 			}
 		}
-
 	}
 
 	/**
@@ -1287,7 +1275,7 @@ class WSUWP_People_Directory {
 			'update_callback' => null,
 			'schema' => null,
 		);
-		foreach( $this->rest_response_fields as $field_name => $value ) {
+		foreach ( $this->rest_response_fields as $field_name => $value ) {
 			register_rest_field( $this->personnel_content_type, $field_name, $args );
 		}
 	}
@@ -1381,24 +1369,24 @@ class WSUWP_People_Directory {
 		$post = get_post( $args[2] );
 
 		// Bail if the post type isn't Personnel:
-		if ( $this->personnel_content_type != $post->post_type ) {
+		if ( $this->personnel_content_type !== $post->post_type ) {
 			return $allcaps;
 		}
 
 		// Bail if the user is the post author:
-		if ( $args[1] == $post->post_author ) {
+		if ( $args[1] === $post->post_author ) {
 			return $allcaps;
 		}
 
 		// Bail if the post isn't published:
-		if ( 'publish' != $post->post_status ) {
+		if ( 'publish' !== $post->post_status ) {
 			return $allcaps;
 		}
 
 		// Bail if the user isn't an Organization Administrator:
 		$dept = get_post_meta( $post->ID, '_wsuwp_profile_dept', true );
 		$org_admin = get_user_meta( $args[1], 'wsuwp_people_organization_admin', true );
-		if ( $org_admin != $dept ) {
+		if ( $org_admin !== $dept ) {
 			return $allcaps;
 		}
 
@@ -1459,7 +1447,7 @@ class WSUWP_People_Directory {
 				'wsuwp_directory_dashboard_widget',
 				'Welcome to the WSU Personnel Directory',
 				array( $this, 'wsuwp_directory_dashboard_widget' )
-      );
+			);
 
 		}
 
@@ -1515,27 +1503,22 @@ class WSUWP_People_Directory {
 
 			$posts = $all_personnel->get_posts();
 
-			foreach( $posts as $post ) {
+			foreach ( $posts as $post ) {
 				if ( current_user_can( 'edit_post', $post->ID ) ) {
 					$users_editable_profiles[] = $post->ID;
 				}
 			}
 
 			if ( $users_editable_profiles ) {
-
 				$profile_ids = implode( ',', $users_editable_profiles );
 				$count = count( $users_editable_profiles );
-
-				$class = ( $_GET['sortby'] == 'last_name' ) ? ' class="current"' : '';
-				$url = admin_url('edit.php?post_type=' . $this->personnel_content_type . '&post_status=publish&sortby=last_name&profiles=' . $profile_ids );
-				$views['others'] = sprintf(__( '<a href="%s"'. $class .'>Others <span class="count">(%d)</span></a>' ), $url, $count );
-
+				$class = ( 'last_name' === $_GET['sortby'] ) ? ' class="current"' : '';
+				$url = admin_url( 'edit.php?post_type=' . $this->personnel_content_type . '&post_status=publish&sortby=last_name&profiles=' . $profile_ids );
+				$views['others'] = sprintf( __( '<a href="%1$s"%2$s>Others <span class="count">(%3$d)</span></a>' ), $url, $class, $count );
 			}
-
 		}
 
 		return $views;
-
 	}
 
 	/**
@@ -1545,11 +1528,10 @@ class WSUWP_People_Directory {
 
 		$screen = get_current_screen();
 
-		if ( is_admin() && 'edit-' . $this->personnel_content_type == $screen->id &&
-				isset( $_GET['post_type'] ) && $_GET['post_type'] == $this->personnel_content_type &&
-				isset( $_GET['sortby'] ) && $_GET['sortby'] == 'last_name' &&
-				isset( $_GET['profiles'] ) && $_GET['profiles'] != '' )
-		{
+		if ( is_admin() && 'edit-' . $this->personnel_content_type === $screen->id &&
+				isset( $_GET['post_type'] ) && $_GET['post_type'] === $this->personnel_content_type &&
+				isset( $_GET['sortby'] ) && 'last_name' === $_GET['sortby'] &&
+				isset( $_GET['profiles'] ) && '' !== $_GET['profiles'] ) {
 			$editables = explode( ',', $_GET['profiles'] );
 			set_query_var( 'meta_key', '_wsuwp_profile_ad_name_last' );
 			set_query_var( 'orderby', 'meta_value' );
@@ -1557,7 +1539,6 @@ class WSUWP_People_Directory {
 			//set_query_var( 'order', 'ASC' );
 			//set_query_var( 'post__in', $editables );
 		}
-
 	}
 
 	/**
