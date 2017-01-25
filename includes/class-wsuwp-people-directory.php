@@ -411,6 +411,8 @@ class WSUWP_People_Directory {
 
 	/**
 	 * Enqueue the scripts and styles used in the admin interface.
+	 *
+	 * @param string $hook The current admin page.
 	 */
 	public function admin_enqueue_scripts( $hook ) {
 		$screen = get_current_screen();
@@ -450,7 +452,7 @@ class WSUWP_People_Directory {
 	/**
 	 * Add markup after the title of the edit screen for the Personnel content type.
 	 *
-	 * @param WP_Post $post
+	 * @param WP_Post $post Post object.
 	 */
 	public function edit_form_after_title( $post ) {
 		if ( $this->personnel_content_type === $post->post_type ) :
@@ -508,7 +510,7 @@ class WSUWP_People_Directory {
 	/**
 	 * Add markup after the default editor of the edit screen for the Personnel content type.
 	 *
-	 * @param WP_Post $post
+	 * @param WP_Post $post Post object.
 	 */
 	public function edit_form_after_editor( $post ) {
 
@@ -827,7 +829,7 @@ class WSUWP_People_Directory {
 	/**
 	 * Display a meta box used to show a person's "card".
 	 *
-	 * @param WP_Post $post
+	 * @param WP_Post $post Post object.
 	 */
 	public function display_position_info_meta_box( $post ) {
 
@@ -913,7 +915,7 @@ class WSUWP_People_Directory {
 	/**
 	 * Display a meta box used to upload a person's C.V.
 	 *
-	 * @param WP_Post $post
+	 * @param WP_Post $post Post object.
 	 */
 	public function display_cv_upload_meta_box( $post ) {
 
@@ -1055,7 +1057,7 @@ class WSUWP_People_Directory {
 	 * Display a meta box to collect alternate contact information as well as additional working
 	 * title and degree data for the profile.
 	 *
-	 * @param WP_Post $post
+	 * @param WP_Post $post Post object.
 	 */
 	public function display_additional_info_meta_box( $post ) {
 		?>
@@ -1135,7 +1137,7 @@ class WSUWP_People_Directory {
 	/**
 	 * Save data associated with a profile.
 	 *
-	 * @param int $post_id
+	 * @param int $post_id Post ID.
 	 *
 	 * @return mixed
 	 */
@@ -1198,6 +1200,10 @@ class WSUWP_People_Directory {
 
 	/**
 	 * Keys of meta fields to revision.
+	 *
+	 * @param array $keys Meta keys to track revisions for.
+	 *
+	 * @return array
 	 */
 	public function add_meta_keys_to_revision( $keys ) {
 		$revisioned_fields = array_merge( $this->basic_fields, $this->repeatable_fields, $this->wp_bio_editors, $this->wp_cv_editors );
@@ -1212,7 +1218,7 @@ class WSUWP_People_Directory {
 	/**
 	 * Taxonomy columns on the "All Profiles" screen.
 	 *
-	 * @param array $columns
+	 * @param array $columns Default columns on the "All Profiles" screen.
 	 *
 	 * @return array
 	 */
@@ -1349,6 +1355,14 @@ class WSUWP_People_Directory {
 
 	/**
 	 * Capability modifications.
+	 *
+	 * @param array $allcaps All the user's capabilities
+	 * @param array $caps    [0] Required capability
+	 * @param array $args    [0] Requested capability
+	 *                       [1] User ID
+	 *                       [2] Associated object ID
+	 *
+	 * @return array $allcaps
 	 */
 	public function user_has_cap( $allcaps, $cap, $args ) {
 		if ( empty( $allcaps ) ) {
@@ -1422,6 +1436,8 @@ class WSUWP_People_Directory {
 
 	/**
 	 * Remove the "Add New" menu from the toolbar.
+	 *
+	 * @param WP_Admin_Bar $wp_admin_bar
 	 */
 	public function admin_bar_menu( $wp_admin_bar ) {
 
@@ -1465,6 +1481,8 @@ class WSUWP_People_Directory {
 	 * Show (non-Admin) users only the media they have uploaded.
 	 * Theoretically, they have no need to see the rest.
 	 * This doesn't change the counts on the Media Library page.
+	 *
+	 * @param WP_Query $query
 	 */
 	public function limit_media_library( $query ) {
 		if ( is_admin() && isset( $_REQUEST['action'] ) ) {
@@ -1481,6 +1499,10 @@ class WSUWP_People_Directory {
 	/**
 	 * Modify "All Profiles" views for all but administrators.
 	 * Probably not the most scalable.
+	 *
+	 * @param array $views Default table views.
+	 *
+	 * @return array
 	 */
 	public function edit_views( $views ) {
 
@@ -1523,6 +1545,8 @@ class WSUWP_People_Directory {
 
 	/**
 	 * Query parsing for "Others" view on "All Profiles" page.
+	 *
+	 * @param mixed $query Array or string of Query parameters.
 	 */
 	public function parse_query( $query ) {
 
