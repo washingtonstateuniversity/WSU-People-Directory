@@ -56,7 +56,6 @@ class WSUWP_People_Directory {
 		'_wsuwp_profile_alt_phone',
 		'_wsuwp_profile_alt_email',
 		'_wsuwp_profile_website',
-		'_wsuwp_profile_cv',
 	);
 
 	/**
@@ -76,24 +75,6 @@ class WSUWP_People_Directory {
 		'_wsuwp_profile_bio_college',
 		'_wsuwp_profile_bio_dept',
 		'_wsuwp_profile_bio_lab',
-	);
-
-	/**
-	 * WP editors for C.V.
-	 */
-	var $wp_cv_editors = array(
-		'_wsuwp_profile_employment',
-		'_wsuwp_profile_honors',
-		'_wsuwp_profile_grants',
-		'_wsuwp_profile_publications',
-		'_wsuwp_profile_presentations',
-		'_wsuwp_profile_teaching',
-		'_wsuwp_profile_service',
-		'_wsuwp_profile_responsibilities',
-		'_wsuwp_profile_societies',
-		'_wsuwp_profile_experience',
-		/*'_wsuwp_profile_research',
-		'_wsuwp_profile_extension',*/
 	);
 
 	/**
@@ -476,28 +457,9 @@ class WSUWP_People_Directory {
 						}
 					}
 
-					// Build an array of CV field values to check against.
-					$profile_cv_data = array();
-					foreach ( $this->wp_cv_editors as $cv_meta_field ) {
-						$cv_data = get_post_meta( $post->ID, $cv_meta_field, true );
-						if ( $cv_data ) {
-							$profile_cv_data[] = $cv_data;
-						}
-					}
-
-					// Display CV tab if any of the fields have been saved.
-					if ( $profile_cv_data ) {
-						echo '<li class="wsuwp-profile-tab"><a href="#wsuwp-profile-cv" class="nav-tab">C.V.</a></li>';
-					}
-
 					// Display "+ Add Bio" link if any biographies are still empty.
 					if ( array_search( '', $profile_bios, true ) !== false ) {
 						echo '<li><a id="add-bio">+ Add Biography</a></li>';
-					}
-
-					//  Display "+ Add Bio" link if none of the fields have value.
-					if ( empty( $profile_cv_data ) ) {
-						echo '<li><a id="add-cv">+ Add C.V.</a></li>';
 					}
 					?>
 				</ul>
@@ -565,240 +527,6 @@ class WSUWP_People_Directory {
 					to this biography.</p>
 				</div>
 			</div><!--wsuwp-profile-bio-template-->
-
-
-			<div id="wsuwp-profile-cv" class="wsuwp-profile-panel" style="display:none;">
-
-				<p class="description">All sections are optional - headings for sections left blank will not be displayed.<br />
-				Click the <i class="mce-ico mce-i-wp_help wsuwp-profile-help"></i>for section notes and formatting examples.</p>
-
-				<?php
-				add_thickbox();
-
-				$wsuwp_profile_cv_settings = array(
-					'media_buttons' => false,
-					'textarea_rows' => 5,
-				);
-
-				?>
-
-				<div id="wsuwp-profile-employment-lb" class="wsuwp-profile-lb">
-					<h4>Include</h4>
-					<ul>
-						<li>University Related</li>
-						<li>Other</li>
-					</ul>
-					<h4>Formatting</h4>
-					<p><strong>University Related</strong></p>
-					<ul>
-						<li><em>2005-Present</em><br />
-						WSU Extension Community Economic Development Specialist. Serving rural communities through economic development education and applied research with an emphasis in access to capital options for small business financing, small business development, and creating entrepreneurial ecosystems in communities.</li>
-						<li><em>2001-2004</em><br />
-						WSU Extension County Director, Sage County. Responsible for administrative leadership for 3 faculty and 2 staff with program oversight for youth, family, natural resources programs. Conducted the community economic development program. Annual office budget, 450,000.</li>
-					</ul>
-					<p><strong>Other</strong></p>
-					<ul>
-						<li><em>2000-1997</em><br />
-						Financial Manager for Neighborhood Action Partners, Springdale, MO. Supervised five staff and ten volunteers. Managed budgets for six programs with annual budget of $750,000.</li>
-					</ul>
-				</div>
-				<h3 class="wsuwp-profile-label">Employment <a href="#TB_inline?width=600&height=700&inlineId=wsuwp-profile-employment-lb" class="thickbox wsuwp-profile-help-link" title="Employment"><i class="mce-ico mce-i-wp_help wsuwp-profile-help"></i></a></h3>
-				<?php wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_employment', true ), '_wsuwp_profile_employment', $wsuwp_profile_cv_settings ); ?>
-
-				<div id="wsuwp-profile-honors-lb" class="wsuwp-profile-lb">
-					<h4>Formatting</h4>
-					<ul>
-						<li><em>2014</em><br />
-						Faculty Excellence in Extension Award, Washington State University</li>
-						<li><em>2004</em><br />
-						Gold Award for Digitally Curriculum, "Training Local Entrepreneurs,” Natural Resource Extension Professionals (ANREP)</li>
-					</ul>
-				</div>
-				<h3 class="wsuwp-profile-label">Honors and Awards <a href="#TB_inline?width=600&height=700&inlineId=wsuwp-profile-honors-lb" class="thickbox wsuwp-profile-help-link" title="Honors and Awards"><i class="mce-ico mce-i-wp_help wsuwp-profile-help"></i></a></h3>
-				<?php wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_honors', true ), '_wsuwp_profile_honors', $wsuwp_profile_cv_settings ); ?>
-
-				<div id="wsuwp-profile-funds-lb" class="wsuwp-profile-lb">
-					<h4>Include</h4>
-					<ul>
-						<li>Grants and Contracts</li>
-						<li>Gifts and Awards</li>
-						<li>Program Revenue Generation and Sponsorships</li>
-						<li>MOA’s and funding secured from Public, Non-profit, and Private entities</li>
-						<li>Unfunded Grant Proposals – Summarized by Year</li>
-					</ul>
-				  <p>Using the rubric below, indicate your contribution(s) to each grant (e.g., principal investigator, co-PI, cooperator), as well as the title, funding entity, total amount, amount of funds for which you had responsibility and authors as described in the example.</p>
-					<ol>
-						<li>Provided the initial idea</li>
-						<li>Developed research/program design and hypotheses</li>
-						<li>Authored or co-authored grant application</li>
-						<li>Developed and/or managed budget</li>
-						<li>Managed personnel, partnerships, and project activities</li>
-					</ol>
-				  <h4>Formatting</h4>
-					<ul>
-						<li>Assessing the effects of global warming on nitrogen cycling in eastern Washington. Agriculture and Food Research Initiative, US Department of Agriculture. $428,802. P.I.: <strong>J. A. Smith</strong> and Co-P.I.: R. N. Jones. (3/08 – 3/12) <strong>(1, 3, 4, $300,000).</strong></li>
-					</ul>
-					<h4>Notes</h4>
-					<ul>
-						<li><em>Briefly explain why you are listed on a grant if none of the indicators above explain your contribution.</em></li>
-						<li><em>The following key will be included on your profile if content is inserted in this section:<br />
-						Key to indicators or description of contributions to Grants, Contracts and Fund Generation: 1 = Provided the initial idea; 2 = Developed research/program design and hypotheses; 3 = Authored or co-authored grant application; 4 = Developed and/or managed budget; 5 = Managed personnel, partnerships, and project activities.</em></li>
-					</ul>
-				</div>
-				<h3 class="wsuwp-profile-label">Grants, Contracts, and Fund Generation <a href="#TB_inline?width=600&height=700&inlineId=wsuwp-profile-funds-lb" class="thickbox wsuwp-profile-help-link" title="Grants, Contracts, and Fund Generation"><i class="mce-ico mce-i-wp_help wsuwp-profile-help"></i></a></h3>
-				<?php wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_grants', true ), '_wsuwp_profile_grants', $wsuwp_profile_cv_settings ); ?>
-
-				<div id="wsuwp-profile-pubs-lb" class="wsuwp-profile-lb">
-					<h4>Include</h4>
-					<ul>
-						<li>Peer-reviewed Journal Articles. (The journal must have a professional organization or corporate entity with an editor that manages a blind, peer review process.)</li>
-						<li>Peer-reviewed Extension Publications. (The publication must have a formal publishing organization such as WSU Extension that manages a blind, peer review process.)</li>
-						<li>Peer-reviewed Curricula and Training Manuals (Published curricula and training manuals that have been formally peer reviewed by WSU Extension or another institution.)</li>
-						<li>Published Books, Book Chapters, or Monographs (Specify when an entry was peer reviewed according to the criteria described in A or B above.)</li>
-						<li>Creative Scholarship in Juried Events. (Abstracts, Posters, and Published Papers in Proceedings of a Professional Meeting or Conference. (Note: These are generally not peer reviewed but they may be peer approved or selected through a process.)</li>
-						<li>Educational Digital Media (Videos, computer programs, mobile aps, dynamic web-pages, social media, blogs, online modules, decision aids, email list-serves, etc.) (Designate products that received formal peer-review with an * and indicate the entity managing the review.)</li>
-						<li>Other Publications and Creative Works (Those products that did not receive formal peer review, and include popular press articles, newsletters, and other written works)</li>
-					</ul>
-					<p>Using the rubric below, indicate your contribution(s) to each scholarly product in parentheses as shown in the example:</p>
-					<ol>
-						<li>Developed the initial idea</li>
-						<li>Obtained or provided funds or other resources</li>
-						<li>Collected data</li>
-						<li>Analyzed data</li>
-						<li>Wrote/created product</li>
-						<li>Edited product</li>
-					</ol>
-					<h4>Formatting</h4>
-					<p><strong>Smith, J. A.</strong>, and R. N. Jones. 2010. The effects of global warming on nitrogen cycling in eastern Washington. Northwestern Ecosystems 45:300-308. <strong>(1, 2, 4, 5)</strong></p>
-					<h4>Notes</h4>
-					<ul>
-						<li><em>Briefly explain why you are listed on a publication if none of the indicators above explain your contribution.</em></li>
-						<li><em>The following key will be included on your profile if content is inserted in this section:<br />
-						Key to indicators or description of contributions to Publications and Creative Work: 1 = Developed the initial idea; 2 = Obtained or provided funds or other resources; 3 = Collected data; 4 = Analyzed data; 5 = Wrote/created product; 6 = Edited product.</em></li>
-					</ul>
-				</div>
-				<h3 class="wsuwp-profile-label">Publications and Creative Work <a href="#TB_inline?width=600&height=550&inlineId=wsuwp-profile-pubs-lb" class="thickbox wsuwp-profile-help-link" title="Publications and Creative Work"><i class="mce-ico mce-i-wp_help wsuwp-profile-help"></i></a></h3>
-				<?php wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_publications', true ), '_wsuwp_profile_publications', $wsuwp_profile_cv_settings ); ?>
-
-				<div id="wsuwp-profile-presentations-lb" class="wsuwp-profile-lb">
-					<p>This section is limited to verbally delivered presentations to audiences. Posters and asynchronous electronic products should be included in the appropriate categories of curriculum, videos, or other creative works in the preceding section for publications and creative works. Do not duplicate single entries across multiple categories. For example, if you developed a poster for a professional meeting do not include it under both “Publications and Creative Work” and “Presentations” categories. Indicate which presentations were specifically invited and keynote addresses.</p>
-					<h4>Include</h4>
-					<ul>
-						<li>International</li>
-						<li>National</li>
-						<li>State</li>
-						<li>Local</li>
-					</ul>
-					<h4>Formatting</h4>
-					<ul>
-						<li><strong>Smith, J. <em>2013</em></strong>. <em>Thrips Management in Onions. Pacific Northwest Insect Management Conference, Portland, OR.</em> <strong>Invited Presentation</strong></li>
-					</ul>
-				</div>
-				<h3 class="wsuwp-profile-label">Presentations <a href="#TB_inline?width=600&height=550&inlineId=wsuwp-profile-presentations-lb" class="thickbox wsuwp-profile-help-link" title="Presentations"><i class="mce-ico mce-i-wp_help wsuwp-profile-help"></i></a></h3>
-				<?php wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_presentations', true ), '_wsuwp_profile_presentations', $wsuwp_profile_cv_settings ); ?>
-
-				<div id="wsuwp-profile-teaching-lb" class="wsuwp-profile-lb">
-					<h4>Include</h4>
-					<ul>
-						<li>Credit Courses Taught</li>
-						<li>Additional Teaching</li>
-						<li>Advising (Graduate Students and Student Interns)</li>
-					</ul>
-					<h4>Formatting</h4>
-					<p><strong>Credit Courses Taught</strong></p>
-					<ul>
-						<li><em>2013</em><br />
-						Micro Economics and Local Development, graduate course. School of Economics, Everstate College – Spokane, WA</li>
-					</ul>
-					<p><strong>Additional Teaching</strong></p>
-					<ul>
-						<li><em>2012</em><br />
-						Micro Economics and Local Investing, undergraduate course. School of Economics, Everstate College – Spokane, WA (guest lecturer)</li>
-					</ul>
-					<p><strong>Advising</strong></p>
-					<ul>
-						<li><em>2011</em><br />
-						Derek Ohlgren, MS, Civil and Environmental Engineering, Washington State University, (thesis committee)</li>
-					</ul>
-				</div>
-				<h3 class="wsuwp-profile-label">University Instruction <a href="#TB_inline?width=600&height=700&inlineId=wsuwp-profile-teaching-lb" class="thickbox wsuwp-profile-help-link" title="University Instruction"><i class="mce-ico mce-i-wp_help wsuwp-profile-help"></i></a></h3>
-				<?php wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_teaching', true ), '_wsuwp_profile_teaching', $wsuwp_profile_cv_settings ); ?>
-
-				<div id="wsuwp-profile-service-lb" class="wsuwp-profile-lb">
-					<h4>Include</h4>
-					<ul>
-						<li>University</li>
-						<li>Professional Society</li>
-						<li>Community</li>
-						<li>Review Activities (journal article reviews and editorial service)</li>
-					</ul>
-					<h4>Formatting</h4>
-					<p><strong>University</strong></p>
-					<ul>
-						<li><em>2013</em><br />
-						Washington State University Strategic Plan Taskforce – Chair<br />
-						WSU Extension Director Search Committee – member</li>
-						<li><em>2010</em><br />
-						Washington State University Faculty Senate – Senator</li>
-					</ul>
-					<p><strong>Professional Society</strong></p>
-					<ul>
-						<li><em>2008</em><br />
-						National Associate of Economic Developers – Western Regional Chair</li>
-						<li><em>2007</em><br />
-						Extension Professionals Society – Conference Planning Chair</li>
-					</ul>
-					<p><strong>Community</strong></p>
-					<ul>
-						<li><em>2012</em><br />
-						Washington Local Investment Coalition – President</li>
-						<li><em>2011 - Present</em><br />
-						Washington Banking Association Advisory Board - member</li>
-					</ul>
-					<p><strong>Review Activities</strong></p>
-					<ul>
-						<li><em>2010-Present</em><br />
-						Doe, J., C. Ray, D. Mee, (editors) Journal of Metropolitan Extension; a journal of the Society for Urban Extension. <a href="#">Read the Journal at W. Coyote</a> [Online Library]</li>
-					</ul>
-				</div>
-				<h3 class="wsuwp-profile-label">Professional Service <a href="#TB_inline?width=600&height=700&inlineId=wsuwp-profile-service-lb" class="thickbox wsuwp-profile-help-link" title="Professional Service"><i class="mce-ico mce-i-wp_help wsuwp-profile-help"></i></a></h3>
-				<?php wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_service', true ), '_wsuwp_profile_service', $wsuwp_profile_cv_settings ); ?>
-
-				<div id="wsuwp-profile-responsibilities-lb" class="wsuwp-profile-lb">
-					<p>A brief listing of administrative duties and responsibilities.</p>
-					<h4>Formatting</h4>
-					<ul>
-						<li><em>2001-2004</em><br />
-						WSU Extension County Director, Sage County. Responsible for administrative leadership of faculty /staff, budget development/ management, local government liaison and representing WSU to the public for youth, family and natural resources programs. Conducted the community economic development program. Annual office budget, $450,000.</li>
-					</ul>
-				</div>
-				<h3 class="wsuwp-profile-label">Administrative Responsibility <a href="#TB_inline?width=600&height=700&inlineId=wsuwp-profile-responsibilities-lb" class="thickbox wsuwp-profile-help-link" title="Administrative Responsibility"><i class="mce-ico mce-i-wp_help wsuwp-profile-help"></i></a></h3>
-				<?php wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_responsibilities', true ), '_wsuwp_profile_responsibilities', $wsuwp_profile_cv_settings ); ?>
-
-				<div id="wsuwp-profile-societies-lb" class="wsuwp-profile-lb">
-					<h4>Formatting</h4>
-					<ul>
-						<li>Society for Indigenous Asset Building – member</li>
-						<li>National Association of Community Development Extension Professionals - Chair, 2011</li>
-					</ul>
-				</div>
-				<h3 class="wsuwp-profile-label">Professional and Scholarly Organization Affiliations <a href="#TB_inline?width=600&height=700&inlineId=wsuwp-profile-societies-lb" class="thickbox wsuwp-profile-help-link" title="Professional and Scholarly Organization Affiliations"><i class="mce-ico mce-i-wp_help wsuwp-profile-help"></i></a></h3>
-				<?php wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_societies', true ), '_wsuwp_profile_societies', $wsuwp_profile_cv_settings ); ?>
-
-				<div id="wsuwp-profile-experience-lb" class="wsuwp-profile-lb">
-					<p>Include additional courses for credit, in-service training, and other major professional development activities.</p>
-					<h4>Formatting</h4>
-					<ul>
-						<li><em>2006-2007</em><br />
-						<em>Spanish for Professionals</em>, Gonzaga University Certificate Summer Program</li>
-						<li><em>2004</em><br />
-						<em>Indigenous Economic Development Course</em>, International Economic Development Council</li>
-					</ul>
-				</div>
-				<h3 class="wsuwp-profile-label">Professional Development <a href="#TB_inline?width=600&height=700&inlineId=wsuwp-profile-experience-lb" class="thickbox wsuwp-profile-help-link" title="Professional Experience"><i class="mce-ico mce-i-wp_help wsuwp-profile-help"></i></a></h3>
-				<?php wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_experience', true ), '_wsuwp_profile_experience', $wsuwp_profile_cv_settings ); ?>
-
-			</div>
 
 		</div><!--wsuwp-profile-tabs-->
 			<?php
@@ -913,30 +641,6 @@ class WSUWP_People_Directory {
 	}
 
 	/**
-	 * Display a meta box used to upload a person's C.V.
-	 *
-	 * @param WP_Post $post Post object.
-	 */
-	public function display_cv_upload_meta_box( $post ) {
-
-		$cv = get_post_meta( $post->ID, '_wsuwp_profile_cv', true );
-
-		?>
-			<div class="upload-set-wrapper">
-				<input type="hidden" class="wsuwp-profile-upload" name="_wsuwp_profile_cv" id="_wsuwp_profile_cv" value="<?php echo esc_attr( $cv ); ?>" />
-				<p class="hide-if-no-js"><a title="C.V." data-type="File" href="#" class="wsuwp-profile-upload-link">
-				<?php if ( $cv ) : ?>
-					<img src="<?php echo esc_url( home_url( '/wp-includes/images/media/document.png' ) ); ?>" /></a></p>
-					<p class="hide-if-no-js"><a title="C.V." href="#" class="wsuwp-profile-remove-link">Remove C.V.</a></p>
-				<?php else : ?>
-					 Set C.V.</a></p>
-				<?php endif; ?>
-			</div>
-		<?php
-
-	}
-
-	/**
 	 * Remove, move, and replace meta boxes as they are created and output.
 	 *
 	 * @param string  $post_type The current post type meta boxes are displayed for.
@@ -965,15 +669,6 @@ class WSUWP_People_Directory {
 		// Move and re-label the Featured Image meta box.
 		remove_meta_box( 'postimagediv', $this->personnel_content_type, 'side' );
 		add_meta_box( 'postimagediv', 'Profile Photo', 'post_thumbnail_meta_box', $this->personnel_content_type, 'side', 'high' );
-
-		add_meta_box(
-			'wsuwp_profile_cv_upload',
-			'Curriculum Vitae',
-			array( $this, 'display_cv_upload_meta_box' ),
-			$this->personnel_content_type,
-			'side',
-			'high'
-		);
 
 		// Remove "Appointment" and "Classification" meta boxes.
 		remove_meta_box( 'appointmentdiv', $this->personnel_content_type, 'side' );
@@ -1188,8 +883,7 @@ class WSUWP_People_Directory {
 		}
 
 		// Sanitize and save wp_editors.
-		$wp_editors = array_merge( $this->wp_bio_editors, $this->wp_cv_editors );
-		foreach ( $wp_editors as $field ) {
+		foreach ( $this->wp_bio_editors as $field ) {
 			if ( isset( $_POST[ $field ] ) && '' !== $_POST[ $field ] ) {
 				update_post_meta( $post_id, $field, wp_kses_post( $_POST[ $field ] ) );
 			} else {
@@ -1206,7 +900,7 @@ class WSUWP_People_Directory {
 	 * @return array
 	 */
 	public function add_meta_keys_to_revision( $keys ) {
-		$revisioned_fields = array_merge( $this->basic_fields, $this->repeatable_fields, $this->wp_bio_editors, $this->wp_cv_editors );
+		$revisioned_fields = array_merge( $this->basic_fields, $this->repeatable_fields, $this->wp_bio_editors );
 
 		foreach ( $revisioned_fields as $field ) {
 			$keys[] = $field;

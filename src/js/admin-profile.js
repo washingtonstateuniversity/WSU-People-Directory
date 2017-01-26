@@ -29,77 +29,6 @@
 			} );
 		} );
 
-		// Upload handling.
-		$( "#post-body" ).on( "click", ".wsuwp-profile-upload-link", function( e ) {
-
-			e.preventDefault();
-
-			var container = $( this ).parents( ".upload-set-wrapper" ),
-				upload_input = container.find( ".wsuwp-profile-upload" ),
-				upload_link  = container.find( ".wsuwp-profile-upload-link" ),
-				remove_link  = container.find( ".wsuwp-profile-remove-link" ),
-				custom_uploader,
-				attachment;
-
-			custom_uploader = window.wp.media.frames.file_frame = window.wp.media( {
-				title: "Choose " + upload_link.attr( "data-type" ),
-				button: {
-					text: "Choose " + upload_link.attr( "data-type" )
-				},
-				multiple: false
-			} );
-
-			custom_uploader.on( "select", function() {
-
-				attachment = custom_uploader.state().get( "selection" ).first().toJSON();
-
-				upload_input.val( attachment.id );
-
-				// Show an image or icon for chosen file
-				if ( upload_link.attr( "data-type" ) === "Photo" ) {
-					if ( attachment.sizes.hasOwnProperty( "thumbnail" ) ) {
-						upload_link.html( "<img src='" + attachment.sizes.thumbnail.url + "' />" );
-					} else {
-						upload_link.addClass( "small-image-notice" );
-						upload_link.html( "<img src='" + attachment.url + "' /><span class='description'>This image is smaller than the recommended ___×___ pixel minimum.<br />Please consider uploading a larger image.</span>" );
-					}
-				} else if ( upload_link.attr( "data-type" ) === "File" ) {
-					upload_link.html( "<img src='http://" + location.host + "/wp-includes/images/media/document.png' />" );
-				}
-
-				// Add a "Remove" link
-				if ( remove_link.length === 0 ) {
-					upload_link.after( "<p class='hide-if-no-js'><a href='#'' class='wsuwp-profile-remove-link'>Remove " + upload_link.attr( "title" ) + "</a></p>" );
-				}
-
-			} );
-
-			custom_uploader.open();
-
-		} );
-
-		// Upload "Remove" handling.
-		$( "#post-body" ).on( "click", ".wsuwp-profile-remove-link", function( e ) {
-
-			e.preventDefault();
-
-			var upload_input = $( this ).parents( ".upload-set-wrapper" ).find( ".wsuwp-profile-upload" ),
-					upload_link  = $( this ).parents( ".upload-set-wrapper" ).find( ".wsuwp-profile-upload-link" );
-
-			// Clear the input value.
-			upload_input.val( "" );
-
-			// Remove notice.
-			upload_link.removeClass( "small-image-notice" );
-
-			// Replace image with link title value.
-			upload_link.html( "Set " + upload_link.attr( "title" ) );
-
-			// Remove the "Remove" link.
-			$( this ).parent( ".hide-if-no-js" ).remove();
-
-		} );
-
 		$( "#load-ad-data" ).on( "click", function() {
 			var $given_name = $( "#_wsuwp_profile_ad_name_first" ),
 				$surname = $( "#_wsuwp_profile_ad_name_last" ),
@@ -203,15 +132,5 @@
 			$( this ).parent( "p" ).remove();
 			$( ".wsuwp-profile-bio-type option[value=" + new_id + "]" ).remove();
 		} );
-
-		// "Add CV" handling.
-		$( "#add-cv" ).on( "click", function() {
-			$( this ).parent( "li" ).remove();
-			$( ".wsuwp-profile-tab" ).last().after( "\n<li class='wsuwp-profile-tab'><a href='#wsuwp-profile-cv' class='nav-tab'>C.V.</a></li>" );
-			tabs.tabs( "refresh" );
-			var index = $( "a[href='#wsuwp-profile-cv']" ).parent( "li" ).index();
-			$( "#wsuwp-profile-tabs" ).tabs( "option", "active", index );
-		} );
-
-} );
+	} );
 }( jQuery, window, document ) );
