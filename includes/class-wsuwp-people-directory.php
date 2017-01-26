@@ -12,22 +12,22 @@ class WSUWP_People_Directory {
 	 *
 	 * @var string
 	 */
-	var $personnel_plugin_version = '0.2.2';
+	var $version = '0.2.2';
 
 	/**
 	 * The slug used to register the "Personnel" custom content type.
 	 *
 	 * @var string
 	 */
-	var $personnel_content_type = 'wsuwp_people_profile';
+	var $post_type_slug = 'wsuwp_people_profile';
 
 	/**
 	 * The slugs used to register the 'Personnel" taxonomies.
 	 *
 	 * @var string
 	 */
-	var $personnel_appointments = 'appointment';
-	var $personnel_classifications = 'classification';
+	var $taxonomy_slug_appointments = 'appointment';
+	var $taxonomy_slug_classifications = 'classification';
 
 	/**
 	 * Fields used to store Active Directory data as meta for a person.
@@ -250,17 +250,17 @@ class WSUWP_People_Directory {
 		add_filter( 'enter_title_here', array( $this, 'enter_title_here' ) );
 		add_action( 'edit_form_after_title', array( $this, 'edit_form_after_title' ) );
 		add_action( 'edit_form_after_editor',	array( $this, 'edit_form_after_editor' ) );
-		add_action( 'add_meta_boxes', array( $this, 'add_meta_boxes' ), 10, 1 );
+		add_action( "add_meta_boxes_{$this->post_type_slug}", array( $this, 'add_meta_boxes' ), 10, 1 );
 		add_action( 'do_meta_boxes', array( $this, 'do_meta_boxes' ), 10, 3 );
-		add_action( 'save_post', array( $this, 'save_post' ), 10, 2 );
+		add_action( "save_post_{$this->post_type_slug}", array( $this, 'save_post' ), 10, 2 );
 		add_filter( 'wp_post_revision_meta_keys', array( $this, 'add_meta_keys_to_revision' ) );
 
 		// Modify taxonomy columns on "All Profiles" page.
-		add_filter( 'manage_taxonomies_for_wsuwp_people_profile_columns', array( $this, 'wsuwp_people_profile_columns' ) );
+		add_filter( "manage_taxonomies_for_{$this->post_type_slug}_columns", array( $this, 'wsuwp_people_profile_columns' ) );
 
 		// Allow REST get_items() queries by additional data.
 		add_action( 'init', array( $this, 'register_wsu_nid_query_var' ) );
-		add_filter( "rest_{$this->personnel_content_type}_query", array( $this, 'rest_query_vars' ), 10, 2 );
+		add_filter( "rest_{$this->post_type_slug}_query", array( $this, 'rest_query_vars' ), 10, 2 );
 		add_action( 'pre_get_posts', array( $this, 'handle_wsu_nid_query_var' ) );
 
 		// Register custom fields with the REST API.
@@ -272,7 +272,7 @@ class WSUWP_People_Directory {
 		add_action( 'admin_bar_menu', array( $this, 'admin_bar_menu' ), 999 );
 		add_action( 'wp_dashboard_setup', array( $this, 'wp_dashboard_setup' ) );
 		add_action( 'pre_get_posts', array( $this, 'limit_media_library' ) );
-		//add_action( 'views_edit-' . $this->personnel_content_type, array( $this, 'edit_views' ) );
+		//add_action( 'views_edit-' . $this->post_type_slug, array( $this, 'edit_views' ) );
 		//add_filter( 'parse_query', array ( $this, 'parse_query' ) );
 
 		// Modify 'wsuwp_people_profile' content type query.
@@ -325,7 +325,7 @@ class WSUWP_People_Directory {
 			'rest_base' => 'people',
 		);
 
-		register_post_type( $this->personnel_content_type, $args );
+		register_post_type( $this->post_type_slug, $args );
 	}
 
 	/**
@@ -350,10 +350,10 @@ class WSUWP_People_Directory {
 			'hierarchical' => true,
 			'show_ui'      => true,
 			'show_in_menu' => true,
-			'query_var'    => $this->personnel_appointments,
+			'query_var'    => $this->taxonomy_slug_appointments,
 			'show_in_rest' => true,
 		);
-		register_taxonomy( $this->personnel_appointments, $this->personnel_content_type, $appointments );
+		register_taxonomy( $this->taxonomy_slug_appointments, $this->post_type_slug, $appointments );
 
 		$classifications = array(
 			'labels'        => array(
@@ -372,10 +372,10 @@ class WSUWP_People_Directory {
 			'hierarchical'  => true,
 			'show_ui'       => true,
 			'show_in_menu'  => true,
-			'query_var'     => $this->personnel_classifications,
+			'query_var'     => $this->taxonomy_slug_classifications,
 			'show_in_rest'  => true,
 		);
-		register_taxonomy( $this->personnel_classifications, $this->personnel_content_type, $classifications );
+		register_taxonomy( $this->taxonomy_slug_classifications, $this->post_type_slug, $classifications );
 
 	}
 
@@ -383,9 +383,9 @@ class WSUWP_People_Directory {
 	 * Add support for WSU University Taxonomies.
 	 */
 	public function add_taxonomies() {
-		register_taxonomy_for_object_type( 'wsuwp_university_category', $this->personnel_content_type );
-		register_taxonomy_for_object_type( 'wsuwp_university_location', $this->personnel_content_type );
-		register_taxonomy_for_object_type( 'wsuwp_university_org', $this->personnel_content_type );
+		register_taxonomy_for_object_type( 'wsuwp_university_category', $this->post_type_slug );
+		register_taxonomy_for_object_type( 'wsuwp_university_location', $this->post_type_slug );
+		register_taxonomy_for_object_type( 'wsuwp_university_org', $this->post_type_slug );
 	}
 
 	/**
@@ -405,17 +405,17 @@ class WSUWP_People_Directory {
 	public function admin_enqueue_scripts( $hook ) {
 		$screen = get_current_screen();
 
-		if ( ( 'post-new.php' === $hook || 'post.php' === $hook ) && $screen->post_type === $this->personnel_content_type ) {
+		if ( ( 'post-new.php' === $hook || 'post.php' === $hook ) && $screen->post_type === $this->post_type_slug ) {
 			$ajax_nonce = wp_create_nonce( 'wsu-people-nid-lookup' );
 
-			wp_enqueue_style( 'wsuwp-people-admin-style', plugins_url( 'css/admin-profile-style.css', dirname( __FILE__ ) ) );
-			wp_enqueue_script( 'wsuwp-people-admin-script', plugins_url( 'js/admin-profile.min.js', dirname( __FILE__ ) ), array( 'jquery-ui-tabs' ), '', true );
+			wp_enqueue_style( 'wsuwp-people-admin-style', plugins_url( 'css/admin-profile-style.css', dirname( __FILE__ ) ), array(), $this->version );
+			wp_enqueue_script( 'wsuwp-people-admin-script', plugins_url( 'js/admin-profile.min.js', dirname( __FILE__ ) ), array( 'jquery-ui-tabs' ), $this->version, true );
 			wp_localize_script( 'wsuwp-people-admin-script', 'wsupeople_nid_nonce', $ajax_nonce );
 		}
 
-		if ( 'edit.php' === $hook && $screen->post_type === $this->personnel_content_type ) {
-			wp_enqueue_style( 'wsuwp-people-admin-style', plugins_url( 'css/admin-edit.css', dirname( __FILE__ ) ) );
-			wp_enqueue_script( 'wsuwp-people-admin-script', plugins_url( 'js/admin-edit.min.js', dirname( __FILE__ ) ) );
+		if ( 'edit.php' === $hook && $screen->post_type === $this->post_type_slug ) {
+			wp_enqueue_style( 'wsuwp-people-admin-style', plugins_url( 'css/admin-edit.css', dirname( __FILE__ ) ), array(), $this->version );
+			wp_enqueue_script( 'wsuwp-people-admin-script', plugins_url( 'js/admin-edit.min.js', dirname( __FILE__ ) ), array( 'jquery' ), $this->version );
 		}
 
 	}
@@ -430,7 +430,7 @@ class WSUWP_People_Directory {
 	public function enter_title_here( $title ) {
 		$screen = get_current_screen();
 
-		if ( $this->personnel_content_type === $screen->post_type ) {
+		if ( $this->post_type_slug === $screen->post_type ) {
 			$title = 'Enter name here';
 		}
 
@@ -443,28 +443,28 @@ class WSUWP_People_Directory {
 	 * @param WP_Post $post Post object.
 	 */
 	public function edit_form_after_title( $post ) {
-		if ( $this->personnel_content_type === $post->post_type ) :
-			?>
-			<?php do_meta_boxes( get_current_screen(), 'after_title', $post ); ?>
-			<div id="wsuwp-profile-tabs">
-				<ul>
-					<li class="wsuwp-profile-tab wsuwp-profile-bio-tab"><a href="#wsuwp-profile-default" class="nav-tab">Personal Biography</a></li>
-					<?php
-					// Add tabs for Unit and University biographies.
-					foreach ( $this->wp_bio_editors as $bio ) {
-						$meta = get_post_meta( $post->ID, $bio, true );
-						?>
-						<li class="wsuwp-profile-tab wsuwp-profile-bio-tab">
-							<a href="#<?php echo esc_attr( substr( $bio, 1 ) ); ?>" class="nav-tab"><?php echo esc_html( ucfirst( substr( strrchr( $bio, '_' ), 1 ) ) ); ?> Biography</a>
-						</li>
-						<?php
-					}
+		if ( $this->post_type_slug !== $post->post_type ) {
+			return;
+		}
+		?>
+		<?php do_meta_boxes( get_current_screen(), 'after_title', $post ); ?>
+		<div id="wsuwp-profile-tabs">
+			<ul>
+				<li class="wsuwp-profile-tab wsuwp-profile-bio-tab"><a href="#wsuwp-profile-default" class="nav-tab">Personal Biography</a></li>
+				<?php
+				// Add tabs for Unit and University biographies.
+				foreach ( $this->wp_bio_editors as $bio ) {
+					$meta = get_post_meta( $post->ID, $bio, true );
 					?>
-				</ul>
-				<div id="wsuwp-profile-default" class="wsuwp-profile-panel">
-			<?php
-		endif;
-
+					<li class="wsuwp-profile-tab wsuwp-profile-bio-tab">
+						<a href="#<?php echo esc_attr( substr( $bio, 1 ) ); ?>" class="nav-tab"><?php echo esc_html( ucfirst( substr( strrchr( $bio, '_' ), 1 ) ) ); ?> Biography</a>
+					</li>
+					<?php
+				}
+				?>
+			</ul>
+			<div id="wsuwp-profile-default" class="wsuwp-profile-panel">
+		<?php
 	}
 
 	/**
@@ -473,10 +473,10 @@ class WSUWP_People_Directory {
 	 * @param WP_Post $post Post object.
 	 */
 	public function edit_form_after_editor( $post ) {
-
-		if ( $this->personnel_content_type === $post->post_type ) :
-
-			?>
+		if ( $this->post_type_slug !== $post->post_type ) {
+			return;
+		}
+		?>
 			</div><!--wsuwp-profile-default-->
 
 			<?php
@@ -491,9 +491,7 @@ class WSUWP_People_Directory {
 			?>
 
 		</div><!--wsuwp-profile-tabs-->
-			<?php
-		endif;
-
+		<?php
 	}
 
 	/**
@@ -502,15 +500,11 @@ class WSUWP_People_Directory {
 	 * @param string $post_type The slug of the current post type.
 	 */
 	public function add_meta_boxes( $post_type ) {
-		if ( $this->personnel_content_type !== $post_type ) {
-			return;
-		}
-
 		add_meta_box(
 			'wsuwp_profile_additional_info',
 			'Additional Profile Information',
 			array( $this, 'display_additional_info_meta_box' ),
-			$this->personnel_content_type,
+			$this->post_type_slug,
 			'after_title',
 			'high'
 		);
@@ -533,8 +527,8 @@ class WSUWP_People_Directory {
 		$address = get_post_meta( $post->ID, '_wsuwp_profile_ad_address', true );
 		$phone = get_post_meta( $post->ID, '_wsuwp_profile_ad_phone', true );
 		$phone_ext = get_post_meta( $post->ID, '_wsuwp_profile_ad_phone_ext', true );
-		$appointments = wp_get_post_terms( $post->ID, $this->personnel_appointments, array( 'fields' => 'names' ) );
-		$classifications = wp_get_post_terms( $post->ID, $this->personnel_classifications, array( 'fields' => 'names' ) );
+		$appointments = wp_get_post_terms( $post->ID, $this->taxonomy_slug_appointments, array( 'fields' => 'names' ) );
+		$classifications = wp_get_post_terms( $post->ID, $this->taxonomy_slug_classifications, array( 'fields' => 'names' ) );
 
 		?>
 		<div class="profile-card">
@@ -610,31 +604,31 @@ class WSUWP_People_Directory {
 	 * @param WP_Post $post      The post object.
 	 */
 	public function do_meta_boxes( $post_type, $context, $post ) {
-		if ( $this->personnel_content_type !== $post_type ) {
+		if ( $this->post_type_slug !== $post_type ) {
 			return;
 		}
 
 		$box_title = ( 'auto-draft' === $post->post_status ) ? 'Create Profile' : 'Update Profile';
 
-		remove_meta_box( 'submitdiv', $this->personnel_content_type, 'side' );
-		add_meta_box( 'submitdiv', $box_title, array( $this, 'publish_meta_box' ), $this->personnel_content_type, 'side', 'high' );
+		remove_meta_box( 'submitdiv', $this->post_type_slug, 'side' );
+		add_meta_box( 'submitdiv', $box_title, array( $this, 'publish_meta_box' ), $this->post_type_slug, 'side', 'high' );
 
 		add_meta_box(
 			'wsuwp_profile_position_info',
 			'Position and Contact Information',
 			array( $this, 'display_position_info_meta_box' ),
-			$this->personnel_content_type,
+			$this->post_type_slug,
 			'side',
 			'high'
 		);
 
 		// Move and re-label the Featured Image meta box.
-		remove_meta_box( 'postimagediv', $this->personnel_content_type, 'side' );
-		add_meta_box( 'postimagediv', 'Profile Photo', 'post_thumbnail_meta_box', $this->personnel_content_type, 'side', 'high' );
+		remove_meta_box( 'postimagediv', $this->post_type_slug, 'side' );
+		add_meta_box( 'postimagediv', 'Profile Photo', 'post_thumbnail_meta_box', $this->post_type_slug, 'side', 'high' );
 
 		// Remove "Appointment" and "Classification" meta boxes.
-		remove_meta_box( 'appointmentdiv', $this->personnel_content_type, 'side' );
-		//remove_meta_box( 'classificationdiv', $this->personnel_content_type, 'side' );
+		remove_meta_box( 'appointmentdiv', $this->post_type_slug, 'side' );
+		//remove_meta_box( 'classificationdiv', $this->post_type_slug, 'side' );
 	}
 
 	/**
@@ -938,7 +932,7 @@ class WSUWP_People_Directory {
 			'schema' => null,
 		);
 		foreach ( $this->rest_response_fields as $field_name => $value ) {
-			register_rest_field( $this->personnel_content_type, $field_name, $args );
+			register_rest_field( $this->post_type_slug, $field_name, $args );
 		}
 	}
 
@@ -1044,7 +1038,7 @@ class WSUWP_People_Directory {
 		$post = get_post( $args[2] );
 
 		// Bail if the post type isn't Personnel:
-		if ( $this->personnel_content_type !== $post->post_type ) {
+		if ( $this->post_type_slug !== $post->post_type ) {
 			return $allcaps;
 		}
 
@@ -1178,7 +1172,7 @@ class WSUWP_People_Directory {
 			$current_user = wp_get_current_user();
 
 			$all_personnel = new WP_Query( array(
-				'post_type'	 => $this->personnel_content_type,
+				'post_type'	 => $this->post_type_slug,
 				'post_status' => 'publish',
 				'posts_per_page' => -1,
 				'author__not_in' => $current_user->ID,
@@ -1196,7 +1190,7 @@ class WSUWP_People_Directory {
 				$profile_ids = implode( ',', $users_editable_profiles );
 				$count = count( $users_editable_profiles );
 				$class = ( 'last_name' === $_GET['sortby'] ) ? ' class="current"' : '';
-				$url = admin_url( 'edit.php?post_type=' . $this->personnel_content_type . '&post_status=publish&sortby=last_name&profiles=' . $profile_ids );
+				$url = admin_url( 'edit.php?post_type=' . $this->post_type_slug . '&post_status=publish&sortby=last_name&profiles=' . $profile_ids );
 				$views['others'] = sprintf( __( '<a href="%1$s"%2$s>Others <span class="count">(%3$d)</span></a>' ), $url, $class, $count );
 			}
 		}
@@ -1213,8 +1207,8 @@ class WSUWP_People_Directory {
 
 		$screen = get_current_screen();
 
-		if ( is_admin() && 'edit-' . $this->personnel_content_type === $screen->id &&
-				isset( $_GET['post_type'] ) && $_GET['post_type'] === $this->personnel_content_type &&
+		if ( is_admin() && 'edit-' . $this->post_type_slug === $screen->id &&
+				isset( $_GET['post_type'] ) && $_GET['post_type'] === $this->post_type_slug &&
 				isset( $_GET['sortby'] ) && 'last_name' === $_GET['sortby'] &&
 				isset( $_GET['profiles'] ) && '' !== $_GET['profiles'] ) {
 			$editables = explode( ',', $_GET['profiles'] );
@@ -1232,7 +1226,7 @@ class WSUWP_People_Directory {
 	 * @param WP_Query $query
 	 */
 	public function profile_archives( $query ) {
-		if ( ( $query->is_post_type_archive( $this->personnel_content_type ) || is_tax() || is_category() || is_tag() ) && $query->is_main_query() && ! is_admin() ) {
+		if ( ( $query->is_post_type_archive( $this->post_type_slug ) || is_tax() || is_category() || is_tag() ) && $query->is_main_query() && ! is_admin() ) {
 			$query->set( 'order', 'ASC' );
 			$query->set( 'orderby', 'meta_value' );
 			$query->set( 'meta_key', '_wsuwp_profile_ad_name_last' );
