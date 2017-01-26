@@ -2,8 +2,9 @@
 	$( document ).ready( function() {
 
 		// Tabs.
-		var tabs = $( "#wsuwp-profile-tabs" ).tabs(),
-			tab_counter = $( "#wsuwp-profile-tabs > ul li" ).length;
+		$( "#wsuwp-profile-tabs" ).tabs( {
+			active: 0
+		} );
 
 		// Repeatable fields handling.
 		$( ".wsuwp-profile-add-repeatable" ).on( "click", "a", function( e ) {
@@ -90,47 +91,6 @@
 				}
 			} );
 
-		} );
-
-		// "Add Bio" handling.
-		$( "#add-bio" ).on( "click", function( e ) {
-			e.preventDefault();
-
-			if ( tab_counter < 6 ) {
-				var $bio_template = $( "#wsuwp-profile-bio-template" ).clone();
-				$( ".wsuwp-profile-bio-tab" ).last().after( "\n<li class='wsuwp-profile-tab wsuwp-profile-bio-tab'><a href='#wsuwp_profile_" + tab_counter + "_bio' class='nav-tab'>New Biography</a></li>" );
-				$bio_template.attr( "id", "wsuwp_profile_" + tab_counter + "_bio" );
-				$( "#wsuwp-profile-bio-template" ).before( $bio_template );
-				tabs.tabs( "refresh" );
-				var index = $( "a[href='#wsuwp_profile_" + tab_counter + "_bio']" ).parent( "li" ).index();
-				$( "#wsuwp-profile-tabs" ).tabs( "option", "active", index );
-				tab_counter++;
-				if ( tab_counter === 6 ) {
-					$( "#add-bio" ).parent( "li" ).remove();
-				}
-			}
-		} );
-
-		// Biography type selection.
-		$( ".wsuwp-profile-bio-type" ).live( "change", function() {
-			var new_id = $( this ).val(),
-				editor_id = "_" + new_id,
-				new_name = $( this ).find( "option:selected" ).text(),
-				$panel = $( this ).parents( ".wsuwp-profile-panel" ),
-				$tab = $( "a[href='#" + $panel.attr( "id" ) + "']" ),
-				$wrapper = $panel.find( ".wsuwp-profile-bio-details-container" ),
-				$editor = $panel.find( ".wsuwp-profile-new-bio" ),
-				$photo = $panel.find( ".wsuwp-profile-bio-photo" );
-			$( this ).attr( "id", new_id + "_type_select" );
-			$tab.attr( "href", "#" + new_id ).html( new_name + " Biography" );
-			$panel.attr( "id", new_id );
-			tabs.tabs( "refresh" );
-			$editor.attr( "id", editor_id ).attr( "name", editor_id );
-			window.tinyMCE.execCommand( "mceAddEditor", false, editor_id );
-			$photo.attr( "name", new_id + "_photo" );
-			$wrapper.show( "slow" );
-			$( this ).parent( "p" ).remove();
-			$( ".wsuwp-profile-bio-type option[value=" + new_id + "]" ).remove();
 		} );
 	} );
 }( jQuery, window, document ) );

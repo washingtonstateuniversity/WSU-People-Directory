@@ -72,9 +72,8 @@ class WSUWP_People_Directory {
 	 * WP editors for biographies.
 	 */
 	var $wp_bio_editors = array(
-		'_wsuwp_profile_bio_college',
-		'_wsuwp_profile_bio_dept',
-		'_wsuwp_profile_bio_lab',
+		'_wsuwp_profile_bio_unit',
+		'_wsuwp_profile_bio_university',
 	);
 
 	/**
@@ -139,6 +138,14 @@ class WSUWP_People_Directory {
 		'website' => array(
 			'meta_key' => '_wsuwp_profile_website',
 			'sanitize' => 'esc_url',
+		),
+		'bio_unit' => array(
+			'meta_key' => '_wsuwp_profile_bio_unit',
+			'sanitize' => 'the_content',
+		),
+		'bio_university' => array(
+			'meta_key' => '_wsuwp_profile_bio_university',
+			'sanitize' => 'the_content',
 		),
 		'bio_college' => array(
 			'meta_key' => '_wsuwp_profile_bio_college',
@@ -441,25 +448,16 @@ class WSUWP_People_Directory {
 			<?php do_meta_boxes( get_current_screen(), 'after_title', $post ); ?>
 			<div id="wsuwp-profile-tabs">
 				<ul>
-					<li class="wsuwp-profile-tab wsuwp-profile-bio-tab"><a href="#wsuwp-profile-default" class="nav-tab">Official Biography</a></li>
+					<li class="wsuwp-profile-tab wsuwp-profile-bio-tab"><a href="#wsuwp-profile-default" class="nav-tab">Personal Biography</a></li>
 					<?php
-					// Add tabs for saved biographies, and build an array to check against.
-					$profile_bios = array();
+					// Add tabs for Unit and University biographies.
 					foreach ( $this->wp_bio_editors as $bio ) {
 						$meta = get_post_meta( $post->ID, $bio, true );
-						$profile_bios[] = $meta;
-						if ( $meta ) {
-							?>
-							<li class="wsuwp-profile-tab wsuwp-profile-bio-tab">
-								<a href="#<?php echo esc_attr( substr( $bio, 1 ) ); ?>" class="nav-tab"><?php echo esc_html( ucfirst( substr( strrchr( $bio, '_' ), 1 ) ) ); ?> Biography</a>
-							</li>
-							<?php
-						}
-					}
-
-					// Display "+ Add Bio" link if any biographies are still empty.
-					if ( array_search( '', $profile_bios, true ) !== false ) {
-						echo '<li><a id="add-bio">+ Add Biography</a></li>';
+						?>
+						<li class="wsuwp-profile-tab wsuwp-profile-bio-tab">
+							<a href="#<?php echo esc_attr( substr( $bio, 1 ) ); ?>" class="nav-tab"><?php echo esc_html( ucfirst( substr( strrchr( $bio, '_' ), 1 ) ) ); ?> Biography</a>
+						</li>
+						<?php
 					}
 					?>
 				</ul>
@@ -483,50 +481,14 @@ class WSUWP_People_Directory {
 
 			<?php
 			foreach ( $this->wp_bio_editors as $bio_meta_field ) {
-				$bio = get_post_meta( $post->ID, $bio_meta_field, true );
-				if ( $bio ) {
-					?>
-					<div id="<?php echo esc_attr( substr( $bio_meta_field, 1 ) ); ?>" class="wsuwp-profile-panel">
-						<?php wp_editor( $bio, $bio_meta_field ); ?>
-						<!--<p>Assign profile photo
-							<select class="wsuwp-profile-bio-photo">
-								<option></option>
-								<option value="one">1</option>
-								<option value="two">2</option>
-								<option value="three">3</option>
-							</select>
-						to this biography.
-						</p>-->
-					</div>
-					<?php
-				}
+				$bio = ( get_post_meta( $post->ID, $bio_meta_field, true ) ) ? get_post_meta( $post->ID, $bio_meta_field, true ) : '';
+				?>
+				<div id="<?php echo esc_attr( substr( $bio_meta_field, 1 ) ); ?>" class="wsuwp-profile-panel">
+					<?php wp_editor( $bio, $bio_meta_field ); ?>
+				</div>
+				<?php
 			}
 			?>
-
-			<div id="wsuwp-profile-bio-template" class="wsuwp-profile-panel">
-				<p>
-					This is my
-					<select class="wsuwp-profile-bio-type">
-						<option></option>
-						<?php foreach ( $this->wp_bio_editors as $bio ) : ?>
-							<?php if ( ! get_post_meta( $post->ID, $bio, true ) ) : /* Somehow check for ones added without saving */ ?>
-							<option value="<?php echo esc_attr( substr( $bio, 1 ) ); ?>"><?php echo esc_html( ucfirst( substr( strrchr( $bio, '_' ), 1 ) ) ); ?></option>
-							<?php endif; ?>
-						<?php endforeach; ?>
-					</select> biography.
-				</p>
-				<div class="wsuwp-profile-bio-details-container">
-					<textarea class="wsuwp-profile-new-bio"></textarea>
-					<p>Assign profile photo
-						<select class="wsuwp-profile-bio-photo">
-							<option></option>
-							<option>1</option>
-							<option>2</option>
-							<option>3</option>
-						</select>
-					to this biography.</p>
-				</div>
-			</div><!--wsuwp-profile-bio-template-->
 
 		</div><!--wsuwp-profile-tabs-->
 			<?php
