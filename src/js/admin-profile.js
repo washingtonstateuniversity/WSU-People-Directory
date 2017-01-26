@@ -12,8 +12,8 @@
 			e.preventDefault();
 
 			var click_parent = $( this ).parent(),
-					added = click_parent.siblings( ".wp-profile-repeatable" ).first().clone(),
-					attrs = "name,id,for";
+				added = click_parent.siblings( ".wp-profile-repeatable" ).first().clone(),
+				attrs = "name,id,for";
 
 			added.find( "input" ).val( "" );
 			click_parent.before( added );
