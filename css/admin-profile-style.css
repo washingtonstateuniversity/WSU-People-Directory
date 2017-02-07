@@ -181,7 +181,7 @@
 	overflow: hidden;
 	padding: 0;
 	position: absolute;
-	width: 1px;
+	width: calc(100% - 42px);
 }
 
 /* Help icons and lightboxes */
