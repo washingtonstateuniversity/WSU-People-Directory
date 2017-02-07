@@ -38,7 +38,7 @@ module.exports = function( grunt ) {
 
         jscs: {
             scripts: {
-                src: [ "Gruntfile.js", "js/*.js" ],
+                src: [ "Gruntfile.js", "src/js/*.js" ],
                 options: {
                     preset: "jquery",
                     requireCamelCaseOrUpperCaseIdentifiers: false, // We rely on name_name too much to change them all.
@@ -61,7 +61,7 @@ module.exports = function( grunt ) {
                 }
             },
            people_scripts: {
-                src: [ "js/*.js" ],
+                src: [ "scr/js/*.js" ],
                 options: {
                     bitwise: true,
                     curly: true,
@@ -77,15 +77,27 @@ module.exports = function( grunt ) {
                     jquery: true   // Define globals exposed by jQuery.
                 }
             }
+        },
+
+        uglify: {
+            all_profiles: {
+                src: "src/js/admin-edit.js",
+                dest: "js/admin-edit.min.js"
+            },
+            edit_profile: {
+                src: "src/js/admin-profile.js",
+                dest: "js/admin-profile.min.js"
+            }
         }
     } );
 
-	grunt.loadNpmTasks( "grunt-jscs" );
 	grunt.loadNpmTasks( "grunt-contrib-jshint" );
+    grunt.loadNpmTasks( "grunt-contrib-uglify" );
+    grunt.loadNpmTasks( "grunt-jscs" );
 	grunt.loadNpmTasks( "grunt-phpcs" );
     grunt.loadNpmTasks( "grunt-postcss" );
     grunt.loadNpmTasks( "grunt-stylelint" );
 
     // Default task(s).
-    grunt.registerTask( "default", [ "postcss", "stylelint", "phpcs", "jscs", "jshint" ] );
+    grunt.registerTask( "default", [ "postcss", "stylelint", "phpcs", "jscs", "jshint", "uglify" ] );
 };
