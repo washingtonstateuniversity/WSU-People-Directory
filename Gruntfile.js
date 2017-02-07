@@ -1,6 +1,30 @@
+var Promise = require( "es6-promise" ).polyfill();
+
 module.exports = function( grunt ) {
     grunt.initConfig( {
         pkg: grunt.file.readJSON( "package.json" ),
+
+        stylelint: {
+            src: [ "src/css/*.css" ]
+        },
+
+        postcss: {
+            options: {
+                processors: [
+                    require( "autoprefixer" )( {
+                        browsers: [ "> 1%", "ie 8-11", "Firefox ESR" ]
+                    } )
+                ]
+            },
+            all_profiles: {
+                src: "src/css/admin-edit.css",
+                dest: "css/admin-edit.css"
+            },
+            edit_profile: {
+                src: "src/css/admin-profile-style.css",
+                dest: "css/admin-profile-style.css"
+            }
+        },
 
         phpcs: {
             plugin: {
@@ -59,7 +83,9 @@ module.exports = function( grunt ) {
 	grunt.loadNpmTasks( "grunt-jscs" );
 	grunt.loadNpmTasks( "grunt-contrib-jshint" );
 	grunt.loadNpmTasks( "grunt-phpcs" );
+    grunt.loadNpmTasks( "grunt-postcss" );
+    grunt.loadNpmTasks( "grunt-stylelint" );
 
     // Default task(s).
-    grunt.registerTask( "default", [ "phpcs", "jscs", "jshint" ] );
+    grunt.registerTask( "default", [ "postcss", "stylelint", "phpcs", "jscs", "jshint" ] );
 };
