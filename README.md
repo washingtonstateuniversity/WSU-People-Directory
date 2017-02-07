@@ -1,5 +1,7 @@
 # WSU People Directory
 
+[![Build Status](https://travis-ci.org/washingtonstateuniversity/WSU-People-Directory.svg?branch=master)](https://travis-ci.org/washingtonstateuniversity/WSU-People-Directory)
+
 A WordPress plugin to maintain a central directory of people at Washington State University.
 
 ## REST API

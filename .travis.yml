@@ -1,0 +1,35 @@
+language: php
+
+notifications:
+  email:
+    on_success: never
+    on_failure: change
+  slack:
+    rooms:
+      - wsu-ucomm:n2TLZRJd84rMOMbkKthSEMgS
+    on_success: change
+    on_failure: always
+    on_start: never
+
+branches:
+  only:
+    - master
+
+matrix:
+  include:
+    - php: 7.0
+      env: TRAVIS_NODE_VERSION="stable"
+
+install:
+  - rm -rf ~/.nvm && git clone https://github.com/creationix/nvm.git ~/.nvm && (cd ~/.nvm && git checkout `git describe --abbrev=0 --tags`) && source ~/.nvm/nvm.sh && nvm install $TRAVIS_NODE_VERSION
+  - npm install
+
+before_script:
+  - composer install
+  - npm install
+  - phpenv versions
+  - npm --version
+  - node --version
+
+script:
+    - grunt default
