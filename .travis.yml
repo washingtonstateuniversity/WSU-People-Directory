@@ -17,26 +17,20 @@ branches:
 
 matrix:
   include:
-    - php: 5.6
-      env: WP_VERSION=latest WP_MULTISITE=0 WP_TRAVISCI=grunt
-    - php: 5.6
-      env: WP_VERSION=latest WP_MULTISITE=1
     - php: 7.0
-      env: WP_VERSION=nightly WP_MULTISITE=1
-    - php: 7.0
-      env: WP_VERSION=latest WP_MULTISITE=1
+      env: TRAVIS_NODE_VERSION="stable"
+
+install:
+  - rm -rf ~/.nvm && git clone https://github.com/creationix/nvm.git ~/.nvm && (cd ~/.nvm && git checkout `git describe --abbrev=0 --tags`) && source ~/.nvm/nvm.sh && nvm install $TRAVIS_NODE_VERSION
+  - npm install
 
 before_script:
-    - bash bin/install-wp-tests.sh wordpress_test root '' localhost $WP_VERSION
-    - |
-      if [[ "$WP_TRAVISCI" == "grunt" ]] ; then
-        npm install
-        composer install
-      fi
+  - composer install
+  - npm install
+  - phpenv versions
+  - npm --version
+  - node --version
 
 script:
     - phpunit
-    - |
-      if [[ "$WP_TRAVISCI" == "grunt" ]] ; then
-        grunt default
-      fi
+    - grunt default
