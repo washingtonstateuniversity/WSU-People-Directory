@@ -60,7 +60,7 @@ module.exports = function( grunt ) {
                     node: true     // Define globals available when running in Node.
                 }
             },
-           people_scripts: {
+            people_scripts: {
                 src: [ "scr/js/*.js" ],
                 options: {
                     bitwise: true,
@@ -91,10 +91,10 @@ module.exports = function( grunt ) {
         }
     } );
 
-	grunt.loadNpmTasks( "grunt-contrib-jshint" );
+    grunt.loadNpmTasks( "grunt-contrib-jshint" );
     grunt.loadNpmTasks( "grunt-contrib-uglify" );
     grunt.loadNpmTasks( "grunt-jscs" );
-	grunt.loadNpmTasks( "grunt-phpcs" );
+    grunt.loadNpmTasks( "grunt-phpcs" );
     grunt.loadNpmTasks( "grunt-postcss" );
     grunt.loadNpmTasks( "grunt-stylelint" );
 
