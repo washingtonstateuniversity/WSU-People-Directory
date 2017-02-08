@@ -87,13 +87,6 @@
 	margin-bottom: -1px;
 }
 
-#wsuwp-profile-tabs > ul li a#add-bio {
-	border: none;
-	cursor: pointer;
-	font-weight: 400;
-	padding: 4px 14px 6px;
-}
-
 #wsuwp-profile-tabs > ul li a:focus {
 	box-shadow: none;
 }
