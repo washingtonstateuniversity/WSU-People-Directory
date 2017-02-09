@@ -12,22 +12,22 @@ class WSUWP_People_Directory {
 	 *
 	 * @var string
 	 */
-	var $personnel_plugin_version = '0.2.2';
+	var $version = '0.2.2';
 
 	/**
 	 * The slug used to register the "Personnel" custom content type.
 	 *
 	 * @var string
 	 */
-	var $personnel_content_type = 'wsuwp_people_profile';
+	var $post_type_slug = 'wsuwp_people_profile';
 
 	/**
 	 * The slugs used to register the 'Personnel" taxonomies.
 	 *
 	 * @var string
 	 */
-	var $personnel_appointments = 'appointment';
-	var $personnel_classifications = 'classification';
+	var $taxonomy_slug_appointments = 'appointment';
+	var $taxonomy_slug_classifications = 'classification';
 
 	/**
 	 * Fields used to store Active Directory data as meta for a person.
@@ -56,7 +56,6 @@ class WSUWP_People_Directory {
 		'_wsuwp_profile_alt_phone',
 		'_wsuwp_profile_alt_email',
 		'_wsuwp_profile_website',
-		'_wsuwp_profile_cv',
 	);
 
 	/**
@@ -73,27 +72,8 @@ class WSUWP_People_Directory {
 	 * WP editors for biographies.
 	 */
 	var $wp_bio_editors = array(
-		'_wsuwp_profile_bio_college',
-		'_wsuwp_profile_bio_dept',
-		'_wsuwp_profile_bio_lab',
-	);
-
-	/**
-	 * WP editors for C.V.
-	 */
-	var $wp_cv_editors = array(
-		'_wsuwp_profile_employment',
-		'_wsuwp_profile_honors',
-		'_wsuwp_profile_grants',
-		'_wsuwp_profile_publications',
-		'_wsuwp_profile_presentations',
-		'_wsuwp_profile_teaching',
-		'_wsuwp_profile_service',
-		'_wsuwp_profile_responsibilities',
-		'_wsuwp_profile_societies',
-		'_wsuwp_profile_experience',
-		/*'_wsuwp_profile_research',
-		'_wsuwp_profile_extension',*/
+		'_wsuwp_profile_bio_unit',
+		'_wsuwp_profile_bio_university',
 	);
 
 	/**
@@ -158,6 +138,14 @@ class WSUWP_People_Directory {
 		'website' => array(
 			'meta_key' => '_wsuwp_profile_website',
 			'sanitize' => 'esc_url',
+		),
+		'bio_unit' => array(
+			'meta_key' => '_wsuwp_profile_bio_unit',
+			'sanitize' => 'the_content',
+		),
+		'bio_university' => array(
+			'meta_key' => '_wsuwp_profile_bio_university',
+			'sanitize' => 'the_content',
 		),
 		'bio_college' => array(
 			'meta_key' => '_wsuwp_profile_bio_college',
@@ -262,17 +250,17 @@ class WSUWP_People_Directory {
 		add_filter( 'enter_title_here', array( $this, 'enter_title_here' ) );
 		add_action( 'edit_form_after_title', array( $this, 'edit_form_after_title' ) );
 		add_action( 'edit_form_after_editor',	array( $this, 'edit_form_after_editor' ) );
-		add_action( 'add_meta_boxes', array( $this, 'add_meta_boxes' ), 10, 1 );
+		add_action( "add_meta_boxes_{$this->post_type_slug}", array( $this, 'add_meta_boxes' ), 10, 1 );
 		add_action( 'do_meta_boxes', array( $this, 'do_meta_boxes' ), 10, 3 );
-		add_action( 'save_post', array( $this, 'save_post' ), 10, 2 );
+		add_action( "save_post_{$this->post_type_slug}", array( $this, 'save_post' ), 10, 2 );
 		add_filter( 'wp_post_revision_meta_keys', array( $this, 'add_meta_keys_to_revision' ) );
 
 		// Modify taxonomy columns on "All Profiles" page.
-		add_filter( 'manage_taxonomies_for_wsuwp_people_profile_columns', array( $this, 'wsuwp_people_profile_columns' ) );
+		add_filter( "manage_taxonomies_for_{$this->post_type_slug}_columns", array( $this, 'wsuwp_people_profile_columns' ) );
 
 		// Allow REST get_items() queries by additional data.
 		add_action( 'init', array( $this, 'register_wsu_nid_query_var' ) );
-		add_filter( "rest_{$this->personnel_content_type}_query", array( $this, 'rest_query_vars' ), 10, 2 );
+		add_filter( "rest_{$this->post_type_slug}_query", array( $this, 'rest_query_vars' ), 10, 2 );
 		add_action( 'pre_get_posts', array( $this, 'handle_wsu_nid_query_var' ) );
 
 		// Register custom fields with the REST API.
@@ -284,7 +272,7 @@ class WSUWP_People_Directory {
 		add_action( 'admin_bar_menu', array( $this, 'admin_bar_menu' ), 999 );
 		add_action( 'wp_dashboard_setup', array( $this, 'wp_dashboard_setup' ) );
 		add_action( 'pre_get_posts', array( $this, 'limit_media_library' ) );
-		//add_action( 'views_edit-' . $this->personnel_content_type, array( $this, 'edit_views' ) );
+		//add_action( 'views_edit-' . $this->post_type_slug, array( $this, 'edit_views' ) );
 		//add_filter( 'parse_query', array ( $this, 'parse_query' ) );
 
 		// Modify 'wsuwp_people_profile' content type query.
@@ -337,7 +325,7 @@ class WSUWP_People_Directory {
 			'rest_base' => 'people',
 		);
 
-		register_post_type( $this->personnel_content_type, $args );
+		register_post_type( $this->post_type_slug, $args );
 	}
 
 	/**
@@ -362,10 +350,10 @@ class WSUWP_People_Directory {
 			'hierarchical' => true,
 			'show_ui'      => true,
 			'show_in_menu' => true,
-			'query_var'    => $this->personnel_appointments,
+			'query_var'    => $this->taxonomy_slug_appointments,
 			'show_in_rest' => true,
 		);
-		register_taxonomy( $this->personnel_appointments, $this->personnel_content_type, $appointments );
+		register_taxonomy( $this->taxonomy_slug_appointments, $this->post_type_slug, $appointments );
 
 		$classifications = array(
 			'labels'        => array(
@@ -384,10 +372,10 @@ class WSUWP_People_Directory {
 			'hierarchical'  => true,
 			'show_ui'       => true,
 			'show_in_menu'  => true,
-			'query_var'     => $this->personnel_classifications,
+			'query_var'     => $this->taxonomy_slug_classifications,
 			'show_in_rest'  => true,
 		);
-		register_taxonomy( $this->personnel_classifications, $this->personnel_content_type, $classifications );
+		register_taxonomy( $this->taxonomy_slug_classifications, $this->post_type_slug, $classifications );
 
 	}
 
@@ -395,9 +383,9 @@ class WSUWP_People_Directory {
 	 * Add support for WSU University Taxonomies.
 	 */
 	public function add_taxonomies() {
-		register_taxonomy_for_object_type( 'wsuwp_university_category', $this->personnel_content_type );
-		register_taxonomy_for_object_type( 'wsuwp_university_location', $this->personnel_content_type );
-		register_taxonomy_for_object_type( 'wsuwp_university_org', $this->personnel_content_type );
+		register_taxonomy_for_object_type( 'wsuwp_university_category', $this->post_type_slug );
+		register_taxonomy_for_object_type( 'wsuwp_university_location', $this->post_type_slug );
+		register_taxonomy_for_object_type( 'wsuwp_university_org', $this->post_type_slug );
 	}
 
 	/**
@@ -417,17 +405,17 @@ class WSUWP_People_Directory {
 	public function admin_enqueue_scripts( $hook ) {
 		$screen = get_current_screen();
 
-		if ( ( 'post-new.php' === $hook || 'post.php' === $hook ) && $screen->post_type === $this->personnel_content_type ) {
+		if ( ( 'post-new.php' === $hook || 'post.php' === $hook ) && $screen->post_type === $this->post_type_slug ) {
 			$ajax_nonce = wp_create_nonce( 'wsu-people-nid-lookup' );
 
-			wp_enqueue_style( 'wsuwp-people-admin-style', plugins_url( 'css/admin-profile-style.css', dirname( __FILE__ ) ) );
-			wp_enqueue_script( 'wsuwp-people-admin-script', plugins_url( 'js/admin-profile.min.js', dirname( __FILE__ ) ), array( 'jquery-ui-tabs' ), '', true );
+			wp_enqueue_style( 'wsuwp-people-admin-style', plugins_url( 'css/admin-profile-style.css', dirname( __FILE__ ) ), array(), $this->version );
+			wp_enqueue_script( 'wsuwp-people-admin-script', plugins_url( 'js/admin-profile.min.js', dirname( __FILE__ ) ), array( 'jquery-ui-tabs' ), $this->version, true );
 			wp_localize_script( 'wsuwp-people-admin-script', 'wsupeople_nid_nonce', $ajax_nonce );
 		}
 
-		if ( 'edit.php' === $hook && $screen->post_type === $this->personnel_content_type ) {
-			wp_enqueue_style( 'wsuwp-people-admin-style', plugins_url( 'css/admin-edit.css', dirname( __FILE__ ) ) );
-			wp_enqueue_script( 'wsuwp-people-admin-script', plugins_url( 'js/admin-edit.min.js', dirname( __FILE__ ) ) );
+		if ( 'edit.php' === $hook && $screen->post_type === $this->post_type_slug ) {
+			wp_enqueue_style( 'wsuwp-people-admin-style', plugins_url( 'css/admin-edit.css', dirname( __FILE__ ) ), array(), $this->version );
+			wp_enqueue_script( 'wsuwp-people-admin-script', plugins_url( 'js/admin-edit.min.js', dirname( __FILE__ ) ), array( 'jquery' ), $this->version );
 		}
 
 	}
@@ -442,7 +430,7 @@ class WSUWP_People_Directory {
 	public function enter_title_here( $title ) {
 		$screen = get_current_screen();
 
-		if ( $this->personnel_content_type === $screen->post_type ) {
+		if ( $this->post_type_slug === $screen->post_type ) {
 			$title = 'Enter name here';
 		}
 
@@ -455,56 +443,28 @@ class WSUWP_People_Directory {
 	 * @param WP_Post $post Post object.
 	 */
 	public function edit_form_after_title( $post ) {
-		if ( $this->personnel_content_type === $post->post_type ) :
-			?>
-			<?php do_meta_boxes( get_current_screen(), 'after_title', $post ); ?>
-			<div id="wsuwp-profile-tabs">
-				<ul>
-					<li class="wsuwp-profile-tab wsuwp-profile-bio-tab"><a href="#wsuwp-profile-default" class="nav-tab">Official Biography</a></li>
-					<?php
-					// Add tabs for saved biographies, and build an array to check against.
-					$profile_bios = array();
-					foreach ( $this->wp_bio_editors as $bio ) {
-						$meta = get_post_meta( $post->ID, $bio, true );
-						$profile_bios[] = $meta;
-						if ( $meta ) {
-							?>
-							<li class="wsuwp-profile-tab wsuwp-profile-bio-tab">
-								<a href="#<?php echo esc_attr( substr( $bio, 1 ) ); ?>" class="nav-tab"><?php echo esc_html( ucfirst( substr( strrchr( $bio, '_' ), 1 ) ) ); ?> Biography</a>
-							</li>
-							<?php
-						}
-					}
-
-					// Build an array of CV field values to check against.
-					$profile_cv_data = array();
-					foreach ( $this->wp_cv_editors as $cv_meta_field ) {
-						$cv_data = get_post_meta( $post->ID, $cv_meta_field, true );
-						if ( $cv_data ) {
-							$profile_cv_data[] = $cv_data;
-						}
-					}
-
-					// Display CV tab if any of the fields have been saved.
-					if ( $profile_cv_data ) {
-						echo '<li class="wsuwp-profile-tab"><a href="#wsuwp-profile-cv" class="nav-tab">C.V.</a></li>';
-					}
-
-					// Display "+ Add Bio" link if any biographies are still empty.
-					if ( array_search( '', $profile_bios, true ) !== false ) {
-						echo '<li><a id="add-bio">+ Add Biography</a></li>';
-					}
-
-					//  Display "+ Add Bio" link if none of the fields have value.
-					if ( empty( $profile_cv_data ) ) {
-						echo '<li><a id="add-cv">+ Add C.V.</a></li>';
-					}
+		if ( $this->post_type_slug !== $post->post_type ) {
+			return;
+		}
+		?>
+		<?php do_meta_boxes( get_current_screen(), 'after_title', $post ); ?>
+		<div id="wsuwp-profile-tabs">
+			<ul>
+				<li class="wsuwp-profile-tab wsuwp-profile-bio-tab"><a href="#wsuwp-profile-default" class="nav-tab">Personal Biography</a></li>
+				<?php
+				// Add tabs for Unit and University biographies.
+				foreach ( $this->wp_bio_editors as $bio ) {
+					$meta = get_post_meta( $post->ID, $bio, true );
 					?>
-				</ul>
-				<div id="wsuwp-profile-default" class="wsuwp-profile-panel">
-			<?php
-		endif;
-
+					<li class="wsuwp-profile-tab wsuwp-profile-bio-tab">
+						<a href="#<?php echo esc_attr( substr( $bio, 1 ) ); ?>" class="nav-tab"><?php echo esc_html( ucfirst( substr( strrchr( $bio, '_' ), 1 ) ) ); ?> Biography</a>
+					</li>
+					<?php
+				}
+				?>
+			</ul>
+			<div id="wsuwp-profile-default" class="wsuwp-profile-panel">
+		<?php
 	}
 
 	/**
@@ -513,297 +473,25 @@ class WSUWP_People_Directory {
 	 * @param WP_Post $post Post object.
 	 */
 	public function edit_form_after_editor( $post ) {
-
-		if ( $this->personnel_content_type === $post->post_type ) :
-
-			?>
+		if ( $this->post_type_slug !== $post->post_type ) {
+			return;
+		}
+		?>
 			</div><!--wsuwp-profile-default-->
 
 			<?php
 			foreach ( $this->wp_bio_editors as $bio_meta_field ) {
-				$bio = get_post_meta( $post->ID, $bio_meta_field, true );
-				if ( $bio ) {
-					?>
-					<div id="<?php echo esc_attr( substr( $bio_meta_field, 1 ) ); ?>" class="wsuwp-profile-panel">
-						<?php wp_editor( $bio, $bio_meta_field ); ?>
-						<!--<p>Assign profile photo
-							<select class="wsuwp-profile-bio-photo">
-								<option></option>
-								<option value="one">1</option>
-								<option value="two">2</option>
-								<option value="three">3</option>
-							</select>
-						to this biography.
-						</p>-->
-					</div>
-					<?php
-				}
+				$bio = ( get_post_meta( $post->ID, $bio_meta_field, true ) ) ? get_post_meta( $post->ID, $bio_meta_field, true ) : '';
+				?>
+				<div id="<?php echo esc_attr( substr( $bio_meta_field, 1 ) ); ?>" class="wsuwp-profile-panel">
+					<?php wp_editor( $bio, $bio_meta_field ); ?>
+				</div>
+				<?php
 			}
 			?>
 
-			<div id="wsuwp-profile-bio-template" class="wsuwp-profile-panel">
-				<p>
-					This is my
-					<select class="wsuwp-profile-bio-type">
-						<option></option>
-						<?php foreach ( $this->wp_bio_editors as $bio ) : ?>
-							<?php if ( ! get_post_meta( $post->ID, $bio, true ) ) : /* Somehow check for ones added without saving */ ?>
-							<option value="<?php echo esc_attr( substr( $bio, 1 ) ); ?>"><?php echo esc_html( ucfirst( substr( strrchr( $bio, '_' ), 1 ) ) ); ?></option>
-							<?php endif; ?>
-						<?php endforeach; ?>
-					</select> biography.
-				</p>
-				<div class="wsuwp-profile-bio-details-container">
-					<textarea class="wsuwp-profile-new-bio"></textarea>
-					<p>Assign profile photo
-						<select class="wsuwp-profile-bio-photo">
-							<option></option>
-							<option>1</option>
-							<option>2</option>
-							<option>3</option>
-						</select>
-					to this biography.</p>
-				</div>
-			</div><!--wsuwp-profile-bio-template-->
-
-
-			<div id="wsuwp-profile-cv" class="wsuwp-profile-panel" style="display:none;">
-
-				<p class="description">All sections are optional - headings for sections left blank will not be displayed.<br />
-				Click the <i class="mce-ico mce-i-wp_help wsuwp-profile-help"></i>for section notes and formatting examples.</p>
-
-				<?php
-				add_thickbox();
-
-				$wsuwp_profile_cv_settings = array(
-					'media_buttons' => false,
-					'textarea_rows' => 5,
-				);
-
-				?>
-
-				<div id="wsuwp-profile-employment-lb" class="wsuwp-profile-lb">
-					<h4>Include</h4>
-					<ul>
-						<li>University Related</li>
-						<li>Other</li>
-					</ul>
-					<h4>Formatting</h4>
-					<p><strong>University Related</strong></p>
-					<ul>
-						<li><em>2005-Present</em><br />
-						WSU Extension Community Economic Development Specialist. Serving rural communities through economic development education and applied research with an emphasis in access to capital options for small business financing, small business development, and creating entrepreneurial ecosystems in communities.</li>
-						<li><em>2001-2004</em><br />
-						WSU Extension County Director, Sage County. Responsible for administrative leadership for 3 faculty and 2 staff with program oversight for youth, family, natural resources programs. Conducted the community economic development program. Annual office budget, 450,000.</li>
-					</ul>
-					<p><strong>Other</strong></p>
-					<ul>
-						<li><em>2000-1997</em><br />
-						Financial Manager for Neighborhood Action Partners, Springdale, MO. Supervised five staff and ten volunteers. Managed budgets for six programs with annual budget of $750,000.</li>
-					</ul>
-				</div>
-				<h3 class="wsuwp-profile-label">Employment <a href="#TB_inline?width=600&height=700&inlineId=wsuwp-profile-employment-lb" class="thickbox wsuwp-profile-help-link" title="Employment"><i class="mce-ico mce-i-wp_help wsuwp-profile-help"></i></a></h3>
-				<?php wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_employment', true ), '_wsuwp_profile_employment', $wsuwp_profile_cv_settings ); ?>
-
-				<div id="wsuwp-profile-honors-lb" class="wsuwp-profile-lb">
-					<h4>Formatting</h4>
-					<ul>
-						<li><em>2014</em><br />
-						Faculty Excellence in Extension Award, Washington State University</li>
-						<li><em>2004</em><br />
-						Gold Award for Digitally Curriculum, "Training Local Entrepreneurs,” Natural Resource Extension Professionals (ANREP)</li>
-					</ul>
-				</div>
-				<h3 class="wsuwp-profile-label">Honors and Awards <a href="#TB_inline?width=600&height=700&inlineId=wsuwp-profile-honors-lb" class="thickbox wsuwp-profile-help-link" title="Honors and Awards"><i class="mce-ico mce-i-wp_help wsuwp-profile-help"></i></a></h3>
-				<?php wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_honors', true ), '_wsuwp_profile_honors', $wsuwp_profile_cv_settings ); ?>
-
-				<div id="wsuwp-profile-funds-lb" class="wsuwp-profile-lb">
-					<h4>Include</h4>
-					<ul>
-						<li>Grants and Contracts</li>
-						<li>Gifts and Awards</li>
-						<li>Program Revenue Generation and Sponsorships</li>
-						<li>MOA’s and funding secured from Public, Non-profit, and Private entities</li>
-						<li>Unfunded Grant Proposals – Summarized by Year</li>
-					</ul>
-				  <p>Using the rubric below, indicate your contribution(s) to each grant (e.g., principal investigator, co-PI, cooperator), as well as the title, funding entity, total amount, amount of funds for which you had responsibility and authors as described in the example.</p>
-					<ol>
-						<li>Provided the initial idea</li>
-						<li>Developed research/program design and hypotheses</li>
-						<li>Authored or co-authored grant application</li>
-						<li>Developed and/or managed budget</li>
-						<li>Managed personnel, partnerships, and project activities</li>
-					</ol>
-				  <h4>Formatting</h4>
-					<ul>
-						<li>Assessing the effects of global warming on nitrogen cycling in eastern Washington. Agriculture and Food Research Initiative, US Department of Agriculture. $428,802. P.I.: <strong>J. A. Smith</strong> and Co-P.I.: R. N. Jones. (3/08 – 3/12) <strong>(1, 3, 4, $300,000).</strong></li>
-					</ul>
-					<h4>Notes</h4>
-					<ul>
-						<li><em>Briefly explain why you are listed on a grant if none of the indicators above explain your contribution.</em></li>
-						<li><em>The following key will be included on your profile if content is inserted in this section:<br />
-						Key to indicators or description of contributions to Grants, Contracts and Fund Generation: 1 = Provided the initial idea; 2 = Developed research/program design and hypotheses; 3 = Authored or co-authored grant application; 4 = Developed and/or managed budget; 5 = Managed personnel, partnerships, and project activities.</em></li>
-					</ul>
-				</div>
-				<h3 class="wsuwp-profile-label">Grants, Contracts, and Fund Generation <a href="#TB_inline?width=600&height=700&inlineId=wsuwp-profile-funds-lb" class="thickbox wsuwp-profile-help-link" title="Grants, Contracts, and Fund Generation"><i class="mce-ico mce-i-wp_help wsuwp-profile-help"></i></a></h3>
-				<?php wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_grants', true ), '_wsuwp_profile_grants', $wsuwp_profile_cv_settings ); ?>
-
-				<div id="wsuwp-profile-pubs-lb" class="wsuwp-profile-lb">
-					<h4>Include</h4>
-					<ul>
-						<li>Peer-reviewed Journal Articles. (The journal must have a professional organization or corporate entity with an editor that manages a blind, peer review process.)</li>
-						<li>Peer-reviewed Extension Publications. (The publication must have a formal publishing organization such as WSU Extension that manages a blind, peer review process.)</li>
-						<li>Peer-reviewed Curricula and Training Manuals (Published curricula and training manuals that have been formally peer reviewed by WSU Extension or another institution.)</li>
-						<li>Published Books, Book Chapters, or Monographs (Specify when an entry was peer reviewed according to the criteria described in A or B above.)</li>
-						<li>Creative Scholarship in Juried Events. (Abstracts, Posters, and Published Papers in Proceedings of a Professional Meeting or Conference. (Note: These are generally not peer reviewed but they may be peer approved or selected through a process.)</li>
-						<li>Educational Digital Media (Videos, computer programs, mobile aps, dynamic web-pages, social media, blogs, online modules, decision aids, email list-serves, etc.) (Designate products that received formal peer-review with an * and indicate the entity managing the review.)</li>
-						<li>Other Publications and Creative Works (Those products that did not receive formal peer review, and include popular press articles, newsletters, and other written works)</li>
-					</ul>
-					<p>Using the rubric below, indicate your contribution(s) to each scholarly product in parentheses as shown in the example:</p>
-					<ol>
-						<li>Developed the initial idea</li>
-						<li>Obtained or provided funds or other resources</li>
-						<li>Collected data</li>
-						<li>Analyzed data</li>
-						<li>Wrote/created product</li>
-						<li>Edited product</li>
-					</ol>
-					<h4>Formatting</h4>
-					<p><strong>Smith, J. A.</strong>, and R. N. Jones. 2010. The effects of global warming on nitrogen cycling in eastern Washington. Northwestern Ecosystems 45:300-308. <strong>(1, 2, 4, 5)</strong></p>
-					<h4>Notes</h4>
-					<ul>
-						<li><em>Briefly explain why you are listed on a publication if none of the indicators above explain your contribution.</em></li>
-						<li><em>The following key will be included on your profile if content is inserted in this section:<br />
-						Key to indicators or description of contributions to Publications and Creative Work: 1 = Developed the initial idea; 2 = Obtained or provided funds or other resources; 3 = Collected data; 4 = Analyzed data; 5 = Wrote/created product; 6 = Edited product.</em></li>
-					</ul>
-				</div>
-				<h3 class="wsuwp-profile-label">Publications and Creative Work <a href="#TB_inline?width=600&height=550&inlineId=wsuwp-profile-pubs-lb" class="thickbox wsuwp-profile-help-link" title="Publications and Creative Work"><i class="mce-ico mce-i-wp_help wsuwp-profile-help"></i></a></h3>
-				<?php wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_publications', true ), '_wsuwp_profile_publications', $wsuwp_profile_cv_settings ); ?>
-
-				<div id="wsuwp-profile-presentations-lb" class="wsuwp-profile-lb">
-					<p>This section is limited to verbally delivered presentations to audiences. Posters and asynchronous electronic products should be included in the appropriate categories of curriculum, videos, or other creative works in the preceding section for publications and creative works. Do not duplicate single entries across multiple categories. For example, if you developed a poster for a professional meeting do not include it under both “Publications and Creative Work” and “Presentations” categories. Indicate which presentations were specifically invited and keynote addresses.</p>
-					<h4>Include</h4>
-					<ul>
-						<li>International</li>
-						<li>National</li>
-						<li>State</li>
-						<li>Local</li>
-					</ul>
-					<h4>Formatting</h4>
-					<ul>
-						<li><strong>Smith, J. <em>2013</em></strong>. <em>Thrips Management in Onions. Pacific Northwest Insect Management Conference, Portland, OR.</em> <strong>Invited Presentation</strong></li>
-					</ul>
-				</div>
-				<h3 class="wsuwp-profile-label">Presentations <a href="#TB_inline?width=600&height=550&inlineId=wsuwp-profile-presentations-lb" class="thickbox wsuwp-profile-help-link" title="Presentations"><i class="mce-ico mce-i-wp_help wsuwp-profile-help"></i></a></h3>
-				<?php wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_presentations', true ), '_wsuwp_profile_presentations', $wsuwp_profile_cv_settings ); ?>
-
-				<div id="wsuwp-profile-teaching-lb" class="wsuwp-profile-lb">
-					<h4>Include</h4>
-					<ul>
-						<li>Credit Courses Taught</li>
-						<li>Additional Teaching</li>
-						<li>Advising (Graduate Students and Student Interns)</li>
-					</ul>
-					<h4>Formatting</h4>
-					<p><strong>Credit Courses Taught</strong></p>
-					<ul>
-						<li><em>2013</em><br />
-						Micro Economics and Local Development, graduate course. School of Economics, Everstate College – Spokane, WA</li>
-					</ul>
-					<p><strong>Additional Teaching</strong></p>
-					<ul>
-						<li><em>2012</em><br />
-						Micro Economics and Local Investing, undergraduate course. School of Economics, Everstate College – Spokane, WA (guest lecturer)</li>
-					</ul>
-					<p><strong>Advising</strong></p>
-					<ul>
-						<li><em>2011</em><br />
-						Derek Ohlgren, MS, Civil and Environmental Engineering, Washington State University, (thesis committee)</li>
-					</ul>
-				</div>
-				<h3 class="wsuwp-profile-label">University Instruction <a href="#TB_inline?width=600&height=700&inlineId=wsuwp-profile-teaching-lb" class="thickbox wsuwp-profile-help-link" title="University Instruction"><i class="mce-ico mce-i-wp_help wsuwp-profile-help"></i></a></h3>
-				<?php wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_teaching', true ), '_wsuwp_profile_teaching', $wsuwp_profile_cv_settings ); ?>
-
-				<div id="wsuwp-profile-service-lb" class="wsuwp-profile-lb">
-					<h4>Include</h4>
-					<ul>
-						<li>University</li>
-						<li>Professional Society</li>
-						<li>Community</li>
-						<li>Review Activities (journal article reviews and editorial service)</li>
-					</ul>
-					<h4>Formatting</h4>
-					<p><strong>University</strong></p>
-					<ul>
-						<li><em>2013</em><br />
-						Washington State University Strategic Plan Taskforce – Chair<br />
-						WSU Extension Director Search Committee – member</li>
-						<li><em>2010</em><br />
-						Washington State University Faculty Senate – Senator</li>
-					</ul>
-					<p><strong>Professional Society</strong></p>
-					<ul>
-						<li><em>2008</em><br />
-						National Associate of Economic Developers – Western Regional Chair</li>
-						<li><em>2007</em><br />
-						Extension Professionals Society – Conference Planning Chair</li>
-					</ul>
-					<p><strong>Community</strong></p>
-					<ul>
-						<li><em>2012</em><br />
-						Washington Local Investment Coalition – President</li>
-						<li><em>2011 - Present</em><br />
-						Washington Banking Association Advisory Board - member</li>
-					</ul>
-					<p><strong>Review Activities</strong></p>
-					<ul>
-						<li><em>2010-Present</em><br />
-						Doe, J., C. Ray, D. Mee, (editors) Journal of Metropolitan Extension; a journal of the Society for Urban Extension. <a href="#">Read the Journal at W. Coyote</a> [Online Library]</li>
-					</ul>
-				</div>
-				<h3 class="wsuwp-profile-label">Professional Service <a href="#TB_inline?width=600&height=700&inlineId=wsuwp-profile-service-lb" class="thickbox wsuwp-profile-help-link" title="Professional Service"><i class="mce-ico mce-i-wp_help wsuwp-profile-help"></i></a></h3>
-				<?php wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_service', true ), '_wsuwp_profile_service', $wsuwp_profile_cv_settings ); ?>
-
-				<div id="wsuwp-profile-responsibilities-lb" class="wsuwp-profile-lb">
-					<p>A brief listing of administrative duties and responsibilities.</p>
-					<h4>Formatting</h4>
-					<ul>
-						<li><em>2001-2004</em><br />
-						WSU Extension County Director, Sage County. Responsible for administrative leadership of faculty /staff, budget development/ management, local government liaison and representing WSU to the public for youth, family and natural resources programs. Conducted the community economic development program. Annual office budget, $450,000.</li>
-					</ul>
-				</div>
-				<h3 class="wsuwp-profile-label">Administrative Responsibility <a href="#TB_inline?width=600&height=700&inlineId=wsuwp-profile-responsibilities-lb" class="thickbox wsuwp-profile-help-link" title="Administrative Responsibility"><i class="mce-ico mce-i-wp_help wsuwp-profile-help"></i></a></h3>
-				<?php wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_responsibilities', true ), '_wsuwp_profile_responsibilities', $wsuwp_profile_cv_settings ); ?>
-
-				<div id="wsuwp-profile-societies-lb" class="wsuwp-profile-lb">
-					<h4>Formatting</h4>
-					<ul>
-						<li>Society for Indigenous Asset Building – member</li>
-						<li>National Association of Community Development Extension Professionals - Chair, 2011</li>
-					</ul>
-				</div>
-				<h3 class="wsuwp-profile-label">Professional and Scholarly Organization Affiliations <a href="#TB_inline?width=600&height=700&inlineId=wsuwp-profile-societies-lb" class="thickbox wsuwp-profile-help-link" title="Professional and Scholarly Organization Affiliations"><i class="mce-ico mce-i-wp_help wsuwp-profile-help"></i></a></h3>
-				<?php wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_societies', true ), '_wsuwp_profile_societies', $wsuwp_profile_cv_settings ); ?>
-
-				<div id="wsuwp-profile-experience-lb" class="wsuwp-profile-lb">
-					<p>Include additional courses for credit, in-service training, and other major professional development activities.</p>
-					<h4>Formatting</h4>
-					<ul>
-						<li><em>2006-2007</em><br />
-						<em>Spanish for Professionals</em>, Gonzaga University Certificate Summer Program</li>
-						<li><em>2004</em><br />
-						<em>Indigenous Economic Development Course</em>, International Economic Development Council</li>
-					</ul>
-				</div>
-				<h3 class="wsuwp-profile-label">Professional Development <a href="#TB_inline?width=600&height=700&inlineId=wsuwp-profile-experience-lb" class="thickbox wsuwp-profile-help-link" title="Professional Experience"><i class="mce-ico mce-i-wp_help wsuwp-profile-help"></i></a></h3>
-				<?php wp_editor( get_post_meta( $post->ID, '_wsuwp_profile_experience', true ), '_wsuwp_profile_experience', $wsuwp_profile_cv_settings ); ?>
-
-			</div>
-
 		</div><!--wsuwp-profile-tabs-->
-			<?php
-		endif;
-
+		<?php
 	}
 
 	/**
@@ -812,15 +500,11 @@ class WSUWP_People_Directory {
 	 * @param string $post_type The slug of the current post type.
 	 */
 	public function add_meta_boxes( $post_type ) {
-		if ( $this->personnel_content_type !== $post_type ) {
-			return;
-		}
-
 		add_meta_box(
 			'wsuwp_profile_additional_info',
 			'Additional Profile Information',
 			array( $this, 'display_additional_info_meta_box' ),
-			$this->personnel_content_type,
+			$this->post_type_slug,
 			'after_title',
 			'high'
 		);
@@ -843,8 +527,8 @@ class WSUWP_People_Directory {
 		$address = get_post_meta( $post->ID, '_wsuwp_profile_ad_address', true );
 		$phone = get_post_meta( $post->ID, '_wsuwp_profile_ad_phone', true );
 		$phone_ext = get_post_meta( $post->ID, '_wsuwp_profile_ad_phone_ext', true );
-		$appointments = wp_get_post_terms( $post->ID, $this->personnel_appointments, array( 'fields' => 'names' ) );
-		$classifications = wp_get_post_terms( $post->ID, $this->personnel_classifications, array( 'fields' => 'names' ) );
+		$appointments = wp_get_post_terms( $post->ID, $this->taxonomy_slug_appointments, array( 'fields' => 'names' ) );
+		$classifications = wp_get_post_terms( $post->ID, $this->taxonomy_slug_classifications, array( 'fields' => 'names' ) );
 
 		?>
 		<div class="profile-card">
@@ -913,30 +597,6 @@ class WSUWP_People_Directory {
 	}
 
 	/**
-	 * Display a meta box used to upload a person's C.V.
-	 *
-	 * @param WP_Post $post Post object.
-	 */
-	public function display_cv_upload_meta_box( $post ) {
-
-		$cv = get_post_meta( $post->ID, '_wsuwp_profile_cv', true );
-
-		?>
-			<div class="upload-set-wrapper">
-				<input type="hidden" class="wsuwp-profile-upload" name="_wsuwp_profile_cv" id="_wsuwp_profile_cv" value="<?php echo esc_attr( $cv ); ?>" />
-				<p class="hide-if-no-js"><a title="C.V." data-type="File" href="#" class="wsuwp-profile-upload-link">
-				<?php if ( $cv ) : ?>
-					<img src="<?php echo esc_url( home_url( '/wp-includes/images/media/document.png' ) ); ?>" /></a></p>
-					<p class="hide-if-no-js"><a title="C.V." href="#" class="wsuwp-profile-remove-link">Remove C.V.</a></p>
-				<?php else : ?>
-					 Set C.V.</a></p>
-				<?php endif; ?>
-			</div>
-		<?php
-
-	}
-
-	/**
 	 * Remove, move, and replace meta boxes as they are created and output.
 	 *
 	 * @param string  $post_type The current post type meta boxes are displayed for.
@@ -944,40 +604,31 @@ class WSUWP_People_Directory {
 	 * @param WP_Post $post      The post object.
 	 */
 	public function do_meta_boxes( $post_type, $context, $post ) {
-		if ( $this->personnel_content_type !== $post_type ) {
+		if ( $this->post_type_slug !== $post_type ) {
 			return;
 		}
 
 		$box_title = ( 'auto-draft' === $post->post_status ) ? 'Create Profile' : 'Update Profile';
 
-		remove_meta_box( 'submitdiv', $this->personnel_content_type, 'side' );
-		add_meta_box( 'submitdiv', $box_title, array( $this, 'publish_meta_box' ), $this->personnel_content_type, 'side', 'high' );
+		remove_meta_box( 'submitdiv', $this->post_type_slug, 'side' );
+		add_meta_box( 'submitdiv', $box_title, array( $this, 'publish_meta_box' ), $this->post_type_slug, 'side', 'high' );
 
 		add_meta_box(
 			'wsuwp_profile_position_info',
 			'Position and Contact Information',
 			array( $this, 'display_position_info_meta_box' ),
-			$this->personnel_content_type,
+			$this->post_type_slug,
 			'side',
 			'high'
 		);
 
 		// Move and re-label the Featured Image meta box.
-		remove_meta_box( 'postimagediv', $this->personnel_content_type, 'side' );
-		add_meta_box( 'postimagediv', 'Profile Photo', 'post_thumbnail_meta_box', $this->personnel_content_type, 'side', 'high' );
-
-		add_meta_box(
-			'wsuwp_profile_cv_upload',
-			'Curriculum Vitae',
-			array( $this, 'display_cv_upload_meta_box' ),
-			$this->personnel_content_type,
-			'side',
-			'high'
-		);
+		remove_meta_box( 'postimagediv', $this->post_type_slug, 'side' );
+		add_meta_box( 'postimagediv', 'Profile Photo', 'post_thumbnail_meta_box', $this->post_type_slug, 'side', 'high' );
 
 		// Remove "Appointment" and "Classification" meta boxes.
-		remove_meta_box( 'appointmentdiv', $this->personnel_content_type, 'side' );
-		//remove_meta_box( 'classificationdiv', $this->personnel_content_type, 'side' );
+		remove_meta_box( 'appointmentdiv', $this->post_type_slug, 'side' );
+		//remove_meta_box( 'classificationdiv', $this->post_type_slug, 'side' );
 	}
 
 	/**
@@ -1188,8 +839,7 @@ class WSUWP_People_Directory {
 		}
 
 		// Sanitize and save wp_editors.
-		$wp_editors = array_merge( $this->wp_bio_editors, $this->wp_cv_editors );
-		foreach ( $wp_editors as $field ) {
+		foreach ( $this->wp_bio_editors as $field ) {
 			if ( isset( $_POST[ $field ] ) && '' !== $_POST[ $field ] ) {
 				update_post_meta( $post_id, $field, wp_kses_post( $_POST[ $field ] ) );
 			} else {
@@ -1206,7 +856,7 @@ class WSUWP_People_Directory {
 	 * @return array
 	 */
 	public function add_meta_keys_to_revision( $keys ) {
-		$revisioned_fields = array_merge( $this->basic_fields, $this->repeatable_fields, $this->wp_bio_editors, $this->wp_cv_editors );
+		$revisioned_fields = array_merge( $this->basic_fields, $this->repeatable_fields, $this->wp_bio_editors );
 
 		foreach ( $revisioned_fields as $field ) {
 			$keys[] = $field;
@@ -1282,7 +932,7 @@ class WSUWP_People_Directory {
 			'schema' => null,
 		);
 		foreach ( $this->rest_response_fields as $field_name => $value ) {
-			register_rest_field( $this->personnel_content_type, $field_name, $args );
+			register_rest_field( $this->post_type_slug, $field_name, $args );
 		}
 	}
 
@@ -1388,7 +1038,7 @@ class WSUWP_People_Directory {
 		$post = get_post( $args[2] );
 
 		// Bail if the post type isn't Personnel:
-		if ( $this->personnel_content_type !== $post->post_type ) {
+		if ( $this->post_type_slug !== $post->post_type ) {
 			return $allcaps;
 		}
 
@@ -1522,7 +1172,7 @@ class WSUWP_People_Directory {
 			$current_user = wp_get_current_user();
 
 			$all_personnel = new WP_Query( array(
-				'post_type'	 => $this->personnel_content_type,
+				'post_type'	 => $this->post_type_slug,
 				'post_status' => 'publish',
 				'posts_per_page' => -1,
 				'author__not_in' => $current_user->ID,
@@ -1540,7 +1190,7 @@ class WSUWP_People_Directory {
 				$profile_ids = implode( ',', $users_editable_profiles );
 				$count = count( $users_editable_profiles );
 				$class = ( 'last_name' === $_GET['sortby'] ) ? ' class="current"' : '';
-				$url = admin_url( 'edit.php?post_type=' . $this->personnel_content_type . '&post_status=publish&sortby=last_name&profiles=' . $profile_ids );
+				$url = admin_url( 'edit.php?post_type=' . $this->post_type_slug . '&post_status=publish&sortby=last_name&profiles=' . $profile_ids );
 				$views['others'] = sprintf( __( '<a href="%1$s"%2$s>Others <span class="count">(%3$d)</span></a>' ), $url, $class, $count );
 			}
 		}
@@ -1557,8 +1207,8 @@ class WSUWP_People_Directory {
 
 		$screen = get_current_screen();
 
-		if ( is_admin() && 'edit-' . $this->personnel_content_type === $screen->id &&
-				isset( $_GET['post_type'] ) && $_GET['post_type'] === $this->personnel_content_type &&
+		if ( is_admin() && 'edit-' . $this->post_type_slug === $screen->id &&
+				isset( $_GET['post_type'] ) && $_GET['post_type'] === $this->post_type_slug &&
 				isset( $_GET['sortby'] ) && 'last_name' === $_GET['sortby'] &&
 				isset( $_GET['profiles'] ) && '' !== $_GET['profiles'] ) {
 			$editables = explode( ',', $_GET['profiles'] );
@@ -1576,7 +1226,7 @@ class WSUWP_People_Directory {
 	 * @param WP_Query $query
 	 */
 	public function profile_archives( $query ) {
-		if ( ( $query->is_post_type_archive( $this->personnel_content_type ) || is_tax() || is_category() || is_tag() ) && $query->is_main_query() && ! is_admin() ) {
+		if ( ( $query->is_post_type_archive( $this->post_type_slug ) || is_tax() || is_category() || is_tag() ) && $query->is_main_query() && ! is_admin() ) {
 			$query->set( 'order', 'ASC' );
 			$query->set( 'orderby', 'meta_value' );
 			$query->set( 'meta_key', '_wsuwp_profile_ad_name_last' );

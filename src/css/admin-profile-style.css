@@ -87,14 +87,6 @@
 	margin-bottom: -1px;
 }
 
-#wsuwp-profile-tabs > ul li a#add-cv,
-#wsuwp-profile-tabs > ul li a#add-bio {
-	border: none;
-	cursor: pointer;
-	font-weight: 400;
-	padding: 4px 14px 6px;
-}
-
 #wsuwp-profile-tabs > ul li a:focus {
 	box-shadow: none;
 }
@@ -106,11 +98,6 @@
 }
 
 /* Tab panels */
-#wsuwp-profile-bio-template,
-.wsuwp-profile-bio-details-container {
-	display: none;
-}
-
 .wsuwp-profile-panel {
 	border: 1px solid #ccc;
 	border-top: none;
@@ -130,45 +117,13 @@
 	padding-top: 0;
 }
 
-#poststuff h3.wsuwp-profile-label {
-	padding: 8px 0;
-}
-
-#wsuwp-profile-default > h3.wsuwp-profile-label:first-of-type {
-	padding-top: 0;
-}
-
-#poststuff #wsuwp-profile-cv h3.wsuwp-profile-label {
-	padding-bottom: 0;
-}
-
 #postdivrich,
-.wp-editor-wrap:not(:last-child):not(#wp-content-wrap),
-.wsuwp-profile-inactive-bio:not(:last-child) {
+.wp-editor-wrap:not(:last-child):not(#wp-content-wrap) {
 	margin-bottom: 16px;
 }
 
-.wsuwp-profile-namefield {
-	margin-bottom: 1em;
-}
-
-.postbox .inside .upload-set-wrapper > p:last-child {
-	margin-bottom: 1px;
-}
-
-.wsuwp-profile-inactive-bio {
-	display: none;
-}
-
 /* Added metabox areas */
-#after_title-sortables,
-#bio_above_editor-sortables,
-#bio_above_editor_left-sortables,
-#bio_above_editor_right-sortables,
-#teaching_above_editor-sortables,
-#research_above_editor-sortables,
-#extension_above_editor-sortables
-#publications_above_editor-sortables {
+#after_title-sortables {
 	min-height: 10px;
 }
 
@@ -182,27 +137,6 @@
 	padding: 0;
 	position: absolute;
 	width: calc(100% - 42px);
-}
-
-/* Help icons and lightboxes */
-.wsuwp-profile-help-link {
-	text-decoration: none;
-}
-
-i.mce-ico.mce-i-wp_help.wsuwp-profile-help {
-	font-size: 16px;
-}
-
-a i.mce-ico.mce-i-wp_help.wsuwp-profile-help {
-	color: #0074a2;
-}
-
-a:hover i.mce-ico.mce-i-wp_help.wsuwp-profile-help {
-	color: #2ea2cc;
-}
-
-.wsuwp-profile-lb {
-	display: none;
 }
 
 /* AD/Network ID search */
