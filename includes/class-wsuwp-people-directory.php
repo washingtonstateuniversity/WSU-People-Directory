@@ -323,7 +323,6 @@ class WSUWP_People_Directory {
 			'supports' => array(
 				'title',
 				'editor',
-				'thumbnail',
 				'revisions',
 				'author',
 			),
@@ -659,10 +658,6 @@ class WSUWP_People_Directory {
 			'side',
 			'high'
 		);
-
-		// Move and re-label the Featured Image meta box.
-		remove_meta_box( 'postimagediv', $this->post_type_slug, 'side' );
-		add_meta_box( 'postimagediv', 'Profile Photo', 'post_thumbnail_meta_box', $this->post_type_slug, 'side', 'high' );
 
 		// Remove "Appointment" and "Classification" meta boxes.
 		remove_meta_box( 'appointmentdiv', $this->post_type_slug, 'side' );
