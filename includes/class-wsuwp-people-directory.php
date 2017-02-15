@@ -30,6 +30,19 @@ class WSUWP_People_Directory {
 	var $taxonomy_slug_classifications = 'classification';
 
 	/**
+	 * A list of post meta keys associated with a profile.
+	 *
+	 * @var array
+	 */
+	var $post_meta_keys = array(
+		'wsuwp_profile_photos' => array(
+			'type' => 'array',
+			'description' => 'A collection of photos',
+			'sanitize_callback' => 'WSUWP_People_Directory::sanitize_photos',
+		),
+	);
+
+	/**
 	 * Fields used to store Active Directory data as meta for a person.
 	 *
 	 * @var array
@@ -246,6 +259,7 @@ class WSUWP_People_Directory {
 		add_action( 'init', array( $this, 'image_sizes' ) );
 
 		// Custom meta and all that.
+		add_action( 'init', array( $this, 'register_meta' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'admin_enqueue_scripts' ) );
 		add_filter( 'enter_title_here', array( $this, 'enter_title_here' ) );
 		add_action( 'edit_form_after_title', array( $this, 'edit_form_after_title' ) );
@@ -398,6 +412,17 @@ class WSUWP_People_Directory {
 	}
 
 	/**
+	 * Register the meta keys used to store profile data.
+	 */
+	public function register_meta() {
+		foreach ( $this->post_meta_keys as $key => $args ) {
+			$args['show_in_rest'] = true;
+			$args['single'] = true;
+			register_meta( 'post', $key, $args );
+		}
+	}
+
+	/**
 	 * Enqueue the scripts and styles used in the admin interface.
 	 *
 	 * @param string $hook The current admin page.
@@ -406,11 +431,15 @@ class WSUWP_People_Directory {
 		$screen = get_current_screen();
 
 		if ( ( 'post-new.php' === $hook || 'post.php' === $hook ) && $screen->post_type === $this->post_type_slug ) {
-			$ajax_nonce = wp_create_nonce( 'wsu-people-nid-lookup' );
+			$post = get_post();
+			$profile_vars = array(
+				'nid_nonce' => wp_create_nonce( 'wsu-people-nid-lookup' ),
+				'post_id' => $post->ID,
+			);
 
 			wp_enqueue_style( 'wsuwp-people-admin-style', plugins_url( 'css/admin-profile-style.css', dirname( __FILE__ ) ), array(), $this->version );
-			wp_enqueue_script( 'wsuwp-people-admin-script', plugins_url( 'js/admin-profile.min.js', dirname( __FILE__ ) ), array( 'jquery-ui-tabs' ), $this->version, true );
-			wp_localize_script( 'wsuwp-people-admin-script', 'wsupeople_nid_nonce', $ajax_nonce );
+			wp_enqueue_script( 'wsuwp-people-admin-script', plugins_url( 'js/admin-profile.min.js', dirname( __FILE__ ) ), array( 'jquery-ui-tabs', 'underscore' ), $this->version, true );
+			wp_localize_script( 'wsuwp-people-admin-script', 'wsupeople', $profile_vars );
 		}
 
 		if ( 'edit.php' === $hook && $screen->post_type === $this->post_type_slug ) {
@@ -506,6 +535,15 @@ class WSUWP_People_Directory {
 			array( $this, 'display_additional_info_meta_box' ),
 			$this->post_type_slug,
 			'after_title',
+			'high'
+		);
+
+		add_meta_box(
+			'wsuwp_profile_photos',
+			'Photos',
+			array( $this, 'display_photo_meta_box' ),
+			$this->post_type_slug,
+			'normal',
 			'high'
 		);
 	}
@@ -782,7 +820,123 @@ class WSUWP_People_Directory {
 			</div>
 		</div>
 		<div class="clear"></div>
-	<?php
+		<?php
+	}
+
+	/**
+	 * Display a meta box used to show a person's photos.
+	 *
+	 * @param WP_Post $post Post object.
+	 */
+	public function display_photo_meta_box( $post ) {
+		wp_enqueue_media();
+
+		$photos = get_post_meta( $post->ID, 'wsuwp_profile_photos', true );
+		$count = 0;
+		?>
+		<div class="wsuwp-profile-photo-collection">
+
+			<?php
+			if ( $photos ) {
+				foreach ( $photos as $index => $photo_id ) {
+					$photo = wp_prepare_attachment_for_js( $photo_id );
+					?>
+					<div class="wsuwp-profile-photo-wrapper">
+
+						<img class="wsuwp-profile-photo"
+							 src='<?php echo esc_url( $photo['sizes']['thumbnail']['url'] ); ?>'
+							 width='<?php echo esc_attr( $photo['sizes']['thumbnail']['width'] ); ?>'
+							 height='<?php echo esc_attr( $photo['sizes']['thumbnail']['height'] ); ?>'
+							 title='<?php echo esc_attr( $photo['title'] ); ?>'
+							 alt='<?php echo esc_attr( $photo['alt'] ); ?>'
+							 data-url='<?php echo esc_attr( $photo['url'] ); ?>'
+							 data-height='<?php echo esc_attr( $photo['height'] ); ?>'
+							 data-width='<?php echo esc_attr( $photo['width'] ); ?>'
+							 data-id="<?php echo esc_attr( $photo_id ); ?>" />
+
+						<div class="wsuwp-profile-photo-controls">
+							<button class="wsuwp-profile-photo-edit" aria-label="Edit">
+								<span class="dashicons dashicons-edit"></span>
+							</button>
+							<button class="wsuwp-profile-photo-remove" aria-label="Remove">
+								<span class="dashicons dashicons-no"></span>
+							</button>
+						</div>
+
+						<input type="hidden"
+							   class="wsuwp-profile-photo-id"
+							   name="wsuwp_profile_photos[<?php echo esc_attr( $count ); ?>]"
+							   value="<?php echo esc_attr( $photo_id ); ?>" />
+
+					</div>
+					<?php
+					$count++;
+				}
+			}
+			?>
+
+		</div>
+
+		<input type="button" class="wsuwp-profile-add-photo button" value="Add Photo(s)" />
+		<input type="hidden"
+				class="wsuwp-profile-photo-count"
+				name="wsuwp-profile-photo-count"
+				value="<?php echo esc_attr( $count ); ?>" />
+
+		<div class="wsuwp-profile-photo-controls-tooltip" role="presentation">
+			<div class="wsuwp-profile-photo-controls-tooltip-arrow"></div>
+			<div class="wsuwp-profile-photo-controls-tooltip-inner"></div>
+		</div>
+
+		<script type="text/template" id="photo-template">
+			<div class="wsuwp-profile-photo-wrapper">
+				<img class="wsuwp-profile-photo"
+					 src="<%= src %>"
+					 width="<%= width %>"
+					 height="<%= height %>"
+					 title="<%= title %>"
+					 alt="<%= alt %>"
+					 data-url="<%= url %>"
+					 data-height="<%= full_height %>"
+					 data-width="<%= full_width %>"
+					 data-id="<%= id %>" />
+				<div class="wsuwp-profile-photo-controls">
+					<button class="wsuwp-profile-photo-edit" aria-label="Edit">
+						<span class="dashicons dashicons-edit"></span>
+					</button>
+					<button class="wsuwp-profile-photo-remove" aria-label="Remove">
+						<span class="dashicons dashicons-no"></span>
+					</button>
+				</div>
+				<input type="hidden" class="wsuwp-profile-photo-id" name="wsuwp_profile_photos[<%= count %>]" value="<%= id %>" />
+			</div>
+		</script>
+		<?php
+	}
+
+	/**
+	 * Sanitizes a collection of photos.
+	 *
+	 * @since 0.3.0
+	 *
+	 * @param array $photos
+	 *
+	 * @return array
+	 */
+	public static function sanitize_photos( $photos ) {
+		if ( ! is_array( $photos ) || 0 === count( $photos ) ) {
+			return '';
+		}
+
+		$sanitized_photos = array();
+
+		foreach ( $photos as $index => $photo_id ) {
+			if ( is_numeric( $photo_id ) ) {
+				$sanitized_photos[] = absint( $photo_id );
+			}
+		}
+
+		return $sanitized_photos;
 	}
 
 	/**
@@ -844,6 +998,15 @@ class WSUWP_People_Directory {
 				update_post_meta( $post_id, $field, wp_kses_post( $_POST[ $field ] ) );
 			} else {
 				delete_post_meta( $post_id, $field );
+			}
+		}
+
+		$keys = get_registered_meta_keys( 'post' );
+
+		foreach ( $this->post_meta_keys as $key => $meta ) {
+			if ( isset( $_POST[ $key ] ) && isset( $keys[ $key ] ) && isset( $keys[ $key ]['sanitize_callback'] ) ) {
+				// Each piece of meta is registered with sanitization.
+				update_post_meta( $post_id, $key, $_POST[ $key ] );
 			}
 		}
 	}
