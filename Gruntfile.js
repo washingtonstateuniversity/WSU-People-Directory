@@ -61,7 +61,7 @@ module.exports = function( grunt ) {
                 }
             },
             people_scripts: {
-                src: [ "scr/js/*.js" ],
+                src: [ "src/js/*.js" ],
                 options: {
                     bitwise: true,
                     curly: true,

@@ -147,3 +147,103 @@
 .load-ad-container {
 	margin-top: 7px;
 }
+
+/* Photo collection */
+.wsuwp-profile-photo-collection {
+	display: -webkit-box;
+	display: -ms-flexbox;
+	display: flex;
+	-ms-flex-wrap: wrap;
+	    flex-wrap: wrap;
+	margin: 0 -4px;
+}
+
+.wsuwp-profile-photo-wrapper {
+	box-sizing: border-box;
+	padding: 4px;
+	position: relative;
+}
+
+.wsuwp-profile-photo {
+	display: block;
+	height: auto;
+	min-width: 198px;
+	width: 100%;
+}
+
+.wsuwp-profile-photo-controls {
+	background: #f5f5f5;
+	border: 1px solid #a0a5aa;
+	border-radius: 2px;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, .15);
+	box-sizing: border-box;
+	display: none;
+	left: 50%;
+	padding: 1px;
+	position: absolute;
+	top: 0;
+	-webkit-transform: translateX(-50%);
+	    -ms-transform: translateX(-50%);
+	        transform: translateX(-50%);
+}
+
+.wsuwp-profile-photo-controls button {
+	background: #f5f5f5;
+	border: 1px solid transparent;
+	border-radius: 2px;
+	cursor: pointer;
+	line-height: normal;
+	margin: 2px;
+	padding: 2px 3px;
+}
+
+.wsuwp-profile-photo-controls button:focus,
+.wsuwp-profile-photo-controls button:hover {
+	background: #fafafa;
+	border-color: #555d66;
+	box-shadow: inset 0 1px 0 #fff, 0 1px 0 rgba(0, 0, 0, .08);
+	color: #23282d;
+	outline: 0;
+}
+
+.wsuwp-profile-photo-controls .dashicons {
+	color: #555d66;
+	line-height: 20px;
+	margin: 0;
+	padding: 0;
+	text-align: center;
+}
+
+.wsuwp-profile-photo-controls-tooltip {
+	display: none;
+	margin-top: 2px;
+	opacity: .8;
+	padding: 5px 0 0;
+	position: absolute;
+	zoom: 1;
+}
+
+.wsuwp-profile-photo-controls-tooltip-arrow {
+	border: 5px solid #000;
+	border-top: none;
+	border-left-color: transparent;
+	border-right-color: transparent;
+	height: 0;
+	left: 50%;
+	line-height: 0;
+	margin-left: -5px;
+	position: absolute;
+	top: 0;
+	width: 0;
+}
+
+.wsuwp-profile-photo-controls-tooltip-inner {
+	background-color: #000;
+	border-radius: 3px;
+	color: #fff;
+	font-size: 12px;
+	max-width: 200px;
+	padding: 5px 8px 4px;
+	text-align: center;
+	white-space: normal;
+}
