@@ -35,198 +35,189 @@ class WSUWP_People_Directory {
 	 * @var array
 	 */
 	var $post_meta_keys = array(
-		'wsuwp_profile_photos' => array(
+		'nid' => array(
+			'type' => 'ad',
+			'description' => '',
+			'sanitize_callback' => 'sanitize_text_field',
+			'meta_key' => '_wsuwp_profile_ad_nid',
+		),
+		'first_name' => array(
+			'type' => 'ad',
+			'description' => '',
+			'sanitize_callback' => 'sanitize_text_field',
+			'meta_key' => '_wsuwp_profile_ad_name_first',
+		),
+		'last_name' => array(
+			'type' => 'ad',
+			'description' => '',
+			'sanitize_callback' => 'sanitize_text_field',
+			'meta_key' => '_wsuwp_profile_ad_name_last',
+		),
+		'position_title' => array(
+			'type' => 'ad',
+			'description' => '',
+			'sanitize_callback' => 'sanitize_text_field',
+			'meta_key' => '_wsuwp_profile_ad_title',
+		),
+		'office' => array(
+			'type' => 'ad',
+			'description' => '',
+			'sanitize_callback' => 'sanitize_text_field',
+			'meta_key' => '_wsuwp_profile_ad_office',
+		),
+		'address' => array(
+			'type' => 'ad',
+			'description' => '',
+			'sanitize_callback' => 'sanitize_text_field',
+			'meta_key' => '_wsuwp_profile_ad_address',
+		),
+		'phone' => array(
+			'type' => 'ad',
+			'description' => '',
+			'sanitize_callback' => 'sanitize_text_field',
+			'meta_key' => '_wsuwp_profile_ad_phone',
+		),
+		'phone_ext' => array(
+			'type' => 'ad',
+			'description' => '',
+			'sanitize_callback' => 'sanitize_text_field',
+			'meta_key' => '_wsuwp_profile_ad_phone_ext',
+		),
+		'email' => array(
+			'type' => 'ad',
+			'description' => '',
+			'sanitize_callback' => 'sanitize_text_field',
+			'meta_key' => '_wsuwp_profile_ad_email',
+		),
+		'office_alt' => array(
+			'type' => 'string',
+			'description' => '',
+			'sanitize_callback' => 'sanitize_text_field',
+			'meta_key' => '_wsuwp_profile_alt_office',
+		),
+		'phone_alt' => array(
+			'type' => 'string',
+			'description' => '',
+			'sanitize_callback' => 'sanitize_text_field',
+			'meta_key' => '_wsuwp_profile_alt_phone',
+		),
+		'email_alt' => array(
+			'type' => 'string',
+			'description' => '',
+			'sanitize_callback' => 'sanitize_text_field',
+			'meta_key' => '_wsuwp_profile_alt_email',
+		),
+		'website' => array(
+			'type' => 'string',
+			'description' => '',
+			'sanitize_callback' => 'esc_url_raw',
+			'meta_key' => '_wsuwp_profile_website',
+		),
+		'degree' => array(
+			'type' => 'array',
+			'description' => '',
+			'sanitize_callback' => 'WSUWP_People_Directory::sanitize_repeatable_text_fields',
+			'meta_key' => '_wsuwp_profile_degrees',
+		),
+		'working_titles' => array(
+			'type' => 'array',
+			'description' => '',
+			'sanitize_callback' => 'WSUWP_People_Directory::sanitize_repeatable_text_fields',
+			'meta_key' => '_wsuwp_profile_title',
+		),
+		'bio_unit' => array(
+			'type' => 'textarea',
+			'description' => 'Unit Biography',
+			'sanitize_callback' => 'wp_kses_post',
+			'meta_key' => '_wsuwp_profile_bio_unit',
+		),
+		'bio_university' => array(
+			'type' => 'textarea',
+			'description' => 'University Biography',
+			'sanitize_callback' => 'wp_kses_post',
+			'meta_key' => '_wsuwp_profile_bio_university',
+		),
+		'photos' => array(
 			'type' => 'array',
 			'description' => 'A collection of photos',
 			'sanitize_callback' => 'WSUWP_People_Directory::sanitize_photos',
+			'meta_key' => '_wsuwp_profile_photos',
 		),
-	);
-
-	/**
-	 * Fields used to store Active Directory data as meta for a person.
-	 *
-	 * @var array
-	 */
-	var $ad_fields = array(
-		'_wsuwp_profile_ad_nid',
-		'_wsuwp_profile_ad_name_first',
-		'_wsuwp_profile_ad_name_last',
-		'_wsuwp_profile_ad_title',
-		'_wsuwp_profile_ad_office',
-		'_wsuwp_profile_ad_address',
-		'_wsuwp_profile_ad_phone',
-		'_wsuwp_profile_ad_phone_ext',
-		'_wsuwp_profile_ad_email',
-	);
-
-	/**
-	 * Fields used to store additional profile information as meta for a person.
-	 *
-	 * @var array
-	 */
-	var $basic_fields = array(
-		'_wsuwp_profile_alt_office',
-		'_wsuwp_profile_alt_phone',
-		'_wsuwp_profile_alt_email',
-		'_wsuwp_profile_website',
-	);
-
-	/**
-	 * Fields use to store data with multiple values as meta for a person.
-	 *
-	 * @var array
-	 */
-	var $repeatable_fields = array(
-		'_wsuwp_profile_degree',
-		'_wsuwp_profile_title',
-	);
-
-	/**
-	 * WP editors for biographies.
-	 */
-	var $wp_bio_editors = array(
-		'_wsuwp_profile_bio_unit',
-		'_wsuwp_profile_bio_university',
-	);
-
-	/**
-	 * Additional fields that we add to REST API responses requesting people directory
-	 * information. Each key includes the meta key used to store the data in post meta
-	 * and the sanitization method used in the `get_callback` when we register the
-	 * field with the API.
-	 *
-	 * @since 0.2.0
-	 *
-	 * @var array
-	 */
-	var $rest_response_fields = array(
-		'nid' => array(
-			'meta_key' => '_wsuwp_profile_ad_nid',
-			'sanitize' => 'esc_html',
-		),
-		'first_name' => array(
-			'meta_key' => '_wsuwp_profile_ad_name_first',
-			'sanitize' => 'esc_html',
-		),
-		'last_name' => array(
-			'meta_key' => '_wsuwp_profile_ad_name_last',
-			'sanitize' => 'esc_html',
-		),
-		'position_title' => array(
-			'meta_key' => '_wsuwp_profile_ad_title',
-			'sanitize' => 'esc_html',
-		),
-		'office' => array(
-			'meta_key' => '_wsuwp_profile_ad_office',
-			'sanitize' => 'esc_html',
-		),
-		'address' => array(
-			'meta_key' => '_wsuwp_profile_ad_address',
-			'sanitize' => 'esc_html',
-		),
-		'phone' => array(
-			'meta_key' => '_wsuwp_profile_ad_phone',
-			'sanitize' => 'esc_html',
-		),
-		'phone_ext' => array(
-			'meta_key' => '_wsuwp_profile_ad_phone_ext',
-			'sanitize' => 'esc_html',
-		),
-		'email' => array(
-			'meta_key' => '_wsuwp_profile_ad_email',
-			'sanitize' => 'esc_html',
-		),
-		'office_alt' => array(
-			'meta_key' => '_wsuwp_profile_alt_office',
-			'sanitize' => 'esc_html',
-		),
-		'phone_alt' => array(
-			'meta_key' => '_wsuwp_profile_alt_phone',
-			'sanitize' => 'esc_html',
-		),
-		'email_alt' => array(
-			'meta_key' => '_wsuwp_profile_alt_email',
-			'sanitize' => 'esc_html',
-		),
-		'website' => array(
-			'meta_key' => '_wsuwp_profile_website',
-			'sanitize' => 'esc_url',
-		),
-		'bio_unit' => array(
-			'meta_key' => '_wsuwp_profile_bio_unit',
-			'sanitize' => 'the_content',
-		),
-		'bio_university' => array(
-			'meta_key' => '_wsuwp_profile_bio_university',
-			'sanitize' => 'the_content',
-		),
+		// Legacy
 		'bio_college' => array(
+			'type' => 'legacy',
+			'sanitize_callback' => 'wp_kses_post',
 			'meta_key' => '_wsuwp_profile_bio_college',
-			'sanitize' => 'the_content',
 		),
 		'bio_lab' => array(
+			'type' => 'legacy',
+			'sanitize_callback' => 'wp_kses_post',
 			'meta_key' => '_wsuwp_profile_bio_lab',
-			'sanitize' => 'the_content',
 		),
 		'bio_department' => array(
+			'type' => 'legacy',
+			'sanitize_callback' => 'wp_kses_post',
 			'meta_key' => '_wsuwp_profile_bio_dept',
-			'sanitize' => 'the_content',
 		),
 		'cv_employment' => array(
+			'type' => 'legacy',
+			'sanitize_callback' => 'wp_kses_post',
 			'meta_key' => '_wsuwp_profile_employment',
-			'sanitize' => 'the_content',
 		),
 		'cv_honors' => array(
+			'type' => 'legacy',
+			'sanitize_callback' => 'wp_kses_post',
 			'meta_key' => '_wsuwp_profile_honors',
-			'sanitize' => 'the_content',
 		),
 		'cv_grants' => array(
+			'type' => 'legacy',
+			'sanitize_callback' => 'wp_kses_post',
 			'meta_key' => '_wsuwp_profile_grants',
-			'sanitize' => 'the_content',
 		),
 		'cv_publications' => array(
+			'type' => 'legacy',
+			'sanitize_callback' => 'wp_kses_post',
 			'meta_key' => '_wsuwp_profile_publications',
-			'sanitize' => 'the_content',
 		),
 		'cv_presentations' => array(
+			'type' => 'legacy',
+			'sanitize_callback' => 'wp_kses_post',
 			'meta_key' => '_wsuwp_profile_presentations',
-			'sanitize' => 'the_content',
 		),
 		'cv_teaching' => array(
+			'type' => 'legacy',
+			'sanitize_callback' => 'wp_kses_post',
 			'meta_key' => '_wsuwp_profile_teaching',
-			'sanitize' => 'the_content',
 		),
 		'cv_service' => array(
+			'type' => 'legacy',
+			'sanitize_callback' => 'wp_kses_post',
 			'meta_key' => '_wsuwp_profile_service',
-			'sanitize' => 'the_content',
 		),
 		'cv_responsibilities' => array(
+			'type' => 'legacy',
+			'sanitize_callback' => 'wp_kses_post',
 			'meta_key' => '_wsuwp_profile_responsibilities',
-			'sanitize' => 'the_content',
 		),
 		'cv_affiliations' => array(
+			'type' => 'legacy',
+			'sanitize_callback' => 'wp_kses_post',
 			'meta_key' => '_wsuwp_profile_societies',
-			'sanitize' => 'the_content',
 		),
 		'cv_experience' => array(
+			'type' => 'legacy',
+			'sanitize_callback' => 'wp_kses_post',
 			'meta_key' => '_wsuwp_profile_experience',
-			'sanitize' => 'the_content',
-		),
-		'working_titles' => array(
-			'meta_key' => '_wsuwp_profile_title',
-			'sanitize' => 'esc_html_map',
-		),
-		'degrees' => array(
-			'meta_key' => '_wsuwp_profile_degree',
-			'sanitize' => 'esc_html_map',
 		),
 		'cv_attachment' => array(
+			'type' => 'legacy',
+			'sanitize_callback' => 'attachment',
 			'meta_key' => '_wsuwp_profile_cv',
-			'sanitize' => 'custom',
 		),
 		'profile_photo' => array(
+			'type' => 'legacy',
+			'sanitize_callback' => 'attachment',
 			'meta_key' => '',
-			'sanitize' => 'custom',
 		),
 	);
 
@@ -415,7 +406,10 @@ class WSUWP_People_Directory {
 	 */
 	public function register_meta() {
 		foreach ( $this->post_meta_keys as $key => $args ) {
-			$args['show_in_rest'] = true;
+			if ( 'legacy' === $args['type'] || 'ad' === $args['type'] ) {
+				continue;
+			}
+
 			$args['single'] = true;
 			register_meta( 'post', $key, $args );
 		}
@@ -466,7 +460,7 @@ class WSUWP_People_Directory {
 	}
 
 	/**
-	 * Add markup after the title of the edit screen for the Personnel content type.
+	 * Add tabs for each biography.
 	 *
 	 * @param WP_Post $post Post object.
 	 */
@@ -478,14 +472,20 @@ class WSUWP_People_Directory {
 		<?php do_meta_boxes( get_current_screen(), 'after_title', $post ); ?>
 		<div id="wsuwp-profile-tabs">
 			<ul>
-				<li class="wsuwp-profile-tab wsuwp-profile-bio-tab"><a href="#wsuwp-profile-default" class="nav-tab">Personal Biography</a></li>
+				<li class="wsuwp-profile-tab wsuwp-profile-bio-tab">
+					<a href="#wsuwp-profile-default" class="nav-tab">Personal Biography</a>
+				</li>
 				<?php
-				// Add tabs for Unit and University biographies.
-				foreach ( $this->wp_bio_editors as $bio ) {
-					$meta = get_post_meta( $post->ID, $bio, true );
+				$keys = get_registered_meta_keys( 'post' );
+
+				foreach ( $keys as $key => $args ) {
+					if ( 'textarea' !== $args['type'] ) {
+						continue;
+					}
+
 					?>
 					<li class="wsuwp-profile-tab wsuwp-profile-bio-tab">
-						<a href="#<?php echo esc_attr( substr( $bio, 1 ) ); ?>" class="nav-tab"><?php echo esc_html( ucfirst( substr( strrchr( $bio, '_' ), 1 ) ) ); ?> Biography</a>
+						<a href="#<?php echo esc_attr( $key ); ?>" class="nav-tab"><?php echo esc_html( $args['description'] ); ?></a>
 					</li>
 					<?php
 				}
@@ -508,11 +508,15 @@ class WSUWP_People_Directory {
 			</div><!--wsuwp-profile-default-->
 
 			<?php
-			foreach ( $this->wp_bio_editors as $bio_meta_field ) {
-				$bio = ( get_post_meta( $post->ID, $bio_meta_field, true ) ) ? get_post_meta( $post->ID, $bio_meta_field, true ) : '';
+			foreach ( $this->post_meta_keys as $key => $args ) {
+				if ( 'textarea' !== $args['type'] ) {
+					continue;
+				}
+
+				$value = get_post_meta( $post->ID, $args['meta_key'], true );
 				?>
-				<div id="<?php echo esc_attr( substr( $bio_meta_field, 1 ) ); ?>" class="wsuwp-profile-panel">
-					<?php wp_editor( $bio, $bio_meta_field ); ?>
+				<div id="<?php echo esc_attr( $key ); ?>" class="wsuwp-profile-panel">
+					<?php wp_editor( $value, $args['meta_key'] ); ?>
 				</div>
 				<?php
 			}
@@ -826,7 +830,7 @@ class WSUWP_People_Directory {
 	public function display_photo_meta_box( $post ) {
 		wp_enqueue_media();
 
-		$photos = get_post_meta( $post->ID, 'wsuwp_profile_photos', true );
+		$photos = get_post_meta( $post->ID, '_wsuwp_profile_photos', true );
 		$count = 0;
 		?>
 		<div class="wsuwp-profile-photo-collection">
@@ -860,7 +864,7 @@ class WSUWP_People_Directory {
 
 						<input type="hidden"
 							   class="wsuwp-profile-photo-id"
-							   name="wsuwp_profile_photos[<?php echo esc_attr( $count ); ?>]"
+							   name="_wsuwp_profile_photos[<?php echo esc_attr( $count ); ?>]"
 							   value="<?php echo esc_attr( $photo_id ); ?>" />
 
 					</div>
@@ -903,10 +907,35 @@ class WSUWP_People_Directory {
 						<span class="dashicons dashicons-no"></span>
 					</button>
 				</div>
-				<input type="hidden" class="wsuwp-profile-photo-id" name="wsuwp_profile_photos[<%= count %>]" value="<%= id %>" />
+				<input type="hidden" class="wsuwp-profile-photo-id" name="_wsuwp_profile_photos[<%= count %>]" value="<%= id %>" />
 			</div>
 		</script>
 		<?php
+	}
+
+	/**
+	 * Sanitizes repeatable text fields.
+	 *
+	 * @since 0.3.0
+	 *
+	 * @param array $values
+	 *
+	 * @return array
+	 */
+	public static function sanitize_repeatable_text_fields( $values ) {
+		if ( ! is_array( $values ) || 0 === count( $values ) ) {
+			return '';
+		}
+
+		$sanitized_values = array();
+
+		foreach ( $values as $index => $value ) {
+			if ( '' !== $value ) {
+				$sanitized_values[] = sanitize_text_field( $value );
+			}
+		}
+
+		return $sanitized_values;
 	}
 
 	/**
@@ -961,47 +990,12 @@ class WSUWP_People_Directory {
 			update_post_meta( $post_id, '_wsuwp_profile_name', sanitize_text_field( $_POST['_wsuwp_profile_ad_name_last'] ) . ' ' . sanitize_text_field( $_POST['_wsuwp_profile_ad_name_first'] ) );
 		}
 
-		// Sanitize and save basic fields.
-		foreach ( $this->basic_fields as $field ) {
-			if ( isset( $_POST[ $field ] ) && '' !== $_POST[ $field ] ) {
-				update_post_meta( $post_id, $field, sanitize_text_field( $_POST[ $field ] ) );
-			} else {
-				delete_post_meta( $post_id, $field );
-			}
-		}
-
-		// Sanitize and save repeatable fields.
-		foreach ( $this->repeatable_fields as $field ) {
-			if ( isset( $_POST[ $field ] ) && '' !== $_POST[ $field ] ) {
-				$array = array();
-				foreach ( $_POST[ $field ] as $value ) {
-					if ( isset( $value ) && '' !== $value ) {
-						$array[] = sanitize_text_field( $value );
-					}
-				}
-				if ( $array ) {
-					update_post_meta( $post_id, $field, $array );
-				} else {
-					delete_post_meta( $post_id, $field );
-				}
-			}
-		}
-
-		// Sanitize and save wp_editors.
-		foreach ( $this->wp_bio_editors as $field ) {
-			if ( isset( $_POST[ $field ] ) && '' !== $_POST[ $field ] ) {
-				update_post_meta( $post_id, $field, wp_kses_post( $_POST[ $field ] ) );
-			} else {
-				delete_post_meta( $post_id, $field );
-			}
-		}
-
 		$keys = get_registered_meta_keys( 'post' );
 
-		foreach ( $this->post_meta_keys as $key => $meta ) {
-			if ( isset( $_POST[ $key ] ) && isset( $keys[ $key ] ) && isset( $keys[ $key ]['sanitize_callback'] ) ) {
+		foreach ( $this->post_meta_keys as $key => $args ) {
+			if ( isset( $_POST[ $args['meta_key'] ] ) && isset( $keys[ $key ] ) && isset( $keys[ $key ]['sanitize_callback'] ) ) {
 				// Each piece of meta is registered with sanitization.
-				update_post_meta( $post_id, $key, $_POST[ $key ] );
+				update_post_meta( $post_id, $args['meta_key'], $_POST[ $args['meta_key'] ] );
 			}
 		}
 	}
@@ -1014,10 +1008,8 @@ class WSUWP_People_Directory {
 	 * @return array
 	 */
 	public function add_meta_keys_to_revision( $keys ) {
-		$revisioned_fields = array_merge( $this->basic_fields, $this->repeatable_fields, $this->wp_bio_editors );
-
-		foreach ( $revisioned_fields as $field ) {
-			$keys[] = $field;
+		foreach ( $this->post_meta_keys as $key => $args ) {
+			$keys[] = $args['meta_key'];
 		}
 
 		return $keys;
@@ -1089,7 +1081,7 @@ class WSUWP_People_Directory {
 			'update_callback' => null,
 			'schema' => null,
 		);
-		foreach ( $this->rest_response_fields as $field_name => $value ) {
+		foreach ( $this->post_meta_keys as $field_name => $value ) {
 			register_rest_field( $this->post_type_slug, $field_name, $args );
 		}
 	}
@@ -1106,16 +1098,16 @@ class WSUWP_People_Directory {
 	 * @return mixed Meta data associated with the post and field name.
 	 */
 	public function get_api_meta_data( $object, $field_name, $request ) {
-		if ( ! array_key_exists( $field_name, $this->rest_response_fields ) ) {
+		if ( ! array_key_exists( $field_name, $this->post_meta_keys ) ) {
 			return '';
 		}
 
-		if ( 'esc_html' === $this->rest_response_fields[ $field_name ]['sanitize'] ) {
-			return esc_html( get_post_meta( $object['id'], $this->rest_response_fields[ $field_name ]['meta_key'], true ) );
+		if ( 'sanitize_text_field' === $this->post_meta_keys[ $field_name ]['sanitize_callback'] ) {
+			return esc_html( get_post_meta( $object['id'], $this->post_meta_keys[ $field_name ]['meta_key'], true ) );
 		}
 
-		if ( 'esc_html_map' === $this->rest_response_fields[ $field_name ]['sanitize'] ) {
-			$data = get_post_meta( $object['id'], $this->rest_response_fields[ $field_name ]['meta_key'], true );
+		if ( 'WSUWP_People_Directory::sanitize_repeatable_text_fields' === $this->post_meta_keys[ $field_name ]['sanitize_callback'] ) {
+			$data = get_post_meta( $object['id'], $this->post_meta_keys[ $field_name ]['meta_key'], true );
 			if ( is_array( $data ) ) {
 				$data = array_map( 'esc_html', $data );
 			} else {
@@ -1125,18 +1117,18 @@ class WSUWP_People_Directory {
 			return $data;
 		}
 
-		if ( 'esc_url' === $this->rest_response_fields[ $field_name ]['sanitize'] ) {
-			return esc_url( get_post_meta( $object['id'], $this->rest_response_fields[ $field_name ]['meta_key'], true ) );
+		if ( 'esc_url_raw' === $this->post_meta_keys[ $field_name ]['sanitize_callback'] ) {
+			return esc_url( get_post_meta( $object['id'], $this->post_meta_keys[ $field_name ]['meta_key'], true ) );
 		}
 
-		if ( 'the_content' === $this->rest_response_fields[ $field_name ]['sanitize'] ) {
-			$data = get_post_meta( $object['id'], $this->rest_response_fields[ $field_name ]['meta_key'], true );
+		if ( 'wp_kses_post' === $this->post_meta_keys[ $field_name ]['sanitize_callback'] ) {
+			$data = get_post_meta( $object['id'], $this->post_meta_keys[ $field_name ]['meta_key'], true );
 			$data = apply_filters( 'the_content', $data );
 			return wp_kses_post( $data );
 		}
 
 		if ( 'cv_attachment' === $field_name ) {
-			$cv_id = get_post_meta( $object['id'], $this->rest_response_fields[ $field_name ]['meta_key'], true );
+			$cv_id = get_post_meta( $object['id'], $this->post_meta_keys[ $field_name ]['meta_key'], true );
 			$cv_url = wp_get_attachment_url( $cv_id );
 
 			if ( $cv_url ) {
