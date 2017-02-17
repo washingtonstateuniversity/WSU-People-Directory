@@ -858,13 +858,12 @@ class WSUWP_People_Directory {
 		wp_enqueue_media();
 
 		$photos = get_post_meta( $post->ID, '_wsuwp_profile_photos', true );
-		$count = 0;
 		?>
 		<div class="wsuwp-profile-photo-collection">
 
 			<?php
 			if ( $photos ) {
-				foreach ( $photos as $index => $photo_id ) {
+				foreach ( $photos as $photo_id ) {
 					$photo = wp_prepare_attachment_for_js( $photo_id );
 					?>
 					<div class="wsuwp-profile-photo-wrapper">
@@ -891,12 +890,11 @@ class WSUWP_People_Directory {
 
 						<input type="hidden"
 							   class="wsuwp-profile-photo-id"
-							   name="_wsuwp_profile_photos[<?php echo esc_attr( $count ); ?>]"
+							   name="_wsuwp_profile_photos[]"
 							   value="<?php echo esc_attr( $photo_id ); ?>" />
 
 					</div>
 					<?php
-					$count++;
 				}
 			}
 			?>
@@ -904,10 +902,6 @@ class WSUWP_People_Directory {
 		</div>
 
 		<input type="button" class="wsuwp-profile-add-photo button" value="Add Photo(s)" />
-		<input type="hidden"
-				class="wsuwp-profile-photo-count"
-				name="wsuwp-profile-photo-count"
-				value="<?php echo esc_attr( $count ); ?>" />
 
 		<div class="wsuwp-profile-photo-controls-tooltip" role="presentation">
 			<div class="wsuwp-profile-photo-controls-tooltip-arrow"></div>
@@ -934,7 +928,7 @@ class WSUWP_People_Directory {
 						<span class="dashicons dashicons-no"></span>
 					</button>
 				</div>
-				<input type="hidden" class="wsuwp-profile-photo-id" name="_wsuwp_profile_photos[<%= count %>]" value="<%= id %>" />
+				<input type="hidden" class="wsuwp-profile-photo-id" name="_wsuwp_profile_photos[]" value="<%= id %>" />
 			</div>
 		</script>
 		<?php

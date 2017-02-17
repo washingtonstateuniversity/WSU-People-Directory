@@ -95,7 +95,6 @@
 			details_frame,
 			$add_photo = $( ".wsuwp-profile-add-photo" ),
 			$collection = $( ".wsuwp-profile-photo-collection" ),
-			$count = $( ".wsuwp-profile-photo-count" ),
 			$tooltip = $( ".wsuwp-profile-photo-controls-tooltip" );
 
 		// Handle photo adding.
@@ -131,8 +130,7 @@
 
 				$.each( photos.models, function( i, attachment ) {
 
-					var index = Number( $count.val() ) + i,
-						photo = attachment.toJSON(),
+					var photo = attachment.toJSON(),
 						has_thumbnail = photo.sizes.hasOwnProperty( "thumbnail" ),
 						url = has_thumbnail ? photo.sizes.thumbnail.url : photo.url,
 						width = has_thumbnail ? photo.sizes.thumbnail.width : photo.width,
@@ -144,7 +142,6 @@
 							src: url,
 							width: width,
 							height: height,
-							count: index,
 							id: photo.id,
 							alt: photo.alt,
 							url: photo.url,
@@ -154,8 +151,6 @@
 						} ) );
 					}
 				} );
-
-				$count.val( $collection.find( ".wsuwp-profile-photo-wrapper" ).length );
 			} );
 
 			media_frame.open();
@@ -246,16 +241,6 @@
 			$tooltip.hide();
 
 			$( this ).closest( ".wsuwp-profile-photo-wrapper" ).remove();
-
-			var $remaining_photos = $( ".wsuwp-profile-photo-id" );
-
-			// Reset indexes of the remaining photos in the collection.
-			for ( var i = 0; i < $remaining_photos.length; i++ ) {
-				$( $remaining_photos[ i ] ).attr( "name", "photos[" + i + "]" );
-			}
-
-			// Reset count value.
-			$count.val( $remaining_photos.length );
 		} );
 	} );
 }( jQuery, window, document ) );
