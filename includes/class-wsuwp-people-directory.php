@@ -117,7 +117,7 @@ class WSUWP_People_Directory {
 			'type' => 'array',
 			'description' => '',
 			'sanitize_callback' => 'WSUWP_People_Directory::sanitize_repeatable_text_fields',
-			'meta_key' => '_wsuwp_profile_degrees',
+			'meta_key' => '_wsuwp_profile_degree',
 		),
 		'working_titles' => array(
 			'type' => 'array',
@@ -772,50 +772,77 @@ class WSUWP_People_Directory {
 			$titles = get_post_meta( $post->ID, '_wsuwp_profile_title', true );
 			$degrees = get_post_meta( $post->ID, '_wsuwp_profile_degree', true );
 			?>
-			<div>
-	        <?php
-			if ( $titles && is_array( $titles ) ) {
-				foreach ( $titles as $index => $title ) {
-					?>
-					<p class="wp-profile-repeatable">
-						<label for="_wsuwp_profile_title[<?php echo esc_attr( $index ); ?>]">Working Title</label><br />
-						<input type="text" id="_wsuwp_profile_title[<?php echo esc_attr( $index ); ?>]" name="_wsuwp_profile_title[<?php echo esc_attr( $index ); ?>]" value="<?php echo esc_attr( $title ); ?>" class="widefat" />
-					</p>
-					<?php
-				}
-			} else {
-				?>
-				<p class="wp-profile-repeatable">
-					<label for="_wsuwp_profile_title[0]">Working Title</label><br />
-					<input type="text" id="_wsuwp_profile_title[0]" name="_wsuwp_profile_title[0]" value="<?php echo esc_attr( $titles ); ?>" class="widefat" />
-				</p>
-				<?php
-			}
-			?>
-			<p class="wsuwp-profile-add-repeatable"><a href="#">+ Add another title</a></p>
-			</div>
 
-			<div>
+			<script type="text/template" class="wsuwp-profile-repeatable-field-template">
+				<p>
+					<label>
+						<span><%= label %></span>
+						<input type="text" name="<%= name %>[]" value="" />
+						<a class="wsuwp-profile-remove-repeatable-field">Remove</a>
+					</label>
+				</p>
+			</script>
+
+			<div class="wsuwp-profile-repeatable-field">
 				<?php
-				if ( $degrees && is_array( $degrees ) ) {
-					foreach ( $degrees as $index => $degree ) {
+				if ( $titles && is_array( $titles ) ) {
+					foreach ( $titles as $title ) {
 						?>
-						<p class="wp-profile-repeatable">
-							<label for="_wsuwp_profile_degree[<?php echo esc_attr( $index ); ?>]">Degree</label><br />
-							<input type="text" id="_wsuwp_profile_degree[<?php echo esc_attr( $index ); ?>]" name="_wsuwp_profile_degree[<?php echo esc_attr( $index ); ?>]" value="<?php echo esc_attr( $degree ); ?>" class="widefat" />
+						<p>
+							<label>
+								<span>Working Title</span>
+								<input type="text" name="_wsuwp_profile_title[]" value="<?php echo esc_attr( $title ); ?>" />
+								<a class="wsuwp-profile-remove-repeatable-field">Remove</a>
+							</label>
 						</p>
 						<?php
 					}
 				} else {
 					?>
-					<p class="wp-profile-repeatable">
-						<label for="_wsuwp_profile_degree[0]">Degree</label><br />
-						<input type="text" id="_wsuwp_profile_degree[0]" name="_wsuwp_profile_degree[0]" value="<?php echo esc_attr( $degrees ); ?>" class="widefat" />
+					<p>
+						<label>
+							<span>Working Title</span>
+							<input type="text" name="_wsuwp_profile_title[]" value="" />
+							<a class="wsuwp-profile-remove-repeatable-field">Remove</a>
+						</label>
 					</p>
 					<?php
 				}
 				?>
-				<p class="wsuwp-profile-add-repeatable"><a href="#">+ Add another degree</a></p>
+				<p class="wsuwp-profile-add-repeatable">
+					<a data-label="Working Title" data-name="_wsuwp_profile_title" href="#">+ Add another title</a>
+				</p>
+			</div>
+
+			<div class="wsuwp-profile-repeatable-field">
+				<?php
+				if ( $degrees && is_array( $degrees ) ) {
+					foreach ( $degrees as $degree ) {
+						?>
+						<p>
+							<label>
+								<span>Degree</span>
+								<input type="text" name="_wsuwp_profile_degree[]" value="<?php echo esc_attr( $degree ); ?>" />
+								<a class="wsuwp-profile-remove-repeatable-field">Remove</a>
+							</label>
+						</p>
+						<?php
+					}
+				} else {
+					?>
+					<p>
+						<label>
+							<span>Degree</span>
+							<input type="text" name="_wsuwp_profile_degree[]" value="" />
+							<a class="wsuwp-profile-remove-repeatable-field">Remove</a>
+						</label>
+					</p>
+					<?php
+				}
+				?>
+				<p class="wsuwp-profile-add-repeatable">
+					<a data-label="Degree" data-name="_wsuwp_profile_degree"  href="#">+ Add another degree</a>
+				</p>
 			</div>
 		</div>
 		<div class="clear"></div>

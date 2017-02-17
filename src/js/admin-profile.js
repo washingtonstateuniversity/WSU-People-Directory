@@ -7,30 +7,26 @@
 			active: 0
 		} );
 
-		// Repeatable fields handling.
-		$( ".wsuwp-profile-add-repeatable" ).on( "click", "a", function( e ) {
+		var repeatable_field_template = _.template( $( ".wsuwp-profile-repeatable-field-template" ).html() );
 
+		// Add a repeatable field.
+		$( ".wsuwp-profile-add-repeatable" ).on( "click", "a", function( e ) {
 			e.preventDefault();
 
-			var click_parent = $( this ).parent(),
-				added = click_parent.siblings( ".wp-profile-repeatable" ).first().clone(),
-				attrs = "name,id,for";
-
-			added.find( "input" ).val( "" );
-			click_parent.before( added );
-			attrs = attrs.split( "," );
-
-			$( this ).parent().siblings( ".wp-profile-repeatable" ).each( function( index ) {
-				$( this ).find( "input, label" ).each( function() {
-					for ( var i = 0; i < attrs.length; i++ ) {
-						if ( undefined !== $( this ).attr( attrs[ i ] ) ) {
-							$( this ).attr( attrs[ i ], $( this ).attr( attrs[ i ] ).replace( "0", index ) );
-						}
-					}
-				} );
-			} );
+			$( this ).closest( "p" ).before( repeatable_field_template( {
+				label: $( this ).data( "label" ),
+				name: $( this ).data( "name" )
+			} ) );
 		} );
 
+		// Remove a repeatable field.
+		$( ".wsuwp-profile-repeatable-field" ).on( "click", ".wsuwp-profile-remove-repeatable-field", function( e ) {
+			e.preventDefault();
+
+			$( this ).closest( "p" ).remove();
+		} );
+
+		// AD data capturing.
 		$( "#load-ad-data" ).on( "click", function() {
 			var $given_name = $( "#_wsuwp_profile_ad_name_first" ),
 				$surname = $( "#_wsuwp_profile_ad_name_last" ),

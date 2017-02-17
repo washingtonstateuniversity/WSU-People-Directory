@@ -1,8 +1,41 @@
+#wsuwp_profile_additional_info .inside {
+	display: -webkit-box;
+	display: -ms-flexbox;
+	display: flex;
+}
+
 .wsuwp-profile-additional {
-	width: 45%;
-	float: left;
-	margin-right: 25px;
-	min-width: 250px;
+	width: 50%;
+	padding: 0 8px;
+}
+
+.wsuwp-profile-repeatable-field label {
+	display: -webkit-box;
+	display: -ms-flexbox;
+	display: flex;
+	-ms-flex-wrap: wrap;
+	    flex-wrap: wrap;
+}
+
+.wsuwp-profile-repeatable-field label span {
+	width: 100%;
+}
+
+.wsuwp-profile-repeatable-field label input {
+	-webkit-box-flex: 1;
+	    -ms-flex: 1 0 auto;
+	        flex: 1 0 auto;
+}
+
+.wsuwp-profile-repeatable-field label a {
+	margin-left: 8px;
+	-ms-flex-item-align: center;
+	    -ms-grid-row-align: center;
+	    align-self: center;
+}
+
+.wsuwp-profile-repeatable-field p:first-of-type label a {
+	display: none;
 }
 
 .wsuwp-profile-add-repeatable {
@@ -112,6 +145,28 @@
 	margin-bottom: 0;
 }
 
+#bio_unit,
+#bio_university {
+	display: none;
+}
+
+#bio_unit.ui-tabs-panel,
+#bio_university.ui-tabs-panel {
+	display: block;
+}
+
+.ui-tabs-panel[aria-hidden="true"] {
+	border: 0;
+	clip: rect(0 0 0 0);
+	display: block !important;
+	height: 1px;
+	margin: -1px;
+	overflow: hidden;
+	padding: 0;
+	position: absolute;
+	width: calc(100% - 42px);
+}
+
 #wp-content-editor-tools {
 	margin: 0;
 	padding-top: 0;
@@ -125,18 +180,6 @@
 /* Added metabox areas */
 #after_title-sortables {
 	min-height: 10px;
-}
-
-.ui-tabs-panel[aria-hidden="true"] {
-	border: 0;
-	clip: rect(0 0 0 0);
-	display: block !important;
-	height: 1px;
-	margin: -1px;
-	overflow: hidden;
-	padding: 0;
-	position: absolute;
-	width: calc(100% - 42px);
 }
 
 /* AD/Network ID search */
