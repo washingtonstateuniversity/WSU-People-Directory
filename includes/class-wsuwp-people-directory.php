@@ -633,6 +633,14 @@ class WSUWP_People_Directory {
 			<?php endif; ?>
 		</div>
 
+		<?php if ( $name_first ) { ?>
+		<p class="refresh-card">
+			<span class="button" id="refresh-ad-data">Refresh</span>
+			<span class="button profile-hide-button" id="undo-ad-data-refresh">Undo</span>
+			<span class="button button-primary profile-hide-button" id="confirm-ad-data">Confirm</span>
+			<input type="hidden" id="confirm-ad-hash" name="confirm_ad_hash" value="">
+		</p>
+		<?php } ?>
 		<!--<p class="description">Notify <a href="#">HR</a> if any of this information is incorrect or needs updated.</p>-->
 		<?php
 	}
