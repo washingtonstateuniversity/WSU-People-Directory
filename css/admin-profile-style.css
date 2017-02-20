@@ -76,6 +76,10 @@
 	margin: 0;
 }
 
+.refresh-card {
+	text-align: right;
+}
+
 /* Phone and extension fields */
 .phone-fields {
 	display: table;
