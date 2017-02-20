@@ -576,38 +576,38 @@ class WSUWP_People_Directory {
 
 			<div>
 				<div>Given Name:</div>
-				<div id="_wsuwp_profile_ad_name_first"><?php echo esc_html( $name_first ); ?></div>
+				<div class="profile-card-data" id="_wsuwp_profile_ad_name_first"><?php echo esc_html( $name_first ); ?></div>
 			</div>
 
 			<div>
 				<div>Surname:</div>
-				<div id="_wsuwp_profile_ad_name_last"><?php echo esc_html( $name_last ); ?></div>
+				<div class="profile-card-data" id="_wsuwp_profile_ad_name_last"><?php echo esc_html( $name_last ); ?></div>
 			</div>
 
 			<div>
 				<div>Title:</div>
-				<div id="_wsuwp_profile_ad_title"><?php echo esc_html( $title ); ?></div>
+				<div class="profile-card-data" id="_wsuwp_profile_ad_title"><?php echo esc_html( $title ); ?></div>
 			</div>
 
 			<div>
 				<div>Office:</div>
-				<div id="_wsuwp_profile_ad_office"><?php echo esc_html( $office ); ?></div>
+				<div class="profile-card-data" id="_wsuwp_profile_ad_office"><?php echo esc_html( $office ); ?></div>
 			</div>
 
 			<div>
 				<div>Street Address:</div>
-				<div id="_wsuwp_profile_ad_address"><?php echo esc_html( $address ); ?></div>
+				<div class="profile-card-data" id="_wsuwp_profile_ad_address"><?php echo esc_html( $address ); ?></div>
 			</div>
 
 			<div>
 				<div>Phone:</div>
-				<div id="_wsuwp_profile_ad_phone"><?php echo esc_html( $phone );
+				<div class="profile-card-data" id="_wsuwp_profile_ad_phone"><?php echo esc_html( $phone );
 				if ( $phone_ext ) { echo ' ' . esc_html( $phone_ext ); } ?></div>
 			</div>
 
 			<div>
 				<div>Email:</div>
-				<div id="_wsuwp_profile_ad_email"><?php echo esc_html( $email ); ?></div>
+				<div class="profile-card-data" id="_wsuwp_profile_ad_email"><?php echo esc_html( $email ); ?></div>
 			</div>
 
 			<?php if ( $appointments ) : ?>
