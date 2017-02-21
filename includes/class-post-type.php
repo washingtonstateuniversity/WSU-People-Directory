@@ -121,7 +121,7 @@ class WSUWP_People_Post_Type {
 	public function admin_enqueue_scripts( $hook_suffix ) {
 		$screen = get_current_screen();
 
-		if ( ( 'post-new.php' === $hook_suffix || 'post.php' === $hook_suffix ) && $screen->post_type === WSUWP_People::$post_type_slug ) {
+		if ( ( 'post-new.php' === $hook_suffix || 'post.php' === $hook_suffix ) && WSUWP_People::$post_type_slug === $screen->post_type ) {
 			$post = get_post();
 			$profile_vars = array(
 				'nid_nonce' => wp_create_nonce( 'wsu-people-nid-lookup' ),
@@ -133,7 +133,7 @@ class WSUWP_People_Post_Type {
 			wp_localize_script( 'wsuwp-people-admin-script', 'wsupeople', $profile_vars );
 		}
 
-		if ( 'edit.php' === $hook_suffix && $screen->post_type === WSUWP_People::$post_type_slug ) {
+		if ( 'edit.php' === $hook_suffix && WSUWP_People::$post_type_slug === $screen->post_type ) {
 			wp_enqueue_style( 'wsuwp-people-admin-style', plugins_url( 'css/admin-edit.css', dirname( __FILE__ ) ), array(), WSUWP_People::$version );
 			wp_enqueue_script( 'wsuwp-people-admin-script', plugins_url( 'js/admin-edit.min.js', dirname( __FILE__ ) ), array( 'jquery' ), WSUWP_People::$version );
 		}
