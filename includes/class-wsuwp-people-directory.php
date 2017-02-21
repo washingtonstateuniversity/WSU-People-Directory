@@ -948,7 +948,7 @@ class WSUWP_People_Directory {
 	 *
 	 * @param array $values
 	 *
-	 * @return array
+	 * @return array|string
 	 */
 	public static function sanitize_repeatable_text_fields( $values ) {
 		if ( ! is_array( $values ) || 0 === count( $values ) ) {
