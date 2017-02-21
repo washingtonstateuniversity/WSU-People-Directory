@@ -7,45 +7,54 @@
 			active: 0
 		} );
 
-		// Repeatable fields handling.
-		$( ".wsuwp-profile-add-repeatable" ).on( "click", "a", function( e ) {
+		var repeatable_field_template = _.template( $( ".wsuwp-profile-repeatable-field-template" ).html() );
 
+		// Add a repeatable field.
+		$( ".wsuwp-profile-add-repeatable" ).on( "click", "a", function( e ) {
 			e.preventDefault();
 
-			var click_parent = $( this ).parent(),
-				added = click_parent.siblings( ".wp-profile-repeatable" ).first().clone(),
-				attrs = "name,id,for";
-
-			added.find( "input" ).val( "" );
-			click_parent.before( added );
-			attrs = attrs.split( "," );
-
-			$( this ).parent().siblings( ".wp-profile-repeatable" ).each( function( index ) {
-				$( this ).find( "input, label" ).each( function() {
-					for ( var i = 0; i < attrs.length; i++ ) {
-						if ( undefined !== $( this ).attr( attrs[ i ] ) ) {
-							$( this ).attr( attrs[ i ], $( this ).attr( attrs[ i ] ).replace( "0", index ) );
-						}
-					}
-				} );
-			} );
+			$( this ).closest( "p" ).before( repeatable_field_template( {
+				label: $( this ).data( "label" ),
+				name: $( this ).data( "name" )
+			} ) );
 		} );
 
-		$( "#load-ad-data" ).on( "click", function() {
-			var $given_name = $( "#_wsuwp_profile_ad_name_first" ),
-				$surname = $( "#_wsuwp_profile_ad_name_last" ),
-				$title = $( "#_wsuwp_profile_ad_title" ),
-				$office = $( "#_wsuwp_profile_ad_office" ),
-				$address = $( "#_wsuwp_profile_ad_address" ),
-				$phone = $( "#_wsuwp_profile_ad_phone" ),
-				$email = $( "#_wsuwp_profile_ad_email" ),
-				$hash = $( "#confirm-ad-hash" ),
-				$confirm = $( "#confirm-ad-data" );
+		// Remove a repeatable field.
+		$( ".wsuwp-profile-repeatable-field" ).on( "click", ".wsuwp-profile-remove-repeatable-field", function( e ) {
+			e.preventDefault();
+
+			$( this ).closest( "p" ).remove();
+		} );
+
+		// AD data capturing.
+		var $nid = $( "#_wsuwp_profile_ad_nid" ),
+			$all_card_data = $( ".profile-card-data" ),
+			$given_name = $( "#_wsuwp_profile_ad_name_first" ),
+			$surname = $( "#_wsuwp_profile_ad_name_last" ),
+			$title = $( "#_wsuwp_profile_ad_title" ),
+			$office = $( "#_wsuwp_profile_ad_office" ),
+			$address = $( "#_wsuwp_profile_ad_address" ),
+			$phone = $( "#_wsuwp_profile_ad_phone" ),
+			$email = $( "#_wsuwp_profile_ad_email" ),
+			$hash = $( "#confirm-ad-hash" ),
+			$load = $( "#load-ad-data" ),
+			$confirm = $( "#confirm-ad-data" ),
+			$refresh = $( "#refresh-ad-data" ),
+			$undo = $( "#undo-ad-data-refresh" );
+
+		$( "#load-ad-data, #refresh-ad-data" ).on( "click", function( e ) {
+
+			// Store current information in case the user wants to undo.
+			if ( $( e.target ).is( "#refresh-ad-data" ) ) {
+				$all_card_data.each( function() {
+					$( this ).data( "original", $( this ).html() );
+				} );
+			}
 
 			var data = {
 				"action": "wsu_people_get_data_by_nid",
 				"_ajax_nonce": window.wsupeople.nid_nonce,
-				"network_id": $( "#_wsuwp_profile_ad_nid" ).val()
+				"network_id": $nid.val()
 			};
 
 			$.post( window.ajaxurl, data, function( response ) {
@@ -60,6 +69,8 @@
 					$hash.val( response.data.confirm_ad_hash );
 
 					$confirm.removeClass( "profile-hide-button" );
+					$undo.removeClass( "profile-hide-button" );
+					$refresh.addClass( "profile-hide-button" );
 				}
 			} );
 		} );
@@ -67,13 +78,15 @@
 		$( "#confirm-ad-data" ).on( "click", function() {
 			var data = {
 				"action": "wsu_people_confirm_nid_data",
-				"_ajax_nonce": window.wsupeople_nid_nonce,
-				"network_id": $( "#_wsuwp_profile_ad_nid" ).val(),
-				"confirm_ad_hash": $( "#confirm-ad-hash" ).val(),
+				"_ajax_nonce": window.wsupeople.nid_nonce,
+				"network_id": $nid.val(),
+				"confirm_ad_hash": $hash.val(),
 				"post_id": $( "#post_ID" ).val()
 			};
 
-			var $title = $( "#title" );
+			var $title = $( "#title" ),
+				$description = $( ".load-ad-container .description" ),
+				$publish = $( "#publish" );
 
 			$.post( window.ajaxurl, data, function( response ) {
 				if ( response.success ) {
@@ -84,14 +97,24 @@
 						$title.val( $( "#_wsuwp_profile_ad_name_first" ).html() + " " + $( "#_wsuwp_profile_ad_name_last" ).html() );
 					}
 
-					$( "#_wsuwp_profile_ad_nid" ).attr( "readonly", true );
-					$( ".load-ad-container .description" ).html( "The WSU Network ID used to populate this profile's data from Active Directory." );
-					$( "#load-ad-data" ).addClass( "profile-hide-button" );
-					$( "#confirm-ad-data" ).addClass( "profile-hide-button" );
-					$( "#publish" ).removeClass( "profile-hide-button" );
+					$nid.attr( "readonly", true );
+					$description.html( "The WSU Network ID used to populate this profile's data from Active Directory." );
+					$load.addClass( "profile-hide-button" );
+					$confirm.addClass( "profile-hide-button" );
+					$publish.removeClass( "profile-hide-button" );
+					$undo.addClass( "profile-hide-button" );
 				}
 			} );
+		} );
 
+		$undo.on( "click", function() {
+			$all_card_data.each( function() {
+				$( this ).html( $( this ).data( "original" ) );
+			} );
+
+			$confirm.addClass( "profile-hide-button" );
+			$undo.addClass( "profile-hide-button" );
+			$refresh.removeClass( "profile-hide-button" );
 		} );
 
 		// Photo collection handling.
@@ -99,7 +122,6 @@
 			details_frame,
 			$add_photo = $( ".wsuwp-profile-add-photo" ),
 			$collection = $( ".wsuwp-profile-photo-collection" ),
-			$count = $( ".wsuwp-profile-photo-count" ),
 			$tooltip = $( ".wsuwp-profile-photo-controls-tooltip" );
 
 		// Handle photo adding.
@@ -135,8 +157,7 @@
 
 				$.each( photos.models, function( i, attachment ) {
 
-					var index = Number( $count.val() ) + i,
-						photo = attachment.toJSON(),
+					var photo = attachment.toJSON(),
 						has_thumbnail = photo.sizes.hasOwnProperty( "thumbnail" ),
 						url = has_thumbnail ? photo.sizes.thumbnail.url : photo.url,
 						width = has_thumbnail ? photo.sizes.thumbnail.width : photo.width,
@@ -148,7 +169,6 @@
 							src: url,
 							width: width,
 							height: height,
-							count: index,
 							id: photo.id,
 							alt: photo.alt,
 							url: photo.url,
@@ -158,8 +178,6 @@
 						} ) );
 					}
 				} );
-
-				$count.val( $collection.find( ".wsuwp-profile-photo-wrapper" ).length );
 			} );
 
 			media_frame.open();
@@ -250,16 +268,6 @@
 			$tooltip.hide();
 
 			$( this ).closest( ".wsuwp-profile-photo-wrapper" ).remove();
-
-			var $remaining_photos = $( ".wsuwp-profile-photo-id" );
-
-			// Reset indexes of the remaining photos in the collection.
-			for ( var i = 0; i < $remaining_photos.length; i++ ) {
-				$( $remaining_photos[ i ] ).attr( "name", "photos[" + i + "]" );
-			}
-
-			// Reset count value.
-			$count.val( $remaining_photos.length );
 		} );
 	} );
 }( jQuery, window, document ) );
