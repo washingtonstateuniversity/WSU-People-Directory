@@ -15,14 +15,14 @@ class WSUWP_People {
 	public static $version = '0.2.2';
 
 	/**
-	 * The slug used to register the "Personnel" custom content type.
+	 * The slug used to register the people post type.
 	 *
 	 * @var string
 	 */
 	public static $post_type_slug = 'wsuwp_people_profile';
 
 	/**
-	 * The slugs used to register the 'Personnel" taxonomies.
+	 * The slugs used to register taxonomies used by the people post type.
 	 *
 	 * @var string
 	 */
@@ -30,7 +30,7 @@ class WSUWP_People {
 	public static $taxonomy_slug_classifications = 'classification';
 
 	/**
-	 * A list of post meta keys associated with a profile.
+	 * A list of post meta keys associated with a person.
 	 *
 	 * @var array
 	 */
@@ -222,8 +222,7 @@ class WSUWP_People {
 	);
 
 	/**
-	 * Maintain and return the one instance. Initiate hooks when
-	 * called the first time.
+	 * Maintain and return the one instance. Initiate hooks when called the first time.
 	 *
 	 * @since 0.3.0
 	 *

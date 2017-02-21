@@ -38,7 +38,7 @@ class WSUWP_People_REST_API {
 	}
 
 	/**
-	 * Register the custom meta fields attached to a REST API response containing profile data.
+	 * Register the custom meta fields attached to a REST API response containing people data.
 	 *
 	 * @since 0.2.0
 	 */

@@ -96,7 +96,7 @@ class WSUWP_People_Post_Type {
 	}
 
 	/**
-	 * Register the meta keys used to store profile data.
+	 * Register the meta keys used to store data about a person.
 	 *
 	 * @since 0.3.0
 	 */
@@ -141,7 +141,7 @@ class WSUWP_People_Post_Type {
 	}
 
 	/**
-	 * Change the "Enter title here" text for the Personnel content type.
+	 * Change the "Enter title here" text for the people content type.
 	 *
 	 * @since 0.1.0
 	 *
@@ -461,8 +461,8 @@ class WSUWP_People_Post_Type {
 	}
 
 	/**
-	 * Display a meta box to collect alternate contact information as well as additional working
-	 * title and degree data for the profile.
+	 * Display a meta box to collect alternate contact information,
+	 * working titles and degrees for a person.
 	 *
 	 * @since 0.1.0
 	 *
