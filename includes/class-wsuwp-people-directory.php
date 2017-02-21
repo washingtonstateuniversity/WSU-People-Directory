@@ -270,6 +270,7 @@ class WSUWP_People_Directory {
 
 		// Register custom fields with the REST API.
 		add_action( 'rest_api_init', array( $this, 'register_api_fields' ) );
+		add_filter( "rest_prepare_{$this->post_type_slug}", array( $this, 'photos_api_field' ), 10, 2 );
 
 		// Capabilities and related.
 		add_filter( 'user_has_cap', array( $this, 'user_has_cap' ), 10, 3 );
@@ -1111,6 +1112,10 @@ class WSUWP_People_Directory {
 			'schema' => null,
 		);
 		foreach ( $this->post_meta_keys as $field_name => $value ) {
+			if ( 'photos' === $field_name ) {
+				continue;
+			}
+
 			register_rest_field( $this->post_type_slug, $field_name, $args );
 		}
 	}
@@ -1180,6 +1185,28 @@ class WSUWP_People_Directory {
 		}
 
 		return '';
+	}
+
+	/**
+	 * Add links for attached photos to the REST API response.
+	 *
+	 * @param WP_REST_Response $response The current REST response object.
+	 * @param WP_Post          $post     The current WP_Post object.
+	 *
+	 * @return WP_REST_Response
+	 */
+	public function photos_api_field( $response, $post ) {
+		$photos = get_post_meta( $post->ID, '_wsuwp_profile_photos', true );
+
+		foreach ( $photos as $photo_id ) {
+			$response->add_link(
+				'https://api.w.org/photos',
+				esc_url( rest_url( '/wp/v2/media/' . $photo_id ) ),
+				array( 'embeddable' => true )
+			);
+		}
+
+		return $response;
 	}
 
 	/**
