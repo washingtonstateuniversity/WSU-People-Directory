@@ -15,14 +15,47 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 // The core plugin class.
-require dirname( __FILE__ ) . '/includes/class-wsuwp-people-directory.php';
+require dirname( __FILE__ ) . '/includes/class-wsuwp-people.php';
 
-add_action( 'after_setup_theme', 'WSUWP_People_Directory' );
+add_action( 'after_setup_theme', 'WSUWP_People' );
 /**
  * Start things up.
  *
- * @return \WSUWP_People_Directory
+ * @return \WSUWP_People
  */
-function WSUWP_People_Directory() {
-	return WSUWP_People_Directory::get_instance();
+function WSUWP_People() {
+	return WSUWP_People::get_instance();
+}
+
+/**
+ * Retrieve the instance of the WSU People post type and meta data handler.
+ *
+ * @since 0.3.0
+ *
+ * @return WSUWP_People_Post_Type
+ */
+function WSUWP_People_Post_Type() {
+	return WSUWP_People_Post_Type::get_instance();
+}
+
+/**
+ * Retrieve the instance of the WSU People taxonomy handler.
+ *
+ * @since 0.3.0
+ *
+ * @return WSUWP_People_Taxonomies
+ */
+function WSUWP_People_Taxonomies() {
+	return WSUWP_People_Taxonomies::get_instance();
+}
+
+/**
+ * Retrieve the instance of the WSU People REST API handler.
+ *
+ * @since 0.3.0
+ *
+ * @return WSUWP_People_REST_API
+ */
+function WSUWP_People_REST_API() {
+	return WSUWP_People_REST_API::get_instance();
 }
