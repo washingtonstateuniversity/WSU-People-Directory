@@ -30,7 +30,7 @@ class WSUWP_People_Post_Type {
 	 */
 	public function setup_hooks() {
 		add_action( 'init', array( $this, 'register_post_type' ), 11 );
-		add_action( 'init', array( $this, 'register_meta' ) );
+		add_action( 'init', array( $this, 'register_meta' ), 11 );
 
 		add_action( 'admin_enqueue_scripts', array( $this, 'admin_enqueue_scripts' ) );
 
@@ -38,7 +38,7 @@ class WSUWP_People_Post_Type {
 		add_action( 'edit_form_after_title', array( $this, 'edit_form_after_title' ) );
 		add_action( 'edit_form_after_editor', array( $this, 'edit_form_after_editor' ) );
 
-		add_action( 'add_meta_boxes_' . WSUWP_People::$post_type_slug, array( $this, 'add_meta_boxes' ), 10, 1 );
+		add_action( 'add_meta_boxes_' . WSUWP_People::$post_type_slug, array( $this, 'add_meta_boxes' ) );
 		add_action( 'do_meta_boxes', array( $this, 'do_meta_boxes' ), 10, 3 );
 
 		add_action( 'save_post_' . WSUWP_People::$post_type_slug, array( $this, 'save_post' ), 10, 2 );
