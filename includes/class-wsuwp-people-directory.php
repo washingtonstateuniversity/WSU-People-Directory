@@ -412,7 +412,7 @@ class WSUWP_People_Directory {
 			}
 
 			$args['single'] = true;
-			register_meta( 'post', $key, $args );
+			register_meta( 'post', $args['meta_key'], $args );
 		}
 	}
 
@@ -477,9 +477,7 @@ class WSUWP_People_Directory {
 					<a href="#wsuwp-profile-default" class="nav-tab">Personal Biography</a>
 				</li>
 				<?php
-				$keys = get_registered_meta_keys( 'post' );
-
-				foreach ( $keys as $key => $args ) {
+				foreach ( $this->post_meta_keys as $key => $args ) {
 					if ( 'textarea' !== $args['type'] ) {
 						continue;
 					}
@@ -1022,10 +1020,10 @@ class WSUWP_People_Directory {
 
 		$keys = get_registered_meta_keys( 'post' );
 
-		foreach ( $this->post_meta_keys as $key => $args ) {
-			if ( isset( $_POST[ $args['meta_key'] ] ) && isset( $keys[ $key ] ) && isset( $keys[ $key ]['sanitize_callback'] ) ) {
+		foreach ( $keys as $key => $args ) {
+			if ( isset( $_POST[ $key ] ) && isset( $args['sanitize_callback'] ) ) {
 				// Each piece of meta is registered with sanitization.
-				update_post_meta( $post_id, $args['meta_key'], $_POST[ $args['meta_key'] ] );
+				update_post_meta( $post_id, $key, $_POST[ $key ] );
 			}
 		}
 	}
