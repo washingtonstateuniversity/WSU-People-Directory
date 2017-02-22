@@ -37,9 +37,9 @@ class WSUWP_People_Directory {
 	 * @since 0.3.0
 	 */
 	public function setup_hooks() {
-		require_once( dirname( __FILE__ ) . '/class-post-type.php' );
-		require_once( dirname( __FILE__ ) . '/class-classification-taxonomy.php' );
-		require_once( dirname( __FILE__ ) . '/class-rest-api.php' );
+		require_once( dirname( __FILE__ ) . '/class-wsuwp-people-post-type.php' );
+		require_once( dirname( __FILE__ ) . '/class-wsuwp-people-classification-taxonomy.php' );
+		require_once( dirname( __FILE__ ) . '/class-wsuwp-people-rest-api.php' );
 
 		add_action( 'init', 'WSUWP_People_Post_Type' );
 		add_action( 'init', 'WSUWP_People_Classification_Taxonomy' );
