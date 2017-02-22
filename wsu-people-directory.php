@@ -15,16 +15,16 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 // The core plugin class.
-require dirname( __FILE__ ) . '/includes/class-wsuwp-people.php';
+require dirname( __FILE__ ) . '/includes/class-wsuwp-people-directory.php';
 
-add_action( 'after_setup_theme', 'WSUWP_People' );
+add_action( 'after_setup_theme', 'WSUWP_People_Directory' );
 /**
  * Start things up.
  *
- * @return \WSUWP_People
+ * @return \WSUWP_People_Directory
  */
-function WSUWP_People() {
-	return WSUWP_People::get_instance();
+function WSUWP_People_Directory() {
+	return WSUWP_People_Directory::get_instance();
 }
 
 /**
