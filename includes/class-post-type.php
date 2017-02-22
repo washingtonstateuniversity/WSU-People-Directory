@@ -493,8 +493,7 @@ class WSUWP_People_Post_Type {
 		$address = get_post_meta( $post->ID, '_wsuwp_profile_ad_address', true );
 		$phone = get_post_meta( $post->ID, '_wsuwp_profile_ad_phone', true );
 		$phone_ext = get_post_meta( $post->ID, '_wsuwp_profile_ad_phone_ext', true );
-		$appointments = wp_get_post_terms( $post->ID, WSUWP_People::$taxonomy_slug_appointments, array( 'fields' => 'names' ) );
-		$classifications = wp_get_post_terms( $post->ID, WSUWP_People::$taxonomy_slug_classifications, array( 'fields' => 'names' ) );
+		$classifications = wp_get_post_terms( $post->ID, WSUWP_People_Classification_Taxonomy::$taxonomy_slug, array( 'fields' => 'names' ) );
 
 		?>
 		<div class="profile-card">
@@ -534,17 +533,6 @@ class WSUWP_People_Post_Type {
 				<div>Email:</div>
 				<div class="profile-card-data" id="_wsuwp_profile_ad_email"><?php echo esc_html( $email ); ?></div>
 			</div>
-
-			<?php if ( $appointments ) : ?>
-				<div>
-					<div>Appointment(s)</div>
-					<div>
-						<ul>
-							<?php foreach ( $appointments as $appointment ) { echo '<li>' . esc_html( $appointment ) . '</li>'; } ?>
-						</ul>
-					</div>
-				</div>
-			<?php endif; ?>
 
 			<?php if ( $classifications ) : ?>
 				<div>
@@ -597,9 +585,6 @@ class WSUWP_People_Post_Type {
 			'side',
 			'high'
 		);
-
-		// Remove "Appointment" meta box.
-		remove_meta_box( 'appointmentdiv', WSUWP_People::$post_type_slug, 'side' );
 	}
 
 	/**

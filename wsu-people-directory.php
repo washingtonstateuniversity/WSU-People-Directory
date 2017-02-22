@@ -39,14 +39,14 @@ function WSUWP_People_Post_Type() {
 }
 
 /**
- * Retrieve the instance of the WSU People taxonomy handler.
+ * Retrieve the instance of the WSU People Classification taxonomy.
  *
  * @since 0.3.0
  *
  * @return WSUWP_People_Taxonomies
  */
-function WSUWP_People_Taxonomies() {
-	return WSUWP_People_Taxonomies::get_instance();
+function WSUWP_People_Classification_Taxonomy() {
+	return WSUWP_People_Classification_Taxonomy::get_instance();
 }
 
 /**
