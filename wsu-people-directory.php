@@ -26,3 +26,36 @@ add_action( 'after_setup_theme', 'WSUWP_People_Directory' );
 function WSUWP_People_Directory() {
 	return WSUWP_People_Directory::get_instance();
 }
+
+/**
+ * Retrieve the instance of the WSU People post type and meta data handler.
+ *
+ * @since 0.3.0
+ *
+ * @return WSUWP_People_Post_Type
+ */
+function WSUWP_People_Post_Type() {
+	return WSUWP_People_Post_Type::get_instance();
+}
+
+/**
+ * Retrieve the instance of the WSU People Classification taxonomy.
+ *
+ * @since 0.3.0
+ *
+ * @return WSUWP_People_Taxonomies
+ */
+function WSUWP_People_Classification_Taxonomy() {
+	return WSUWP_People_Classification_Taxonomy::get_instance();
+}
+
+/**
+ * Retrieve the instance of the WSU People REST API handler.
+ *
+ * @since 0.3.0
+ *
+ * @return WSUWP_People_REST_API
+ */
+function WSUWP_People_REST_API() {
+	return WSUWP_People_REST_API::get_instance();
+}
