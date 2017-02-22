@@ -9,6 +9,209 @@ class WSUWP_People_Post_Type {
 	private static $instance;
 
 	/**
+	 * The slug used to register the people post type.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @var string
+	 */
+	public static $post_type_slug = 'wsuwp_people_profile';
+
+	/**
+	 * A list of post meta keys associated with a person.
+	 *
+	 * @since 0.3.0
+	 *
+	 * @var array
+	 */
+	public static $post_meta_keys = array(
+		'nid' => array(
+			'type' => 'ad',
+			'description' => '',
+			'sanitize_callback' => 'sanitize_text_field',
+			'meta_key' => '_wsuwp_profile_ad_nid',
+		),
+		'first_name' => array(
+			'type' => 'ad',
+			'description' => '',
+			'sanitize_callback' => 'sanitize_text_field',
+			'meta_key' => '_wsuwp_profile_ad_name_first',
+		),
+		'last_name' => array(
+			'type' => 'ad',
+			'description' => '',
+			'sanitize_callback' => 'sanitize_text_field',
+			'meta_key' => '_wsuwp_profile_ad_name_last',
+		),
+		'position_title' => array(
+			'type' => 'ad',
+			'description' => '',
+			'sanitize_callback' => 'sanitize_text_field',
+			'meta_key' => '_wsuwp_profile_ad_title',
+		),
+		'office' => array(
+			'type' => 'ad',
+			'description' => '',
+			'sanitize_callback' => 'sanitize_text_field',
+			'meta_key' => '_wsuwp_profile_ad_office',
+		),
+		'address' => array(
+			'type' => 'ad',
+			'description' => '',
+			'sanitize_callback' => 'sanitize_text_field',
+			'meta_key' => '_wsuwp_profile_ad_address',
+		),
+		'phone' => array(
+			'type' => 'ad',
+			'description' => '',
+			'sanitize_callback' => 'sanitize_text_field',
+			'meta_key' => '_wsuwp_profile_ad_phone',
+		),
+		'phone_ext' => array(
+			'type' => 'ad',
+			'description' => '',
+			'sanitize_callback' => 'sanitize_text_field',
+			'meta_key' => '_wsuwp_profile_ad_phone_ext',
+		),
+		'email' => array(
+			'type' => 'ad',
+			'description' => '',
+			'sanitize_callback' => 'sanitize_text_field',
+			'meta_key' => '_wsuwp_profile_ad_email',
+		),
+		'office_alt' => array(
+			'type' => 'string',
+			'description' => '',
+			'sanitize_callback' => 'sanitize_text_field',
+			'meta_key' => '_wsuwp_profile_alt_office',
+		),
+		'phone_alt' => array(
+			'type' => 'string',
+			'description' => '',
+			'sanitize_callback' => 'sanitize_text_field',
+			'meta_key' => '_wsuwp_profile_alt_phone',
+		),
+		'email_alt' => array(
+			'type' => 'string',
+			'description' => '',
+			'sanitize_callback' => 'sanitize_text_field',
+			'meta_key' => '_wsuwp_profile_alt_email',
+		),
+		'website' => array(
+			'type' => 'string',
+			'description' => '',
+			'sanitize_callback' => 'esc_url_raw',
+			'meta_key' => '_wsuwp_profile_website',
+		),
+		'degree' => array(
+			'type' => 'array',
+			'description' => '',
+			'sanitize_callback' => 'WSUWP_People_Post_Type::sanitize_repeatable_text_fields',
+			'meta_key' => '_wsuwp_profile_degree',
+		),
+		'working_titles' => array(
+			'type' => 'array',
+			'description' => '',
+			'sanitize_callback' => 'WSUWP_People_Post_Type::sanitize_repeatable_text_fields',
+			'meta_key' => '_wsuwp_profile_title',
+		),
+		'bio_unit' => array(
+			'type' => 'textarea',
+			'description' => 'Unit Biography',
+			'sanitize_callback' => 'wp_kses_post',
+			'meta_key' => '_wsuwp_profile_bio_unit',
+		),
+		'bio_university' => array(
+			'type' => 'textarea',
+			'description' => 'University Biography',
+			'sanitize_callback' => 'wp_kses_post',
+			'meta_key' => '_wsuwp_profile_bio_university',
+		),
+		'photos' => array(
+			'type' => 'array',
+			'description' => 'A collection of photos',
+			'sanitize_callback' => 'WSUWP_People_Post_Type::sanitize_photos',
+			'meta_key' => '_wsuwp_profile_photos',
+		),
+		// Legacy
+		'bio_college' => array(
+			'type' => 'legacy',
+			'sanitize_callback' => 'wp_kses_post',
+			'meta_key' => '_wsuwp_profile_bio_college',
+		),
+		'bio_lab' => array(
+			'type' => 'legacy',
+			'sanitize_callback' => 'wp_kses_post',
+			'meta_key' => '_wsuwp_profile_bio_lab',
+		),
+		'bio_department' => array(
+			'type' => 'legacy',
+			'sanitize_callback' => 'wp_kses_post',
+			'meta_key' => '_wsuwp_profile_bio_dept',
+		),
+		'cv_employment' => array(
+			'type' => 'legacy',
+			'sanitize_callback' => 'wp_kses_post',
+			'meta_key' => '_wsuwp_profile_employment',
+		),
+		'cv_honors' => array(
+			'type' => 'legacy',
+			'sanitize_callback' => 'wp_kses_post',
+			'meta_key' => '_wsuwp_profile_honors',
+		),
+		'cv_grants' => array(
+			'type' => 'legacy',
+			'sanitize_callback' => 'wp_kses_post',
+			'meta_key' => '_wsuwp_profile_grants',
+		),
+		'cv_publications' => array(
+			'type' => 'legacy',
+			'sanitize_callback' => 'wp_kses_post',
+			'meta_key' => '_wsuwp_profile_publications',
+		),
+		'cv_presentations' => array(
+			'type' => 'legacy',
+			'sanitize_callback' => 'wp_kses_post',
+			'meta_key' => '_wsuwp_profile_presentations',
+		),
+		'cv_teaching' => array(
+			'type' => 'legacy',
+			'sanitize_callback' => 'wp_kses_post',
+			'meta_key' => '_wsuwp_profile_teaching',
+		),
+		'cv_service' => array(
+			'type' => 'legacy',
+			'sanitize_callback' => 'wp_kses_post',
+			'meta_key' => '_wsuwp_profile_service',
+		),
+		'cv_responsibilities' => array(
+			'type' => 'legacy',
+			'sanitize_callback' => 'wp_kses_post',
+			'meta_key' => '_wsuwp_profile_responsibilities',
+		),
+		'cv_affiliations' => array(
+			'type' => 'legacy',
+			'sanitize_callback' => 'wp_kses_post',
+			'meta_key' => '_wsuwp_profile_societies',
+		),
+		'cv_experience' => array(
+			'type' => 'legacy',
+			'sanitize_callback' => 'wp_kses_post',
+			'meta_key' => '_wsuwp_profile_experience',
+		),
+		'cv_attachment' => array(
+			'type' => 'legacy',
+			'sanitize_callback' => 'attachment',
+			'meta_key' => '_wsuwp_profile_cv',
+		),
+		'profile_photo' => array(
+			'type' => 'legacy',
+			'sanitize_callback' => 'attachment',
+			'meta_key' => '',
+		),
+	);
+
+	/**
 	 * Maintain and return the one instance. Initiate hooks when called the first time.
 	 *
 	 * @since 0.3.0
@@ -31,6 +234,7 @@ class WSUWP_People_Post_Type {
 	public function setup_hooks() {
 		add_action( 'init', array( $this, 'register_post_type' ), 11 );
 		add_action( 'init', array( $this, 'register_meta' ), 11 );
+		add_action( 'init', array( $this, 'register_taxonomies_for_people' ), 12 );
 
 		add_action( 'admin_enqueue_scripts', array( $this, 'admin_enqueue_scripts' ) );
 
@@ -38,15 +242,17 @@ class WSUWP_People_Post_Type {
 		add_action( 'edit_form_after_title', array( $this, 'edit_form_after_title' ) );
 		add_action( 'edit_form_after_editor', array( $this, 'edit_form_after_editor' ) );
 
-		add_action( 'add_meta_boxes_' . WSUWP_People::$post_type_slug, array( $this, 'add_meta_boxes' ) );
+		add_action( 'add_meta_boxes_' . self::$post_type_slug, array( $this, 'add_meta_boxes' ) );
 		add_action( 'do_meta_boxes', array( $this, 'do_meta_boxes' ), 10, 3 );
 
-		add_action( 'save_post_' . WSUWP_People::$post_type_slug, array( $this, 'save_post' ), 10, 2 );
+		add_action( 'save_post_' . self::$post_type_slug, array( $this, 'save_post' ), 10, 2 );
 
 		add_action( 'wp_ajax_wsu_people_get_data_by_nid', array( $this, 'ajax_get_data_by_nid' ) );
 		add_action( 'wp_ajax_wsu_people_confirm_nid_data', array( $this, 'ajax_confirm_nid_data' ) );
 
 		add_filter( 'wp_post_revision_meta_keys', array( $this, 'add_meta_keys_to_revision' ) );
+
+		add_filter( 'manage_taxonomies_for_' . self::$post_type_slug . '_columns', array( $this, 'manage_people_taxonomy_columns' ) );
 	}
 
 	/**
@@ -92,7 +298,7 @@ class WSUWP_People_Post_Type {
 			'rest_base' => 'people',
 		);
 
-		register_post_type( WSUWP_People::$post_type_slug, $args );
+		register_post_type( self::$post_type_slug, $args );
 	}
 
 	/**
@@ -101,7 +307,7 @@ class WSUWP_People_Post_Type {
 	 * @since 0.3.0
 	 */
 	public function register_meta() {
-		foreach ( WSUWP_People::$post_meta_keys as $key => $args ) {
+		foreach ( self::$post_meta_keys as $key => $args ) {
 			if ( 'legacy' === $args['type'] || 'ad' === $args['type'] ) {
 				continue;
 			}
@@ -109,6 +315,17 @@ class WSUWP_People_Post_Type {
 			$args['single'] = true;
 			register_meta( 'post', $args['meta_key'], $args );
 		}
+	}
+
+	/**
+	 * Add support for WSU University Taxonomies to the People post type.
+	 *
+	 * @since 0.1.0
+	 */
+	public function register_taxonomies_for_people() {
+		register_taxonomy_for_object_type( 'wsuwp_university_category', self::$post_type_slug );
+		register_taxonomy_for_object_type( 'wsuwp_university_location', self::$post_type_slug );
+		register_taxonomy_for_object_type( 'wsuwp_university_org', self::$post_type_slug );
 	}
 
 	/**
@@ -121,21 +338,21 @@ class WSUWP_People_Post_Type {
 	public function admin_enqueue_scripts( $hook_suffix ) {
 		$screen = get_current_screen();
 
-		if ( ( 'post-new.php' === $hook_suffix || 'post.php' === $hook_suffix ) && WSUWP_People::$post_type_slug === $screen->post_type ) {
+		if ( ( 'post-new.php' === $hook_suffix || 'post.php' === $hook_suffix ) && self::$post_type_slug === $screen->post_type ) {
 			$post = get_post();
 			$profile_vars = array(
 				'nid_nonce' => wp_create_nonce( 'wsu-people-nid-lookup' ),
 				'post_id' => $post->ID,
 			);
 
-			wp_enqueue_style( 'wsuwp-people-admin-style', plugins_url( 'css/admin-profile-style.css', dirname( __FILE__ ) ), array(), WSUWP_People::$version );
-			wp_enqueue_script( 'wsuwp-people-admin-script', plugins_url( 'js/admin-profile.min.js', dirname( __FILE__ ) ), array( 'jquery-ui-tabs', 'underscore' ), WSUWP_People::$version, true );
+			wp_enqueue_style( 'wsuwp-people-admin-style', plugins_url( 'css/admin-profile-style.css', dirname( __FILE__ ) ), array(), WSUWP_People_Directory::$version );
+			wp_enqueue_script( 'wsuwp-people-admin-script', plugins_url( 'js/admin-profile.min.js', dirname( __FILE__ ) ), array( 'jquery-ui-tabs', 'underscore' ), WSUWP_People_Directory::$version, true );
 			wp_localize_script( 'wsuwp-people-admin-script', 'wsupeople', $profile_vars );
 		}
 
-		if ( 'edit.php' === $hook_suffix && WSUWP_People::$post_type_slug === $screen->post_type ) {
-			wp_enqueue_style( 'wsuwp-people-admin-style', plugins_url( 'css/admin-edit.css', dirname( __FILE__ ) ), array(), WSUWP_People::$version );
-			wp_enqueue_script( 'wsuwp-people-admin-script', plugins_url( 'js/admin-edit.min.js', dirname( __FILE__ ) ), array( 'jquery' ), WSUWP_People::$version );
+		if ( 'edit.php' === $hook_suffix && self::$post_type_slug === $screen->post_type ) {
+			wp_enqueue_style( 'wsuwp-people-admin-style', plugins_url( 'css/admin-edit.css', dirname( __FILE__ ) ), array(), WSUWP_People_Directory::$version );
+			wp_enqueue_script( 'wsuwp-people-admin-script', plugins_url( 'js/admin-edit.min.js', dirname( __FILE__ ) ), array( 'jquery' ), WSUWP_People_Directory::$version );
 		}
 
 	}
@@ -152,7 +369,7 @@ class WSUWP_People_Post_Type {
 	public function enter_title_here( $title ) {
 		$screen = get_current_screen();
 
-		if ( WSUWP_People::$post_type_slug === $screen->post_type ) {
+		if ( self::$post_type_slug === $screen->post_type ) {
 			$title = 'Enter name here';
 		}
 
@@ -169,7 +386,7 @@ class WSUWP_People_Post_Type {
 	 * @param WP_Post $post Post object.
 	 */
 	public function edit_form_after_title( $post ) {
-		if ( WSUWP_People::$post_type_slug !== $post->post_type ) {
+		if ( self::$post_type_slug !== $post->post_type ) {
 			return;
 		}
 		?>
@@ -180,7 +397,7 @@ class WSUWP_People_Post_Type {
 					<a href="#wsuwp-profile-default" class="nav-tab">Personal Biography</a>
 				</li>
 				<?php
-				foreach ( WSUWP_People::$post_meta_keys as $key => $args ) {
+				foreach ( self::$post_meta_keys as $key => $args ) {
 					if ( 'textarea' !== $args['type'] ) {
 						continue;
 					}
@@ -205,14 +422,14 @@ class WSUWP_People_Post_Type {
 	 * @param WP_Post $post Post object.
 	 */
 	public function edit_form_after_editor( $post ) {
-		if ( WSUWP_People::$post_type_slug !== $post->post_type ) {
+		if ( self::$post_type_slug !== $post->post_type ) {
 			return;
 		}
 		?>
 			</div><!--wsuwp-profile-default-->
 
 			<?php
-			foreach ( WSUWP_People::$post_meta_keys as $key => $args ) {
+			foreach ( self::$post_meta_keys as $key => $args ) {
 				if ( 'textarea' !== $args['type'] ) {
 					continue;
 				}
@@ -242,7 +459,7 @@ class WSUWP_People_Post_Type {
 			'wsuwp_profile_additional_info',
 			'Additional Profile Information',
 			array( $this, 'display_additional_info_meta_box' ),
-			WSUWP_People::$post_type_slug,
+			self::$post_type_slug,
 			'after_title',
 			'high'
 		);
@@ -251,7 +468,7 @@ class WSUWP_People_Post_Type {
 			'wsuwp_profile_photos',
 			'Photos',
 			array( $this, 'display_photo_meta_box' ),
-			WSUWP_People::$post_type_slug,
+			self::$post_type_slug,
 			'normal',
 			'high'
 		);
@@ -363,20 +580,20 @@ class WSUWP_People_Post_Type {
 	 * @param WP_Post $post      The post object.
 	 */
 	public function do_meta_boxes( $post_type, $context, $post ) {
-		if ( WSUWP_People::$post_type_slug !== $post_type ) {
+		if ( self::$post_type_slug !== $post_type ) {
 			return;
 		}
 
 		$box_title = ( 'auto-draft' === $post->post_status ) ? 'Create Profile' : 'Update Profile';
 
-		remove_meta_box( 'submitdiv', WSUWP_People::$post_type_slug, 'side' );
-		add_meta_box( 'submitdiv', $box_title, array( $this, 'publish_meta_box' ), WSUWP_People::$post_type_slug, 'side', 'high' );
+		remove_meta_box( 'submitdiv', self::$post_type_slug, 'side' );
+		add_meta_box( 'submitdiv', $box_title, array( $this, 'publish_meta_box' ), self::$post_type_slug, 'side', 'high' );
 
 		add_meta_box(
 			'wsuwp_profile_position_info',
 			'Position and Contact Information',
 			array( $this, 'display_position_info_meta_box' ),
-			WSUWP_People::$post_type_slug,
+			self::$post_type_slug,
 			'side',
 			'high'
 		);
@@ -879,10 +1096,26 @@ class WSUWP_People_Post_Type {
 	 * @return array
 	 */
 	public function add_meta_keys_to_revision( $keys ) {
-		foreach ( WSUWP_People::$post_meta_keys as $key => $args ) {
+		foreach ( self::$post_meta_keys as $key => $args ) {
 			$keys[] = $args['meta_key'];
 		}
 
 		return $keys;
+	}
+
+	/**
+	 * Modify taxonomy columns on the "All Profiles" screen.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @param array $columns Default columns on the "All Profiles" screen.
+	 *
+	 * @return array
+	 */
+	public function manage_people_taxonomy_columns( $columns ) {
+		$columns[] = 'wsuwp_university_org';
+		$columns[] = 'wsuwp_university_location';
+
+		return $columns;
 	}
 }

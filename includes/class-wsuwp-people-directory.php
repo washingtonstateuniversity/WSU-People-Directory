@@ -17,15 +17,6 @@ class WSUWP_People_Directory {
 	public static $version = '0.2.2';
 
 	/**
-	 * The slug used to register the people post type.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @var string
-	 */
-	public static $post_type_slug = 'wsuwp_people_profile';
-
-	/**
 	 * Maintain and return the one instance. Initiate hooks when called the first time.
 	 *
 	 * @since 0.3.0

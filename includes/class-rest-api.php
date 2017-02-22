@@ -30,10 +30,10 @@ class WSUWP_People_REST_API {
 	 */
 	public function setup_hooks() {
 		add_action( 'rest_api_init', array( $this, 'register_api_fields' ) );
-		add_filter( 'rest_prepare_' . WSUWP_People::$post_type_slug, array( $this, 'photos_api_field' ), 10, 2 );
+		add_filter( 'rest_prepare_' . WSUWP_People_Post_Type::$post_type_slug, array( $this, 'photos_api_field' ), 10, 2 );
 
 		add_action( 'init', array( $this, 'register_wsu_nid_query_var' ) );
-		add_filter( 'rest_' . WSUWP_People::$post_type_slug . '_query', array( $this, 'rest_query_vars' ), 10, 2 );
+		add_filter( 'rest_' . WSUWP_People_Post_Type::$post_type_slug . '_query', array( $this, 'rest_query_vars' ), 10, 2 );
 		add_action( 'pre_get_posts', array( $this, 'handle_wsu_nid_query_var' ) );
 	}
 
@@ -48,12 +48,12 @@ class WSUWP_People_REST_API {
 			'update_callback' => null,
 			'schema' => null,
 		);
-		foreach ( WSUWP_People::$post_meta_keys as $field_name => $value ) {
+		foreach ( WSUWP_People_Post_Type::$post_meta_keys as $field_name => $value ) {
 			if ( 'photos' === $field_name ) {
 				continue;
 			}
 
-			register_rest_field( WSUWP_People::$post_type_slug, $field_name, $args );
+			register_rest_field( WSUWP_People_Post_Type::$post_type_slug, $field_name, $args );
 		}
 	}
 
@@ -69,16 +69,16 @@ class WSUWP_People_REST_API {
 	 * @return mixed Meta data associated with the post and field name.
 	 */
 	public function get_api_meta_data( $object, $field_name, $request ) {
-		if ( ! array_key_exists( $field_name, WSUWP_People::$post_meta_keys ) ) {
+		if ( ! array_key_exists( $field_name, WSUWP_People_Post_Type::$post_meta_keys ) ) {
 			return '';
 		}
 
-		if ( 'sanitize_text_field' === WSUWP_People::$post_meta_keys[ $field_name ]['sanitize_callback'] ) {
-			return esc_html( get_post_meta( $object['id'], WSUWP_People::$post_meta_keys[ $field_name ]['meta_key'], true ) );
+		if ( 'sanitize_text_field' === WSUWP_People_Post_Type::$post_meta_keys[ $field_name ]['sanitize_callback'] ) {
+			return esc_html( get_post_meta( $object['id'], WSUWP_People_Post_Type::$post_meta_keys[ $field_name ]['meta_key'], true ) );
 		}
 
-		if ( 'WSUWP_People::sanitize_repeatable_text_fields' === WSUWP_People::$post_meta_keys[ $field_name ]['sanitize_callback'] ) {
-			$data = get_post_meta( $object['id'], WSUWP_People::$post_meta_keys[ $field_name ]['meta_key'], true );
+		if ( 'WSUWP_People_Directory::sanitize_repeatable_text_fields' === WSUWP_People_Post_Type::$post_meta_keys[ $field_name ]['sanitize_callback'] ) {
+			$data = get_post_meta( $object['id'], WSUWP_People_Post_Type::$post_meta_keys[ $field_name ]['meta_key'], true );
 			if ( is_array( $data ) ) {
 				$data = array_map( 'esc_html', $data );
 			} else {
@@ -88,18 +88,18 @@ class WSUWP_People_REST_API {
 			return $data;
 		}
 
-		if ( 'esc_url_raw' === WSUWP_People::$post_meta_keys[ $field_name ]['sanitize_callback'] ) {
-			return esc_url( get_post_meta( $object['id'], WSUWP_People::$post_meta_keys[ $field_name ]['meta_key'], true ) );
+		if ( 'esc_url_raw' === WSUWP_People_Post_Type::$post_meta_keys[ $field_name ]['sanitize_callback'] ) {
+			return esc_url( get_post_meta( $object['id'], WSUWP_People_Post_Type::$post_meta_keys[ $field_name ]['meta_key'], true ) );
 		}
 
-		if ( 'wp_kses_post' === WSUWP_People::$post_meta_keys[ $field_name ]['sanitize_callback'] ) {
-			$data = get_post_meta( $object['id'], WSUWP_People::$post_meta_keys[ $field_name ]['meta_key'], true );
+		if ( 'wp_kses_post' === WSUWP_People_Post_Type::$post_meta_keys[ $field_name ]['sanitize_callback'] ) {
+			$data = get_post_meta( $object['id'], WSUWP_People_Post_Type::$post_meta_keys[ $field_name ]['meta_key'], true );
 			$data = apply_filters( 'the_content', $data );
 			return wp_kses_post( $data );
 		}
 
 		if ( 'cv_attachment' === $field_name ) {
-			$cv_id = get_post_meta( $object['id'], WSUWP_People::$post_meta_keys[ $field_name ]['meta_key'], true );
+			$cv_id = get_post_meta( $object['id'], WSUWP_People_Post_Type::$post_meta_keys[ $field_name ]['meta_key'], true );
 			$cv_url = wp_get_attachment_url( $cv_id );
 
 			if ( $cv_url ) {
