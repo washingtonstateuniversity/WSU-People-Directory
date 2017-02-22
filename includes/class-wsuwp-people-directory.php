@@ -45,7 +45,16 @@ class WSUWP_People_Directory {
 
 		if ( apply_filters( 'wsuwp_people_show_in_rest', false ) ) {
 			require_once( dirname( __FILE__ ) . '/class-wsuwp-people-rest-api.php' );
+
 			add_action( 'init', 'WSUWP_People_REST_API' );
+		}
+
+		if ( apply_filters( 'wsuwp_people_display', true ) ) {
+			require_once( dirname( __FILE__ ) . '/class-wsuwp-people-display-settings.php' );
+			require_once( dirname( __FILE__ ) . '/class-wsuwp-people-display-frontend.php' );
+
+			add_action( 'init', 'WSUWP_People_Display_Settings' );
+			add_action( 'init', 'WSUWP_People_Display_Frontend' );
 		}
 	}
 }

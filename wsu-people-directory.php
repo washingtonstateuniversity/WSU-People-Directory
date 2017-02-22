@@ -14,6 +14,10 @@ if ( ! defined( 'WPINC' ) ) {
 	die;
 }
 
+// Flush rewrite rules on activation or deactivation.
+register_activation_hook( __FILE__, 'flush_rewrite_rules' );
+register_deactivation_hook( __FILE__, 'flush_rewrite_rules' );
+
 // The core plugin class.
 require dirname( __FILE__ ) . '/includes/class-wsuwp-people-directory.php';
 
@@ -58,4 +62,22 @@ function WSUWP_People_Classification_Taxonomy() {
  */
 function WSUWP_People_REST_API() {
 	return WSUWP_People_REST_API::get_instance();
+}
+
+/**
+ * Retrieve the instance of the settings page.
+ *
+ * @return WSUWP_People_Display_Admin_Settings
+ */
+function WSUWP_People_Display_Settings() {
+	return WSUWP_People_Display_Settings::get_instance();
+}
+
+/**
+ * Retrieve the instance of the frontend handler.
+ *
+ * @return WSUWP_People_Display_Settings
+ */
+function WSUWP_People_Display_Frontend() {
+	return WSUWP_People_Display_Frontend::get_instance();
 }

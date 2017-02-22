@@ -1,0 +1,92 @@
+.article-header {
+	display: none;
+}
+
+.table .wsu-people {
+	border-bottom: 1px solid #ddd;
+	border-collapse: collapse;
+	display: table;
+	table-layout: fixed;
+	width: 100%;
+}
+
+.table .wsu-person {
+	border-top: 1px solid #ddd;
+	display: table-row;
+}
+
+.table .wsu-person:nth-of-type(odd) {
+	background-color: #fff;
+}
+
+.table .wsu-person:nth-of-type(even) {
+	background-color: #f9f9f9;
+}
+
+.table .card,
+.table .about {
+	box-sizing: border-box;
+	display: table-cell;
+	padding: 1rem;
+}
+
+.table .card {
+	width: 200px;
+}
+
+.table.photos .card {
+	width: 300px;
+}
+
+.table .name {
+	display: inline;
+	font-size: 1rem;
+}
+
+.table .photo {
+	float: left;
+	margin-right: 20px;
+	width: 100px;
+}
+
+.table .photo img {
+	max-width: 100%;
+	width: 100%;
+}
+
+.table .has-photo .contact {
+	margin-left: 120px;
+}
+
+.table .contact span {
+	display: block;
+}
+
+@media only screen and ( max-width: 693px ) {
+
+	.table .wsu-person {
+		border-top: 1px solid #ddd;
+		display: block;
+	}
+
+	.table .card,
+	.table .name,
+	.table .about {
+		display: block;
+	}
+
+	.table .card,
+	.table.photos .card {
+		width: 100%;
+	}
+
+	.table .photo {
+		display: block;
+		float: none;
+		margin-right: 0;
+	}
+
+	.table .has-photo .contact {
+		margin-left: 0;
+	}
+}
