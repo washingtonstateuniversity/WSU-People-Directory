@@ -343,14 +343,14 @@ class WSUWP_People_Post_Type {
 				'post_id' => $post->ID,
 			);
 
-			wp_enqueue_style( 'wsuwp-people-admin-style', plugins_url( 'css/admin-profile-style.css', dirname( __FILE__ ) ), array(), WSUWP_People_Directory::$version );
-			wp_enqueue_script( 'wsuwp-people-admin-script', plugins_url( 'js/admin-profile.min.js', dirname( __FILE__ ) ), array( 'jquery-ui-tabs', 'underscore' ), WSUWP_People_Directory::$version, true );
+			wp_enqueue_style( 'wsuwp-people-admin-style', plugins_url( 'css/admin-person.css', dirname( __FILE__ ) ), array(), WSUWP_People_Directory::$version );
+			wp_enqueue_script( 'wsuwp-people-admin-script', plugins_url( 'js/admin-person.min.js', dirname( __FILE__ ) ), array( 'jquery-ui-tabs', 'underscore' ), WSUWP_People_Directory::$version, true );
 			wp_localize_script( 'wsuwp-people-admin-script', 'wsupeople', $profile_vars );
 		}
 
 		if ( 'edit.php' === $hook_suffix && self::$post_type_slug === $screen->post_type ) {
-			wp_enqueue_style( 'wsuwp-people-admin-style', plugins_url( 'css/admin-edit.css', dirname( __FILE__ ) ), array(), WSUWP_People_Directory::$version );
-			wp_enqueue_script( 'wsuwp-people-admin-script', plugins_url( 'js/admin-edit.min.js', dirname( __FILE__ ) ), array( 'jquery' ), WSUWP_People_Directory::$version );
+			wp_enqueue_style( 'wsuwp-people-admin-style', plugins_url( 'css/admin-people.css', dirname( __FILE__ ) ), array(), WSUWP_People_Directory::$version );
+			wp_enqueue_script( 'wsuwp-people-admin-script', plugins_url( 'js/admin-people.min.js', dirname( __FILE__ ) ), array( 'jquery' ), WSUWP_People_Directory::$version );
 		}
 
 	}
