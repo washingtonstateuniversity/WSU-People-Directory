@@ -294,8 +294,6 @@ class WSUWP_People_Post_Type {
 				'slug' => 'profile',
 				'with_front' => false,
 			),
-			'show_in_rest' => true,
-			'rest_base' => 'people',
 		);
 
 		register_post_type( self::$post_type_slug, $args );

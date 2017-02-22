@@ -39,10 +39,13 @@ class WSUWP_People_Directory {
 	public function setup_hooks() {
 		require_once( dirname( __FILE__ ) . '/class-wsuwp-people-post-type.php' );
 		require_once( dirname( __FILE__ ) . '/class-wsuwp-people-classification-taxonomy.php' );
-		require_once( dirname( __FILE__ ) . '/class-wsuwp-people-rest-api.php' );
 
 		add_action( 'init', 'WSUWP_People_Post_Type' );
 		add_action( 'init', 'WSUWP_People_Classification_Taxonomy' );
-		add_action( 'init', 'WSUWP_People_REST_API' );
+
+		if ( apply_filters( 'wsuwp_people_show_in_rest', false ) ) {
+			require_once( dirname( __FILE__ ) . '/class-wsuwp-people-rest-api.php' );
+			add_action( 'init', 'WSUWP_People_REST_API' );
+		}
 	}
 }
