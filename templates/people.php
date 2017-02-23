@@ -1,27 +1,4 @@
 <?php
-// Retrieve people from people.wsu.edu.
-$request_url = 'https://people.wsu.edu/wp-json/wp/v2/people/';
-
-//$request_url = add_query_arg( array( 'filter[wsuwp_university_org]' => $terms ), $request_url );
-
-$response = wp_remote_get( $request_url );
-
-if ( is_wp_error( $response ) ) {
-	return '<!-- ' . sanitize_text_field( $response->get_error_message() ) . ' -->';
-}
-
-$data = wp_remote_retrieve_body( $response );
-
-if ( empty( $data ) ) {
-	return '<!-- empty -->';
-}
-
-$people = json_decode( $data );
-
-if ( empty( $people ) ) {
-	return '<!-- empty -->';
-}
-
 $options = get_option( 'wsu_people_display' );
 
 $wrapper_classes = array( 'wsu-people-wrapper' );
@@ -47,11 +24,27 @@ $base_url = trailingslashit( trailingslashit( get_home_url() ) . $slug );
 <div class="<?php echo esc_html( implode( ' ', $wrapper_classes ) ); ?>">
 
 	<div class="wsu-people">
+
 	<?php
-	foreach ( $people as $person ) {
-		include dirname( __FILE__ ) . '/person.php';
+	$people_query_args = array(
+		'post_type' => array( WSUWP_People_Post_Type::$post_type_slug ),
+		'posts_per_page' => -1,
+		'order'     => 'ASC',
+		'orderby'   => 'meta_value',
+		'meta_key'  => '_wsuwp_profile_ad_name_last',
+	);
+
+	$people = new WP_Query( $people_query_args );
+
+	if ( $people->have_posts() ) {
+		while ( $people->have_posts() ) {
+			$people->the_post();
+			include dirname( __FILE__ ) . '/person.php';
+		}
+		wp_reset_postdata();
 	}
 	?>
+
 	</div>
 
 </div>
