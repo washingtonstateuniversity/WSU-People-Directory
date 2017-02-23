@@ -289,11 +289,7 @@ class WSUWP_People_Post_Type {
 			'taxonomies' => array(
 				'post_tag',
 			),
-			'has_archive' => true,
-			'rewrite' => array(
-				'slug' => 'profile',
-				'with_front' => false,
-			),
+			'rewrite' => false,
 		);
 
 		register_post_type( self::$post_type_slug, $args );

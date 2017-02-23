@@ -15,16 +15,7 @@ class WSUWP_People_Display_Frontend {
 	 *
 	 * @var string
 	 */
-	public static $people_query_var = 'people';
-
-	/**
-	 * Tracks the person query variable.
-	 *
-	 * @since 0.3.0
-	 *
-	 * @var string
-	 */
-	public static $person_query_var = 'person';
+	public static $people_query_var = 'wsuwp_people';
 
 	/**
 	 * Maintain and return the one instance. Initiate hooks when called the first time.
@@ -48,6 +39,7 @@ class WSUWP_People_Display_Frontend {
 	 */
 	public function setup_hooks() {
 		add_action( 'init', array( $this, 'rewrite_rules' ), 11 );
+		add_filter( 'post_type_link', array( $this, 'person_permalink' ), 10, 2 );
 		add_filter( 'query_vars', array( $this, 'query_vars' ) );
 		add_filter( 'the_posts', array( $this, 'placeholder_page' ) );
 		add_filter( 'template_include', array( $this, 'template_include' ) );
@@ -72,7 +64,7 @@ class WSUWP_People_Display_Frontend {
 	 * @param boolean
 	 */
 	public function person_query() {
-		return get_query_var( self::$person_query_var );
+		return get_query_var( WSUWP_People_Post_Type::$post_type_slug );
 	}
 
 	/**
@@ -84,17 +76,29 @@ class WSUWP_People_Display_Frontend {
 		$options = get_option( 'wsu_people_display' );
 		$slug = ( isset( $options['slug'] ) && '' !== $options['slug'] ) ? $options['slug'] : 'people';
 
-		add_rewrite_rule(
-			$slug . '/([^/]*)/?$',
-			'index.php?' . self::$person_query_var . '=$matches[1]',
-			'top'
-		);
+		add_rewrite_tag( '%wsuwp_person%', '([^/]+)', WSUWP_People_Post_Type::$post_type_slug . '=' );
+		add_permastruct( 'person', "/{$slug}/%wsuwp_person%/", false );
 
-		add_rewrite_rule(
-			$slug,
-			'index.php?' . self::$people_query_var . '=1',
-			'top'
-		);
+		add_rewrite_tag( '%wsuwp_people%', $slug, self::$people_query_var . '=1' );
+		add_permastruct( 'people', '/%wsuwp_people%/', false );
+	}
+
+	/**
+	 * Change the permalink structure for individual people posts.
+	 *
+	 * @since 0.3.0
+	 *
+	 * @param string $url  The post URL.
+	 * @param object $post The post object.
+	 */
+	public function person_permalink( $url, $post ) {
+		if ( get_post_type( $post ) === WSUWP_People_Post_Type::$post_type_slug ) {
+			$options = get_option( 'wsu_people_display' );
+			$slug = ( isset( $options['slug'] ) && '' !== $options['slug'] ) ? $options['slug'] : 'people';
+			$url = get_site_url() . '/' . $slug . '/' . $post->post_name . '/';
+		}
+
+		return $url;
 	}
 
 	/**
@@ -108,7 +112,7 @@ class WSUWP_People_Display_Frontend {
 	 */
 	public function query_vars( $query_vars ) {
 		$query_vars[] = self::$people_query_var;
-		$query_vars[] = self::$person_query_var;
+
 		return $query_vars;
 	}
 
@@ -124,7 +128,9 @@ class WSUWP_People_Display_Frontend {
 	 * @return array Modified array containing our placeholder post.
 	 */
 	public function placeholder_page( $posts ) {
-		if ( count( $posts ) === 0 && ( $this->people_query() || $this->person_query() ) ) {
+		remove_filter( 'the_posts', array( $this, 'placeholder_page' ) );
+
+		if ( $this->people_query() ) {
 			$post = array(
 				'ID' => 0,
 				'post_author' => 0,
@@ -151,8 +157,7 @@ class WSUWP_People_Display_Frontend {
 			);
 
 			$post = (object) $post;
-			$posts = null;
-			$posts[] = $post;
+			$posts = array( $post );
 		}
 
 		return $posts;
@@ -198,6 +203,8 @@ class WSUWP_People_Display_Frontend {
 	 * @return string Modified content.
 	 */
 	public function content( $content ) {
+		remove_filter( 'the_content', array( $this, 'content' ) );
+
 		ob_start();
 
 		if ( $this->people_query() ) {
@@ -225,30 +232,6 @@ class WSUWP_People_Display_Frontend {
 	public function title( $title ) {
 		if ( $this->people_query() ) {
 			$title = 'People | ' . $title;
-		}
-
-		if ( $this->person_query() ) {
-			$request_url = 'https://people.wsu.edu/wp-json/wp/v2/people/';
-			$request_url = add_query_arg( array( 'wsu_nid' => esc_html( self::person_query() ) ), $request_url );
-			$response = wp_remote_get( $request_url );
-
-			if ( is_wp_error( $response ) ) {
-				return $title;
-			}
-
-			$data = wp_remote_retrieve_body( $response );
-
-			if ( empty( $data ) ) {
-				return $title;
-			}
-
-			$person = json_decode( $data );
-
-			if ( empty( $person ) ) {
-				return $title;
-			}
-
-			$title = esc_html( $person[0]->title->rendered ) . ' | ' . $title;
 		}
 
 		return $title;
