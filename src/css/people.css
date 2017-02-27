@@ -1,0 +1,290 @@
+/* Search */
+input[type="search"]::-webkit-search-decoration {
+	display: none;
+}
+
+.wsu-people-actions .search input {
+	background: #fff;
+	border-radius: 1px;
+	border: 1px solid #5e6a71;
+	box-sizing: border-box;
+	color: #8d959a;
+	font-family: "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Geneva, Verdana, sans-serif;
+	font-size: 1em;
+	height: 2rem;
+	line-height: 20px;
+	margin: 0;
+	padding: .5rem 1rem;
+	width: 100%;
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	appearance: none;
+}
+
+.wsu-people-actions .search input:focus {
+	color: #981e32;
+}
+
+.wsu-people-actions .search input::-webkit-input-placeholder {
+	color: #8d959a;
+	font-family: "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Geneva, Verdana, sans-serif;
+	font-size: 14px;
+	font-style: italic;
+}
+
+.wsu-people-actions .search input::-moz-placeholder {
+	color: #8d959a;
+	font-family: "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Geneva, Verdana, sans-serif;
+	font-size: 14px;
+	font-style: italic;
+	opacity: 1;
+}
+
+.wsu-people-actions .search input:-ms-input-placeholder {
+	color: #8d959a;
+	font-family: "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Geneva, Verdana, sans-serif;
+	font-size: 14px;
+	font-style: italic;
+}
+
+.wsu-people-actions .search input:-moz-placeholder {
+	color: #8d959a;
+	font-family: "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Geneva, Verdana, sans-serif;
+	font-size: 14px;
+	font-style: italic;
+	opacity: 1;
+}
+
+/* Filters */
+.wsu-people-filter-label {
+	background: #fff;
+	border: 1px solid #5e6a71;
+	box-sizing: border-box;
+	cursor: pointer;
+	height: 2rem;
+	line-height: 2rem;
+	padding: 0 2rem 0 1rem;
+	position: relative;
+}
+
+.wsu-people-filter-label:after {
+	content: "\F501";
+	display: block;
+	font-family: Spine-Icons;
+	position: absolute;
+	right: 1rem;
+	top: 0;
+	text-align: right;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+.wsu-people-filter-label.open:after {
+	content: "\F500";
+}
+
+.wsu-people-filter-terms {
+	background: #5e6a71;
+	display: none;
+	list-style: none;
+	padding: 0;
+}
+
+.wsu-people-filter-label.open + .wsu-people-filter-terms {
+	display: block;
+}
+
+.wsu-people-filter-terms li {
+	padding: 0;
+}
+
+.wsu-people-filter-terms input {
+	display: none;
+}
+
+.wsu-people-filter-terms span {
+	color: #fff;
+	cursor: pointer;
+	display: block;
+	font-size: 14px;
+	font-weight: 400;
+	padding: .3rem 1rem;
+}
+
+.wsu-people-filter-terms span:hover {
+	background: #464e54;
+}
+
+.wsu-people-filter-terms :checked + span {
+	font-weight: 700;
+	background: #981e32;
+}
+
+.wsu-people-filter-terms :checked + span:hover {
+	background: #c60c30;
+}
+
+/* Table layout */
+.table .wsu-people-actions {
+	display: flex;
+	margin: 0 -.5rem 1rem;
+}
+
+.table .wsu-people-action {
+	box-sizing: border-box;
+	padding: 0 .5rem;
+	width: 50%;
+}
+
+.table .wsu-people {
+	border-bottom: 1px solid #ddd;
+	border-collapse: collapse;
+	display: table;
+	table-layout: fixed;
+	width: 100%;
+}
+
+.table .wsu-person {
+	border-top: 1px solid #ddd;
+	display: table-row;
+}
+
+.table .wsu-person:nth-of-type(odd) {
+	background-color: #fff;
+}
+
+.table .wsu-person:nth-of-type(even) {
+	background-color: #f9f9f9;
+}
+
+.table .card,
+.table .about {
+	box-sizing: border-box;
+	display: table-cell;
+	padding: 1rem;
+}
+
+.table .card {
+	width: 200px;
+}
+
+.table.photos .card {
+	width: 300px;
+}
+
+.table .name {
+	display: inline;
+	font-size: 1rem;
+}
+
+.table .photo {
+	float: left;
+	margin-right: 20px;
+	width: 100px;
+}
+
+.table .photo img {
+	max-width: 100%;
+	width: 100%;
+}
+
+.table .has-photo .contact {
+	margin-left: 120px;
+}
+
+.table .contact span {
+	display: block;
+}
+
+@media only screen and ( max-width: 693px ) {
+
+	.table .wsu-person {
+		border-top: 1px solid #ddd;
+		display: block;
+	}
+
+	.table .card,
+	.table .name,
+	.table .about {
+		display: block;
+	}
+
+	.table .card,
+	.table.photos .card {
+		width: 100%;
+	}
+
+	.table .photo {
+		display: block;
+		float: none;
+		margin-right: 0;
+	}
+
+	.table .has-photo .contact {
+		margin-left: 0;
+	}
+}
+
+/* Grid layout */
+.grid .wsu-people {
+	display: flex;
+	flex-wrap: wrap;
+	margin: 0 -.5rem;
+}
+
+.grid .wsu-person {
+	background: #fff content-box;
+	box-sizing: border-box;
+	padding: .5rem;
+	width: 25%;
+}
+
+.grid .name {
+	font-size: 1rem;
+	width: 100%;
+}
+
+.grid .card {
+	display: flex;
+	flex-wrap: wrap;
+	padding: 1rem;
+}
+
+.grid .photo {
+	margin: -1rem -1rem 1rem -1rem;
+	order: -1;
+	padding: 2rem 1rem 100%;
+	position: relative;
+	width: 100%;
+}
+
+.grid .photo img {
+	left: 0;
+	position: absolute;
+	top: 0;
+	width: 100%;
+}
+
+.grid .contact {
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+@media only screen and ( max-width: 693px ) {
+
+	.grid .wsu-person {
+		width: 50%;
+	}
+}
+
+@media only screen and ( max-width: 480px ) {
+
+	.grid .wsu-people {
+		display: block;
+	}
+
+	.grid .wsu-person {
+		width: 100%;
+	}
+}
+

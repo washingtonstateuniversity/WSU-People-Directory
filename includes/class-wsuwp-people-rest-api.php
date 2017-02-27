@@ -29,12 +29,25 @@ class WSUWP_People_REST_API {
 	 * @since 0.3.0
 	 */
 	public function setup_hooks() {
+		add_action( 'init', array( $this, 'show_people_in_rest' ), 12 );
 		add_action( 'rest_api_init', array( $this, 'register_api_fields' ) );
 		add_filter( 'rest_prepare_' . WSUWP_People_Post_Type::$post_type_slug, array( $this, 'photos_api_field' ), 10, 2 );
 
 		add_action( 'init', array( $this, 'register_wsu_nid_query_var' ) );
 		add_filter( 'rest_' . WSUWP_People_Post_Type::$post_type_slug . '_query', array( $this, 'rest_query_vars' ), 10, 2 );
 		add_action( 'pre_get_posts', array( $this, 'handle_wsu_nid_query_var' ) );
+	}
+
+	/**
+	 * Expose the people content type in the REST API.
+	 *
+	 * @since 0.2.0
+	 */
+	public function show_people_in_rest() {
+		global $wp_post_types;
+
+		$wp_post_types[ WSUWP_People_Post_Type::$post_type_slug ]->show_in_rest = true;
+		$wp_post_types[ WSUWP_People_Post_Type::$post_type_slug ]->rest_base = 'people';
 	}
 
 	/**

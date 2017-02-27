@@ -16,13 +16,21 @@ module.exports = function( grunt ) {
                     } )
                 ]
             },
-            all_profiles: {
-                src: "src/css/admin-edit.css",
-                dest: "css/admin-edit.css"
+            admin_people: {
+                src: "src/css/admin-people.css",
+                dest: "css/admin-people.css"
             },
-            edit_profile: {
-                src: "src/css/admin-profile-style.css",
-                dest: "css/admin-profile-style.css"
+            admin_person: {
+                src: "src/css/admin-person.css",
+                dest: "css/admin-person.css"
+            },
+            frontend_people: {
+                src: "src/css/people.css",
+                dest: "css/people.css"
+            },
+            frontend_person: {
+                src: "src/css/person.css",
+                dest: "css/person.css"
             }
         },
 
@@ -80,13 +88,17 @@ module.exports = function( grunt ) {
         },
 
         uglify: {
-            all_profiles: {
-                src: "src/js/admin-edit.js",
-                dest: "js/admin-edit.min.js"
+            admin_people: {
+                src: "src/js/admin-people.js",
+                dest: "js/admin-people.min.js"
             },
-            edit_profile: {
-                src: "src/js/admin-profile.js",
-                dest: "js/admin-profile.min.js"
+            admin_person: {
+                src: "src/js/admin-person.js",
+                dest: "js/admin-person.min.js"
+            },
+            frontend_people: {
+                src: "src/js/people.js",
+                dest: "js/people.min.js"
             }
         }
     } );
