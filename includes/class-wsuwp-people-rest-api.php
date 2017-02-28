@@ -150,12 +150,14 @@ class WSUWP_People_REST_API {
 	public function photos_api_field( $response, $post ) {
 		$photos = get_post_meta( $post->ID, '_wsuwp_profile_photos', true );
 
-		foreach ( $photos as $photo_id ) {
-			$response->add_link(
-				'https://api.w.org/photos',
-				esc_url( rest_url( '/wp/v2/media/' . $photo_id ) ),
-				array( 'embeddable' => true )
-			);
+		if ( $photos ) {
+			foreach ( $photos as $photo_id ) {
+				$response->add_link(
+					'https://api.w.org/photos',
+					esc_url( rest_url( '/wp/v2/media/' . $photo_id ) ),
+					array( 'embeddable' => true )
+				);
+			}
 		}
 
 		return $response;
