@@ -337,6 +337,7 @@ class WSUWP_People_Post_Type {
 			$profile_vars = array(
 				'nid_nonce' => wp_create_nonce( 'wsu-people-nid-lookup' ),
 				'post_id' => $post->ID,
+				'request_from' => ( apply_filters( 'wsuwp_people_display', true ) ) ? 'people' : 'ad',
 			);
 
 			wp_enqueue_style( 'wsuwp-people-admin-style', plugins_url( 'css/admin-person.css', dirname( __FILE__ ) ), array(), WSUWP_People_Directory::$version );
@@ -694,13 +695,13 @@ class WSUWP_People_Post_Type {
 				<p>
 					<label>
 						<span><%= label %></span>
-						<input type="text" name="<%= name %>[]" value="" />
+						<input type="text" name="<%= name %>[]" value="<%= value %>" />
 						<a class="wsuwp-profile-remove-repeatable-field">Remove</a>
 					</label>
 				</p>
 			</script>
 
-			<div class="wsuwp-profile-repeatable-field">
+			<div class="wsuwp-profile-repeatable-field wsuwp-profile-titles">
 				<?php
 				if ( $titles && is_array( $titles ) ) {
 					foreach ( $titles as $title ) {
@@ -731,7 +732,7 @@ class WSUWP_People_Post_Type {
 				</p>
 			</div>
 
-			<div class="wsuwp-profile-repeatable-field">
+			<div class="wsuwp-profile-repeatable-field wsuwp-profile-degrees">
 				<?php
 				if ( $degrees && is_array( $degrees ) ) {
 					foreach ( $degrees as $degree ) {
@@ -758,7 +759,7 @@ class WSUWP_People_Post_Type {
 				}
 				?>
 				<p class="wsuwp-profile-add-repeatable">
-					<a data-label="Degree" data-name="_wsuwp_profile_degree"  href="#">+ Add another degree</a>
+					<a data-label="Degree" data-name="_wsuwp_profile_degree" href="#">+ Add another degree</a>
 				</p>
 			</div>
 		</div>
@@ -943,6 +944,31 @@ class WSUWP_People_Post_Type {
 	}
 
 	/**
+	 * Given a WSU Network ID, retrive information about a person from people.wsu.edu.
+	 *
+	 * @since 0.3.0
+	 *
+	 * @param string $nid The user's network ID.
+	 *
+	 * @return array List of predefined information we'll expect on the other side.
+	 */
+	private function get_person_data( $nid ) {
+		$request_url = 'https://people.wsu.edu/wp-json/wp/v2/people?_embed';
+		$request_url = add_query_arg( array( 'wsu_nid' => $nid ), $request_url );
+
+		$response = wp_remote_get( $request_url );
+
+		if ( is_wp_error( $response ) ) {
+			return false;
+		}
+
+		$data = wp_remote_retrieve_body( $response );
+		$data = json_decode( $data );
+
+		return $data[0];
+	}
+
+	/**
 	 * Given a WSU Network ID, retrieve information from active directory about
 	 * a user.
 	 *
@@ -1006,7 +1032,7 @@ class WSUWP_People_Post_Type {
 	}
 
 	/**
-	 * Process an ajax request for AD information attached to a network ID. We'll return
+	 * Process an ajax request for information attached to a network ID. We'll return
 	 * the data here for confirmation. Confirmation will be handled elsewhere.
 	 *
 	 * @since 0.1.0
@@ -1020,7 +1046,30 @@ class WSUWP_People_Post_Type {
 			wp_send_json_error( 'Invalid or empty Network ID' );
 		}
 
-		$return_data = $this->get_nid_data( $nid );
+		// If this isn't a manual refresh, make sure the profile doesn't already exist.
+		if ( 'refresh' !== $_POST['source'] ) {
+
+			$nid_query = new WP_Query( array(
+				'meta_key' => '_wsuwp_profile_ad_nid',
+				'meta_value' => $nid,
+				'post_type' => self::$post_type_slug,
+				'posts_per_page' => -1,
+			) );
+
+			if ( 0 < $nid_query->found_posts ) {
+				wp_send_json_error( 'A profile for this person already exists' );
+			}
+		}
+
+		// Try to retrieve a person from people.wsu.edu first.
+		// We do this in here so the above check for existing profiles can be performed.
+		if ( 'people' === $_POST['source'] ) {
+			$return_data = $this->get_person_data( $nid );
+		}
+
+		if ( ! $return_data || 'ad' === $_POST['source'] ) {
+			$return_data = $this->get_nid_data( $nid );
+		}
 
 		wp_send_json_success( $return_data );
 	}
@@ -1043,7 +1092,7 @@ class WSUWP_People_Post_Type {
 		// Data is sanitized before return.
 		$confirm_data = $this->get_nid_data( $nid );
 
-		if ( $confirm_data['confirm_ad_hash'] !== $_POST['confirm_ad_hash'] ) {
+		if ( 'ad' === $_POST['source'] && $confirm_data['confirm_ad_hash'] !== $_POST['confirm_ad_hash'] ) {
 			wp_send_json_error( 'Previously retrieved data does not match the data attached to this network ID.' );
 		}
 

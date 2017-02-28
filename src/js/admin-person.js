@@ -2,32 +2,10 @@
 ( function( $, window, document ) {
 	$( document ).ready( function() {
 
-		// Tabs.
-		$( "#wsuwp-profile-tabs" ).tabs( {
-			active: 0
-		} );
-
-		var repeatable_field_template = _.template( $( ".wsuwp-profile-repeatable-field-template" ).html() );
-
-		// Add a repeatable field.
-		$( ".wsuwp-profile-add-repeatable" ).on( "click", "a", function( e ) {
-			e.preventDefault();
-
-			$( this ).closest( "p" ).before( repeatable_field_template( {
-				label: $( this ).data( "label" ),
-				name: $( this ).data( "name" )
-			} ) );
-		} );
-
-		// Remove a repeatable field.
-		$( ".wsuwp-profile-repeatable-field" ).on( "click", ".wsuwp-profile-remove-repeatable-field", function( e ) {
-			e.preventDefault();
-
-			$( this ).closest( "p" ).remove();
-		} );
-
-		// AD data capturing.
-		var $nid = $( "#_wsuwp_profile_ad_nid" ),
+		var repeatable_field_template = _.template( $( ".wsuwp-profile-repeatable-field-template" ).html() ),
+			photo_template = _.template( $( "#photo-template" ).html() ),
+			$post_title = $( "#title" ),
+			$nid = $( "#_wsuwp_profile_ad_nid" ),
 			$all_card_data = $( ".profile-card-data" ),
 			$given_name = $( "#_wsuwp_profile_ad_name_first" ),
 			$surname = $( "#_wsuwp_profile_ad_name_last" ),
@@ -42,9 +20,133 @@
 			$refresh = $( "#refresh-ad-data" ),
 			$undo = $( "#undo-ad-data-refresh" );
 
+		// Populate profile with data from people.wsu.edu.
+		function populate_from_people_directory( data ) {
+			var $working_titles = $( ".wsuwp-profile-titles .wsuwp-profile-add-repeatable" ),
+				working_title_label = $working_titles.find( "a" ).data( "label" ),
+				working_title_name = $working_titles.find( "a" ).data( "name" ),
+				$degrees = $( ".wsuwp-profile-degrees .wsuwp-profile-add-repeatable" ),
+				degree_label = $degrees.find( "a" ).data( "label" ),
+				degree_name = $degrees.find( "a" ).data( "name" );
+
+			// Populate AD data.
+			$post_title.focus().val( data.title.rendered );
+			$given_name.html( data.first_name );
+			$surname.html( data.last_name );
+			$title.html( data.position_title );
+			$office.html( data.office );
+			$address.html( data.address );
+			$phone.html( data.phone );
+			$email.html( data.email );
+
+			// Populate additional/alternative fields.
+			$( "#_wsuwp_profile_alt_office" ).val( data.office_alt );
+			$( "#_wsuwp_profile_alt_phone" ).val( data.phone_alt );
+			$( "#_wsuwp_profile_alt_email" ).val( data.email_alt );
+			$( "#_wsuwp_profile_website" ).val( data.website );
+
+			// Populate biographies.
+			window.tinymce.get( "content" ).setContent( data.content.rendered );
+			window.tinymce.get( "_wsuwp_profile_bio_unit" ).setContent( data.bio_unit );
+			window.tinymce.get( "_wsuwp_profile_bio_university" ).setContent( data.bio_university );
+
+			// Populate first working title.
+			$( "[name='_wsuwp_profile_title[]']" ).val( data.working_titles[ 0 ] );
+
+			// Populate any additional working titles.
+			$.each( data.working_titles, function( i, value ) {
+				if ( i > 0 ) {
+					$working_titles.before( repeatable_field_template( {
+						label: working_title_label,
+						name: working_title_name,
+						value: value
+					} ) );
+				}
+			} );
+
+			// Populate first degree.
+			$( "[name='_wsuwp_profile_degree[]']" ).val( data.degree[ 0 ] );
+
+			// Populate any additional degrees.
+			$.each( data.degree, function( i, value ) {
+				if ( i > 0 ) {
+					$degrees.before( repeatable_field_template( {
+						label: degree_label,
+						name: degree_name,
+						value: value
+					} ) );
+				}
+			} );
+
+			// Populate photo collection.
+			if ( data._embedded[ "wp:photos" ] !== 0 ) {
+				$.each( data._embedded[ "wp:photos" ], function( i, data ) {
+					populate_photos( data );
+				} );
+			}
+
+			// Populate featured image as part of the photo collection.
+			if ( data._embedded[ "wp:featuredmedia" ] && data._embedded[ "wp:featuredmedia" ] !== 0 ) {
+				populate_photos( data._embedded[ "wp:featuredmedia" ][ 0 ] );
+			}
+
+			// @todo Populate taxonomy data.
+		}
+
+		// Populate the photo collection with data from people.wsu.edu.
+		function populate_photos( data ) {
+			var photo = data.media_details,
+				has_thumbnail = photo.sizes.thumbnail,
+				url = has_thumbnail ? photo.sizes.thumbnail.source_url : data.source_url,
+				width = has_thumbnail ? photo.sizes.thumbnail.width : photo.width,
+				height = has_thumbnail ? photo.sizes.thumbnail.height : photo.height;
+
+			$collection.append( photo_template( {
+				src: url,
+				width: width,
+				height: height,
+				id: data.id,
+				alt: data.alt,
+				url: data.source_url,
+				title: data.title.rendered,
+				full_width: photo.width,
+				full_height: photo.height
+			} ) );
+		}
+
+		// Initialize tabs.
+		$( "#wsuwp-profile-tabs" ).tabs( {
+			active: 0
+		} );
+
+		// Add a repeatable field.
+		$( ".wsuwp-profile-add-repeatable" ).on( "click", "a", function( e ) {
+			e.preventDefault();
+
+			$( this ).closest( "p" ).before( repeatable_field_template( {
+				label: $( this ).data( "label" ),
+				name: $( this ).data( "name" ),
+				value: ""
+			} ) );
+		} );
+
+		// Remove a repeatable field.
+		$( ".wsuwp-profile-repeatable-field" ).on( "click", ".wsuwp-profile-remove-repeatable-field", function( e ) {
+			e.preventDefault();
+
+			$( this ).closest( "p" ).remove();
+		} );
+
+		// Capture data.
 		$( "#load-ad-data, #refresh-ad-data" ).on( "click", function( e ) {
 
-			// Store current information in case the user wants to undo.
+			// Don't let the user get too far without entering a NID.
+			if ( "" === $nid.val() ) {
+				window.alert( "Please enter a Network ID" );
+				return;
+			}
+
+			// Store current information in case the user wants to undo a refresh.
 			if ( $( e.target ).is( "#refresh-ad-data" ) ) {
 				$all_card_data.each( function() {
 					$( this ).data( "original", $( this ).html() );
@@ -54,51 +156,66 @@
 			var data = {
 				"action": "wsu_people_get_data_by_nid",
 				"_ajax_nonce": window.wsupeople.nid_nonce,
-				"network_id": $nid.val()
+				"network_id": $nid.val(),
+				"source": ( $( e.target ).is( "#refresh-ad-data" ) ) ? "refresh" : window.wsupeople.request_from
 			};
 
 			$.post( window.ajaxurl, data, function( response ) {
 				if ( response.success ) {
-					$given_name.html( response.data.given_name );
-					$surname.html( response.data.surname );
-					$title.html( response.data.title );
-					$office.html( response.data.office );
-					$address.html( response.data.street_address );
-					$phone.html( response.data.telephone_number );
-					$email.html( response.data.email );
-					$hash.val( response.data.confirm_ad_hash );
 
-					$confirm.removeClass( "profile-hide-button" );
-					$undo.removeClass( "profile-hide-button" );
-					$refresh.addClass( "profile-hide-button" );
+					// If the response has an id property, it's almost certainly from people.wsu.edu.
+					if ( response.data.id ) {
+						populate_from_people_directory( response.data );
+					} else {
+						$given_name.html( response.data.given_name );
+						$surname.html( response.data.surname );
+						$title.html( response.data.title );
+						$office.html( response.data.office );
+						$address.html( response.data.street_address );
+						$phone.html( response.data.telephone_number );
+						$email.html( response.data.email );
+						$hash.val( response.data.confirm_ad_hash );
+					}
+				} else {
+					window.alert( response.data );
+					return;
 				}
+
+				$confirm.removeClass( "profile-hide-button" );
+				$undo.removeClass( "profile-hide-button" );
+				$refresh.addClass( "profile-hide-button" );
 			} );
 		} );
 
-		$( "#confirm-ad-data" ).on( "click", function() {
+		// Confirm/save retrieved data.
+		$confirm.on( "click", function() {
 			var data = {
 				"action": "wsu_people_confirm_nid_data",
 				"_ajax_nonce": window.wsupeople.nid_nonce,
 				"network_id": $nid.val(),
 				"confirm_ad_hash": $hash.val(),
-				"post_id": $( "#post_ID" ).val()
+				"post_id": $( "#post_ID" ).val(),
+				"source": window.wsupeople.request_from
 			};
 
-			var $title = $( "#title" ),
-				$description = $( ".load-ad-container .description" ),
+			var $description = $( ".load-ad-container .description" ),
 				$publish = $( "#publish" );
+
+			// Give the post a slug so the preview permalink works if a draft is saved.
+			$( "#post_name" ).val( $( "#_wsuwp_profile_ad_name_first" ).html().toLowerCase() + "-" + $( "#_wsuwp_profile_ad_name_last" ).html().toLowerCase() );
 
 			$.post( window.ajaxurl, data, function( response ) {
 				if ( response.success ) {
 
 					// If a title has not yet been entered, use the given and surname from AD.
-					if ( "" === $title.val() ) {
-						$title.focus();
-						$title.val( $( "#_wsuwp_profile_ad_name_first" ).html() + " " + $( "#_wsuwp_profile_ad_name_last" ).html() );
+					if ( "" === $post_title.val() ) {
+						$post_title.focus();
+						$post_title.val( $( "#_wsuwp_profile_ad_name_first" ).html() + " " + $( "#_wsuwp_profile_ad_name_last" ).html() );
 					}
 
 					$nid.attr( "readonly", true );
 					$description.html( "The WSU Network ID used to populate this profile's data from Active Directory." );
+
 					$load.addClass( "profile-hide-button" );
 					$confirm.addClass( "profile-hide-button" );
 					$publish.removeClass( "profile-hide-button" );
@@ -107,6 +224,7 @@
 			} );
 		} );
 
+		// Undo a refresh.
 		$undo.on( "click", function() {
 			$all_card_data.each( function() {
 				$( this ).html( $( this ).data( "original" ) );
@@ -147,7 +265,6 @@
 
 			media_frame.on( "select", function() {
 				var photos = media_frame.state().get( "selection" ),
-					template = _.template( $( "#photo-template" ).html() ),
 					existing_photos = [];
 
 				// Create an array of photo IDs already in the collection.
@@ -165,7 +282,7 @@
 
 					// An image doesn't need to be added more than once.
 					if ( -1 === $.inArray( photo.id, existing_photos ) ) {
-						$collection.append( template( {
+						$collection.append( photo_template( {
 							src: url,
 							width: width,
 							height: height,
