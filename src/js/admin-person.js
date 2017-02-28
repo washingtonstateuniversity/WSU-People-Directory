@@ -4,6 +4,8 @@
 
 		var repeatable_field_template = _.template( $( ".wsuwp-profile-repeatable-field-template" ).html() ),
 			photo_template = _.template( $( "#photo-template" ).html() ),
+			$publishing_spinner = $( "#publishing-action .spinner" ),
+			$refresh_spinner = $( ".refresh-card .spinner" ),
 			$post_title = $( "#title" ),
 			$nid = $( "#_wsuwp_profile_ad_nid" ),
 			$all_card_data = $( ".profile-card-data" ),
@@ -146,11 +148,15 @@
 				return;
 			}
 
-			// Store current information in case the user wants to undo a refresh.
+			// Provide an indication that data is being loaded.
+			// If this is a refresh, store current information in case the user wants to undo.
 			if ( $( e.target ).is( "#refresh-ad-data" ) ) {
+				$refresh_spinner.css( "visibility", "visible" );
 				$all_card_data.each( function() {
 					$( this ).data( "original", $( this ).html() );
 				} );
+			} else {
+				$publishing_spinner.css( "visibility", "visible" );
 			}
 
 			var data = {
@@ -161,6 +167,8 @@
 			};
 
 			$.post( window.ajaxurl, data, function( response ) {
+				$( ".spinner" ).css( "visibility", "hidden" );
+
 				if ( response.success ) {
 
 					// If the response has an id property, it's almost certainly from people.wsu.edu.
@@ -188,7 +196,15 @@
 		} );
 
 		// Confirm/save retrieved data.
-		$confirm.on( "click", function() {
+		$confirm.on( "click", function( e ) {
+
+			// Provide an indication that data is being loaded.
+			if ( $( e.target ).hasClass( "refresh" ) ) {
+				$refresh_spinner.css( "visibility", "visible" );
+			} else {
+				$publishing_spinner.css( "visibility", "visible" );
+			}
+
 			var data = {
 				"action": "wsu_people_confirm_nid_data",
 				"_ajax_nonce": window.wsupeople.nid_nonce,
@@ -216,6 +232,7 @@
 					$nid.attr( "readonly", true );
 					$description.html( "The WSU Network ID used to populate this profile's data from Active Directory." );
 
+					$( ".spinner" ).css( "visibility", "hidden" );
 					$load.addClass( "profile-hide-button" );
 					$confirm.addClass( "profile-hide-button" );
 					$publish.removeClass( "profile-hide-button" );
