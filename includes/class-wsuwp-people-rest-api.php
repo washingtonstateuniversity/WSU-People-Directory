@@ -90,7 +90,7 @@ class WSUWP_People_REST_API {
 			return esc_html( get_post_meta( $object['id'], WSUWP_People_Post_Type::$post_meta_keys[ $field_name ]['meta_key'], true ) );
 		}
 
-		if ( 'WSUWP_People_Directory::sanitize_repeatable_text_fields' === WSUWP_People_Post_Type::$post_meta_keys[ $field_name ]['sanitize_callback'] ) {
+		if ( 'WSUWP_People_Post_Type::sanitize_repeatable_text_fields' === WSUWP_People_Post_Type::$post_meta_keys[ $field_name ]['sanitize_callback'] ) {
 			$data = get_post_meta( $object['id'], WSUWP_People_Post_Type::$post_meta_keys[ $field_name ]['meta_key'], true );
 			if ( is_array( $data ) ) {
 				$data = array_map( 'esc_html', $data );
