@@ -22,6 +22,15 @@
 			$refresh = $( "#refresh-ad-data" ),
 			$undo = $( "#undo-ad-data-refresh" );
 
+		// Create an array of photo IDs already in the collection.
+		function existing_photos() {
+			var existing_photos = $( ".wsuwp-profile-photo-id" ).map( function() {
+				return parseInt( $( this ).val() );
+			} ).get();
+
+			return existing_photos;
+		}
+
 		// Populate profile with data from people.wsu.edu.
 		function populate_from_people_directory( data ) {
 			var $working_titles = $( ".wsuwp-profile-titles .wsuwp-profile-add-repeatable" ),
@@ -52,12 +61,11 @@
 			window.tinymce.get( "_wsuwp_profile_bio_unit" ).setContent( data.bio_unit );
 			window.tinymce.get( "_wsuwp_profile_bio_university" ).setContent( data.bio_university );
 
-			// Populate first working title.
-			$( "[name='_wsuwp_profile_title[]']" ).val( data.working_titles[ 0 ] );
-
-			// Populate any additional working titles.
+			// Populate working title(s).
 			$.each( data.working_titles, function( i, value ) {
-				if ( i > 0 ) {
+				if ( $( "[name='_wsuwp_profile_title[]']" )[ i ] ) {
+					$( $( "[name='_wsuwp_profile_title[]']" )[ i ] ).val( value );
+				} else {
 					$working_titles.before( repeatable_field_template( {
 						label: working_title_label,
 						name: working_title_name,
@@ -66,12 +74,11 @@
 				}
 			} );
 
-			// Populate first degree.
-			$( "[name='_wsuwp_profile_degree[]']" ).val( data.degree[ 0 ] );
-
-			// Populate any additional degrees.
+			// Populate degree(s).
 			$.each( data.degree, function( i, value ) {
-				if ( i > 0 ) {
+				if ( $( "[name='_wsuwp_profile_degree[]']" )[ i ] ) {
+					$( $( "[name='_wsuwp_profile_degree[]']" )[ i ] ).val( value );
+				} else {
 					$degrees.before( repeatable_field_template( {
 						label: degree_label,
 						name: degree_name,
@@ -82,8 +89,8 @@
 
 			// Populate photo collection.
 			if ( data._embedded[ "wp:photos" ] !== 0 ) {
-				$.each( data._embedded[ "wp:photos" ], function( i, data ) {
-					populate_photos( data );
+				$.each( data._embedded[ "wp:photos" ], function( i, photo ) {
+					populate_photos( photo );
 				} );
 			}
 
@@ -103,17 +110,20 @@
 				width = has_thumbnail ? photo.sizes.thumbnail.width : photo.width,
 				height = has_thumbnail ? photo.sizes.thumbnail.height : photo.height;
 
-			$collection.append( photo_template( {
-				src: url,
-				width: width,
-				height: height,
-				id: data.id,
-				alt: data.alt,
-				url: data.source_url,
-				title: data.title.rendered,
-				full_width: photo.width,
-				full_height: photo.height
-			} ) );
+			// Avoid inserting duplicate images.
+			if ( -1 === $.inArray( data.id, existing_photos() ) ) {
+				$collection.append( photo_template( {
+					src: url,
+					width: width,
+					height: height,
+					id: data.id,
+					alt: data.alt,
+					url: data.source_url,
+					title: data.title.rendered,
+					full_width: photo.width,
+					full_height: photo.height
+				} ) );
+			}
 		}
 
 		// Initialize tabs.
@@ -165,7 +175,8 @@
 				"action": "wsu_people_get_data_by_nid",
 				"_ajax_nonce": window.wsupeople.nid_nonce,
 				"network_id": $nid.val(),
-				"source": ( $( e.target ).is( "#refresh-ad-data" ) ) ? "refresh" : window.wsupeople.request_from
+				"source": window.wsupeople.request_from,
+				"is_refresh": ( $( e.target ).is( "#refresh-ad-data" ) ) ? "true" : "false"
 			};
 
 			$.post( window.ajaxurl, data, function( response ) {
@@ -289,13 +300,7 @@
 			} );
 
 			media_frame.on( "select", function() {
-				var photos = media_frame.state().get( "selection" ),
-					existing_photos = [];
-
-				// Create an array of photo IDs already in the collection.
-				$( ".wsuwp-profile-photo-id" ).each( function() {
-					existing_photos.push( parseInt( $( this ).val() ) );
-				} );
+				var photos = media_frame.state().get( "selection" );
 
 				$.each( photos.models, function( i, attachment ) {
 
@@ -306,7 +311,7 @@
 						height = has_thumbnail ? photo.sizes.thumbnail.height : photo.height;
 
 					// An image doesn't need to be added more than once.
-					if ( -1 === $.inArray( photo.id, existing_photos ) ) {
+					if ( -1 === $.inArray( photo.id, existing_photos() ) ) {
 						$collection.append( photo_template( {
 							src: url,
 							width: width,

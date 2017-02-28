@@ -1048,7 +1048,7 @@ class WSUWP_People_Post_Type {
 		}
 
 		// If this isn't a manual refresh, make sure the profile doesn't already exist.
-		if ( 'refresh' !== $_POST['source'] ) {
+		if ( 'false' === $_POST['is_refresh'] ) {
 
 			$nid_query = new WP_Query( array(
 				'meta_key' => '_wsuwp_profile_ad_nid',
