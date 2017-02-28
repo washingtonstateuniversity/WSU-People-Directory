@@ -544,9 +544,9 @@ class WSUWP_People_Post_Type {
 		<?php if ( $name_first ) { ?>
 		<p class="refresh-card">
 			<span class="spinner"></span>
-			<span class="button" id="refresh-ad-data">Refresh</span>
-			<span class="button profile-hide-button" id="undo-ad-data-refresh">Undo</span>
-			<span class="button button-primary profile-hide-button refresh" id="confirm-ad-data">Confirm</span>
+			<button class="button" id="refresh-ad-data">Refresh</button>
+			<button class="button profile-hide-button" id="undo-ad-data-refresh">Undo</button>
+			<button class="button button-primary profile-hide-button refresh" id="confirm-ad-data">Confirm</button>
 			<input type="hidden" id="confirm-ad-hash" name="confirm_ad_hash" value="">
 		</p>
 		<?php } ?>
@@ -639,8 +639,8 @@ class WSUWP_People_Post_Type {
 					<span class="spinner"></span>
 					<?php
 					if ( $can_publish && ( ! in_array( $post->post_status, array( 'publish', 'future', 'private' ), true ) || 0 === $post->ID ) ) { ?>
-						<span class="button" id="load-ad-data">Load</span>
-						<span class="button button-primary profile-hide-button" id="confirm-ad-data">Confirm</span>
+						<button class="button" id="load-ad-data">Load</button>
+						<button class="button button-primary profile-hide-button" id="confirm-ad-data">Confirm</button>
 						<input type="hidden" id="confirm-ad-hash" name="confirm_ad_hash" value="" />
 						<input name="original_publish" type="hidden" id="original_publish"
 							   value="<?php esc_attr_e( 'Publish' ); ?>"/>

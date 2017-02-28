@@ -141,6 +141,8 @@
 
 		// Capture data.
 		$( "#load-ad-data, #refresh-ad-data" ).on( "click", function( e ) {
+			e.preventDefault();
+			e.target.disabled = true;
 
 			// Don't let the user get too far without entering a NID.
 			if ( "" === $nid.val() ) {
@@ -168,6 +170,7 @@
 
 			$.post( window.ajaxurl, data, function( response ) {
 				$( ".spinner" ).css( "visibility", "hidden" );
+				e.target.disabled = false;
 
 				if ( response.success ) {
 
@@ -197,12 +200,16 @@
 
 		// Confirm/save retrieved data.
 		$confirm.on( "click", function( e ) {
+			e.preventDefault();
+			e.target.disabled = true;
 
 			// Provide an indication that data is being loaded.
 			if ( $( e.target ).hasClass( "refresh" ) ) {
 				$refresh_spinner.css( "visibility", "visible" );
+				$undo.addClass( "profile-hide-button" );
 			} else {
 				$publishing_spinner.css( "visibility", "visible" );
+				$load.addClass( "profile-hide-button" );
 			}
 
 			var data = {
@@ -233,23 +240,24 @@
 					$description.html( "The WSU Network ID used to populate this profile's data from Active Directory." );
 
 					$( ".spinner" ).css( "visibility", "hidden" );
-					$load.addClass( "profile-hide-button" );
+
 					$confirm.addClass( "profile-hide-button" );
 					$publish.removeClass( "profile-hide-button" );
-					$undo.addClass( "profile-hide-button" );
 				}
 			} );
 		} );
 
 		// Undo a refresh.
-		$undo.on( "click", function() {
+		$undo.on( "click", function( e ) {
+			e.preventDefault();
+
 			$all_card_data.each( function() {
 				$( this ).html( $( this ).data( "original" ) );
 			} );
 
 			$confirm.addClass( "profile-hide-button" );
 			$undo.addClass( "profile-hide-button" );
-			$refresh.removeClass( "profile-hide-button" );
+			$refresh.removeClass( "profile-hide-button" ).disabled = false;
 		} );
 
 		// Photo collection handling.
