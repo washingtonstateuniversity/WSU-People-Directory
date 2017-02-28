@@ -99,7 +99,30 @@
 				populate_photos( data._embedded[ "wp:featuredmedia" ][ 0 ] );
 			}
 
-			// @todo Populate taxonomy data.
+			// Populate taxonomy data.
+			if ( data._embedded[ "wp:term" ] && data._embedded[ "wp:term" ] !== 0 ) {
+				$.each( data._embedded[ "wp:term" ], function( i, taxonomy ) {
+					if ( taxonomy ) {
+						$.each( taxonomy, function( i, term ) {
+							if ( "post_tag" === term.taxonomy ) {
+								$( "#new-tag-post_tag" ).val( function( index, val ) {
+									return val + term.name + ", ";
+								} );
+							} else {
+								$( "#" + term.taxonomy + "-all" )
+								.find( ".selectit:contains('" + term.name + "')" )
+								.find( "input[type='checkbox']" ).prop( "checked", true );
+							}
+						} );
+					}
+				} );
+
+				// Add the tags.
+				$( ".tagadd" ).trigger( "click" );
+
+				// Change focus to the post title field (the trigger above leaves it on the tag input).
+				$post_title.focus();
+			}
 		}
 
 		// Populate the photo collection with data from people.wsu.edu.
