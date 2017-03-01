@@ -20,7 +20,8 @@
 			$load = $( "#load-ad-data" ),
 			$confirm = $( "#confirm-ad-data" ),
 			$refresh = $( "#refresh-ad-data" ),
-			$undo = $( "#undo-ad-data-refresh" );
+			$undo = $( "#undo-ad-data-refresh" ),
+			$slug_field = $( "#post_name" );
 
 		// Create an array of photo IDs already in the collection.
 		function existing_photos() {
@@ -49,6 +50,9 @@
 			$address.html( data.address );
 			$phone.html( data.phone );
 			$email.html( data.email );
+
+			// Give the post a slug so the preview permalink works if a draft is saved.
+			$slug_field.val( data.first_name.toLowerCase() + "-" + data.last_name.toLowerCase() );
 
 			// Populate additional/alternative fields.
 			$( "#_wsuwp_profile_alt_office" ).val( data.office_alt );
@@ -220,6 +224,9 @@
 						$phone.html( response.data.telephone_number );
 						$email.html( response.data.email );
 						$hash.val( response.data.confirm_ad_hash );
+
+						// Give the post a slug so the preview permalink works if a draft is saved.
+						$slug_field.val( response.data.given_name.toLowerCase() + "-" + response.data.surname.toLowerCase() );
 					}
 				} else {
 					window.alert( response.data );
@@ -257,9 +264,6 @@
 
 			var $description = $( ".load-ad-container .description" ),
 				$publish = $( "#publish" );
-
-			// Give the post a slug so the preview permalink works if a draft is saved.
-			$( "#post_name" ).val( $( "#_wsuwp_profile_ad_name_first" ).html().toLowerCase() + "-" + $( "#_wsuwp_profile_ad_name_last" ).html().toLowerCase() );
 
 			$.post( window.ajaxurl, data, function( response ) {
 				if ( response.success ) {
