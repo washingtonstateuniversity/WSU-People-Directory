@@ -17,11 +17,11 @@
 			$phone = $( "#_wsuwp_profile_ad_phone" ),
 			$email = $( "#_wsuwp_profile_ad_email" ),
 			$hash = $( "#confirm-ad-hash" ),
+			$collection = $( ".wsuwp-profile-photo-collection" ),
 			$load = $( "#load-ad-data" ),
 			$confirm = $( "#confirm-ad-data" ),
 			$refresh = $( "#refresh-ad-data" ),
-			$undo = $( "#undo-ad-data-refresh" ),
-			$slug_field = $( "#post_name" );
+			$undo = $( "#undo-ad-data-refresh" );
 
 		// Create an array of photo IDs already in the collection.
 		function existing_photos() {
@@ -51,9 +51,6 @@
 			$phone.html( data.phone );
 			$email.html( data.email );
 
-			// Give the post a slug so the preview permalink works if a draft is saved.
-			$slug_field.val( data.first_name.toLowerCase() + "-" + data.last_name.toLowerCase() );
-
 			// Populate additional/alternative fields.
 			$( "#_wsuwp_profile_alt_office" ).val( data.office_alt );
 			$( "#_wsuwp_profile_alt_phone" ).val( data.phone_alt );
@@ -67,8 +64,10 @@
 
 			// Populate working title(s).
 			$.each( data.working_titles, function( i, value ) {
-				if ( $( "[name='_wsuwp_profile_title[]']" )[ i ] ) {
-					$( $( "[name='_wsuwp_profile_title[]']" )[ i ] ).val( value );
+				var field = $( "[name='_wsuwp_profile_title[]']" )[ i ];
+
+				if ( field ) {
+					$( field ).val( value );
 				} else {
 					$working_titles.before( repeatable_field_template( {
 						label: working_title_label,
@@ -80,8 +79,10 @@
 
 			// Populate degree(s).
 			$.each( data.degree, function( i, value ) {
-				if ( $( "[name='_wsuwp_profile_degree[]']" )[ i ] ) {
-					$( $( "[name='_wsuwp_profile_degree[]']" )[ i ] ).val( value );
+				var field = $( "[name='_wsuwp_profile_degree[]']" )[ i ];
+
+				if ( field ) {
+					$( field ).val( value );
 				} else {
 					$degrees.before( repeatable_field_template( {
 						label: degree_label,
@@ -124,7 +125,7 @@
 				// Add the tags.
 				$( ".tagadd" ).trigger( "click" );
 
-				// Change focus to the post title field (the trigger above leaves it on the tag input).
+				// Change focus to the post title field (the trigger above focuses the tag input).
 				$post_title.focus();
 			}
 		}
@@ -157,6 +158,18 @@
 		$( "#wsuwp-profile-tabs" ).tabs( {
 			active: 0
 		} );
+
+		// Make a REST request to populate a person with data from people.wsu.edu
+		if ( window.wsupeople.make_request ) {
+			jQuery.ajax( {
+				url: "https://people.wsu.edu/wp-json/wp/v2/people?_embed",
+				data: { wsu_nid: $nid.val() }
+			} ).done( function( response ) {
+				if ( response.length !== 0 ) {
+					populate_from_people_directory( response[ 0 ] );
+				}
+			} );
+		}
 
 		// Add a repeatable field.
 		$( ".wsuwp-profile-add-repeatable" ).on( "click", "a", function( e ) {
@@ -202,7 +215,7 @@
 				"action": "wsu_people_get_data_by_nid",
 				"_ajax_nonce": window.wsupeople.nid_nonce,
 				"network_id": $nid.val(),
-				"source": window.wsupeople.request_from,
+				"request_from": window.wsupeople.request_from,
 				"is_refresh": ( $( e.target ).is( "#refresh-ad-data" ) ) ? "true" : "false"
 			};
 
@@ -224,9 +237,6 @@
 						$phone.html( response.data.telephone_number );
 						$email.html( response.data.email );
 						$hash.val( response.data.confirm_ad_hash );
-
-						// Give the post a slug so the preview permalink works if a draft is saved.
-						$slug_field.val( response.data.given_name.toLowerCase() + "-" + response.data.surname.toLowerCase() );
 					}
 				} else {
 					window.alert( response.data );
@@ -259,7 +269,7 @@
 				"network_id": $nid.val(),
 				"confirm_ad_hash": $hash.val(),
 				"post_id": $( "#post_ID" ).val(),
-				"source": window.wsupeople.request_from
+				"request_from": window.wsupeople.request_from
 			};
 
 			var $description = $( ".load-ad-container .description" ),
@@ -302,7 +312,6 @@
 		var media_frame,
 			details_frame,
 			$add_photo = $( ".wsuwp-profile-add-photo" ),
-			$collection = $( ".wsuwp-profile-photo-collection" ),
 			$tooltip = $( ".wsuwp-profile-photo-controls-tooltip" );
 
 		// Handle photo adding.
