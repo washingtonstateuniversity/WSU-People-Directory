@@ -80,6 +80,11 @@
 	text-align: right;
 }
 
+.refresh-card .spinner {
+	float: none;
+	margin-top: -4px;
+}
+
 /* Phone and extension fields */
 .phone-fields {
 	display: table;

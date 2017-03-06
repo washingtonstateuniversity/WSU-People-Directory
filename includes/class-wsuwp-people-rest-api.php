@@ -32,6 +32,7 @@ class WSUWP_People_REST_API {
 		add_action( 'init', array( $this, 'show_people_in_rest' ), 12 );
 		add_action( 'rest_api_init', array( $this, 'register_api_fields' ) );
 		add_filter( 'rest_prepare_' . WSUWP_People_Post_Type::$post_type_slug, array( $this, 'photos_api_field' ), 10, 2 );
+		add_action( 'init', array( $this, 'show_university_taxonomies_in_rest' ), 12 );
 
 		add_action( 'init', array( $this, 'register_wsu_nid_query_var' ) );
 		add_filter( 'rest_' . WSUWP_People_Post_Type::$post_type_slug . '_query', array( $this, 'rest_query_vars' ), 10, 2 );
@@ -90,7 +91,7 @@ class WSUWP_People_REST_API {
 			return esc_html( get_post_meta( $object['id'], WSUWP_People_Post_Type::$post_meta_keys[ $field_name ]['meta_key'], true ) );
 		}
 
-		if ( 'WSUWP_People_Directory::sanitize_repeatable_text_fields' === WSUWP_People_Post_Type::$post_meta_keys[ $field_name ]['sanitize_callback'] ) {
+		if ( 'WSUWP_People_Post_Type::sanitize_repeatable_text_fields' === WSUWP_People_Post_Type::$post_meta_keys[ $field_name ]['sanitize_callback'] ) {
 			$data = get_post_meta( $object['id'], WSUWP_People_Post_Type::$post_meta_keys[ $field_name ]['meta_key'], true );
 			if ( is_array( $data ) ) {
 				$data = array_map( 'esc_html', $data );
@@ -150,15 +151,35 @@ class WSUWP_People_REST_API {
 	public function photos_api_field( $response, $post ) {
 		$photos = get_post_meta( $post->ID, '_wsuwp_profile_photos', true );
 
-		foreach ( $photos as $photo_id ) {
-			$response->add_link(
-				'https://api.w.org/photos',
-				esc_url( rest_url( '/wp/v2/media/' . $photo_id ) ),
-				array( 'embeddable' => true )
-			);
+		if ( $photos ) {
+			foreach ( $photos as $photo_id ) {
+				$response->add_link(
+					'https://api.w.org/photos',
+					esc_url( rest_url( '/wp/v2/media/' . $photo_id ) ),
+					array( 'embeddable' => true )
+				);
+			}
 		}
 
 		return $response;
+	}
+
+	/**
+	 * Expose the University taxonomies in the REST API.
+	 *
+	 * @since 0.3.0
+	 */
+	public function show_university_taxonomies_in_rest() {
+		global $wp_taxonomies;
+
+		$wp_taxonomies['wsuwp_university_category']->show_in_rest = true;
+		$wp_taxonomies['wsuwp_university_category']->rest_base = 'university_category';
+
+		$wp_taxonomies['wsuwp_university_location']->show_in_rest = true;
+		$wp_taxonomies['wsuwp_university_location']->rest_base = 'location';
+
+		$wp_taxonomies['wsuwp_university_org']->show_in_rest = true;
+		$wp_taxonomies['wsuwp_university_org']->rest_base = 'organization';
 	}
 
 	/**

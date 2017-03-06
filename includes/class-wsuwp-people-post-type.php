@@ -332,21 +332,36 @@ class WSUWP_People_Post_Type {
 	public function admin_enqueue_scripts( $hook_suffix ) {
 		$screen = get_current_screen();
 
-		if ( ( 'post-new.php' === $hook_suffix || 'post.php' === $hook_suffix ) && self::$post_type_slug === $screen->post_type ) {
+		if ( self::$post_type_slug !== $screen->post_type ) {
+			return;
+		}
+
+		if ( 'post-new.php' === $hook_suffix || 'post.php' === $hook_suffix ) {
 			$post = get_post();
 			$profile_vars = array(
 				'nid_nonce' => wp_create_nonce( 'wsu-people-nid-lookup' ),
 				'post_id' => $post->ID,
+				'request_from' => ( apply_filters( 'wsuwp_people_display', true ) ) ? 'rest' : 'ad',
 			);
 
-			wp_enqueue_style( 'wsuwp-people-admin-style', plugins_url( 'css/admin-person.css', dirname( __FILE__ ) ), array(), WSUWP_People_Directory::$version );
-			wp_enqueue_script( 'wsuwp-people-admin-script', plugins_url( 'js/admin-person.min.js', dirname( __FILE__ ) ), array( 'jquery-ui-tabs', 'underscore' ), WSUWP_People_Directory::$version, true );
-			wp_localize_script( 'wsuwp-people-admin-script', 'wsupeople', $profile_vars );
+			// Make a REST request for data from people.wsu.edu when editing a person.
+			if ( 'post.php' === $hook_suffix && apply_filters( 'wsuwp_people_display', true ) ) {
+				$profile_vars['make_request'] = true;
+			}
+
+			wp_enqueue_style( 'wsuwp-people-admin', plugins_url( 'css/admin-person.css', dirname( __FILE__ ) ), array(), WSUWP_People_Directory::$version );
+			wp_enqueue_script( 'wsuwp-people-admin', plugins_url( 'js/admin-person.min.js', dirname( __FILE__ ) ), array( 'jquery-ui-tabs', 'underscore' ), WSUWP_People_Directory::$version, true );
+			wp_localize_script( 'wsuwp-people-admin', 'wsupeople', $profile_vars );
 		}
 
-		if ( 'edit.php' === $hook_suffix && self::$post_type_slug === $screen->post_type ) {
-			wp_enqueue_style( 'wsuwp-people-admin-style', plugins_url( 'css/admin-people.css', dirname( __FILE__ ) ), array(), WSUWP_People_Directory::$version );
-			wp_enqueue_script( 'wsuwp-people-admin-script', plugins_url( 'js/admin-people.min.js', dirname( __FILE__ ) ), array( 'jquery' ), WSUWP_People_Directory::$version );
+		// Disable autosaving on new people posts if this isn't people.wsu.edu.
+		if ( 'post-new.php' === $hook_suffix && apply_filters( 'wsuwp_people_display', true ) ) {
+			wp_dequeue_script( 'autosave' );
+		}
+
+		if ( 'edit.php' === $hook_suffix ) {
+			wp_enqueue_style( 'wsuwp-people-admin', plugins_url( 'css/admin-people.css', dirname( __FILE__ ) ), array(), WSUWP_People_Directory::$version );
+			wp_enqueue_script( 'wsuwp-people-admin', plugins_url( 'js/admin-people.min.js', dirname( __FILE__ ) ), array( 'jquery' ), WSUWP_People_Directory::$version );
 		}
 
 	}
@@ -479,6 +494,7 @@ class WSUWP_People_Post_Type {
 
 		wp_nonce_field( 'wsuwsp_profile', 'wsuwsp_profile_nonce' );
 
+		$nid = get_post_meta( $post->ID, '_wsuwp_profile_ad_nid', true );
 		$name_first = get_post_meta( $post->ID, '_wsuwp_profile_ad_name_first', true );
 		$name_last = get_post_meta( $post->ID, '_wsuwp_profile_ad_name_last', true );
 		$title = get_post_meta( $post->ID, '_wsuwp_profile_ad_title', true );
@@ -540,11 +556,12 @@ class WSUWP_People_Post_Type {
 			<?php endif; ?>
 		</div>
 
-		<?php if ( $name_first ) { ?>
+		<?php if ( ! apply_filters( 'wsuwp_people_display', true ) && $nid ) { ?>
 		<p class="refresh-card">
-			<span class="button" id="refresh-ad-data">Refresh</span>
-			<span class="button profile-hide-button" id="undo-ad-data-refresh">Undo</span>
-			<span class="button button-primary profile-hide-button" id="confirm-ad-data">Confirm</span>
+			<span class="spinner"></span>
+			<button class="button" id="refresh-ad-data">Refresh</button>
+			<button class="button profile-hide-button" id="undo-ad-data-refresh">Undo</button>
+			<button class="button button-primary profile-hide-button refresh" id="confirm-ad-data">Confirm</button>
 			<input type="hidden" id="confirm-ad-hash" name="confirm_ad_hash" value="">
 		</p>
 		<?php } ?>
@@ -637,8 +654,8 @@ class WSUWP_People_Post_Type {
 					<span class="spinner"></span>
 					<?php
 					if ( $can_publish && ( ! in_array( $post->post_status, array( 'publish', 'future', 'private' ), true ) || 0 === $post->ID ) ) { ?>
-						<span class="button" id="load-ad-data">Load</span>
-						<span class="button button-primary profile-hide-button" id="confirm-ad-data">Confirm</span>
+						<button class="button" id="load-ad-data">Load</button>
+						<button class="button button-primary profile-hide-button" id="confirm-ad-data">Confirm</button>
 						<input type="hidden" id="confirm-ad-hash" name="confirm_ad_hash" value="" />
 						<input name="original_publish" type="hidden" id="original_publish"
 							   value="<?php esc_attr_e( 'Publish' ); ?>"/>
@@ -694,13 +711,13 @@ class WSUWP_People_Post_Type {
 				<p>
 					<label>
 						<span><%= label %></span>
-						<input type="text" name="<%= name %>[]" value="" />
+						<input type="text" name="<%= name %>[]" value="<%= value %>" />
 						<a class="wsuwp-profile-remove-repeatable-field">Remove</a>
 					</label>
 				</p>
 			</script>
 
-			<div class="wsuwp-profile-repeatable-field">
+			<div class="wsuwp-profile-repeatable-field wsuwp-profile-titles">
 				<?php
 				if ( $titles && is_array( $titles ) ) {
 					foreach ( $titles as $title ) {
@@ -731,7 +748,7 @@ class WSUWP_People_Post_Type {
 				</p>
 			</div>
 
-			<div class="wsuwp-profile-repeatable-field">
+			<div class="wsuwp-profile-repeatable-field wsuwp-profile-degrees">
 				<?php
 				if ( $degrees && is_array( $degrees ) ) {
 					foreach ( $degrees as $degree ) {
@@ -758,7 +775,7 @@ class WSUWP_People_Post_Type {
 				}
 				?>
 				<p class="wsuwp-profile-add-repeatable">
-					<a data-label="Degree" data-name="_wsuwp_profile_degree"  href="#">+ Add another degree</a>
+					<a data-label="Degree" data-name="_wsuwp_profile_degree" href="#">+ Add another degree</a>
 				</p>
 			</div>
 		</div>
@@ -913,7 +930,6 @@ class WSUWP_People_Post_Type {
 	 * @return mixed
 	 */
 	public function save_post( $post_id ) {
-
 		if ( ! isset( $_POST['wsuwsp_profile_nonce'] ) || ! wp_verify_nonce( $_POST['wsuwsp_profile_nonce'], 'wsuwsp_profile' ) ) {
 			return $post_id;
 		}
@@ -923,6 +939,12 @@ class WSUWP_People_Post_Type {
 		}
 
 		if ( ! current_user_can( 'edit_post', $post_id ) ) {
+			return $post_id;
+		}
+
+		// Don't save any meta if this isn't people.wsu.edu.
+		// (We will store some data in the future.)
+		if ( apply_filters( 'wsuwp_people_display', true ) ) {
 			return $post_id;
 		}
 
@@ -940,6 +962,31 @@ class WSUWP_People_Post_Type {
 				update_post_meta( $post_id, $key, $_POST[ $key ] );
 			}
 		}
+	}
+
+	/**
+	 * Given a WSU Network ID, retrive information about a person from people.wsu.edu.
+	 *
+	 * @since 0.3.0
+	 *
+	 * @param string $nid The user's network ID.
+	 *
+	 * @return array List of predefined information we'll expect on the other side.
+	 */
+	private function get_person_data( $nid ) {
+		$request_url = 'https://people.wsu.edu/wp-json/wp/v2/people?_embed';
+		$request_url = add_query_arg( array( 'wsu_nid' => $nid ), $request_url );
+
+		$response = wp_remote_get( $request_url );
+
+		if ( is_wp_error( $response ) ) {
+			return false;
+		}
+
+		$data = wp_remote_retrieve_body( $response );
+		$data = json_decode( $data );
+
+		return $data[0];
 	}
 
 	/**
@@ -1006,7 +1053,7 @@ class WSUWP_People_Post_Type {
 	}
 
 	/**
-	 * Process an ajax request for AD information attached to a network ID. We'll return
+	 * Process an ajax request for information attached to a network ID. We'll return
 	 * the data here for confirmation. Confirmation will be handled elsewhere.
 	 *
 	 * @since 0.1.0
@@ -1020,7 +1067,30 @@ class WSUWP_People_Post_Type {
 			wp_send_json_error( 'Invalid or empty Network ID' );
 		}
 
-		$return_data = $this->get_nid_data( $nid );
+		// If this isn't a manual refresh, make sure the profile doesn't already exist.
+		if ( 'false' === $_POST['is_refresh'] ) {
+
+			$nid_query = new WP_Query( array(
+				'meta_key' => '_wsuwp_profile_ad_nid',
+				'meta_value' => $nid,
+				'post_type' => self::$post_type_slug,
+				'posts_per_page' => -1,
+			) );
+
+			if ( 0 < $nid_query->found_posts ) {
+				wp_send_json_error( 'A profile for this person already exists' );
+			}
+		}
+
+		// Try to retrieve a person from people.wsu.edu first.
+		// We do this in here so the above check for existing profiles can be performed.
+		if ( 'rest' === $_POST['request_from'] ) {
+			$return_data = $this->get_rest_data( $nid );
+		}
+
+		if ( ! $return_data || 'ad' === $_POST['request_from'] ) {
+			$return_data = $this->get_nid_data( $nid );
+		}
 
 		wp_send_json_success( $return_data );
 	}
@@ -1043,7 +1113,7 @@ class WSUWP_People_Post_Type {
 		// Data is sanitized before return.
 		$confirm_data = $this->get_nid_data( $nid );
 
-		if ( $confirm_data['confirm_ad_hash'] !== $_POST['confirm_ad_hash'] ) {
+		if ( 'ad' === $_POST['request_from'] && $confirm_data['confirm_ad_hash'] !== $_POST['confirm_ad_hash'] ) {
 			wp_send_json_error( 'Previously retrieved data does not match the data attached to this network ID.' );
 		}
 
@@ -1054,13 +1124,17 @@ class WSUWP_People_Post_Type {
 		$post_id = $_POST['post_id'];
 
 		update_post_meta( $post_id, '_wsuwp_profile_ad_nid', $nid );
-		update_post_meta( $post_id, '_wsuwp_profile_ad_name_first', $confirm_data['given_name'] );
-		update_post_meta( $post_id, '_wsuwp_profile_ad_name_last', $confirm_data['surname'] );
-		update_post_meta( $post_id, '_wsuwp_profile_ad_title', $confirm_data['title'] );
-		update_post_meta( $post_id, '_wsuwp_profile_ad_office', $confirm_data['office'] );
-		update_post_meta( $post_id, '_wsuwp_profile_ad_address', $confirm_data['street_address'] );
-		update_post_meta( $post_id, '_wsuwp_profile_ad_phone', $confirm_data['telephone_number'] );
-		update_post_meta( $post_id, '_wsuwp_profile_ad_email', $confirm_data['email'] );
+
+		// Only save this meta on people.wsu.edu
+		if ( ! apply_filters( 'wsuwp_people_display', true ) ) {
+			update_post_meta( $post_id, '_wsuwp_profile_ad_name_first', $confirm_data['given_name'] );
+			update_post_meta( $post_id, '_wsuwp_profile_ad_name_last', $confirm_data['surname'] );
+			update_post_meta( $post_id, '_wsuwp_profile_ad_title', $confirm_data['title'] );
+			update_post_meta( $post_id, '_wsuwp_profile_ad_office', $confirm_data['office'] );
+			update_post_meta( $post_id, '_wsuwp_profile_ad_address', $confirm_data['street_address'] );
+			update_post_meta( $post_id, '_wsuwp_profile_ad_phone', $confirm_data['telephone_number'] );
+			update_post_meta( $post_id, '_wsuwp_profile_ad_email', $confirm_data['email'] );
+		}
 
 		wp_send_json_success( 'Updated' );
 	}

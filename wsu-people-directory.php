@@ -65,15 +65,6 @@ function WSUWP_People_REST_API() {
 }
 
 /**
- * Retrieve the instance of the settings page.
- *
- * @return WSUWP_People_Display_Admin_Settings
- */
-function WSUWP_People_Display_Settings() {
-	return WSUWP_People_Display_Settings::get_instance();
-}
-
-/**
  * Retrieve the instance of the frontend handler.
  *
  * @return WSUWP_People_Display_Settings
