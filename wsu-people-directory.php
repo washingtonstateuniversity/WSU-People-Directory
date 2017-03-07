@@ -76,10 +76,10 @@ function WSUWP_People_Directory_Page_Template() {
 }
 
 /**
- * Retrieve the instance of the frontend handler.
+ * Retrieve the instance of the Person Display handler.
  *
- * @return WSUWP_People_Display_Settings
+ * @return WSUWP_Person_Display
  */
-function WSUWP_People_Display_Frontend() {
-	return WSUWP_People_Display_Frontend::get_instance();
+function WSUWP_Person_Display() {
+	return WSUWP_Person_Display::get_instance();
 }
