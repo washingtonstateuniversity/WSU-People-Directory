@@ -79,6 +79,7 @@ class WSUWP_People_Directory_Page_Template {
 		add_action( 'save_post_page', array( $this, 'save_post' ), 10, 2 );
 
 		add_filter( 'theme_page_templates', array( $this, 'add_directory_template' ) );
+		add_filter( 'template_include', array( $this, 'template_include' ) );
 	}
 
 	/**
@@ -299,5 +300,69 @@ class WSUWP_People_Directory_Page_Template {
 		$posts_templates = array_merge( $posts_templates, $this->template );
 
 		return $posts_templates;
+	}
+
+	/**
+	 * Check if a theme is providing its own directory template.
+	 *
+	 * @since 0.3.0
+	 *
+	 * @return string Path to the template file.
+	 */
+	public function theme_has_template() {
+		return locate_template( 'wsu-people-templates/people.php' );
+	}
+
+	/**
+	 * Determine which template to use and enqueue dependencies if needed.
+	 *
+	 * @since 0.3.0
+	 *
+	 * @param string $template The path of the template to include.
+	 *
+	 * @return string
+	 */
+	public function template_include( $template ) {
+		$post = get_post();
+
+		if ( key( $this->template ) !== get_page_template_slug( $post->ID ) ) {
+			return $template;
+		}
+
+		// If a theme has a directory template, use it.
+		if ( $this->theme_has_template() ) {
+			return $this->theme_has_template();
+		}
+
+		// Enqueue styles and scripts if appropriate.
+		if ( 'custom' !== get_post_meta( $post->ID, '_wsu_people_directory_layout', true ) ) {
+			wp_enqueue_style( 'wsu-people', plugin_dir_url( dirname( __FILE__ ) ) . 'css/people.css', array(), WSUWP_People_Directory::$version );
+			wp_enqueue_script( 'wsu-people', plugin_dir_url( dirname( __FILE__ ) ) . 'js/people.min.js', array( 'jquery' ), WSUWP_People_Directory::$version );
+		}
+
+		add_filter( 'the_content', array( $this, 'directory_content' ) );
+
+		return trailingslashit( get_template_directory() ) . 'templates/single.php';
+	}
+
+	/**
+	 * Display the list of people as defined by the directory page.
+	 *
+	 * @since 0.3.0
+	 *
+	 * @param string $content Current post content.
+	 *
+	 * @return string Modified content.
+	 */
+	public function directory_content( $content ) {
+		remove_filter( 'the_content', array( $this, 'directory_content' ) );
+
+		ob_start();
+
+		include plugin_dir_path( dirname( __FILE__ ) ) . 'templates/people.php';
+
+		$content = ob_get_clean();
+
+		return $content;
 	}
 }
