@@ -9,6 +9,15 @@ class WSUWP_People_Directory_Page_Template {
 	private static $instance;
 
 	/**
+	 * The people directory page template slug and name.
+	 *
+	 * @since 0.3.0
+	 *
+	 * @var array
+	 */
+	var $template = array( 'templates/people.php' => 'People Directory' );
+
+	/**
 	 * A list of post meta keys associated with a directory page.
 	 *
 	 * @since 0.3.0
@@ -68,6 +77,8 @@ class WSUWP_People_Directory_Page_Template {
 		add_action( 'admin_enqueue_scripts', array( $this, 'admin_enqueue_scripts' ) );
 		add_action( 'add_meta_boxes_page', array( $this, 'add_meta_boxes' ) );
 		add_action( 'save_post_page', array( $this, 'save_post' ), 10, 2 );
+
+		add_filter( 'theme_page_templates', array( $this, 'add_directory_template' ) );
 	}
 
 	/**
@@ -273,5 +284,20 @@ class WSUWP_People_Directory_Page_Template {
 				update_post_meta( $post_id, $key, $_POST[ $key ] );
 			}
 		}
+	}
+
+	/**
+	 * Add a "People Directory" option to the page template drop-down.
+	 *
+	 * @since 0.3.0
+	 *
+	 * @param array $posts_templates Page templates.
+	 *
+	 * @return array
+	 */
+	public function add_directory_template( $posts_templates ) {
+		$posts_templates = array_merge( $posts_templates, $this->template );
+
+		return $posts_templates;
 	}
 }
