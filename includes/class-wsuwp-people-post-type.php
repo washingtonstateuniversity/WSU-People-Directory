@@ -342,6 +342,7 @@ class WSUWP_People_Post_Type {
 				'nid_nonce' => wp_create_nonce( 'wsu-people-nid-lookup' ),
 				'post_id' => $post->ID,
 				'request_from' => ( apply_filters( 'wsuwp_people_display', true ) ) ? 'rest' : 'ad',
+				'rest_url' => WSUWP_People_Directory::REST_URL(),
 			);
 
 			// Make a REST request for data from people.wsu.edu when editing a person.
@@ -973,9 +974,14 @@ class WSUWP_People_Post_Type {
 	 *
 	 * @return array List of predefined information we'll expect on the other side.
 	 */
-	private function get_person_data( $nid ) {
-		$request_url = 'https://people.wsu.edu/wp-json/wp/v2/people?_embed';
-		$request_url = add_query_arg( array( 'wsu_nid' => $nid ), $request_url );
+	private function get_rest_data( $nid ) {
+		$request_url = add_query_arg(
+			array(
+				'_embed' => true,
+				'wsu_nid' => $nid,
+			),
+			WSUWP_People_Directory::REST_URL()
+		);
 
 		$response = wp_remote_get( $request_url );
 

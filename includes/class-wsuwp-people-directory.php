@@ -57,4 +57,18 @@ class WSUWP_People_Directory {
 			add_action( 'init', 'WSUWP_Person_Display' );
 		}
 	}
+
+	/**
+	 * The REST request URL.
+	 *
+	 * @since 0.3.0
+	 *
+	 * @return string
+	 */
+	public static function REST_URL() {
+
+		$default = 'https://people.wsu.edu/wp-json/wp/v2/people';
+
+		return apply_filters( 'wsu_people_directory_rest_url', $default );
+	}
 }

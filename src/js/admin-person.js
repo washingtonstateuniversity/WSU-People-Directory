@@ -162,8 +162,11 @@
 		// Make a REST request to populate a person with data from people.wsu.edu
 		if ( window.wsupeople.make_request ) {
 			jQuery.ajax( {
-				url: "https://people.wsu.edu/wp-json/wp/v2/people?_embed",
-				data: { wsu_nid: $nid.val() }
+				url: window.wsupeople.rest_url,
+				data: {
+					_embed: true,
+					wsu_nid: $nid.val()
+				}
 			} ).done( function( response ) {
 				if ( response.length !== 0 ) {
 					populate_from_people_directory( response[ 0 ] );
