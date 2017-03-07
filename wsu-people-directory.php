@@ -47,7 +47,7 @@ function WSUWP_People_Post_Type() {
  *
  * @since 0.3.0
  *
- * @return WSUWP_People_Taxonomies
+ * @return WSUWP_People_Classification_Taxonomy
  */
 function WSUWP_People_Classification_Taxonomy() {
 	return WSUWP_People_Classification_Taxonomy::get_instance();
@@ -62,6 +62,17 @@ function WSUWP_People_Classification_Taxonomy() {
  */
 function WSUWP_People_REST_API() {
 	return WSUWP_People_REST_API::get_instance();
+}
+
+/**
+ * Retrieve the instance of the People Directory page template.
+ *
+ * @since 0.3.0
+ *
+ * @return WSUWP_People_Directory_Page_Template
+ */
+function WSUWP_People_Directory_Page_Template() {
+	return WSUWP_People_Directory_Page_Template::get_instance();
 }
 
 /**

@@ -1,0 +1,15 @@
+#wsuwp-people-directory-configuration {
+	display: none;
+}
+
+.wsu-person-controls {
+	display: none;
+}
+
+.wsu-person .card {
+	background: none;
+	border: none;
+	box-shadow: 0;
+	max-width: none;
+	min-width: 200px;
+}

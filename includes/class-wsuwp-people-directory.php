@@ -50,8 +50,10 @@ class WSUWP_People_Directory {
 		}
 
 		if ( apply_filters( 'wsuwp_people_display', true ) ) {
+			require_once( dirname( __FILE__ ) . '/class-wsuwp-people-directory-page-template.php' );
 			require_once( dirname( __FILE__ ) . '/class-wsuwp-people-display-frontend.php' );
 
+			add_action( 'init', 'WSUWP_People_Directory_Page_Template' );
 			add_action( 'init', 'WSUWP_People_Display_Frontend' );
 		}
 	}

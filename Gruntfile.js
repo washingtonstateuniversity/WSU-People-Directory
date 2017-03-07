@@ -16,6 +16,10 @@ module.exports = function( grunt ) {
                     } )
                 ]
             },
+            admin_page: {
+                src: "src/css/admin-page.css",
+                dest: "css/admin-page.css"
+            },
             admin_people: {
                 src: "src/css/admin-people.css",
                 dest: "css/admin-people.css"
@@ -88,6 +92,10 @@ module.exports = function( grunt ) {
         },
 
         uglify: {
+            admin_page: {
+                src: "src/js/admin-page.js",
+                dest: "js/admin-page.min.js"
+            },
             admin_people: {
                 src: "src/js/admin-people.js",
                 dest: "js/admin-people.min.js"
