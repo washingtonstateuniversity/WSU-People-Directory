@@ -1,33 +1,61 @@
 <?php
-$profile = get_query_var( WSUWP_People_Post_Type::$post_type_slug );
+$post = get_post();
+$nid = get_post_meta( $post->ID, '_wsuwp_profile_ad_nid', true );
+$link = trailingslashit( $base_url . $post->post_name );
 
-// @todo Implement some kind of validation that the profile should indeed be accessible on this site.
+$profile = get_query_var( 'person' );
 
-$photo = false;
-// Array madness to sort out
-$title = ( $alt_title = get_post_meta( get_the_ID(), '_wsuwp_profile_title', true ) ) ? $alt_title[0] : get_post_meta( get_the_ID(), '_wsuwp_profile_ad_title', true );
-$email = ( $alt_email = get_post_meta( get_the_ID(), '_wsuwp_profile_email', true ) ) ? $alt_email : get_post_meta( get_the_ID(), '_wsuwp_profile_ad_email', true );
-$office = ( $alt_office = get_post_meta( get_the_ID(), '_wsuwp_profile_office', true ) ) ? $alt_office : get_post_meta( get_the_ID(), '_wsuwp_profile_ad_office', true );
-$address = ( $alt_address = get_post_meta( get_the_ID(), '_wsuwp_profile_email', true ) ) ? $alt_address : get_post_meta( get_the_ID(), '_wsuwp_profile_ad_address', true );
-$phone = ( $alt_phone = get_post_meta( get_the_ID(), '_wsuwp_profile_email', true ) ) ? $alt_phone : get_post_meta( get_the_ID(), '_wsuwp_profile_ad_phone', true );
-$phone_ext = get_post_meta( get_the_ID(), '_wsuwp_profile_ad_phone_ext', true );
-$classifications = wp_get_post_terms( get_the_ID(), WSUWP_People_Classification_Taxonomy::$taxonomy_slug, array( 'fields' => 'names' ) );
+$request_url = add_query_arg(
+	array(
+		'_embed' => true,
+		'wsu_nid' => $nid,
+	),
+	WSUWP_People_Directory::REST_URL()
+);
 
+$response = wp_remote_get( $request_url );
+
+if ( is_wp_error( $response ) ) {
+	return '';
+}
+$data = wp_remote_retrieve_body( $response );
+
+if ( empty( $data ) ) {
+	return '';
+}
+
+$person = json_decode( $data );
+
+if ( empty( $person ) ) {
+	return '';
+}
+
+$person = $person[0];
+$name = $person->title->rendered;
+
+$title = ( isset( $person->working_titles[0] ) ) ? $person->working_titles[0] : $person->position_title;
+$email = ( ! empty( $person->email_alt ) ) ? $person->email_alt : $person->email;
+$phone = ( ! empty( $person->phone_alt ) ) ? $person->phone_alt : $person->phone; // We provide a field for phone extension, but I'm not sure if it's used.
+$office = ( ! empty( $person->office_alt ) ) ? $person->office_alt : $person->office;
+$address = $person->address;
+$photo = $person->profile_photo;
+$degrees = ( ! empty( $person->degrees ) ) ? $person->degrees : false;
+$website = $person->website;
 ?>
-<article class="wsu-person<?php if ( $photo ) { echo ' has-photo'; } ?>">
+<article class="wsu-person<?php if ( $photo ) { echo ' has-photo'; } ?>"<?php if ( is_admin() ) { ?> data-nid="<?php echo esc_attr( $nid ); ?>"<?php } ?>>
 
 	<div class="card">
 
 		<?php if ( $profile ) { ?>
-		<h1 class="name"><?php the_title(); ?></h1>
+		<h1 class="name"><?php echo esc_html( $person->title->rendered ); ?></h1>
 		<?php } else { ?>
 		<h2 class="name">
-			<a href="<?php the_permalink(); ?>"><?php the_title(); ?></a>
+			<a href="<?php echo esc_url( $link ); ?>"><?php echo esc_html( $person->title->rendered ); ?></a>
 		</h2>
 		<?php } ?>
 
 		<?php if ( ! $profile && in_array( 'photos', $wrapper_classes, true ) && $photo ) { ?>
-		<a class="photo" href="#">
+		<a class="photo" href="<?php echo esc_url( $link ); ?>">
 			<img src="https://people.wsu.edu/wp-content/uploads/sites/908/2015/07/HeadShot_Template2.jpg"
 				 data-photo="<?php echo esc_url( $photo ); ?>"
 				 alt="<?php echo esc_attr( $person->title->rendered ); ?>" />
@@ -35,19 +63,29 @@ $classifications = wp_get_post_terms( get_the_ID(), WSUWP_People_Classification_
 		<?php } ?>
 
 		<div class="contact">
-			<div class="title"><?php echo esc_html( $title ); ?></div>
-			<div class="email"><a href="mailto:<?php echo esc_attr( $email ); ?>"><?php echo esc_html( $email ); ?></a></div>
-			<div class="phone"><?php echo esc_html( $phone ); ?></div>
-			<div class="office"><?php echo esc_html( $office ); ?></div>
-			<?php if ( ! empty( $address ) ) { echo '<div class="address">' . esc_html( $address ) . '</div>'; } ?>
-			<?php if ( ! empty( $website ) ) { echo '<div class="website"><a href="' . esc_url( $website ) . '">' . esc_html( $website ) . '</a></div>'; } ?>
+			<span class="title"><?php echo esc_html( $title ); ?></span>
+			<span class="email"><a href="mailto:<?php echo esc_attr( $email ); ?>"><?php echo esc_html( $email ); ?></a></span>
+			<span class="phone"><?php echo esc_html( $phone ); ?></span>
+			<span class="office"><?php echo esc_html( $office ); ?></span>
+			<?php if ( ! empty( $address ) ) { echo '<span class="address">' . esc_html( $address ) . '</span>'; } ?>
+			<?php if ( ! empty( $website ) ) { echo '<span class="website"><a href="' . esc_url( $website ) . '">' . esc_html( $website ) . '</a></span>'; } ?>
 		</div>
 
 	</div>
 
 	<div class="about">
-		<?php the_content(); ?>
+		<?php echo apply_filters( 'the_content', $person->content->rendered ); ?>
 	</div>
 
+	<?php if ( is_admin() ) { ?>
+	<div class="wsu-person-controls">
+		<button class="wsu-person-edit" aria-label="Edit">
+			<span class="dashicons dashicons-edit"></span>
+		</button>
+		<button class="wsu-person-remove" aria-label="Remove">
+			<span class="dashicons dashicons-no"></span>
+		</button>
+	</div>
+	<?php } ?>
+
 </article>
-<?php

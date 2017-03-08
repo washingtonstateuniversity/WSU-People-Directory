@@ -46,7 +46,7 @@ class WSUWP_People_Directory_Page_Template {
 			'sanitize_callback' => 'sanitize_text_field',
 		),
 		'_wsu_people_directory_show_photos' => array(
-			'type' => 'string',
+			'type' => 'boolean',
 			'description' => 'Whether to show photos on this people listing',
 			'sanitize_callback' => 'sanitize_text_field',
 		),
@@ -109,9 +109,11 @@ class WSUWP_People_Directory_Page_Template {
 			return;
 		}
 
-		wp_enqueue_style( 'wsuwp-people', plugins_url( 'css/people.css', dirname( __FILE__ ) ), array(), WSUWP_People_Directory::$version );
+		wp_enqueue_style( 'wsuwp-people-display', plugins_url( 'css/people.css', dirname( __FILE__ ) ), array(), WSUWP_People_Directory::$version );
 		wp_enqueue_style( 'wsuwp-people-admin', plugins_url( 'css/admin-page.css', dirname( __FILE__ ) ), array(), WSUWP_People_Directory::$version );
-		wp_enqueue_script( 'wsuwp-people-admin', plugins_url( 'js/admin-page.min.js', dirname( __FILE__ ) ), array( 'jquery', 'underscore' ), WSUWP_People_Directory::$version, true );
+		wp_enqueue_script( 'wsuwp-people-admin', plugins_url( 'js/admin-page.min.js', dirname( __FILE__ ) ), array( 'jquery', 'underscore', 'jquery-ui-autocomplete', 'jquery-ui-sortable' ), WSUWP_People_Directory::$version, true );
+		wp_localize_script( 'wsuwp-people-admin', 'wsupeople', array( 'rest_url' => WSUWP_People_Directory::REST_URL() ) );
+
 	}
 
 	/**
@@ -149,8 +151,9 @@ class WSUWP_People_Directory_Page_Template {
 		?>
 			<p>
 				<label for="wsu-people-import">Import/add people</label>
-				<input type="text"
-					   id="wsu-people-import"
+				<input type="text" id="wsu-people-import" value="" />
+				<input type="hidden"
+					   id="directory-page-nids"
 					   name="_wsu_people_directory_nids"
 					   value="<?php echo esc_attr( $nids ); ?>" />
 			</p>
@@ -158,58 +161,45 @@ class WSUWP_People_Directory_Page_Template {
 			<p>
 				<label for="wsu-people-directory-layout">Layout</label>
 				<select id="wsu-people-directory-layout" name="_wsu_people_directory_layout">
-					<option value="table">Table</option>
-					<option value="grid">Grid</option>
-					<option value="custom">Custom (provide your own CSS)</option>
+					<option value="table"<?php selected( 'table', $layout ); ?>>Table</option>
+					<option value="grid"<?php selected( 'grid', $layout ); ?>>Grid</option>
+					<option value="custom"<?php selected( 'custom', $layout ); ?>>Custom (provide your own CSS)</option>
 				</select>
 			</p>
 
 			<p>
 				<label for="wsu-people-directory-link">Link to full profiles</label>
 				<select id="wsu-people-directory-link" name="_wsu_people_directory_link">
-					<option value="if_bio">If the person has a biography</option>
-					<option value="yes">Yes</option>
-					<option value="no">No</option>
+					<option value="if_bio"<?php selected( 'if_bio', $link ); ?>>If the person has a biography</option>
+					<option value="yes"<?php selected( 'yes', $link ); ?>>Yes</option>
+					<option value="no"<?php selected( 'no', $link ); ?>>No</option>
 				</select>
 			</p>
 
 			<p>
 				<label for="wsu-people-directory-profile">Open full profiles in a</label>
 				<select id="wsu-people-directory-profile" name="_wsu_people_directory_profile">
-					<option value="page">Page</option>
-					<option value="lightbox">Lightbox</option>
+					<option value="page"<?php selected( 'page', $profile ); ?>>Page</option>
+					<option value="lightbox"<?php selected( 'lightbox', $profile ); ?>>Lightbox</option>
 				</select>
 			</p>
 
 			<p>
 				<label for="wsu-people-directory-show-photos">Show photos</label>
-				<input type="checkbox" id="wsu-people-directory-show-photos" name="_wsu_people_directory_show_photos" value="1">
+				<input type="checkbox" id="wsu-people-directory-show-photos" name="_wsu_people_directory_show_photos" value="1" <?php checked( true, $photos ); ?> />
 			</p>
 
 			<script type="text/template" id="wsu-person-template">
 
-				<article class="wsu-person<%= has_photo %>">
-
-					<div class="wsu-person-controls">
-
-						<label>
-							<span class="screen-reader-text">Select for bulk action</span>
-							<input type="checkbox">
-						</label>
-
-						<a class="wsu-person-edit">Edit</a>
-
-						<a class="wsu-person-remove">Remove</a>
-
-					</div>
+				<article class="wsu-person<%= has_photo %>" data-nid="<%= nid %>">
 
 					<div class="card">
 
 						<h2 class="name">
-							<a href="<%= link %>"><%= name %></a>
+							<a href="<?php echo esc_url( get_permalink( $post->ID ) ); ?><%= slug %>"><%= name %></a>
 						</h2>
 
-						<a class="photo" href="<%= link %>">
+						<a class="photo" href="<?php echo esc_url( get_permalink( $post->ID ) ); ?><%= slug %>">
 							<img src="https://people.wsu.edu/wp-content/uploads/sites/908/2015/07/HeadShot_Template2.jpg"
 								 data-photo="<%= photo %>"
 								 alt="<%= name %>" />
@@ -228,6 +218,15 @@ class WSUWP_People_Directory_Page_Template {
 
 					<div class="about"><%= content %></div>
 
+					<div class="wsu-person-controls">
+						<button class="wsu-person-edit" aria-label="Edit">
+							<span class="dashicons dashicons-edit"></span>
+						</button>
+						<button class="wsu-person-remove" aria-label="Remove">
+							<span class="dashicons dashicons-no"></span>
+						</button>
+					</div>
+
 				</article>
 
 			</script>
@@ -242,12 +241,50 @@ class WSUWP_People_Directory_Page_Template {
 			}
 
 			?>
+
+			<div class="wsu-people-bulk-actions">
+
+				<button type="button" class="button toggle-select-mode">Bulk Select</button>
+
+				<button type="button" class="button button-primary delete-selected-people">Delete Selected</button>
+
+			</div>
+
 			<div class="<?php echo esc_html( implode( ' ', $wrapper_classes ) ); ?>">
 
 				<div class="wsu-people">
+
 					<?php
-						// Draggable/droppable people listing
+					if ( $nids ) {
+						$nids = explode( ' ', $nids );
+
+						$people_query_args = array(
+							'post_type' => WSUWP_People_Post_Type::$post_type_slug,
+							'posts_per_page' => count( $nids ),
+							'meta_key' => "order_on_page_{$post->ID}",
+							'orderby' => 'meta_value_num',
+							'order' => 'asc',
+							'meta_query' => array(
+								array(
+									'meta_key' => '_wsuwp_profile_ad_nid',
+									'meta_value' => $nids,
+									'meta_compare' => 'in',
+								),
+							),
+						);
+
+						$people = new WP_Query( $people_query_args );
+
+						if ( $people->have_posts() ) {
+							while ( $people->have_posts() ) {
+								$people->the_post();
+								include plugin_dir_path( dirname( __FILE__ ) ) . 'templates/person.php';
+							}
+							wp_reset_postdata();
+						}
+					}
 					?>
+
 				</div>
 
 			</div>
@@ -284,6 +321,76 @@ class WSUWP_People_Directory_Page_Template {
 				// Each piece of meta is registered with sanitization.
 				update_post_meta( $post_id, $key, $_POST[ $key ] );
 			}
+		}
+
+		// Save order data of the associated profiles.
+		if ( isset( $_POST['_wsu_people_directory_nids'] ) ) {
+			$nids = explode( ' ', $_POST['_wsu_people_directory_nids'] );
+
+			foreach ( $nids as $index => $nid ) {
+
+				$person_query_args = array(
+					'post_type' => WSUWP_People_Post_Type::$post_type_slug,
+					'posts_per_page' => 1,
+					'meta_key' => '_wsuwp_profile_ad_nid',
+					'meta_value' => $nid,
+					'fields' => 'ids',
+				);
+
+				$person = get_posts( $person_query_args );
+
+				if ( $person ) {
+					foreach ( $person as $person ) {
+						update_post_meta( $person, "order_on_page_{$post_id}", $index );
+					}
+				} else {
+					// If no matching NID is found, save the profile.
+					$this->save_person( $nid, $post_id, $index );
+				}
+			}
+		}
+	}
+
+	/**
+	 * Save a person who has been added to a directory page.
+	 *
+	 * @param string $nid     The person's netID.
+	 * @param int    $page_id ID of the page this person is associated with.
+	 * @param order  $order   The person's order on the page.
+	 */
+	private function save_person( $nid, $page_id, $order ) {
+		$person = WSUWP_People_Post_Type::get_rest_data( $nid );
+
+		if ( $person ) {
+			$tags = array();
+			$taxonomy_data = array();
+
+			foreach ( $person->_embedded->{'wp:term'} as $term ) {
+				if ( ! $term ) {
+					continue;
+				}
+
+				if ( 'post_tag' === $term[0]->taxonomy ) {
+					$tags[] = $term[0]->slug;
+				} else {
+					$taxonomy_data[ $term[0]->taxonomy ][] = $term[0]->slug;
+				}
+			}
+
+			$person_data = array(
+				'post_title' => wp_strip_all_tags( $person->title->rendered ),
+				'post_content' => '',
+				'post_status' => 'publish',
+				'post_type' => WSUWP_People_Post_Type::$post_type_slug,
+				'meta_input' => array(
+					'_wsuwp_profile_ad_nid' => $nid,
+					"order_on_page_{$page_id}" => absint( $order ),
+				),
+				'tags_input' => $tags,
+				'tax_input' => $taxonomy_data,
+			);
+
+			wp_insert_post( $person_data );
 		}
 	}
 

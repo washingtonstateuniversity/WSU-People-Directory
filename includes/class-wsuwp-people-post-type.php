@@ -974,7 +974,7 @@ class WSUWP_People_Post_Type {
 	 *
 	 * @return array List of predefined information we'll expect on the other side.
 	 */
-	private function get_rest_data( $nid ) {
+	public static function get_rest_data( $nid ) {
 		$request_url = add_query_arg(
 			array(
 				'_embed' => true,
@@ -1091,7 +1091,7 @@ class WSUWP_People_Post_Type {
 		// Try to retrieve a person from people.wsu.edu first.
 		// We do this in here so the above check for existing profiles can be performed.
 		if ( 'rest' === $_POST['request_from'] ) {
-			$return_data = $this->get_rest_data( $nid );
+			$return_data = self::get_rest_data( $nid );
 		}
 
 		if ( ! $return_data || 'ad' === $_POST['request_from'] ) {

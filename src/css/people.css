@@ -138,15 +138,11 @@ input[type="search"]::-webkit-search-decoration {
 
 .table .wsu-people {
 	border-bottom: 1px solid #ddd;
-	border-collapse: collapse;
-	display: table;
-	table-layout: fixed;
-	width: 100%;
 }
 
 .table .wsu-person {
 	border-top: 1px solid #ddd;
-	display: table-row;
+	display: flex;
 }
 
 .table .wsu-person:nth-of-type(odd) {
@@ -160,7 +156,6 @@ input[type="search"]::-webkit-search-decoration {
 .table .card,
 .table .about {
 	box-sizing: border-box;
-	display: table-cell;
 	padding: 1rem;
 }
 
@@ -194,6 +189,10 @@ input[type="search"]::-webkit-search-decoration {
 
 .table .contact span {
 	display: block;
+}
+
+.table .about {
+	flex: 1 0 0;
 }
 
 @media only screen and ( max-width: 693px ) {
