@@ -350,6 +350,11 @@ class WSUWP_People_Directory_Page_Template {
 				}
 			}
 		}
+
+		// Set a flag to flush rewrite rules if this page is using the people directory template.
+		if ( isset( $_POST['page_template'] ) && key( self::$template ) === $_POST['page_template'] ) {
+			set_transient( 'wsuwp_people_directory_flush_rewrites', true );
+		}
 	}
 
 	/**
