@@ -245,7 +245,7 @@ class WSUWP_People_Post_Type {
 		add_action( 'add_meta_boxes_' . self::$post_type_slug, array( $this, 'add_meta_boxes' ) );
 		add_action( 'do_meta_boxes', array( $this, 'do_meta_boxes' ), 10, 3 );
 
-		add_action( 'save_post_' . self::$post_type_slug, array( $this, 'save_post' ), 10, 2 );
+		add_action( 'save_post_' . self::$post_type_slug, array( $this, 'save_post' ) );
 
 		add_action( 'wp_ajax_wsu_people_get_data_by_nid', array( $this, 'ajax_get_data_by_nid' ) );
 		add_action( 'wp_ajax_wsu_people_confirm_nid_data', array( $this, 'ajax_confirm_nid_data' ) );
@@ -461,10 +461,8 @@ class WSUWP_People_Post_Type {
 	 * Add the meta boxes used for capturing information about a person.
 	 *
 	 * @since 0.1.0
-	 *
-	 * @param string $post_type The slug of the current post type.
 	 */
-	public function add_meta_boxes( $post_type ) {
+	public function add_meta_boxes() {
 		add_meta_box(
 			'wsuwp_profile_additional_info',
 			'Additional Profile Information',
