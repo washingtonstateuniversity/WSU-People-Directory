@@ -105,7 +105,7 @@ class WSUWP_People_Directory_Page_Template {
 	public function admin_enqueue_scripts( $hook_suffix ) {
 		$screen = get_current_screen();
 
-		if ( 'page' !== $screen->post_type && ( 'post-new.php' !== $hook_suffix || 'post.php' !== $hook_suffix ) ) {
+		if ( 'page' !== $screen->post_type || ! in_array( $hook_suffix, array( 'post.php', 'post-new.php' ), true ) ) {
 			return;
 		}
 
