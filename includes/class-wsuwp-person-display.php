@@ -35,17 +35,32 @@ class WSUWP_Person_Display {
 	}
 
 	/**
-	 * Add rewrite rules for handling people and person views.
+	 * Add rewrite rules for person views.
 	 *
 	 * @since 0.3.0
 	 */
 	public function rewrite_rules() {
-		add_rewrite_tag( '%wsuwp_person%', '([^/]+)', WSUWP_People_Post_Type::$post_type_slug . '=' );
-		//add_permastruct( 'person', "/{$slug}/%wsuwp_person%/", false );
+		$pages = get_posts( array(
+			'post_type' => 'page',
+			'meta_key' => '_wp_page_template',
+			'meta_value' => key( WSUWP_People_Directory_Page_Template::$template ),
+		) );
+
+		if ( $pages ) {
+			foreach ( $pages as $page ) {
+				$slug = str_replace( trailingslashit( get_home_url() ), '', get_permalink( $page->ID ) );
+
+				add_rewrite_rule(
+					'^' . $slug . '([^/]*)/?',
+					'index.php?' . WSUWP_People_Post_Type::$post_type_slug . '=$matches[1]',
+					'top'
+				);
+			}
+		}
 	}
 
 	/**
-	 * Change the permalink structure for individual people posts.
+	 * Change the permalink structure for a person.
 	 *
 	 * @since 0.3.0
 	 *
@@ -53,11 +68,13 @@ class WSUWP_Person_Display {
 	 * @param object $post The post object.
 	 */
 	public function person_permalink( $url, $post ) {
-		if ( get_post_type( $post ) === WSUWP_People_Post_Type::$post_type_slug ) {
-			$options = get_option( 'wsu_people_display' );
-			$slug = ( isset( $options['slug'] ) && '' !== $options['slug'] ) ? $options['slug'] : 'people';
-			$url = get_site_url() . '/' . $slug . '/' . $post->post_name . '/';
+		if ( get_post_type( $post ) !== WSUWP_People_Post_Type::$post_type_slug ) {
+			return $url;
 		}
+
+		$directory_page_id = get_post_meta( $post->ID, 'on_page', true );
+
+		$url = get_permalink( $directory_page_id ) . $post->post_name . '/';
 
 		return $url;
 	}

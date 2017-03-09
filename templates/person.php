@@ -1,9 +1,7 @@
 <?php
 $post = get_post();
 $nid = get_post_meta( $post->ID, '_wsuwp_profile_ad_nid', true );
-$link = trailingslashit( $base_url . $post->post_name );
-
-$profile = get_query_var( 'person' );
+$profile = get_query_var( 'wsuwp_people_profile' );
 
 $request_url = add_query_arg(
 	array(
@@ -18,6 +16,7 @@ $response = wp_remote_get( $request_url );
 if ( is_wp_error( $response ) ) {
 	return '';
 }
+
 $data = wp_remote_retrieve_body( $response );
 
 if ( empty( $data ) ) {
@@ -46,11 +45,10 @@ $website = $person->website;
 
 	<div class="card">
 
-		<?php if ( $profile ) { ?>
-		<h1 class="name"><?php echo esc_html( $person->title->rendered ); ?></h1>
-		<?php } else { ?>
+		<?php if ( ! $profile ) { ?>
+		<?php $link = trailingslashit( $base_url . $post->post_name ); ?>
 		<h2 class="name">
-			<a href="<?php echo esc_url( $link ); ?>"><?php echo esc_html( $person->title->rendered ); ?></a>
+			<a href="<?php echo esc_url( $link ); ?>"><?php the_title(); ?></a>
 		</h2>
 		<?php } ?>
 

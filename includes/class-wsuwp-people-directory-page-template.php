@@ -15,7 +15,7 @@ class WSUWP_People_Directory_Page_Template {
 	 *
 	 * @var array
 	 */
-	var $template = array( 'templates/people.php' => 'People Directory' );
+	public static $template = array( 'templates/people.php' => 'People Directory' );
 
 	/**
 	 * A list of post meta keys associated with a directory page.
@@ -341,6 +341,7 @@ class WSUWP_People_Directory_Page_Template {
 
 				if ( $person ) {
 					foreach ( $person as $person ) {
+						update_post_meta( $person, 'on_page', $post_id );
 						update_post_meta( $person, "order_on_page_{$post_id}", $index );
 					}
 				} else {
@@ -384,6 +385,7 @@ class WSUWP_People_Directory_Page_Template {
 				'post_type' => WSUWP_People_Post_Type::$post_type_slug,
 				'meta_input' => array(
 					'_wsuwp_profile_ad_nid' => $nid,
+					'on_page' => $page_id,
 					"order_on_page_{$page_id}" => absint( $order ),
 				),
 				'tags_input' => $tags,
@@ -404,7 +406,7 @@ class WSUWP_People_Directory_Page_Template {
 	 * @return array
 	 */
 	public function add_directory_template( $posts_templates ) {
-		$posts_templates = array_merge( $posts_templates, $this->template );
+		$posts_templates = array_merge( $posts_templates, self::$template );
 
 		return $posts_templates;
 	}
@@ -432,7 +434,7 @@ class WSUWP_People_Directory_Page_Template {
 	public function template_include( $template ) {
 		$post = get_post();
 
-		if ( key( $this->template ) !== get_page_template_slug( $post->ID ) ) {
+		if ( key( self::$template ) !== get_page_template_slug( $post->ID ) ) {
 			return $template;
 		}
 
