@@ -80,26 +80,46 @@ class WSUWP_Person_Display {
 	}
 
 	/**
-	 * Assign templates to people and person pages.
+	 * Check if a theme is providing its own person template.
+	 *
+	 * @since 0.3.0
+	 *
+	 * @return string Path to the template file.
+	 */
+	public function theme_has_template() {
+		return locate_template( 'wsu-people-templates/person.php' );
+	}
+
+	/**
+	 * Determine which template to use.
+	 *
+	 * If using the plugin defaults, enqueue a stylesheet and filter the content.
+	 *
+	 * @since 0.3.0
 	 *
 	 * @param string $template The path of the template to include.
 	 *
 	 * @return string The path of the template to include.
 	 */
 	public function template_include( $template ) {
-		if ( is_singular( WSUWP_People_Post_Type::$post_type_slug ) ) {
-			$template = trailingslashit( get_template_directory() ) . 'templates/single.php';
-
-			wp_enqueue_style( 'wsu-people-display', plugin_dir_url( dirname( __FILE__ ) ) . 'css/person.css', array(), WSUWP_People_Directory::$version );
-
-			add_filter( 'the_content', array( $this, 'content' ) );
+		if ( ! is_singular( WSUWP_People_Post_Type::$post_type_slug ) ) {
+			return $template;
 		}
 
-		return $template;
+		// If a theme has a person template, use it.
+		if ( $this->theme_has_template() ) {
+			return $this->theme_has_template();
+		}
+
+		wp_enqueue_style( 'wsu-people-display', plugin_dir_url( dirname( __FILE__ ) ) . 'css/person.css', array(), WSUWP_People_Directory::$version );
+
+		add_filter( 'the_content', array( $this, 'content' ) );
+
+		return trailingslashit( get_template_directory() ) . 'templates/single.php';
 	}
 
 	/**
-	 * Adjust the query for people page requests.
+	 * Filter the content for a person view.
 	 *
 	 * @since 0.3.0
 	 *
