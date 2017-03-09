@@ -14,15 +14,6 @@ if ( ! defined( 'WPINC' ) ) {
 	die;
 }
 
-
-register_activation_hook( __FILE__, 'wsuwp_people_directory_activate' );
-/**
- * Set a flag to flush rewrite rules after our post type is registered.
- */
-function wsuwp_people_directory_activate() {
-	set_transient( 'wsuwp_people_directory_flush_rewrites', true );
-}
-
 // Flush rewrite rules on deactivation.
 register_deactivation_hook( __FILE__, 'flush_rewrite_rules' );
 
