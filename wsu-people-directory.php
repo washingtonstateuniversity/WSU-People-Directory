@@ -14,8 +14,7 @@ if ( ! defined( 'WPINC' ) ) {
 	die;
 }
 
-// Flush rewrite rules on activation or deactivation.
-register_activation_hook( __FILE__, 'flush_rewrite_rules' );
+// Flush rewrite rules on deactivation.
 register_deactivation_hook( __FILE__, 'flush_rewrite_rules' );
 
 // The core plugin class.
@@ -47,7 +46,7 @@ function WSUWP_People_Post_Type() {
  *
  * @since 0.3.0
  *
- * @return WSUWP_People_Taxonomies
+ * @return WSUWP_People_Classification_Taxonomy
  */
 function WSUWP_People_Classification_Taxonomy() {
 	return WSUWP_People_Classification_Taxonomy::get_instance();
@@ -65,10 +64,21 @@ function WSUWP_People_REST_API() {
 }
 
 /**
- * Retrieve the instance of the frontend handler.
+ * Retrieve the instance of the People Directory page template.
  *
- * @return WSUWP_People_Display_Settings
+ * @since 0.3.0
+ *
+ * @return WSUWP_People_Directory_Page_Template
  */
-function WSUWP_People_Display_Frontend() {
-	return WSUWP_People_Display_Frontend::get_instance();
+function WSUWP_People_Directory_Page_Template() {
+	return WSUWP_People_Directory_Page_Template::get_instance();
+}
+
+/**
+ * Retrieve the instance of the Person Display handler.
+ *
+ * @return WSUWP_Person_Display
+ */
+function WSUWP_Person_Display() {
+	return WSUWP_Person_Display::get_instance();
 }

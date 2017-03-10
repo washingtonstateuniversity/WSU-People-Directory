@@ -50,9 +50,39 @@ class WSUWP_People_Directory {
 		}
 
 		if ( apply_filters( 'wsuwp_people_display', true ) ) {
-			require_once( dirname( __FILE__ ) . '/class-wsuwp-people-display-frontend.php' );
+			require_once( dirname( __FILE__ ) . '/class-wsuwp-people-directory-page-template.php' );
+			require_once( dirname( __FILE__ ) . '/class-wsuwp-person-display.php' );
 
-			add_action( 'init', 'WSUWP_People_Display_Frontend' );
+			add_action( 'init', 'WSUWP_People_Directory_Page_Template' );
+			add_action( 'init', 'WSUWP_Person_Display' );
+		}
+
+		add_action( 'init', array( $this, 'maybe_flush_rewrite_rules' ), 99 );
+	}
+
+	/**
+	 * The REST request URL.
+	 *
+	 * @since 0.3.0
+	 *
+	 * @return string
+	 */
+	public static function REST_URL() {
+
+		$default = 'https://people.wsu.edu/wp-json/wp/v2/people';
+
+		return apply_filters( 'wsu_people_directory_rest_url', $default );
+	}
+
+	/**
+	 * If the flag for flushing rewrite rules is set, flush them and delete the flag.
+	 *
+	 * @since 0.3.0
+	 */
+	public function maybe_flush_rewrite_rules() {
+		if ( get_transient( 'wsuwp_people_directory_flush_rewrites' ) ) {
+			flush_rewrite_rules();
+			delete_transient( 'wsuwp_people_directory_flush_rewrites' );
 		}
 	}
 }

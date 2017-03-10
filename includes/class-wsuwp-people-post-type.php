@@ -245,7 +245,7 @@ class WSUWP_People_Post_Type {
 		add_action( 'add_meta_boxes_' . self::$post_type_slug, array( $this, 'add_meta_boxes' ) );
 		add_action( 'do_meta_boxes', array( $this, 'do_meta_boxes' ), 10, 3 );
 
-		add_action( 'save_post_' . self::$post_type_slug, array( $this, 'save_post' ), 10, 2 );
+		add_action( 'save_post_' . self::$post_type_slug, array( $this, 'save_post' ) );
 
 		add_action( 'wp_ajax_wsu_people_get_data_by_nid', array( $this, 'ajax_get_data_by_nid' ) );
 		add_action( 'wp_ajax_wsu_people_confirm_nid_data', array( $this, 'ajax_confirm_nid_data' ) );
@@ -342,6 +342,7 @@ class WSUWP_People_Post_Type {
 				'nid_nonce' => wp_create_nonce( 'wsu-people-nid-lookup' ),
 				'post_id' => $post->ID,
 				'request_from' => ( apply_filters( 'wsuwp_people_display', true ) ) ? 'rest' : 'ad',
+				'rest_url' => WSUWP_People_Directory::REST_URL(),
 			);
 
 			// Make a REST request for data from people.wsu.edu when editing a person.
@@ -460,10 +461,8 @@ class WSUWP_People_Post_Type {
 	 * Add the meta boxes used for capturing information about a person.
 	 *
 	 * @since 0.1.0
-	 *
-	 * @param string $post_type The slug of the current post type.
 	 */
-	public function add_meta_boxes( $post_type ) {
+	public function add_meta_boxes() {
 		add_meta_box(
 			'wsuwp_profile_additional_info',
 			'Additional Profile Information',
@@ -973,9 +972,14 @@ class WSUWP_People_Post_Type {
 	 *
 	 * @return array List of predefined information we'll expect on the other side.
 	 */
-	private function get_person_data( $nid ) {
-		$request_url = 'https://people.wsu.edu/wp-json/wp/v2/people?_embed';
-		$request_url = add_query_arg( array( 'wsu_nid' => $nid ), $request_url );
+	public static function get_rest_data( $nid ) {
+		$request_url = add_query_arg(
+			array(
+				'_embed' => true,
+				'wsu_nid' => $nid,
+			),
+			WSUWP_People_Directory::REST_URL()
+		);
 
 		$response = wp_remote_get( $request_url );
 
@@ -1085,7 +1089,7 @@ class WSUWP_People_Post_Type {
 		// Try to retrieve a person from people.wsu.edu first.
 		// We do this in here so the above check for existing profiles can be performed.
 		if ( 'rest' === $_POST['request_from'] ) {
-			$return_data = $this->get_rest_data( $nid );
+			$return_data = self::get_rest_data( $nid );
 		}
 
 		if ( ! $return_data || 'ad' === $_POST['request_from'] ) {
