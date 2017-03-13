@@ -371,15 +371,19 @@ class WSUWP_People_Directory_Page_Template {
 			$tags = array();
 			$taxonomy_data = array();
 
-			foreach ( $person->_embedded->{'wp:term'} as $term ) {
-				if ( ! $term ) {
+			foreach ( $person->_embedded->{'wp:term'} as $taxonomy ) {
+				if ( ! $taxonomy ) {
 					continue;
 				}
 
-				if ( 'post_tag' === $term[0]->taxonomy ) {
-					$tags[] = $term[0]->slug;
-				} else {
-					$taxonomy_data[ $term[0]->taxonomy ][] = $term[0]->slug;
+				foreach ( $taxonomy as $term ) {
+					if ( 'post_tag' === $term->taxonomy ) {
+						$tags[] = $term->slug;
+					} else {
+						// Slugs and names don't seem to work, so find the equivalent local term ID.
+						$local_term = get_term_by( 'slug', $term->slug, $term->taxonomy );
+						$taxonomy_data[ $term->taxonomy ][] = $local_term->term_id;
+					}
 				}
 			}
 
