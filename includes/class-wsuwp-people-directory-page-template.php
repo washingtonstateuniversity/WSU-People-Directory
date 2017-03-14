@@ -186,7 +186,11 @@ class WSUWP_People_Directory_Page_Template {
 
 			<p>
 				<label for="wsu-people-directory-show-photos">Show photos</label>
-				<input type="checkbox" id="wsu-people-directory-show-photos" name="_wsu_people_directory_show_photos" value="1" <?php checked( true, $photos ); ?> />
+				<select id="wsu-people-directory-show-photos" name="_wsu_people_directory_show_photos">
+					<option value="yes"<?php selected( 'yes', $photos ); ?>>Yes</option>
+					<option value="no"<?php selected( 'no', $photos ); ?>>No</option>
+				</select>
+
 			</p>
 
 			<script type="text/template" id="wsu-person-template">

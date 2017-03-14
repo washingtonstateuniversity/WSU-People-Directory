@@ -7,7 +7,7 @@ $base_url = get_permalink();
 $wrapper_classes = array( 'wsu-people-wrapper' );
 $wrapper_classes[] = ( $layout = get_post_meta( $page_id, '_wsu_people_directory_layout', true ) ) ? esc_attr( $layout ) : 'table';
 
-if ( get_post_meta( $page_id, '_wsu_people_directory_show_photos', true ) ) {
+if ( 'yes' === get_post_meta( $page_id, '_wsu_people_directory_show_photos', true ) ) {
 	$wrapper_classes[] = 'photos';
 }
 
