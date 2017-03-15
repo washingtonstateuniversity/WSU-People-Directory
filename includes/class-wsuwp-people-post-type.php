@@ -26,55 +26,55 @@ class WSUWP_People_Post_Type {
 	 */
 	public static $post_meta_keys = array(
 		'nid' => array(
-			'type' => 'ad',
+			'type' => 'string',
 			'description' => '',
 			'sanitize_callback' => 'sanitize_text_field',
 			'meta_key' => '_wsuwp_profile_ad_nid',
 		),
 		'first_name' => array(
-			'type' => 'ad',
+			'type' => 'string',
 			'description' => '',
 			'sanitize_callback' => 'sanitize_text_field',
 			'meta_key' => '_wsuwp_profile_ad_name_first',
 		),
 		'last_name' => array(
-			'type' => 'ad',
+			'type' => 'string',
 			'description' => '',
 			'sanitize_callback' => 'sanitize_text_field',
 			'meta_key' => '_wsuwp_profile_ad_name_last',
 		),
 		'position_title' => array(
-			'type' => 'ad',
+			'type' => 'string',
 			'description' => '',
 			'sanitize_callback' => 'sanitize_text_field',
 			'meta_key' => '_wsuwp_profile_ad_title',
 		),
 		'office' => array(
-			'type' => 'ad',
+			'type' => 'string',
 			'description' => '',
 			'sanitize_callback' => 'sanitize_text_field',
 			'meta_key' => '_wsuwp_profile_ad_office',
 		),
 		'address' => array(
-			'type' => 'ad',
+			'type' => 'string',
 			'description' => '',
 			'sanitize_callback' => 'sanitize_text_field',
 			'meta_key' => '_wsuwp_profile_ad_address',
 		),
 		'phone' => array(
-			'type' => 'ad',
+			'type' => 'string',
 			'description' => '',
 			'sanitize_callback' => 'sanitize_text_field',
 			'meta_key' => '_wsuwp_profile_ad_phone',
 		),
 		'phone_ext' => array(
-			'type' => 'ad',
+			'type' => 'string',
 			'description' => '',
 			'sanitize_callback' => 'sanitize_text_field',
 			'meta_key' => '_wsuwp_profile_ad_phone_ext',
 		),
 		'email' => array(
-			'type' => 'ad',
+			'type' => 'string',
 			'description' => '',
 			'sanitize_callback' => 'sanitize_text_field',
 			'meta_key' => '_wsuwp_profile_ad_email',
@@ -84,130 +84,195 @@ class WSUWP_People_Post_Type {
 			'description' => '',
 			'sanitize_callback' => 'sanitize_text_field',
 			'meta_key' => '_wsuwp_profile_alt_office',
+			'register_as_meta' => true,
+			'updatable_via_rest' => true,
 		),
 		'phone_alt' => array(
 			'type' => 'string',
 			'description' => '',
 			'sanitize_callback' => 'sanitize_text_field',
 			'meta_key' => '_wsuwp_profile_alt_phone',
+			'register_as_meta' => true,
+			'updatable_via_rest' => true,
 		),
 		'email_alt' => array(
 			'type' => 'string',
 			'description' => '',
 			'sanitize_callback' => 'sanitize_text_field',
 			'meta_key' => '_wsuwp_profile_alt_email',
+			'register_as_meta' => true,
+			'updatable_via_rest' => true,
 		),
 		'website' => array(
 			'type' => 'string',
 			'description' => '',
 			'sanitize_callback' => 'esc_url_raw',
 			'meta_key' => '_wsuwp_profile_website',
+			'register_as_meta' => true,
+			'updatable_via_rest' => true,
 		),
 		'degree' => array(
 			'type' => 'array',
+			'items' => array(
+				'type' => 'string',
+			),
 			'description' => '',
 			'sanitize_callback' => 'WSUWP_People_Post_Type::sanitize_repeatable_text_fields',
 			'meta_key' => '_wsuwp_profile_degree',
+			'register_as_meta' => true,
+			'updatable_via_rest' => true,
 		),
 		'working_titles' => array(
 			'type' => 'array',
+			'items' => array(
+				'type' => 'string',
+			),
 			'description' => '',
 			'sanitize_callback' => 'WSUWP_People_Post_Type::sanitize_repeatable_text_fields',
 			'meta_key' => '_wsuwp_profile_title',
+			'register_as_meta' => true,
+			'updatable_via_rest' => true,
 		),
 		'bio_unit' => array(
-			'type' => 'textarea',
+			'type' => 'string',
 			'description' => 'Unit Biography',
 			'sanitize_callback' => 'wp_kses_post',
 			'meta_key' => '_wsuwp_profile_bio_unit',
+			'register_as_meta' => true,
+			'updatable_via_rest' => true,
+			'render_as_wp_editor' => true,
 		),
 		'bio_university' => array(
-			'type' => 'textarea',
+			'type' => 'string',
 			'description' => 'University Biography',
 			'sanitize_callback' => 'wp_kses_post',
 			'meta_key' => '_wsuwp_profile_bio_university',
+			'register_as_meta' => true,
+			'updatable_via_rest' => true,
+			'render_as_wp_editor' => true,
 		),
 		'photos' => array(
 			'type' => 'array',
 			'description' => 'A collection of photos',
 			'sanitize_callback' => 'WSUWP_People_Post_Type::sanitize_photos',
 			'meta_key' => '_wsuwp_profile_photos',
+			'register_as_meta' => true,
+		),
+		'listed_on' => array(
+			'type' => 'array',
+			'items' => array(
+				'type' => 'string',
+			),
+			'description' => '',
+			'sanitize_callback' => 'WSUWP_People_Post_Type::sanitize_repeatable_text_fields',
+			'meta_key' => '_wsuwp_profile_listed_on',
+			'updatable_via_rest' => true,
 		),
 		// Legacy
 		'bio_college' => array(
-			'type' => 'legacy',
+			'type' => 'string',
+			'description' => '',
 			'sanitize_callback' => 'wp_kses_post',
 			'meta_key' => '_wsuwp_profile_bio_college',
+			'updatable_via_rest' => true,
 		),
 		'bio_lab' => array(
-			'type' => 'legacy',
+			'type' => 'string',
+			'description' => '',
 			'sanitize_callback' => 'wp_kses_post',
 			'meta_key' => '_wsuwp_profile_bio_lab',
+			'updatable_via_rest' => true,
 		),
 		'bio_department' => array(
-			'type' => 'legacy',
+			'type' => 'string',
+			'description' => '',
 			'sanitize_callback' => 'wp_kses_post',
 			'meta_key' => '_wsuwp_profile_bio_dept',
+			'updatable_via_rest' => true,
 		),
 		'cv_employment' => array(
-			'type' => 'legacy',
+			'type' => 'string',
+			'description' => '',
 			'sanitize_callback' => 'wp_kses_post',
 			'meta_key' => '_wsuwp_profile_employment',
+			'updatable_via_rest' => true,
 		),
 		'cv_honors' => array(
-			'type' => 'legacy',
+			'type' => 'string',
+			'description' => '',
 			'sanitize_callback' => 'wp_kses_post',
 			'meta_key' => '_wsuwp_profile_honors',
+			'updatable_via_rest' => true,
 		),
 		'cv_grants' => array(
-			'type' => 'legacy',
+			'type' => 'string',
+			'description' => '',
 			'sanitize_callback' => 'wp_kses_post',
 			'meta_key' => '_wsuwp_profile_grants',
+			'updatable_via_rest' => true,
 		),
 		'cv_publications' => array(
-			'type' => 'legacy',
+			'type' => 'string',
+			'description' => '',
 			'sanitize_callback' => 'wp_kses_post',
 			'meta_key' => '_wsuwp_profile_publications',
+			'updatable_via_rest' => true,
 		),
 		'cv_presentations' => array(
-			'type' => 'legacy',
+			'type' => 'string',
+			'description' => '',
 			'sanitize_callback' => 'wp_kses_post',
 			'meta_key' => '_wsuwp_profile_presentations',
+			'updatable_via_rest' => true,
 		),
 		'cv_teaching' => array(
-			'type' => 'legacy',
+			'type' => 'string',
+			'description' => '',
 			'sanitize_callback' => 'wp_kses_post',
 			'meta_key' => '_wsuwp_profile_teaching',
+			'updatable_via_rest' => true,
 		),
 		'cv_service' => array(
-			'type' => 'legacy',
+			'type' => 'string',
+			'description' => '',
 			'sanitize_callback' => 'wp_kses_post',
 			'meta_key' => '_wsuwp_profile_service',
+			'updatable_via_rest' => true,
 		),
 		'cv_responsibilities' => array(
-			'type' => 'legacy',
+			'type' => 'string',
+			'description' => '',
 			'sanitize_callback' => 'wp_kses_post',
 			'meta_key' => '_wsuwp_profile_responsibilities',
+			'updatable_via_rest' => true,
 		),
 		'cv_affiliations' => array(
-			'type' => 'legacy',
+			'type' => 'string',
+			'description' => '',
 			'sanitize_callback' => 'wp_kses_post',
 			'meta_key' => '_wsuwp_profile_societies',
+			'updatable_via_rest' => true,
 		),
 		'cv_experience' => array(
-			'type' => 'legacy',
+			'type' => 'string',
+			'description' => '',
 			'sanitize_callback' => 'wp_kses_post',
 			'meta_key' => '_wsuwp_profile_experience',
+			'updatable_via_rest' => true,
 		),
 		'cv_attachment' => array(
-			'type' => 'legacy',
+			'type' => 'string',
+			'description' => '',
 			'sanitize_callback' => 'attachment',
 			'meta_key' => '_wsuwp_profile_cv',
+			'updatable_via_rest' => true,
 		),
 		'profile_photo' => array(
-			'type' => 'legacy',
+			'type' => 'string',
+			'description' => '',
 			'sanitize_callback' => 'attachment',
 			'meta_key' => '',
+			'updatable_via_rest' => true,
 		),
 	);
 
@@ -303,7 +368,7 @@ class WSUWP_People_Post_Type {
 	 */
 	public function register_meta() {
 		foreach ( self::$post_meta_keys as $key => $args ) {
-			if ( 'legacy' === $args['type'] || 'ad' === $args['type'] ) {
+			if ( ! isset( $args['register_as_meta'] ) ) {
 				continue;
 			}
 
@@ -409,7 +474,7 @@ class WSUWP_People_Post_Type {
 				</li>
 				<?php
 				foreach ( self::$post_meta_keys as $key => $args ) {
-					if ( 'textarea' !== $args['type'] ) {
+					if ( ! isset( $args['render_as_wp_editor'] ) ) {
 						continue;
 					}
 
@@ -441,7 +506,7 @@ class WSUWP_People_Post_Type {
 
 			<?php
 			foreach ( self::$post_meta_keys as $key => $args ) {
-				if ( 'textarea' !== $args['type'] ) {
+				if ( ! isset( $args['render_as_wp_editor'] ) ) {
 					continue;
 				}
 
