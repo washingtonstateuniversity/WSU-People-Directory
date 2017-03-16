@@ -113,7 +113,11 @@ class WSUWP_People_Directory_Page_Template {
 		wp_enqueue_style( 'wsuwp-people-admin', plugins_url( 'css/admin-page.css', dirname( __FILE__ ) ), array(), WSUWP_People_Directory::$version );
 		wp_enqueue_script( 'wsuwp-people-admin', plugins_url( 'js/admin-page.min.js', dirname( __FILE__ ) ), array( 'jquery', 'underscore', 'jquery-ui-autocomplete', 'jquery-ui-sortable' ), WSUWP_People_Directory::$version, true );
 		wp_localize_script( 'wsuwp-people-admin', 'wsupeople', array( 'rest_url' => WSUWP_People_Directory::REST_URL() ) );
-
+		wp_enqueue_script( 'wsuwp-people-sync', plugins_url( 'js/admin-people-sync.min.js', dirname( __FILE__ ) ), array( 'jquery' ), WSUWP_People_Directory::$version, true );
+		wp_localize_script( 'wsuwp-people-sync', 'wsupeoplesync', array(
+			'nonce' => wp_create_nonce( 'wp_rest' ),
+			'site_url' => get_home_url(),
+		) );
 	}
 
 	/**
