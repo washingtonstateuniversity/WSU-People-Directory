@@ -74,6 +74,10 @@ class WSUWP_Person_Display {
 
 		$directory_page_id = get_post_meta( $post->ID, 'on_page', true );
 
+		if ( ! $directory_page_id ) {
+			return $url;
+		}
+
 		$url = get_permalink( $directory_page_id ) . $post->post_name . '/';
 
 		return $url;
