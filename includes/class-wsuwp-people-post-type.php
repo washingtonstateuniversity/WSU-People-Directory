@@ -546,6 +546,16 @@ class WSUWP_People_Post_Type {
 			'normal',
 			'high'
 		);
+
+		if ( ! apply_filters( 'wsuwp_people_display', true ) ) {
+			add_meta_box(
+				'wsuwp_profile_listing',
+				'Listed On',
+				array( $this, 'display_listing_meta_box' ),
+				self::$post_type_slug,
+				'normal'
+			);
+		}
 	}
 
 	/**
@@ -932,6 +942,24 @@ class WSUWP_People_Post_Type {
 				<input type="hidden" class="wsuwp-profile-photo-id" name="_wsuwp_profile_photos[]" value="<%= id %>" />
 			</div>
 		</script>
+		<?php
+	}
+
+	/**
+	 * Display a meta box used to show which sites a person is being listed on.
+	 *
+	 * @since 0.3.0
+	 *
+	 * @param WP_Post $post Post object.
+	 */
+	public function display_listing_meta_box( $post ) {
+		$listings = get_post_meta( $post->ID, '_wsuwp_profile_listed_on', true );
+		?>
+		<ul>
+		<?php foreach ( $listings as $listing ) { ?>
+			<li><a href="<?php echo esc_url( $listing ); ?>"><?php echo esc_url( $listing ); ?></a></li>
+		<?php } ?>
+		</ul>
 		<?php
 	}
 
