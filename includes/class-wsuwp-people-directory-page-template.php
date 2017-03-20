@@ -325,6 +325,9 @@ class WSUWP_People_Directory_Page_Template {
 			return $post_id;
 		}
 
+		// We'll check against this further down.
+		$previous_nids = get_post_meta( $post_id, '_wsu_people_directory_nids', true );
+
 		$keys = get_registered_meta_keys( 'post' );
 
 		foreach ( $keys as $key => $args ) {
@@ -335,36 +338,66 @@ class WSUWP_People_Directory_Page_Template {
 			}
 		}
 
-		// Save order data of the associated profiles.
-		if ( isset( $_POST['_wsu_people_directory_nids'] ) ) {
-			$nids = explode( ' ', $_POST['_wsu_people_directory_nids'] );
+		// Set a flag to flush rewrite rules.
+		set_transient( 'wsuwp_people_directory_flush_rewrites', true );
 
-			foreach ( $nids as $index => $nid ) {
+		// Update associated people data.
+		if ( ! isset( $_POST['_wsu_people_directory_nids'] ) ) {
+			return $post_id;
+		}
 
-				$person_query_args = array(
-					'post_type' => WSUWP_People_Post_Type::$post_type_slug,
-					'posts_per_page' => 1,
-					'meta_key' => '_wsuwp_profile_ad_nid',
-					'meta_value' => $nid,
-					'fields' => 'ids',
-				);
+		if ( $previous_nids === $_POST['_wsu_people_directory_nids'] ) {
+			return $post_id;
+		}
 
-				$person = get_posts( $person_query_args );
+		// Save order data of the associated people.
+		$nids = explode( ' ', $_POST['_wsu_people_directory_nids'] );
 
-				if ( $person ) {
-					foreach ( $person as $person ) {
+		foreach ( $nids as $index => $nid ) {
+			$person_query_args = array(
+				'post_type' => WSUWP_People_Post_Type::$post_type_slug,
+				'posts_per_page' => 1,
+				'meta_key' => '_wsuwp_profile_ad_nid',
+				'meta_value' => $nid,
+				'fields' => 'ids',
+			);
+
+			$person = get_posts( $person_query_args );
+
+			if ( $person ) {
+				foreach ( $person as $person ) {
+					$on_page = get_post_meta( $person, 'on_page', true );
+					$order_on_page = get_post_meta( $person, "order_on_page_{$post_id}", true );
+
+					if ( $index !== $order_on_page && $post_id !== $on_page ) {
 						update_post_meta( $person, 'on_page', $post_id );
 						update_post_meta( $person, "order_on_page_{$post_id}", $index );
 					}
-				} else {
-					// If no matching NID is found, save the profile.
-					$this->save_person( $nid, $post_id, $index );
 				}
+			} else {
+				// If no matching NID is found, save the profile.
+				$this->save_person( $nid, $post_id, $index );
 			}
 		}
 
-		// Set a flag to flush rewrite rules if this page is using the people directory template.
-		set_transient( 'wsuwp_people_directory_flush_rewrites', true );
+		// Delete order data for people removed from this page.
+		$removed_people_query_args = array(
+			'post_type' => WSUWP_People_Post_Type::$post_type_slug,
+			'posts_per_page' => -1,
+			'meta_key' => '_wsuwp_profile_ad_nid',
+			'meta_value' => $nids,
+			'meta_compare' => 'not in',
+			'fields' => 'ids',
+		);
+
+		$removed_people = get_posts( $removed_people_query_args );
+
+		if ( $removed_people ) {
+			foreach ( $removed_people as $person ) {
+				delete_post_meta( $person, 'on_page', $post_id, $post_id );
+				delete_post_meta( $person, "order_on_page_{$post_id}" );
+			}
+		}
 	}
 
 	/**
