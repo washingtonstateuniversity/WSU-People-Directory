@@ -954,13 +954,16 @@ class WSUWP_People_Post_Type {
 	 */
 	public function display_listing_meta_box( $post ) {
 		$listings = get_post_meta( $post->ID, '_wsuwp_profile_listed_on', true );
-		?>
-		<ul>
-		<?php foreach ( $listings as $listing ) { ?>
-			<li><a href="<?php echo esc_url( $listing ); ?>"><?php echo esc_url( $listing ); ?></a></li>
-		<?php } ?>
-		</ul>
-		<?php
+
+		if ( $listings ) {
+			?>
+			<ul>
+			<?php foreach ( $listings as $listing ) { ?>
+				<li><a href="<?php echo esc_url( $listing ); ?>"><?php echo esc_url( $listing ); ?></a></li>
+			<?php } ?>
+			</ul>
+			<?php
+		}
 	}
 
 	/**
