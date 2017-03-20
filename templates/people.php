@@ -28,9 +28,8 @@ if ( 'yes' === get_post_meta( $page_id, '_wsu_people_directory_show_photos', tru
 			'order' => 'asc',
 			'meta_query' => array(
 				array(
-					'meta_key' => '_wsuwp_profile_ad_nid',
-					'meta_value' => $nids,
-					'meta_compare' => 'in',
+					'key' => '_on_page',
+					'value' => $page_id,
 				),
 			),
 		);

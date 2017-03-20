@@ -274,9 +274,8 @@ class WSUWP_People_Directory_Page_Template {
 							'order' => 'asc',
 							'meta_query' => array(
 								array(
-									'meta_key' => '_wsuwp_profile_ad_nid',
-									'meta_value' => $nids,
-									'meta_compare' => 'in',
+									'key' => '_on_page',
+									'value' => $post->ID,
 								),
 							),
 						);
