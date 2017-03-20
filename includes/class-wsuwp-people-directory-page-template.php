@@ -113,7 +113,11 @@ class WSUWP_People_Directory_Page_Template {
 		wp_enqueue_style( 'wsuwp-people-admin', plugins_url( 'css/admin-page.css', dirname( __FILE__ ) ), array(), WSUWP_People_Directory::$version );
 		wp_enqueue_script( 'wsuwp-people-admin', plugins_url( 'js/admin-page.min.js', dirname( __FILE__ ) ), array( 'jquery', 'underscore', 'jquery-ui-autocomplete', 'jquery-ui-sortable' ), WSUWP_People_Directory::$version, true );
 		wp_localize_script( 'wsuwp-people-admin', 'wsupeople', array( 'rest_url' => WSUWP_People_Directory::REST_URL() ) );
-
+		wp_enqueue_script( 'wsuwp-people-sync', plugins_url( 'js/admin-people-sync.min.js', dirname( __FILE__ ) ), array( 'jquery' ), WSUWP_People_Directory::$version, true );
+		wp_localize_script( 'wsuwp-people-sync', 'wsupeoplesync', array(
+			'nonce' => wp_create_nonce( 'wp_rest' ),
+			'site_url' => get_home_url(),
+		) );
 	}
 
 	/**
@@ -186,7 +190,11 @@ class WSUWP_People_Directory_Page_Template {
 
 			<p>
 				<label for="wsu-people-directory-show-photos">Show photos</label>
-				<input type="checkbox" id="wsu-people-directory-show-photos" name="_wsu_people_directory_show_photos" value="1" <?php checked( true, $photos ); ?> />
+				<select id="wsu-people-directory-show-photos" name="_wsu_people_directory_show_photos">
+					<option value="yes"<?php selected( 'yes', $photos ); ?>>Yes</option>
+					<option value="no"<?php selected( 'no', $photos ); ?>>No</option>
+				</select>
+
 			</p>
 
 			<script type="text/template" id="wsu-person-template">
@@ -261,14 +269,13 @@ class WSUWP_People_Directory_Page_Template {
 						$people_query_args = array(
 							'post_type' => WSUWP_People_Post_Type::$post_type_slug,
 							'posts_per_page' => count( $nids ),
-							'meta_key' => "order_on_page_{$post->ID}",
+							'meta_key' => "_order_on_page_{$post->ID}",
 							'orderby' => 'meta_value_num',
 							'order' => 'asc',
 							'meta_query' => array(
 								array(
-									'meta_key' => '_wsuwp_profile_ad_nid',
-									'meta_value' => $nids,
-									'meta_compare' => 'in',
+									'key' => '_on_page',
+									'value' => $post->ID,
 								),
 							),
 						);
@@ -313,6 +320,13 @@ class WSUWP_People_Directory_Page_Template {
 			return $post_id;
 		}
 
+		if ( ! isset( $_POST['page_template'] ) || key( self::$template ) !== $_POST['page_template'] ) {
+			return $post_id;
+		}
+
+		// We'll check against this further down.
+		$previous_nids = get_post_meta( $post_id, '_wsu_people_directory_nids', true );
+
 		$keys = get_registered_meta_keys( 'post' );
 
 		foreach ( $keys as $key => $args ) {
@@ -323,37 +337,65 @@ class WSUWP_People_Directory_Page_Template {
 			}
 		}
 
-		// Save order data of the associated profiles.
-		if ( isset( $_POST['_wsu_people_directory_nids'] ) ) {
-			$nids = explode( ' ', $_POST['_wsu_people_directory_nids'] );
+		// Set a flag to flush rewrite rules.
+		set_transient( 'wsuwp_people_directory_flush_rewrites', true );
 
-			foreach ( $nids as $index => $nid ) {
+		// Update associated people data.
+		if ( ! isset( $_POST['_wsu_people_directory_nids'] ) ) {
+			return $post_id;
+		}
 
-				$person_query_args = array(
-					'post_type' => WSUWP_People_Post_Type::$post_type_slug,
-					'posts_per_page' => 1,
-					'meta_key' => '_wsuwp_profile_ad_nid',
-					'meta_value' => $nid,
-					'fields' => 'ids',
-				);
+		if ( $previous_nids === $_POST['_wsu_people_directory_nids'] ) {
+			return $post_id;
+		}
 
-				$person = get_posts( $person_query_args );
+		// Save order data of the associated people.
+		$nids = explode( ' ', $_POST['_wsu_people_directory_nids'] );
 
-				if ( $person ) {
-					foreach ( $person as $person ) {
-						update_post_meta( $person, 'on_page', $post_id );
-						update_post_meta( $person, "order_on_page_{$post_id}", $index );
+		foreach ( $nids as $index => $nid ) {
+			$person_query_args = array(
+				'post_type' => WSUWP_People_Post_Type::$post_type_slug,
+				'posts_per_page' => 1,
+				'meta_key' => '_wsuwp_profile_ad_nid',
+				'meta_value' => $nid,
+				'fields' => 'ids',
+			);
+
+			$person = get_posts( $person_query_args );
+
+			if ( $person ) {
+				foreach ( $person as $person ) {
+					$on_page = get_post_meta( $person, '_on_page', true );
+					$order_on_page = get_post_meta( $person, "_order_on_page_{$post_id}", true );
+
+					if ( $index !== $order_on_page && $post_id !== $on_page ) {
+						update_post_meta( $person, '_on_page', $post_id );
+						update_post_meta( $person, "_order_on_page_{$post_id}", $index );
 					}
-				} else {
-					// If no matching NID is found, save the profile.
-					$this->save_person( $nid, $post_id, $index );
 				}
+			} else {
+				// If no matching NID is found, save the profile.
+				$this->save_person( $nid, $post_id, $index );
 			}
 		}
 
-		// Set a flag to flush rewrite rules if this page is using the people directory template.
-		if ( isset( $_POST['page_template'] ) && key( self::$template ) === $_POST['page_template'] ) {
-			set_transient( 'wsuwp_people_directory_flush_rewrites', true );
+		// Delete order data for people removed from this page.
+		$removed_people_query_args = array(
+			'post_type' => WSUWP_People_Post_Type::$post_type_slug,
+			'posts_per_page' => -1,
+			'meta_key' => '_wsuwp_profile_ad_nid',
+			'meta_value' => $nids,
+			'meta_compare' => 'not in',
+			'fields' => 'ids',
+		);
+
+		$removed_people = get_posts( $removed_people_query_args );
+
+		if ( $removed_people ) {
+			foreach ( $removed_people as $person ) {
+				delete_post_meta( $person, '_on_page', $post_id, $post_id );
+				delete_post_meta( $person, "_order_on_page_{$post_id}" );
+			}
 		}
 	}
 
@@ -371,15 +413,19 @@ class WSUWP_People_Directory_Page_Template {
 			$tags = array();
 			$taxonomy_data = array();
 
-			foreach ( $person->_embedded->{'wp:term'} as $term ) {
-				if ( ! $term ) {
+			foreach ( $person->_embedded->{'wp:term'} as $taxonomy ) {
+				if ( ! $taxonomy ) {
 					continue;
 				}
 
-				if ( 'post_tag' === $term[0]->taxonomy ) {
-					$tags[] = $term[0]->slug;
-				} else {
-					$taxonomy_data[ $term[0]->taxonomy ][] = $term[0]->slug;
+				foreach ( $taxonomy as $term ) {
+					if ( 'post_tag' === $term->taxonomy ) {
+						$tags[] = $term->slug;
+					} else {
+						// Slugs and names don't seem to work, so find the equivalent local term ID.
+						$local_term = get_term_by( 'slug', $term->slug, $term->taxonomy );
+						$taxonomy_data[ $term->taxonomy ][] = $local_term->term_id;
+					}
 				}
 			}
 
@@ -390,8 +436,8 @@ class WSUWP_People_Directory_Page_Template {
 				'post_type' => WSUWP_People_Post_Type::$post_type_slug,
 				'meta_input' => array(
 					'_wsuwp_profile_ad_nid' => $nid,
-					'on_page' => $page_id,
-					"order_on_page_{$page_id}" => absint( $order ),
+					'_on_page' => $page_id,
+					"_order_on_page_{$page_id}" => absint( $order ),
 				),
 				'tags_input' => $tags,
 				'tax_input' => $taxonomy_data,

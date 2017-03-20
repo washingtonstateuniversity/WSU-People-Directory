@@ -77,7 +77,7 @@ $website = $person->website;
 
 	<?php if ( is_admin() ) { ?>
 	<div class="wsu-person-controls">
-		<button class="wsu-person-edit" aria-label="Edit">
+		<button class="wsu-person-edit" aria-label="Edit" data-id="<?php echo esc_attr( $person->id ); ?>" data-listed="<?php echo esc_attr( implode( ' ', $person->listed_on ) ); ?>">
 			<span class="dashicons dashicons-edit"></span>
 		</button>
 		<button class="wsu-person-remove" aria-label="Remove">

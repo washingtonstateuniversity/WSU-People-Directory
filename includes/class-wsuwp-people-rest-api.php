@@ -59,12 +59,12 @@ class WSUWP_People_REST_API {
 	public function register_api_fields() {
 		$args = array(
 			'get_callback' => array( $this, 'get_api_meta_data' ),
-			'update_callback' => null,
-			'schema' => null,
 		);
+
 		foreach ( WSUWP_People_Post_Type::$post_meta_keys as $field_name => $value ) {
-			if ( 'photos' === $field_name ) {
-				continue;
+			if ( isset( $value['updatable_via_rest'] ) ) {
+				$args['update_callback'] = array( $this, 'update_api_meta_data' );
+				$args['schema'] = $this->rest_field_schema( $value );
 			}
 
 			register_rest_field( WSUWP_People_Post_Type::$post_type_slug, $field_name, $args );
@@ -108,7 +108,7 @@ class WSUWP_People_REST_API {
 
 		if ( 'wp_kses_post' === WSUWP_People_Post_Type::$post_meta_keys[ $field_name ]['sanitize_callback'] ) {
 			$data = get_post_meta( $object['id'], WSUWP_People_Post_Type::$post_meta_keys[ $field_name ]['meta_key'], true );
-			$data = apply_filters( 'the_content', $data );
+			$data = trim( apply_filters( 'the_content', $data ) );
 			return wp_kses_post( $data );
 		}
 
@@ -136,6 +136,79 @@ class WSUWP_People_REST_API {
 		}
 
 		return '';
+	}
+
+	/**
+	 * Update the value of a post meta field sanitized against a whitelist with the provided method.
+	 *
+	 * @since 0.2.0
+	 *
+	 * @param  mixed  $value      Post views count
+	 * @param  object $object     The object from the response
+	 * @param  string $field_name Name of the current field
+	 *
+	 * @return mixed
+	 */
+	public function update_api_meta_data( $value, $object, $field_name ) {
+		if ( ! array_key_exists( $field_name, WSUWP_People_Post_Type::$post_meta_keys ) ) {
+			return;
+		}
+
+		if ( ! $field_name && ! $value ) {
+			return;
+		}
+
+		if ( 'sanitize_text_field' === WSUWP_People_Post_Type::$post_meta_keys[ $field_name ]['sanitize_callback'] ) {
+			$value = sanitize_text_field( $value );
+			return update_post_meta( $object->ID, WSUWP_People_Post_Type::$post_meta_keys[ $field_name ]['meta_key'], $value );
+		}
+
+		if ( 'WSUWP_People_Post_Type::sanitize_repeatable_text_fields' === WSUWP_People_Post_Type::$post_meta_keys[ $field_name ]['sanitize_callback'] ) {
+
+			if ( is_array( $value ) ) {
+				$value = ( 'listed_on' === $field_name ) ? array_map( 'esc_url_raw', $value ) : array_map( 'sanitize_text_field', $value );
+			} else {
+				$value = ( 'listed_on' === $field_name ) ? esc_url_raw( $value ) : sanitize_text_field( $value );
+			}
+
+			return update_post_meta( $object->ID, WSUWP_People_Post_Type::$post_meta_keys[ $field_name ]['meta_key'], $value );
+		}
+
+		if ( 'esc_url_raw' === WSUWP_People_Post_Type::$post_meta_keys[ $field_name ]['sanitize_callback'] ) {
+			$value = esc_url_raw( $value );
+			return update_post_meta( $object->ID, WSUWP_People_Post_Type::$post_meta_keys[ $field_name ]['meta_key'], $value );
+		}
+
+		if ( 'wp_kses_post' === WSUWP_People_Post_Type::$post_meta_keys[ $field_name ]['sanitize_callback'] ) {
+			$value = trim( apply_filters( 'the_content', $value ) );
+			$value = wp_kses_post( $value );
+			return update_post_meta( $object->ID, WSUWP_People_Post_Type::$post_meta_keys[ $field_name ]['meta_key'], $value );
+		}
+
+		return '';
+	}
+
+	/**
+	 * Set up the schema for each registered field.
+	 *
+	 * @since 0.3.0
+	 *
+	 * @param array @args
+	 *
+	 * @return array
+	 */
+	public function rest_field_schema( $args ) {
+		$schema = array(
+			'description' => $args['description'],
+			'type' => $args['type'],
+			'context' => array( 'view', 'edit' ),
+		);
+
+		if ( 'array' === $args['type'] ) {
+			$schema['items'] = $args['items'];
+		}
+
+		return $schema;
 	}
 
 	/**

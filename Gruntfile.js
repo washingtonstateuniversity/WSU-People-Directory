@@ -100,6 +100,10 @@ module.exports = function( grunt ) {
                 src: "src/js/admin-people.js",
                 dest: "js/admin-people.min.js"
             },
+            admin_people_sync: {
+                src: "src/js/admin-people-sync.js",
+                dest: "js/admin-people-sync.min.js"
+            },
             admin_person: {
                 src: "src/js/admin-person.js",
                 dest: "js/admin-person.min.js"

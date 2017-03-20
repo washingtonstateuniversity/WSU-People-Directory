@@ -7,7 +7,7 @@ $base_url = get_permalink();
 $wrapper_classes = array( 'wsu-people-wrapper' );
 $wrapper_classes[] = ( $layout = get_post_meta( $page_id, '_wsu_people_directory_layout', true ) ) ? esc_attr( $layout ) : 'table';
 
-if ( get_post_meta( $page_id, '_wsu_people_directory_show_photos', true ) ) {
+if ( 'yes' === get_post_meta( $page_id, '_wsu_people_directory_show_photos', true ) ) {
 	$wrapper_classes[] = 'photos';
 }
 
@@ -23,14 +23,13 @@ if ( get_post_meta( $page_id, '_wsu_people_directory_show_photos', true ) ) {
 		$people_query_args = array(
 			'post_type' => WSUWP_People_Post_Type::$post_type_slug,
 			'posts_per_page' => count( $nids ),
-			'meta_key' => "order_on_page_{$page_id}",
+			'meta_key' => "_order_on_page_{$page_id}",
 			'orderby' => 'meta_value_num',
 			'order' => 'asc',
 			'meta_query' => array(
 				array(
-					'meta_key' => '_wsuwp_profile_ad_nid',
-					'meta_value' => $nids,
-					'meta_compare' => 'in',
+					'key' => '_on_page',
+					'value' => $page_id,
 				),
 			),
 		);

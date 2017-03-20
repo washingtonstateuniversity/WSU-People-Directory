@@ -105,8 +105,15 @@
 	// Add a person retrieved from the REST request to the list.
 	function createPerson( person ) {
 		$.each( person, function( i, data ) {
+			var $nids_field = $( "#directory-page-nids" ),
+				listed_nids = $people_wrapper.find( ".wsu-person" ).map( function() { return $( this ).data( "nid" ); } ).get();
 
-			$( "#directory-page-nids" ).val( function() {
+			// Don't add the person if they're already listed.
+			if ( -1 !== $.inArray( data.nid, listed_nids ) ) {
+				return;
+			}
+
+			$nids_field.val( function() {
 				return this.value + " " + data.nid;
 			} );
 
