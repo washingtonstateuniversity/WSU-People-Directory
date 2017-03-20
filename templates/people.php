@@ -23,7 +23,7 @@ if ( 'yes' === get_post_meta( $page_id, '_wsu_people_directory_show_photos', tru
 		$people_query_args = array(
 			'post_type' => WSUWP_People_Post_Type::$post_type_slug,
 			'posts_per_page' => count( $nids ),
-			'meta_key' => "order_on_page_{$page_id}",
+			'meta_key' => "_order_on_page_{$page_id}",
 			'orderby' => 'meta_value_num',
 			'order' => 'asc',
 			'meta_query' => array(

@@ -269,7 +269,7 @@ class WSUWP_People_Directory_Page_Template {
 						$people_query_args = array(
 							'post_type' => WSUWP_People_Post_Type::$post_type_slug,
 							'posts_per_page' => count( $nids ),
-							'meta_key' => "order_on_page_{$post->ID}",
+							'meta_key' => "_order_on_page_{$post->ID}",
 							'orderby' => 'meta_value_num',
 							'order' => 'asc',
 							'meta_query' => array(
@@ -366,12 +366,12 @@ class WSUWP_People_Directory_Page_Template {
 
 			if ( $person ) {
 				foreach ( $person as $person ) {
-					$on_page = get_post_meta( $person, 'on_page', true );
-					$order_on_page = get_post_meta( $person, "order_on_page_{$post_id}", true );
+					$on_page = get_post_meta( $person, '_on_page', true );
+					$order_on_page = get_post_meta( $person, "_order_on_page_{$post_id}", true );
 
 					if ( $index !== $order_on_page && $post_id !== $on_page ) {
-						update_post_meta( $person, 'on_page', $post_id );
-						update_post_meta( $person, "order_on_page_{$post_id}", $index );
+						update_post_meta( $person, '_on_page', $post_id );
+						update_post_meta( $person, "_order_on_page_{$post_id}", $index );
 					}
 				}
 			} else {
@@ -394,8 +394,8 @@ class WSUWP_People_Directory_Page_Template {
 
 		if ( $removed_people ) {
 			foreach ( $removed_people as $person ) {
-				delete_post_meta( $person, 'on_page', $post_id, $post_id );
-				delete_post_meta( $person, "order_on_page_{$post_id}" );
+				delete_post_meta( $person, '_on_page', $post_id, $post_id );
+				delete_post_meta( $person, "_order_on_page_{$post_id}" );
 			}
 		}
 	}
@@ -437,8 +437,8 @@ class WSUWP_People_Directory_Page_Template {
 				'post_type' => WSUWP_People_Post_Type::$post_type_slug,
 				'meta_input' => array(
 					'_wsuwp_profile_ad_nid' => $nid,
-					'on_page' => $page_id,
-					"order_on_page_{$page_id}" => absint( $order ),
+					'_on_page' => $page_id,
+					"_order_on_page_{$page_id}" => absint( $order ),
 				),
 				'tags_input' => $tags,
 				'tax_input' => $taxonomy_data,
