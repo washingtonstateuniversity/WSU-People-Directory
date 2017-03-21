@@ -119,11 +119,11 @@
 
 			$( ".wsu-people" ).append( $person_template( {
 				nid: data.nid,
-				has_photo: " has_photo",
+				has_photo: ( 0 < data.photos.length ) ? " has-photo" : "",
 				slug: data.slug,
 				name: data.title.rendered,
-				photo: "",
-				title: ( data.working_titles[ 0 ] ) ? data.working_titles[ 0 ] : data.position_title,
+				photo: ( 0 < data.photos.length ) ? data.photos[ 0 ].thumbnail : "",
+				title: ( 0 < data.working_titles.length ) ? data.working_titles[ 0 ] : data.position_title,
 				email: ( data.email_alt ) ? data.email_alt : data.email,
 				phone: ( data.phone_alt ) ? data.phone_alt : data.phone + data.phone_ext,
 				office: ( data.office_alt ) ? data.office_alt : data.office,
