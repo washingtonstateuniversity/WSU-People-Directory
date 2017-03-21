@@ -135,6 +135,26 @@ class WSUWP_People_REST_API {
 			}
 		}
 
+		if ( 'photos' === $field_name ) {
+			$data = get_post_meta( $object['id'], WSUWP_People_Post_Type::$post_meta_keys[ $field_name ]['meta_key'], true );
+			$photos = array();
+
+			if ( is_array( $data ) ) {
+				$sizes = get_intermediate_image_sizes();
+				$sizes[] = 'full';
+				foreach ( $data as $index => $photo_id ) {
+					foreach ( $sizes as $size ) {
+						$image = wp_get_attachment_image_src( $photo_id, $size );
+						if ( $image ) {
+							$photos[ $index ][ $size ] = $image[0];
+						}
+					}
+				}
+			}
+
+			return $photos;
+		}
+
 		return '';
 	}
 
