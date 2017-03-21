@@ -4,6 +4,6 @@
 
     <rule ref="WordPress-Extra">
         <exclude name="WordPress.NamingConventions.ValidFunctionName" />
-        <exclude name="WordPress.PHP.DisallowAlternativePHPTags.MaybeASPShortOpenTagFound" />
+        <exclude name="Generic.PHP.DisallowAlternativePHPTags.MaybeASPShortOpenTagFound" />
     </rule>
 </ruleset>

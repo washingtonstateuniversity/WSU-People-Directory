@@ -229,7 +229,9 @@ class WSUWP_People_REST_API {
 				$response->add_link(
 					'https://api.w.org/photos',
 					esc_url( rest_url( '/wp/v2/media/' . $photo_id ) ),
-					array( 'embeddable' => true )
+					array(
+						'embeddable' => true,
+					)
 				);
 			}
 		}

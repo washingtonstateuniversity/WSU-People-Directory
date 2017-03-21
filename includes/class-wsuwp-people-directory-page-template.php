@@ -15,7 +15,9 @@ class WSUWP_People_Directory_Page_Template {
 	 *
 	 * @var array
 	 */
-	public static $template = array( 'templates/people.php' => 'People Directory' );
+	public static $template = array(
+		'templates/people.php' => 'People Directory',
+	);
 
 	/**
 	 * A list of post meta keys associated with a directory page.
@@ -24,7 +26,7 @@ class WSUWP_People_Directory_Page_Template {
 	 *
 	 * @var array
 	 */
-	var $post_meta_keys = array(
+	public $post_meta_keys = array(
 		'_wsu_people_directory_nids' => array(
 			'type' => 'string',
 			'description' => 'A list of people to display on this page',
@@ -109,15 +111,18 @@ class WSUWP_People_Directory_Page_Template {
 			return;
 		}
 
-		wp_enqueue_style( 'wsuwp-people-display', plugins_url( 'css/people.css', dirname( __FILE__ ) ), array(), WSUWP_People_Directory::$version );
-		wp_enqueue_style( 'wsuwp-people-admin', plugins_url( 'css/admin-page.css', dirname( __FILE__ ) ), array(), WSUWP_People_Directory::$version );
-		wp_enqueue_script( 'wsuwp-people-admin', plugins_url( 'js/admin-page.min.js', dirname( __FILE__ ) ), array( 'jquery', 'underscore', 'jquery-ui-autocomplete', 'jquery-ui-sortable' ), WSUWP_People_Directory::$version, true );
-		wp_localize_script( 'wsuwp-people-admin', 'wsupeople', array( 'rest_url' => WSUWP_People_Directory::REST_URL() ) );
-		wp_enqueue_script( 'wsuwp-people-sync', plugins_url( 'js/admin-people-sync.min.js', dirname( __FILE__ ) ), array( 'jquery' ), WSUWP_People_Directory::$version, true );
+		wp_localize_script( 'wsuwp-people-admin', 'wsupeople', array(
+			'rest_url' => WSUWP_People_Directory::REST_URL(),
+		) );
 		wp_localize_script( 'wsuwp-people-sync', 'wsupeoplesync', array(
 			'nonce' => wp_create_nonce( 'wp_rest' ),
 			'site_url' => get_home_url(),
 		) );
+
+		wp_enqueue_style( 'wsuwp-people-display', plugins_url( 'css/people.css', dirname( __FILE__ ) ), array(), WSUWP_People_Directory::$version );
+		wp_enqueue_style( 'wsuwp-people-admin', plugins_url( 'css/admin-page.css', dirname( __FILE__ ) ), array(), WSUWP_People_Directory::$version );
+		wp_enqueue_script( 'wsuwp-people-admin', plugins_url( 'js/admin-page.min.js', dirname( __FILE__ ) ), array( 'jquery', 'underscore', 'jquery-ui-autocomplete', 'jquery-ui-sortable' ), WSUWP_People_Directory::$version, true );
+		wp_enqueue_script( 'wsuwp-people-sync', plugins_url( 'js/admin-people-sync.min.js', dirname( __FILE__ ) ), array( 'jquery' ), WSUWP_People_Directory::$version, true );
 	}
 
 	/**
@@ -409,42 +414,44 @@ class WSUWP_People_Directory_Page_Template {
 	private function save_person( $nid, $page_id, $order ) {
 		$person = WSUWP_People_Post_Type::get_rest_data( $nid );
 
-		if ( $person ) {
-			$tags = array();
-			$taxonomy_data = array();
+		if ( ! $person ) {
+			return;
+		}
 
-			foreach ( $person->_embedded->{'wp:term'} as $taxonomy ) {
-				if ( ! $taxonomy ) {
-					continue;
-				}
+		$tags = array();
+		$taxonomy_data = array();
 
-				foreach ( $taxonomy as $term ) {
-					if ( 'post_tag' === $term->taxonomy ) {
-						$tags[] = $term->slug;
-					} else {
-						// Slugs and names don't seem to work, so find the equivalent local term ID.
-						$local_term = get_term_by( 'slug', $term->slug, $term->taxonomy );
-						$taxonomy_data[ $term->taxonomy ][] = $local_term->term_id;
-					}
-				}
+		foreach ( $person->_embedded->{'wp:term'} as $taxonomy ) {
+			if ( ! $taxonomy ) {
+				continue;
 			}
 
-			$person_data = array(
-				'post_title' => wp_strip_all_tags( $person->title->rendered ),
-				'post_content' => '',
-				'post_status' => 'publish',
-				'post_type' => WSUWP_People_Post_Type::$post_type_slug,
-				'meta_input' => array(
-					'_wsuwp_profile_ad_nid' => $nid,
-					'_on_page' => $page_id,
-					"_order_on_page_{$page_id}" => absint( $order ),
-				),
-				'tags_input' => $tags,
-				'tax_input' => $taxonomy_data,
-			);
-
-			wp_insert_post( $person_data );
+			foreach ( $taxonomy as $term ) {
+				if ( 'post_tag' === $term->taxonomy ) {
+					$tags[] = $term->slug;
+				} else {
+					// Slugs and names don't seem to work, so find the equivalent local term ID.
+					$local_term = get_term_by( 'slug', $term->slug, $term->taxonomy );
+					$taxonomy_data[ $term->taxonomy ][] = $local_term->term_id;
+				}
+			}
 		}
+
+		$person_data = array(
+			'post_title' => wp_strip_all_tags( $person->title->rendered ),
+			'post_content' => '',
+			'post_status' => 'publish',
+			'post_type' => WSUWP_People_Post_Type::$post_type_slug,
+			'meta_input' => array(
+				'_wsuwp_profile_ad_nid' => $nid,
+				'_on_page' => $page_id,
+				"_order_on_page_{$page_id}" => absint( $order ),
+			),
+			'tags_input' => $tags,
+			'tax_input' => $taxonomy_data,
+		);
+
+		wp_insert_post( $person_data );
 	}
 
 	/**
