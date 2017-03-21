@@ -5,8 +5,10 @@
 		$editor = $( "#postdivrich" ),
 		$add_people = $( "#wsu-people-import" ),
 		$page_nids = $( "#directory-page-nids" ),
+		$photos_option = $( "#wsu-people-directory-show-photos" ),
 		organizations = $( "#wsuwp_university_orgchecklist .selectit" ).map( function() { return $( this ).text(); } ).get(),
-		$people_wrapper = $( ".wsu-people" ),
+		$people_wrapper = $( ".wsu-people-wrapper" ),
+		$people = $( ".wsu-people" ),
 		$person_template = _.template( $( "#wsu-person-template" ).html() );
 
 	$( document ).ready( function() {
@@ -36,6 +38,15 @@
 			}
 		} );
 
+		$photos_option.on( "change", function() {
+			if ( "yes" === $( this ).val() ) {
+				$people_wrapper.addClass( "photos" );
+			} else {
+				$people_wrapper.removeClass( "photos" );
+			}
+
+		} );
+
 		// Toggle bulk selection mode.
 		$( ".wsu-people-bulk-actions" ).on( "click", ".toggle-select-mode", function() {
 			if ( "Bulk Select" === $( this ).text() ) {
@@ -50,7 +61,7 @@
 		} );
 
 		// Use jQuery UI Sortable to allow reordering of people.
-		$people_wrapper.sortable( {
+		$people.sortable( {
 			cursor: "move",
 			start: function( e, ui ) {
 				ui.placeholder.height( ui.item.height() );
@@ -61,7 +72,7 @@
 		} );
 
 		// Edit a person.
-		$people_wrapper.on( "click", ".wsu-person-edit", function( e ) {
+		$people.on( "click", ".wsu-person-edit", function( e ) {
 			e.preventDefault();
 
 			// This could be where the photo and bio to display are selected,
@@ -69,7 +80,7 @@
 		} );
 
 		// Delete a person
-		$people_wrapper.on( "click", ".wsu-person-remove", function( e ) {
+		$people.on( "click", ".wsu-person-remove", function( e ) {
 			e.preventDefault();
 
 			$( this ).closest( ".wsu-person" ).remove();
@@ -117,7 +128,7 @@
 	function createPerson( person ) {
 		$.each( person, function( i, data ) {
 			var $nids_field = $( "#directory-page-nids" ),
-				listed_nids = $people_wrapper.find( ".wsu-person" ).map( function() { return $( this ).data( "nid" ); } ).get();
+				listed_nids = $people.find( ".wsu-person" ).map( function() { return $( this ).data( "nid" ); } ).get();
 
 			// Don't add the person if they're already listed.
 			if ( -1 !== $.inArray( data.nid, listed_nids ) ) {
@@ -147,7 +158,7 @@
 
 	// Update the list of NIDs associated with this page.
 	function updateNidList() {
-		var nids = $people_wrapper.find( ".wsu-person" ).map( function() { return $( this ).data( "nid" ); } ).get();
+		var nids = $people.find( ".wsu-person" ).map( function() { return $( this ).data( "nid" ); } ).get();
 
 		$page_nids.val( nids.join( " " ) );
 	}
