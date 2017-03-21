@@ -1063,8 +1063,6 @@ class WSUWP_People_Post_Type {
 		if ( apply_filters( 'wsuwp_people_display', true ) ) {
 			$nid = get_post_meta( $post_id, '_wsuwp_profile_ad_nid', true );
 
-			self::update_primary_record( $nid );
-
 			return $post_id;
 		}
 
