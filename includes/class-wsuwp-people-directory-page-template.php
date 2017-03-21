@@ -213,7 +213,7 @@ class WSUWP_People_Directory_Page_Template {
 						</h2>
 
 						<a class="photo" href="<?php echo esc_url( get_permalink( $post->ID ) ); ?><%= slug %>">
-							<img src="https://people.wsu.edu/wp-content/uploads/sites/908/2015/07/HeadShot_Template2.jpg"
+							<img src="<?php echo esc_url( plugins_url( 'images/placeholder.png', dirname( __FILE__ ) ) ); ?>"
 								 data-photo="<%= photo %>"
 								 alt="<%= name %>" />
 						</a>

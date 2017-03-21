@@ -64,7 +64,7 @@ $photo = ( $person->photos ) ? $person->photos[ $photo_index ]->thumbnail : fals
 				?>
 				<figure class="photo">
 					<a href="<?php echo esc_url( $link ); ?>">
-						<img src="https://people.wsu.edu/wp-content/uploads/sites/908/2015/07/HeadShot_Template2.jpg"
+						<img src="<?php echo esc_url( plugins_url( 'images/placeholder.png', dirname( __FILE__ ) ) ); ?>"
 							 data-photo="<?php echo esc_url( $photo ); ?>"
 							 alt="<?php echo esc_attr( $person->title->rendered ); ?>" />
 					</a>
