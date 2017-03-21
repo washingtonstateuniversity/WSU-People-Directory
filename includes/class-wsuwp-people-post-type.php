@@ -578,7 +578,10 @@ class WSUWP_People_Post_Type {
 		$address = get_post_meta( $post->ID, '_wsuwp_profile_ad_address', true );
 		$phone = get_post_meta( $post->ID, '_wsuwp_profile_ad_phone', true );
 		$phone_ext = get_post_meta( $post->ID, '_wsuwp_profile_ad_phone_ext', true );
-		$classifications = wp_get_post_terms( $post->ID, WSUWP_People_Classification_Taxonomy::$taxonomy_slug, array( 'fields' => 'names' ) );
+
+		$classifications = wp_get_post_terms( $post->ID, WSUWP_People_Classification_Taxonomy::$taxonomy_slug, array(
+			'fields' => 'names',
+		) );
 
 		?>
 		<div class="profile-card">
@@ -1168,7 +1171,7 @@ class WSUWP_People_Post_Type {
 			$return_data['email'] = sanitize_text_field( $nid_data['mail'][0] );
 		}
 
-		$hash = md5( serialize( $return_data ) );
+		$hash = md5( wp_json_encode( $return_data ) );
 		$return_data['confirm_ad_hash'] = $hash;
 
 		return $return_data;
