@@ -11,6 +11,9 @@
 
 	$( document ).ready( function() {
 
+		// Load photos asynchronously.
+		loadPhotos();
+
 		// Toggle default editor and People Directory Setup metabox visibility on template select.
 		$page_template_select.on( "change", function() {
 			if ( "templates/people.php" === $( this ).val() ) {
@@ -75,6 +78,13 @@
 		} );
 	} );
 
+	// Load photos asynchronously.
+	function loadPhotos() {
+		$( ".has-photo .photo img" ).each( function() {
+			$( this ).attr( "src", $( this ).data( "photo" ) );
+		} );
+	}
+
 	// Get all the people for the given organization via a REST request.
 	function makeRequest( ui ) {
 		jQuery.ajax( {
@@ -87,6 +97,7 @@
 			if ( response.length !== 0 ) {
 				response.sort( sortResponse );
 				createPerson( response );
+				loadPhotos();
 			}
 		} );
 	}
