@@ -8,8 +8,12 @@
 		$layout_option = $( "#wsu-people-directory-layout" ),
 		$photos_option = $( "#wsu-people-directory-show-photos" ),
 		organizations = $( "#wsuwp_university_orgchecklist .selectit" ).map( function() { return $( this ).text(); } ).get(),
+		$bulk_select = $( ".toggle-select-mode" ),
+		$select_all = $( ".select-all-people" ),
+		$delete_selection = $( ".delete-selected-people" ),
 		$people_wrapper = $( ".wsu-people-wrapper" ),
 		$people = $( ".wsu-people" ),
+		$tooltip = $( ".wsu-person-controls-tooltip" ),
 		$person_template = _.template( $( "#wsu-person-template" ).html() );
 
 	$( document ).ready( function() {
@@ -57,19 +61,6 @@
 			$people_wrapper.addClass( $layout );
 		} );
 
-		// Toggle bulk selection mode.
-		$( ".wsu-people-bulk-actions" ).on( "click", ".toggle-select-mode", function() {
-			if ( "Bulk Select" === $( this ).text() ) {
-				$( this ).text( "Cancel Selection" );
-				$( ".delete-selected-people" ).show();
-				$( ".wsu-people-wrapper" ).addClass( "bulk-select" );
-			} else {
-				$( this ).text( "Bulk Select" );
-				$( ".delete-selected-people" ).hide();
-				$( ".wsu-people-wrapper" ).removeClass( "bulk-select" );
-			}
-		} );
-
 		// Use jQuery UI Sortable to allow reordering of people.
 		$people.sortable( {
 			cursor: "move",
@@ -79,6 +70,85 @@
 			stop: function() {
 				updateNidList();
 			}
+		} );
+
+		// Toggle bulk selection mode.
+		$bulk_select.on( "click", function() {
+			if ( "Bulk Select" === $( this ).text() ) {
+				$( this ).text( "Cancel Selection" );
+				$select_all.show();
+				$delete_selection.show().prop( "disabled", true );
+				$people_wrapper.addClass( "bulk-select" );
+				$people.sortable( "option", "disabled", true );
+			} else {
+				$( this ).text( "Bulk Select" );
+				$select_all.hide();
+				$delete_selection.hide().prop( "disabled", true );
+				$people_wrapper.removeClass( "bulk-select" );
+				$people.find( ".wsu-person" ).removeClass( "selected" ).attr( "aria-checked", "false" );
+				$people.sortable( "option", "disabled", false );
+			}
+		} );
+
+		// Select/deselect all people.
+		$select_all.on( "click", function() {
+			if ( "Select All" === $( this ).text() ) {
+				$( this ).text( "Deselect All" );
+				$people.find( ".wsu-person" ).addClass( "selected" ).attr( "aria-checked", "true" );
+				$delete_selection.prop( "disabled", false );
+			} else {
+				$( this ).text( "Select All" );
+				$people.find( ".wsu-person" ).removeClass( "selected" ).attr( "aria-checked", "false" );
+				$delete_selection.prop( "disabled", true );
+			}
+		} );
+
+		// Select individual people in bulk selection mode.
+		$people.on( "click", ".wsu-person", function() {
+			if ( $people_wrapper.is( ".bulk-select" ) ) {
+				$( this ).toggleClass( "selected" );
+				if ( $( this ).hasClass( "selected" ) ) {
+					$( this ).attr( "aria-checked", "true" );
+				} else {
+					$( this ).attr( "aria-checked", "false" );
+				}
+
+				if ( 0 < $people.find( ".selected" ).length ) {
+					$delete_selection.prop( "disabled", false );
+				} else {
+					$select_all.text( "Select All" );
+					$delete_selection.prop( "disabled", true );
+				}
+
+				if ( $people.find( ".wsu-person" ).length === $people.find( ".selected" ).length ) {
+					$select_all.text( "Deselect All" );
+				}
+			}
+		} );
+
+		// Delete bulk selected people.
+		$delete_selection.on( "click", function() {
+			$people.find( ".selected" ).remove();
+			updateNidList();
+		} );
+
+		// Show control buttons tooltip.
+		$people.on( "mouseover", ".wsu-person-controls button", function() {
+			var text = this.getAttribute( "aria-label" ),
+				button = this.getBoundingClientRect(),
+				people = $people[ 0 ].getBoundingClientRect();
+
+			$tooltip.find( ".wsu-person-controls-tooltip-inner" ).html( text );
+
+			$tooltip.css( {
+				top: ( button.bottom - people.top ) + "px",
+				left: ( button.right - people.left - $tooltip.width() / 2 - button.width / 2 ) + "px"
+			} ).show();
+		} );
+
+		// Hide control buttons tooltip.
+		$people.on( "mouseleave", ".wsu-person-controls button", function() {
+			$tooltip.hide();
 		} );
 
 		// Edit a person.

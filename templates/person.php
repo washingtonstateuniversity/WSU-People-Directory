@@ -46,7 +46,10 @@ $website = $person->website;
 $photo_index = ( $set_photo ) ? $set_photo : 0;
 $photo = ( $person->photos ) ? $person->photos[ $photo_index ]->thumbnail : false;
 ?>
-<article class="wsu-person<?php if ( $photo ) { echo ' has-photo'; } ?>"<?php if ( is_admin() ) { ?> data-nid="<?php echo esc_attr( $nid ); ?>"<?php } ?>>
+<article class="wsu-person<?php if ( $photo ) { echo ' has-photo'; } ?>"<?php if ( is_admin() ) { ?>
+		 data-nid="<?php echo esc_attr( $nid ); ?>"
+		 aria-checked="false"
+		 <?php } ?>>
 
 	<div class="card">
 
@@ -107,6 +110,11 @@ $photo = ( $person->photos ) ? $person->photos[ $photo_index ]->thumbnail : fals
 			<span class="dashicons dashicons-no"></span>
 		</button>
 	</div>
+
+	<button type="button" class="wsu-person-select button-link check">
+		<span class="media-modal-icon"></span>
+		<span class="screen-reader-text">Deselect</span>
+	</button>
 	<?php } ?>
 
 </article>

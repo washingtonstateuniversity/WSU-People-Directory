@@ -1,6 +1,15 @@
 #wsuwp-people-directory-configuration,
-#wsuwp-people-directory-configuration .delete-selected-people {
+#wsuwp-people-directory-configuration .delete-selected-people,
+#wsuwp-people-directory-configuration .select-all-people {
 	display: none;
+}
+
+.wsu-people-bulk-actions {
+	padding: 12px 0;
+}
+
+.wsu-people-wrapper {
+	position: relative;
 }
 
 .wsu-person {
@@ -8,8 +17,17 @@
 	position: relative;
 }
 
+.wsu-person .card a {
+	pointer-events: none;
+}
+
 .bulk-select .wsu-person {
+	cursor: pointer;
 	opacity: .65;
+}
+
+.bulk-select .wsu-person.selected {
+	opacity: 1;
 }
 
 .wsu-person-controls {
@@ -55,6 +73,35 @@
 	outline: 0;
 }
 
+.wp-core-ui .button-link.wsu-person-select {
+	background-color: #0073aa;
+	box-shadow: 0 0 0 1px #fff, 0 0 0 2px #0073aa;
+	display: none;
+	height: 24px;
+	position: absolute;
+	right: -8px;
+	top: -8px;
+	width: 24px;
+	z-index: 10;
+}
+
+.wp-core-ui .selected .button-link.wsu-person-select {
+	display: block;
+}
+
+.wsu-person-select .media-modal-icon {
+	background-position: -21px 0;
+	background-repeat: no-repeat;
+	display: block;
+	height: 15px;
+	width: 15px;
+	margin: 5px;
+}
+
+.wsu-person-select:hover .media-modal-icon {
+	background-position: -60px 0;
+}
+
 .wsu-person-controls .dashicons {
 	color: #555d66;
 	line-height: 20px;
@@ -70,4 +117,42 @@
 	margin: 0;
 	max-width: none;
 	min-width: 0;
+}
+
+.wsu-person-controls-tooltip {
+	display: none;
+	margin-top: 2px;
+	opacity: .8;
+	padding: 5px 0 0;
+	position: absolute;
+	zoom: 1;
+}
+
+.grid .wsu-person-controls-tooltip {
+	margin-left: -.5rem;
+}
+
+.wsu-person-controls-tooltip-arrow {
+	border: 5px solid #000;
+	border-top: none;
+	border-left-color: transparent;
+	border-right-color: transparent;
+	height: 0;
+	left: 50%;
+	line-height: 0;
+	margin-left: -5px;
+	position: absolute;
+	top: 0;
+	width: 0;
+}
+
+.wsu-person-controls-tooltip-inner {
+	background-color: #000;
+	border-radius: 3px;
+	color: #fff;
+	font-size: 12px;
+	max-width: 200px;
+	padding: 5px 8px 4px;
+	text-align: center;
+	white-space: normal;
 }

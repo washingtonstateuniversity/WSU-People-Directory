@@ -240,6 +240,11 @@ class WSUWP_People_Directory_Page_Template {
 						</button>
 					</div>
 
+					<button type="button" class="wsu-person-select button-link check">
+						<span class="media-modal-icon"></span>
+						<span class="screen-reader-text">Deselect</span>
+					</button>
+
 				</article>
 
 			</script>
@@ -259,7 +264,9 @@ class WSUWP_People_Directory_Page_Template {
 
 				<button type="button" class="button toggle-select-mode">Bulk Select</button>
 
-				<button type="button" class="button button-primary delete-selected-people">Delete Selected</button>
+				<button type="button" class="button select-all-people">Select All</button>
+
+				<button type="button" class="button button-primary delete-selected-people" disabled="disabled">Delete Selected</button>
 
 			</div>
 
@@ -297,6 +304,11 @@ class WSUWP_People_Directory_Page_Template {
 					}
 					?>
 
+				</div>
+
+				<div class="wsu-person-controls-tooltip" role="presentation">
+					<div class="wsu-person-controls-tooltip-arrow"></div>
+					<div class="wsu-person-controls-tooltip-inner"></div>
 				</div>
 
 			</div>
