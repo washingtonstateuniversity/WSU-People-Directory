@@ -916,7 +916,7 @@ class WSUWP_People_Post_Type {
 
 		<div class="wsuwp-profile-photo-controls-tooltip" role="presentation">
 			<div class="wsuwp-profile-photo-controls-tooltip-arrow"></div>
-			<div class="wsuwp-profile-photo-controls-tooltip-inner"></div>
+			<div class="wsuwp-profile-photo-controls-tooltip-inner">Remove</div>
 		</div>
 
 		<script type="text/template" id="photo-template">
