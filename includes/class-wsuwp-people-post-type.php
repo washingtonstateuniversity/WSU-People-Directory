@@ -894,9 +894,6 @@ class WSUWP_People_Post_Type {
 							 data-id="<?php echo esc_attr( $photo_id ); ?>" />
 
 						<div class="wsuwp-profile-photo-controls">
-							<button class="wsuwp-profile-photo-edit" aria-label="Edit">
-								<span class="dashicons dashicons-edit"></span>
-							</button>
 							<button class="wsuwp-profile-photo-remove" aria-label="Remove">
 								<span class="dashicons dashicons-no"></span>
 							</button>
@@ -919,7 +916,7 @@ class WSUWP_People_Post_Type {
 
 		<div class="wsuwp-profile-photo-controls-tooltip" role="presentation">
 			<div class="wsuwp-profile-photo-controls-tooltip-arrow"></div>
-			<div class="wsuwp-profile-photo-controls-tooltip-inner"></div>
+			<div class="wsuwp-profile-photo-controls-tooltip-inner">Remove</div>
 		</div>
 
 		<script type="text/template" id="photo-template">
@@ -935,9 +932,6 @@ class WSUWP_People_Post_Type {
 					 data-width="<%= full_width %>"
 					 data-id="<%= id %>" />
 				<div class="wsuwp-profile-photo-controls">
-					<button class="wsuwp-profile-photo-edit" aria-label="Edit">
-						<span class="dashicons dashicons-edit"></span>
-					</button>
 					<button class="wsuwp-profile-photo-remove" aria-label="Remove">
 						<span class="dashicons dashicons-no"></span>
 					</button>
@@ -1062,8 +1056,6 @@ class WSUWP_People_Post_Type {
 		// (We will store some data in the future.)
 		if ( apply_filters( 'wsuwp_people_display', true ) ) {
 			$nid = get_post_meta( $post_id, '_wsuwp_profile_ad_nid', true );
-
-			self::update_primary_record( $nid );
 
 			return $post_id;
 		}

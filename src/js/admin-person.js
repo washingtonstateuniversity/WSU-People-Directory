@@ -313,7 +313,6 @@
 
 		// Photo collection handling.
 		var media_frame,
-			details_frame,
 			$add_photo = $( ".wsuwp-profile-add-photo" ),
 			$tooltip = $( ".wsuwp-profile-photo-controls-tooltip" );
 
@@ -369,23 +368,10 @@
 			media_frame.open();
 		} );
 
-		// Surface control buttons when an image is clicked.
-		$( "html" ).click( function( e ) {
-			if ( $( e.target ).hasClass( "wsuwp-profile-photo" ) ) {
-				$( e.target ).next( ".wsuwp-profile-photo-controls" ).show();
-				$( e.target ).closest( ".wsuwp-profile-photo-wrapper" ).siblings( ".wsuwp-profile-photo-wrapper" ).find( ".wsuwp-profile-photo-controls" ).hide();
-			} else {
-				$( ".wsuwp-profile-photo-controls" ).hide();
-			}
-		} );
-
 		// Show control buttons tooltip.
 		$collection.on( "mouseover", ".wsuwp-profile-photo-controls button", function() {
-			var text = this.getAttribute( "aria-label" ),
-				button = this.getBoundingClientRect(),
+			var button = this.getBoundingClientRect(),
 				collection = $collection[ 0 ].getBoundingClientRect();
-
-			$tooltip.find( ".wsuwp-profile-photo-controls-tooltip-inner" ).html( text );
 
 			$tooltip.css( {
 				top: button.bottom - collection.top + "px",
@@ -396,56 +382,6 @@
 		// Hide control buttons tooltip.
 		$collection.on( "mouseleave", ".wsuwp-profile-photo-controls button", function() {
 			$tooltip.hide();
-		} );
-
-		// Edit a photo.
-		$collection.on( "click", ".wsuwp-profile-photo-edit", function( e ) {
-			e.preventDefault();
-			$tooltip.hide();
-
-			var img = $( this ).closest( ".wsuwp-profile-photo-wrapper" ).find( "img" ),
-				metadata = {
-				attachment_id: img.data( "id" ),
-				size: "full",
-				caption: "",
-				align: "none",
-				extraClasses: "",
-				link: false,
-				title: img.attr( "title" ),
-				url: img.data( "url" ),
-				alt: img.attr( "alt" ),
-				width: img.data( "width" ),
-				height: img.data( "height" )
-			};
-
-			if ( details_frame ) {
-				details_frame.open();
-				return;
-			}
-
-			window.wp.media.events.trigger( "editor:image-edit", {
-				metadata: metadata,
-				image: img
-			} );
-
-			details_frame = window.wp.media( {
-				frame: "image",
-				state: "image-details",
-				metadata: metadata
-			} );
-
-			details_frame.on( "close", function() {
-				var values = details_frame.state().image.attributes;
-
-				img.attr( "title", values.title );
-				img.attr( "alt", values.alt );
-				img.data( "width", values.width );
-				img.data( "height", values.height );
-
-				// @todo update image post meta to reflect changes
-			} );
-
-			details_frame.open();
 		} );
 
 		// Delete a photo.

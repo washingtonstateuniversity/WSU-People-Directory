@@ -239,6 +239,10 @@
 	        transform: translateX(-50%);
 }
 
+.wsuwp-profile-photo-wrapper:hover .wsuwp-profile-photo-controls {
+	display: block;
+}
+
 .wsuwp-profile-photo-controls button {
 	background: #f5f5f5;
 	border: 1px solid transparent;
