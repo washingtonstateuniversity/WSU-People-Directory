@@ -5,6 +5,7 @@
 		$editor = $( "#postdivrich" ),
 		$add_people = $( "#wsu-people-import" ),
 		$page_nids = $( "#directory-page-nids" ),
+		$layout_option = $( "#wsu-people-directory-layout" ),
 		$photos_option = $( "#wsu-people-directory-show-photos" ),
 		organizations = $( "#wsuwp_university_orgchecklist .selectit" ).map( function() { return $( this ).text(); } ).get(),
 		$people_wrapper = $( ".wsu-people-wrapper" ),
@@ -38,13 +39,22 @@
 			}
 		} );
 
+		// Toggle the "photos" class when the "Show Photos" option is changed.
 		$photos_option.on( "change", function() {
 			if ( "yes" === $( this ).val() ) {
 				$people_wrapper.addClass( "photos" );
 			} else {
 				$people_wrapper.removeClass( "photos" );
 			}
+		} );
 
+		// Update layout class when the "Layout" option is changed.
+		$layout_option.on( "change", function() {
+			var $layout = $( this ).val();
+			$layout_option.find( "option" ).not( ":selected" ).each( function() {
+				$people_wrapper.removeClass( $( this ).val() );
+			} );
+			$people_wrapper.addClass( $layout );
 		} );
 
 		// Toggle bulk selection mode.
