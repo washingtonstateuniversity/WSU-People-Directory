@@ -66,7 +66,7 @@ $photo = ( $person->photos ) ? $person->photos[ $photo_index ]->thumbnail : fals
 					<a href="<?php echo esc_url( $link ); ?>">
 						<img src="<?php echo esc_url( plugins_url( 'images/placeholder.png', dirname( __FILE__ ) ) ); ?>"
 							 data-photo="<?php echo esc_url( $photo ); ?>"
-							 alt="<?php echo esc_attr( $person->title->rendered ); ?>" />
+							 alt="<?php the_title(); ?>" />
 					</a>
 				</figure>
 				<?php
@@ -77,7 +77,7 @@ $photo = ( $person->photos ) ? $person->photos[ $photo_index ]->thumbnail : fals
 				?>
 				<figure class="photo">
 					<img src="<?php echo esc_url( $photo ); ?>"
-						 alt="<?php echo esc_attr( $person->title->rendered ); ?>" />
+						 alt="<?php the_title(); ?>" />
 				</figure>
 				<?php
 			}
