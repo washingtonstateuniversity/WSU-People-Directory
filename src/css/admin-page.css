@@ -13,12 +13,30 @@
 }
 
 .wsu-person {
+	color: #717171;
 	cursor: move;
+	font-family: "Open Sans", "Lucida Sans", "Lucida Grande", "Lucida Sans Unicode", sans-serif;
+	font-size: 14px;
+	line-height: 22px;
 	position: relative;
 }
 
+#poststuff .wsu-person .name {
+	font-size: 1rem;
+	font-weight: 700;
+	padding: 8px 0 3.2px;
+}
+
 .wsu-person .card a {
+	color: #981e32;
 	pointer-events: none;
+	text-decoration: none;
+}
+
+.wsu-person p {
+	font-size: 14px;
+	margin: 0;
+	padding-bottom: 1em;
 }
 
 .bulk-select .wsu-person {
