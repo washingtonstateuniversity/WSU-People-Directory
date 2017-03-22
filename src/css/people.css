@@ -173,17 +173,23 @@ input[type="search"]::-webkit-search-decoration {
 }
 
 .table .photo {
+	display: none;
 	float: left;
-	margin-right: 20px;
+	margin: 0 20px 0 0;
 	width: 100px;
 }
 
+.table.photos .has-photo .photo {
+	display: block;
+}
+
 .table .photo img {
+	display: block;
 	max-width: 100%;
 	width: 100%;
 }
 
-.table .has-photo .contact {
+.table.photos .has-photo .contact {
 	margin-left: 120px;
 }
 
