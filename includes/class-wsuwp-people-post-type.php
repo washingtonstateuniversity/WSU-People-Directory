@@ -894,9 +894,6 @@ class WSUWP_People_Post_Type {
 							 data-id="<?php echo esc_attr( $photo_id ); ?>" />
 
 						<div class="wsuwp-profile-photo-controls">
-							<button class="wsuwp-profile-photo-edit" aria-label="Edit">
-								<span class="dashicons dashicons-edit"></span>
-							</button>
 							<button class="wsuwp-profile-photo-remove" aria-label="Remove">
 								<span class="dashicons dashicons-no"></span>
 							</button>
@@ -935,9 +932,6 @@ class WSUWP_People_Post_Type {
 					 data-width="<%= full_width %>"
 					 data-id="<%= id %>" />
 				<div class="wsuwp-profile-photo-controls">
-					<button class="wsuwp-profile-photo-edit" aria-label="Edit">
-						<span class="dashicons dashicons-edit"></span>
-					</button>
 					<button class="wsuwp-profile-photo-remove" aria-label="Remove">
 						<span class="dashicons dashicons-no"></span>
 					</button>
