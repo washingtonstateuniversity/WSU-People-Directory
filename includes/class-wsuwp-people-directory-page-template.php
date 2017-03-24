@@ -232,10 +232,10 @@ class WSUWP_People_Directory_Page_Template {
 					<div class="about"><%= content %></div>
 
 					<div class="wsu-person-controls">
-						<button class="wsu-person-edit" aria-label="Edit">
+						<button type="button" class="wsu-person-edit" aria-label="Edit">
 							<span class="dashicons dashicons-edit"></span>
 						</button>
-						<button class="wsu-person-remove" aria-label="Remove">
+						<button type="button" class="wsu-person-remove" aria-label="Remove">
 							<span class="dashicons dashicons-no"></span>
 						</button>
 					</div>

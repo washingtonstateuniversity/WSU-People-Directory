@@ -13,6 +13,7 @@
 		$delete_selection = $( ".delete-selected-people" ),
 		$people_wrapper = $( ".wsu-people-wrapper" ),
 		$people = $( ".wsu-people" ),
+		$person_modal = $( ".person-modal" ),
 		$tooltip = $( ".wsu-person-controls-tooltip" ),
 		$person_template = _.template( $( "#wsu-person-template" ).html() );
 
@@ -151,22 +152,73 @@
 			$tooltip.hide();
 		} );
 
-		// Edit a person.
-		$people.on( "click", ".wsu-person-edit", function( e ) {
-			e.preventDefault();
-
-			// This could be where the photo and bio to display are selected,
-			// so that decision can be made per-page rather than per-site.
+		// Open the details modal for a person.
+		$people.on( "click", ".wsu-person-edit", function() {
+			$( this ).closest( ".wsu-person" ).find( ".person-modal-wrapper" ).addClass( "active" );
+			$( "body" ).addClass( "person-modal-open" );
+			$people.sortable( "option", "disabled", true );
 		} );
 
 		// Delete a person
-		$people.on( "click", ".wsu-person-remove", function( e ) {
-			e.preventDefault();
-
+		$people.on( "click", ".wsu-person-remove", function() {
 			$( this ).closest( ".wsu-person" ).remove();
 
 			updateNidList();
 		} );
+
+		// Close a person without updating.
+		$people.on( "click", ".close", function( e ) {
+			if ( e.target === this ) {
+				$( this ).closest( ".person-modal-wrapper" ).removeClass( "active" );
+				$( "body" ).removeClass( "person-modal-open" );
+				$people.sortable( "option", "disabled", false );
+			}
+		} );
+
+		// Edit a person.
+		$person_modal.on( "click", ".choose > div", function() {
+			$( this ).toggleClass( "selected" );
+
+			if ( !$( this ).closest( ".choose" ).hasClass( "multiple" ) ) {
+				$( this ).siblings().removeClass( "selected" );
+			}
+		} );
+
+		// Update a person.
+		$person_modal.on( "click", ".person-update", function() {
+			var $person = $( this ).closest( ".wsu-person" ),
+				$modal = $( this ).closest( ".person-modal-wrapper" );
+
+			if ( $modal.find( ".person-photos .selected" ) ) {
+				$person.find( ".photo img" ).attr( "src", $modal.find( ".person-photos .selected img" ).attr( "src" ) );
+			}
+
+			if ( $modal.find( ".person-titles .selected" ) ) {
+				var new_title = "",
+					selected_titles = $modal.find( ".person-titles .selected .content" ),
+					count = selected_titles.length;
+
+				selected_titles.each( function( i ) {
+					new_title += $( this ).html();
+
+					if ( i !== count - 1 ) {
+						new_title += "<br />";
+					}
+				} );
+
+				$person.find( ".card .title" ).html( new_title );
+			}
+
+			if ( $modal.find( ".person-content .selected" ) ) {
+				$person.find( ".about" ).html( $modal.find( ".person-content .selected .content" ).html() );
+			}
+
+			$modal.removeClass( "active" );
+			$people.sortable( "option", "disabled", false );
+		} );
+
+		$( "body" ).removeClass( "person-modal-open" );
+		$people.sortable( "option", "disabled", false );
 	} );
 
 	// Load photos asynchronously.
