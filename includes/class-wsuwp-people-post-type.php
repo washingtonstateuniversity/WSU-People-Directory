@@ -310,7 +310,7 @@ class WSUWP_People_Post_Type {
 		add_action( 'add_meta_boxes_' . self::$post_type_slug, array( $this, 'add_meta_boxes' ) );
 		add_action( 'do_meta_boxes', array( $this, 'do_meta_boxes' ), 10, 3 );
 
-		add_filter( 'content_save_pre', array( $this, 'content_save_pre' ) );
+		add_filter( 'wp_insert_post_data', array( $this, 'wp_insert_post_data' ) );
 		add_action( 'save_post_' . self::$post_type_slug, array( $this, 'save_post' ) );
 
 		add_action( 'wp_ajax_wsu_people_get_data_by_nid', array( $this, 'ajax_get_data_by_nid' ) );
@@ -1014,20 +1014,21 @@ class WSUWP_People_Post_Type {
 	}
 
 	/**
-	 * Save post content only if this is people.wsu.edu
+	 * Save post content only if this is people.wsu.edu.
 	 *
 	 * @since 0.3.0
 	 *
-	 * @param string $content The post content.
+	 * @param array $data An array of slashed post data.
 	 *
-	 * @return string
+	 * @return array
 	 */
-	public function content_save_pre( $content ) {
-		if ( apply_filters( 'wsuwp_people_display', true ) ) {
-			return '';
+	public function wp_insert_post_data( $data ) {
+		if ( apply_filters( 'wsuwp_people_display', true ) && self::$post_type_slug === $data['post_type'] ) {
+			$data['post_content'] = '';
+			$data['post_content_filtered'] = '';
 		}
 
-		return $content;
+		return $data;
 	}
 
 	/**
