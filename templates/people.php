@@ -3,9 +3,10 @@ $page_id = get_the_ID();
 $nids = get_post_meta( $page_id, '_wsu_people_directory_nids', true );
 $link = get_post_meta( $page_id, '_wsu_people_directory_link', true );
 $profile = get_post_meta( $page_id, '_wsu_people_directory_profile', true );
+$layout = get_post_meta( $page_id, '_wsu_people_directory_layout', true );
 $base_url = get_permalink();
 $wrapper_classes = array( 'wsu-people-wrapper' );
-$wrapper_classes[] = ( $layout = get_post_meta( $page_id, '_wsu_people_directory_layout', true ) ) ? esc_attr( $layout ) : 'table';
+$wrapper_classes[] = ( $layout ) ? esc_attr( $layout ) : 'table';
 
 if ( 'yes' === get_post_meta( $page_id, '_wsu_people_directory_show_photos', true ) ) {
 	$wrapper_classes[] = 'photos';
