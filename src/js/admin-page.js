@@ -187,18 +187,29 @@
 		// Update a person.
 		$person_modal.on( "click", ".person-update", function() {
 			var $person = $( this ).closest( ".wsu-person" ),
-				$modal = $( this ).closest( ".person-modal-wrapper" );
+				$modal = $( this ).closest( ".person-modal-wrapper" ),
+				data = {
+					action: "person_details",
+					nonce: window.wsupeople.nonce,
+					page: window.wsupeople.page_id,
+					post: $person.data( "post-id" )
+				};
 
 			if ( $modal.find( ".person-photos .selected" ) ) {
-				$person.find( ".photo img" ).attr( "src", $modal.find( ".person-photos .selected img" ).attr( "src" ) );
+				var $photo = $modal.find( ".person-photos .selected" );
+
+				data.photo = $photo.data( "index" );
+				$person.find( ".photo img" ).attr( "src",  $photo.find( "img" ).attr( "src" ) );
 			}
 
 			if ( $modal.find( ".person-titles .selected" ) ) {
 				var new_title = "",
+					title_indexes = [],
 					selected_titles = $modal.find( ".person-titles .selected .content" ),
 					count = selected_titles.length;
 
 				selected_titles.each( function( i ) {
+					title_indexes.push( $( this ).closest( ".selected" ).data( "index" ) );
 					new_title += $( this ).html();
 
 					if ( i !== count - 1 ) {
@@ -206,19 +217,19 @@
 					}
 				} );
 
+				data.title = title_indexes.join( " " );
 				$person.find( ".card .title" ).html( new_title );
 			}
 
 			if ( $modal.find( ".person-content .selected" ) ) {
-				$person.find( ".about" ).html( $modal.find( ".person-content .selected .content" ).html() );
+				var $about = $modal.find( ".person-content .selected" );
+
+				data.about = $about.data( "key" );
+				$person.find( ".about" ).html(  $about.find( ".content" ).html() );
 			}
 
-			$modal.removeClass( "active" );
-			$people.sortable( "option", "disabled", false );
+			updatePersonDetails( data, $modal );
 		} );
-
-		$( "body" ).removeClass( "person-modal-open" );
-		$people.sortable( "option", "disabled", false );
 	} );
 
 	// Load photos asynchronously.
@@ -230,7 +241,7 @@
 
 	// Get all the people for the given organization via a REST request.
 	function makeRequest( ui ) {
-		jQuery.ajax( {
+		$.ajax( {
 			url: window.wsupeople.rest_url,
 			data: {
 				"filter[wsuwp_university_org]": ui.item.value,
@@ -293,5 +304,15 @@
 		var nids = $people.find( ".wsu-person" ).map( function() { return $( this ).data( "nid" ); } ).get();
 
 		$page_nids.val( nids.join( " " ) );
+	}
+
+	// Update a person's details.
+	function updatePersonDetails( data, $modal ) {
+		window.console.log( data );
+		$.post( window.wsupeople.ajax_url, data ).done( function() {
+			$modal.removeClass( "active" );
+			$people.sortable( "option", "disabled", false );
+			$( "body" ).removeClass( "person-modal-open" );
+		} );
 	}
 }( jQuery, window, document ) );

@@ -79,6 +79,7 @@ class WSUWP_People_Directory_Page_Template {
 		add_action( 'admin_enqueue_scripts', array( $this, 'admin_enqueue_scripts' ) );
 		add_action( 'add_meta_boxes_page', array( $this, 'add_meta_boxes' ) );
 		add_action( 'save_post_page', array( $this, 'save_post' ), 10, 2 );
+		add_action( 'wp_ajax_person_details', array( $this, 'person_details' ) );
 
 		add_filter( 'theme_page_templates', array( $this, 'add_directory_template' ) );
 		add_filter( 'template_include', array( $this, 'template_include' ) );
@@ -105,6 +106,7 @@ class WSUWP_People_Directory_Page_Template {
 	 * @param string $hook_suffix The current admin page.
 	 */
 	public function admin_enqueue_scripts( $hook_suffix ) {
+		global $post;
 		$screen = get_current_screen();
 
 		if ( 'page' !== $screen->post_type || ! in_array( $hook_suffix, array( 'post.php', 'post-new.php' ), true ) ) {
@@ -118,6 +120,9 @@ class WSUWP_People_Directory_Page_Template {
 
 		wp_localize_script( 'wsuwp-people-admin', 'wsupeople', array(
 			'rest_url' => WSUWP_People_Directory::REST_URL(),
+			'ajax_url' => admin_url( 'admin-ajax.php' ),
+			'nonce' => wp_create_nonce( 'person-details' ),
+			'page_id' => $post->ID,
 		) );
 		wp_localize_script( 'wsuwp-people-sync', 'wsupeoplesync', array(
 			'nonce' => wp_create_nonce( 'wp_rest' ),
@@ -277,17 +282,18 @@ class WSUWP_People_Directory_Page_Template {
 					<?php
 					if ( $nids ) {
 						$nids = explode( ' ', $nids );
+						$page_id = $post->ID;
 
 						$people_query_args = array(
 							'post_type' => WSUWP_People_Post_Type::$post_type_slug,
 							'posts_per_page' => count( $nids ),
-							'meta_key' => "_order_on_page_{$post->ID}",
+							'meta_key' => "_order_on_page_{$page_id}",
 							'orderby' => 'meta_value_num',
 							'order' => 'asc',
 							'meta_query' => array(
 								array(
 									'key' => '_on_page',
-									'value' => $post->ID,
+									'value' => $page_id,
 								),
 							),
 						);
@@ -464,6 +470,44 @@ class WSUWP_People_Directory_Page_Template {
 		);
 
 		wp_insert_post( $person_data );
+	}
+
+	/**
+	 * Update a person's display information for this page.
+	 *
+	 * @since 0.3.0
+	 */
+	public function person_details() {
+		check_ajax_referer( 'person-details', 'nonce' );
+
+		$post_id = absint( $_POST['post'] );
+		$page_id = absint( $_POST['page'] );
+		$meta = array();
+
+		if ( $_POST['title'] ) {
+			$titles = explode( ' ', $_POST['title'] );
+			foreach ( $titles as $title ) {
+				if ( 'ad' === $title ) {
+					$meta['title'][] = 'ad';
+				} else {
+					$meta['title'][] = absint( $title );
+				}
+			}
+		}
+
+		if ( $_POST['photo'] ) {
+			$meta['photo'] = absint( $_POST['photo'] );
+		}
+
+		if ( $_POST['about'] ) {
+			$meta['about'] = sanitize_text_field( $_POST['about'] );
+		}
+
+		if ( ! empty( $meta ) ) {
+			update_post_meta( $post_id, "_display_on_page_{$page_id}", $meta );
+		}
+
+		exit();
 	}
 
 	/**
