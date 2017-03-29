@@ -43,6 +43,8 @@ class WSUWP_People_Directory {
 		add_action( 'init', 'WSUWP_People_Post_Type' );
 		add_action( 'init', 'WSUWP_People_Classification_Taxonomy' );
 
+		add_action( 'init', array( $this, 'add_global_cache_groups' ), 9 );
+
 		if ( apply_filters( 'wsuwp_people_show_in_rest', false ) ) {
 			require_once( dirname( __FILE__ ) . '/class-wsuwp-people-rest-api.php' );
 
@@ -58,6 +60,16 @@ class WSUWP_People_Directory {
 		}
 
 		add_action( 'init', array( $this, 'maybe_flush_rewrite_rules' ), 99 );
+	}
+
+	/**
+	 * Adds a global cache group for use with the people directory
+	 * across a multisite install.
+	 *
+	 * @since 0.3.0
+	 */
+	public function add_global_cache_groups() {
+		wp_cache_add_global_groups( 'wsuwp-people' );
 	}
 
 	/**
