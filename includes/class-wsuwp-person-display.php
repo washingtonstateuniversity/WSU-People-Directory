@@ -35,7 +35,7 @@ class WSUWP_Person_Display {
 	}
 
 	/**
-	 * Add rewrite rules for person views.
+	 * Adds rewrite rules for person views under each directory page's path.
 	 *
 	 * @since 0.3.0
 	 */
@@ -48,10 +48,8 @@ class WSUWP_Person_Display {
 
 		if ( $pages ) {
 			foreach ( $pages as $page ) {
-				$slug = str_replace( trailingslashit( get_home_url() ), '', get_permalink( $page->ID ) );
-
 				add_rewrite_rule(
-					'^' . $slug . '([^/]*)/?',
+					'^' . $page->post_name . '/([^/]*)/?',
 					'index.php?' . WSUWP_People_Post_Type::$post_type_slug . '=$matches[1]',
 					'top'
 				);
