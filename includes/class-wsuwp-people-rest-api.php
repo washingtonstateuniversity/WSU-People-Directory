@@ -30,7 +30,10 @@ class WSUWP_People_REST_API {
 	 */
 	public function setup_hooks() {
 		add_action( 'init', array( $this, 'show_people_in_rest' ), 12 );
+
+		add_action( 'rest_api_init', array( $this, 'custom_access_control_headers' ) );
 		add_action( 'rest_api_init', array( $this, 'register_api_fields' ) );
+
 		add_filter( 'rest_prepare_' . WSUWP_People_Post_Type::$post_type_slug, array( $this, 'photos_api_field' ), 10, 2 );
 		add_action( 'init', array( $this, 'show_university_taxonomies_in_rest' ), 12 );
 
@@ -49,6 +52,41 @@ class WSUWP_People_REST_API {
 
 		$wp_post_types[ WSUWP_People_Post_Type::$post_type_slug ]->show_in_rest = true;
 		$wp_post_types[ WSUWP_People_Post_Type::$post_type_slug ]->rest_base = 'people';
+	}
+
+	/**
+	 * Removes the default WordPress core CORS headers and adds a
+	 * custom replacement.
+	 *
+	 * @since 0.3.0
+	 */
+	public function custom_access_control_headers() {
+		remove_filter( 'rest_pre_serve_request', 'rest_send_cors_headers' );
+		add_filter( 'rest_pre_serve_request', array( $this, 'rest_send_cors_headers' ) );
+	}
+
+	/**
+	 * Adds `X-WP-Nonce` and `X-WSUWP-NID` to the CORS headers supplied by default
+	 * in WordPress core.
+	 *
+	 * @since 0.3.0
+	 *
+	 * @param mixed $value
+	 *
+	 * @return mixed
+	 */
+	public function rest_send_cors_headers( $value ) {
+		$origin = get_http_origin();
+
+		if ( $origin ) {
+			header( 'Access-Control-Allow-Origin: ' . esc_url_raw( $origin ) );
+			header( 'Access-Control-Allow-Methods: OPTIONS, GET, POST, PUT, PATCH, DELETE' );
+			header( 'Access-Control-Allow-Credentials: true' );
+			header( 'Access-Control-Allow-Headers: X-WP-Nonce, X-WSUWP-UID' );
+			header( 'Vary: Origin' );
+		}
+
+		return $value;
 	}
 
 	/**
