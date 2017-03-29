@@ -384,10 +384,10 @@ class WSUWP_People_Directory_Page_Template {
 				'fields' => 'ids',
 			);
 
-			$person = get_posts( $person_query_args );
+			$people = get_posts( $person_query_args );
 
-			if ( $person ) {
-				foreach ( $person as $person ) {
+			if ( $people ) {
+				foreach ( $people as $person ) {
 					$on_page = get_post_meta( $person, '_on_page', true );
 					$order_on_page = get_post_meta( $person, "_order_on_page_{$post_id}", true );
 
