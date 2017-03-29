@@ -35,7 +35,7 @@ class WSUWP_Person_Display {
 	}
 
 	/**
-	 * Add rewrite rules for person views.
+	 * Adds rewrite rules for person views under each directory page's path.
 	 *
 	 * @since 0.3.0
 	 */
@@ -48,10 +48,8 @@ class WSUWP_Person_Display {
 
 		if ( $pages ) {
 			foreach ( $pages as $page ) {
-				$slug = str_replace( trailingslashit( get_home_url() ), '', get_permalink( $page->ID ) );
-
 				add_rewrite_rule(
-					'^' . $slug . '([^/]*)/?',
+					'^' . $page->post_name . '/([^/]*)/?',
 					'index.php?' . WSUWP_People_Post_Type::$post_type_slug . '=$matches[1]',
 					'top'
 				);
@@ -60,15 +58,17 @@ class WSUWP_Person_Display {
 	}
 
 	/**
-	 * Change the permalink structure for a person.
+	 * Changes the permalink structure for a person.
 	 *
 	 * @since 0.3.0
 	 *
 	 * @param string $url  The post URL.
 	 * @param object $post The post object.
+	 *
+	 * @return string The modified URL.
 	 */
 	public function person_permalink( $url, $post ) {
-		if ( get_post_type( $post ) !== WSUWP_People_Post_Type::$post_type_slug ) {
+		if ( WSUWP_People_Post_Type::$post_type_slug !== $post->post_type ) {
 			return $url;
 		}
 
@@ -123,15 +123,13 @@ class WSUWP_Person_Display {
 	}
 
 	/**
-	 * Filter the content for a person view.
+	 * Filters the content for a person view.
 	 *
 	 * @since 0.3.0
 	 *
-	 * @param string $content Current post content.
-	 *
 	 * @return string Modified content.
 	 */
-	public function content( $content ) {
+	public function content() {
 		remove_filter( 'the_content', array( $this, 'content' ) );
 
 		ob_start();

@@ -79,6 +79,7 @@ class WSUWP_People_Directory_Page_Template {
 		add_action( 'admin_enqueue_scripts', array( $this, 'admin_enqueue_scripts' ) );
 		add_action( 'add_meta_boxes_page', array( $this, 'add_meta_boxes' ) );
 		add_action( 'save_post_page', array( $this, 'save_post' ), 10, 2 );
+		add_action( 'wp_ajax_person_details', array( $this, 'person_details' ) );
 
 		add_filter( 'theme_page_templates', array( $this, 'add_directory_template' ) );
 		add_filter( 'template_include', array( $this, 'template_include' ) );
@@ -105,6 +106,7 @@ class WSUWP_People_Directory_Page_Template {
 	 * @param string $hook_suffix The current admin page.
 	 */
 	public function admin_enqueue_scripts( $hook_suffix ) {
+		global $post;
 		$screen = get_current_screen();
 
 		if ( 'page' !== $screen->post_type || ! in_array( $hook_suffix, array( 'post.php', 'post-new.php' ), true ) ) {
@@ -118,6 +120,9 @@ class WSUWP_People_Directory_Page_Template {
 
 		wp_localize_script( 'wsuwp-people-admin', 'wsupeople', array(
 			'rest_url' => WSUWP_People_Directory::REST_URL(),
+			'ajax_url' => admin_url( 'admin-ajax.php' ),
+			'nonce' => wp_create_nonce( 'person-details' ),
+			'page_id' => $post->ID,
 		) );
 		wp_localize_script( 'wsuwp-people-sync', 'wsupeoplesync', array(
 			'nonce' => wp_create_nonce( 'wp_rest' ),
@@ -232,13 +237,18 @@ class WSUWP_People_Directory_Page_Template {
 					<div class="about"><%= content %></div>
 
 					<div class="wsu-person-controls">
-						<button class="wsu-person-edit" aria-label="Edit">
+						<button type="button" class="wsu-person-edit" aria-label="Edit">
 							<span class="dashicons dashicons-edit"></span>
 						</button>
-						<button class="wsu-person-remove" aria-label="Remove">
+						<button type="button" class="wsu-person-remove" aria-label="Remove">
 							<span class="dashicons dashicons-no"></span>
 						</button>
 					</div>
+
+					<button type="button" class="wsu-person-select button-link check">
+						<span class="media-modal-icon"></span>
+						<span class="screen-reader-text">Deselect</span>
+					</button>
 
 				</article>
 
@@ -259,7 +269,9 @@ class WSUWP_People_Directory_Page_Template {
 
 				<button type="button" class="button toggle-select-mode">Bulk Select</button>
 
-				<button type="button" class="button button-primary delete-selected-people">Delete Selected</button>
+				<button type="button" class="button select-all-people">Select All</button>
+
+				<button type="button" class="button button-primary delete-selected-people" disabled="disabled">Delete Selected</button>
 
 			</div>
 
@@ -270,17 +282,18 @@ class WSUWP_People_Directory_Page_Template {
 					<?php
 					if ( $nids ) {
 						$nids = explode( ' ', $nids );
+						$page_id = $post->ID;
 
 						$people_query_args = array(
 							'post_type' => WSUWP_People_Post_Type::$post_type_slug,
 							'posts_per_page' => count( $nids ),
-							'meta_key' => "_order_on_page_{$post->ID}",
+							'meta_key' => "_order_on_page_{$page_id}",
 							'orderby' => 'meta_value_num',
 							'order' => 'asc',
 							'meta_query' => array(
 								array(
 									'key' => '_on_page',
-									'value' => $post->ID,
+									'value' => $page_id,
 								),
 							),
 						);
@@ -299,6 +312,11 @@ class WSUWP_People_Directory_Page_Template {
 
 				</div>
 
+				<div class="wsu-person-controls-tooltip" role="presentation">
+					<div class="wsu-person-controls-tooltip-arrow"></div>
+					<div class="wsu-person-controls-tooltip-inner"></div>
+				</div>
+
 			</div>
 		<?php
 	}
@@ -309,24 +327,22 @@ class WSUWP_People_Directory_Page_Template {
 	 * @since 0.3.0
 	 *
 	 * @param int $post_id Post ID.
-	 *
-	 * @return mixed
 	 */
 	public function save_post( $post_id ) {
 		if ( ! isset( $_POST['directory_page_nonce'] ) || ! wp_verify_nonce( $_POST['directory_page_nonce'], 'directory-page-configuration' ) ) {
-			return $post_id;
+			return;
 		}
 
 		if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
-			return $post_id;
+			return;
 		}
 
 		if ( ! current_user_can( 'edit_post', $post_id ) ) {
-			return $post_id;
+			return;
 		}
 
 		if ( ! isset( $_POST['page_template'] ) || key( self::$template ) !== $_POST['page_template'] ) {
-			return $post_id;
+			return;
 		}
 
 		// We'll check against this further down.
@@ -347,11 +363,11 @@ class WSUWP_People_Directory_Page_Template {
 
 		// Update associated people data.
 		if ( ! isset( $_POST['_wsu_people_directory_nids'] ) ) {
-			return $post_id;
+			return;
 		}
 
 		if ( $previous_nids === $_POST['_wsu_people_directory_nids'] ) {
-			return $post_id;
+			return;
 		}
 
 		// Save order data of the associated people.
@@ -366,10 +382,10 @@ class WSUWP_People_Directory_Page_Template {
 				'fields' => 'ids',
 			);
 
-			$person = get_posts( $person_query_args );
+			$people = get_posts( $person_query_args );
 
-			if ( $person ) {
-				foreach ( $person as $person ) {
+			if ( $people ) {
+				foreach ( $people as $person ) {
 					$on_page = get_post_meta( $person, '_on_page', true );
 					$order_on_page = get_post_meta( $person, "_order_on_page_{$post_id}", true );
 
@@ -398,7 +414,7 @@ class WSUWP_People_Directory_Page_Template {
 
 		if ( $removed_people ) {
 			foreach ( $removed_people as $person ) {
-				delete_post_meta( $person, '_on_page', $post_id, $post_id );
+				delete_post_meta( $person, '_on_page', $post_id );
 				delete_post_meta( $person, "_order_on_page_{$post_id}" );
 			}
 		}
@@ -407,9 +423,9 @@ class WSUWP_People_Directory_Page_Template {
 	/**
 	 * Save a person who has been added to a directory page.
 	 *
-	 * @param string $nid     The person's netID.
+	 * @param string $nid     The person's network ID.
 	 * @param int    $page_id ID of the page this person is associated with.
-	 * @param order  $order   The person's order on the page.
+	 * @param int    $order   The person's order on the page.
 	 */
 	private function save_person( $nid, $page_id, $order ) {
 		$person = WSUWP_People_Post_Type::get_rest_data( $nid );
@@ -452,6 +468,44 @@ class WSUWP_People_Directory_Page_Template {
 		);
 
 		wp_insert_post( $person_data );
+	}
+
+	/**
+	 * Update a person's display information for this page.
+	 *
+	 * @since 0.3.0
+	 */
+	public function person_details() {
+		check_ajax_referer( 'person-details', 'nonce' );
+
+		$post_id = absint( $_POST['post'] );
+		$page_id = absint( $_POST['page'] );
+		$meta = array();
+
+		if ( $_POST['title'] ) {
+			$titles = explode( ' ', $_POST['title'] );
+			foreach ( $titles as $title ) {
+				if ( 'ad' === $title ) {
+					$meta['title'][] = 'ad';
+				} else {
+					$meta['title'][] = absint( $title );
+				}
+			}
+		}
+
+		if ( $_POST['photo'] ) {
+			$meta['photo'] = absint( $_POST['photo'] );
+		}
+
+		if ( $_POST['about'] ) {
+			$meta['about'] = sanitize_text_field( $_POST['about'] );
+		}
+
+		if ( ! empty( $meta ) ) {
+			update_post_meta( $post_id, "_display_on_page_{$page_id}", $meta );
+		}
+
+		exit();
 	}
 
 	/**
@@ -517,11 +571,9 @@ class WSUWP_People_Directory_Page_Template {
 	 *
 	 * @since 0.3.0
 	 *
-	 * @param string $content Current post content.
-	 *
 	 * @return string Modified content.
 	 */
-	public function directory_content( $content ) {
+	public function directory_content() {
 		remove_filter( 'the_content', array( $this, 'directory_content' ) );
 
 		ob_start();

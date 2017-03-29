@@ -31,22 +31,73 @@ if ( empty( $person ) ) {
 }
 
 $person = $person[0];
-$name = $person->title->rendered;
 
 // Card info.
-$title = ( isset( $person->working_titles[0] ) ) ? $person->working_titles[0] : $person->position_title;
+$title = ( ! empty( $person->working_titles ) ) ? implode( '<br />', $person->working_titles ) : $person->position_title;
 $email = ( ! empty( $person->email_alt ) ) ? $person->email_alt : $person->email;
-$phone = ( ! empty( $person->phone_alt ) ) ? $person->phone_alt : $person->phone; // We provide a field for phone extension, but I'm not sure if it's used.
+$ad_phone = ( ! empty( $person->phone_ext ) ) ? $person->phone . ' ext ' . $person->phone_ext : $person->phone;
+$phone = ( ! empty( $person->phone_alt ) ) ? $person->phone_alt : $ad_phone;
 $office = ( ! empty( $person->office_alt ) ) ? $person->office_alt : $person->office;
 $address = $person->address;
-$degrees = ( ! empty( $person->degrees ) ) ? $person->degrees : false;
+$degrees = ( ! empty( $person->degrees ) ) ? implode( '<br />', $person->degrees ) : false;
 $website = $person->website;
 
 // Photo.
 $photo_index = ( $set_photo ) ? $set_photo : 0;
 $photo = ( $person->photos ) ? $person->photos[ $photo_index ]->thumbnail : false;
+
+// About.
+$about = $person->content->rendered;
+
+// Taxonomy info.
+$tags = wp_get_post_tags( $post->ID, array(
+	'fields' => 'names',
+) );
+
+// Directory page-specific info.
+if ( ! $profile ) {
+	$directory_page = get_post_meta( $post->ID, "_display_on_page_{$page_id}", true );
+
+	if ( isset( $directory_page['title'] ) ) {
+		$titles = array();
+
+		foreach ( $directory_page['title'] as $title_index ) {
+			if ( 'ad' === $title_index ) {
+				$titles[] = $person->position_title;
+			} else {
+				$titles[] = $person->working_titles[ $title_index ];
+			}
+		}
+
+		$title = implode( '<br />', $titles );
+	}
+
+	if ( isset( $directory_page['photo'] ) ) {
+		$index = $directory_page['photo'];
+		$photo = $person->photos[ $index ]->thumbnail;
+	}
+
+	if ( isset( $directory_page['about'] ) && 'content' !== $directory_page['about'] ) {
+		if ( 'bio_unit' === $directory_page['about'] ) {
+			$about = $person->bio_unit;
+		} elseif ( 'bio_university' === $directory_page['about'] ) {
+			$about = $person->bio_university;
+		} elseif ( 'tags' === $directory_page['about'] ) {
+			$about = implode( ', ', $tags );
+		}
+	}
+}
+
+// Person classes.
+$person_classes = array( 'wsu-person' );
+if ( $photo ) {
+	$person_classes[] = 'has-photo';
+}
 ?>
-<article class="wsu-person<?php if ( $photo ) { echo ' has-photo'; } ?>"<?php if ( is_admin() ) { ?> data-nid="<?php echo esc_attr( $nid ); ?>"<?php } ?>>
+<article class="<?php echo esc_html( implode( ' ', $person_classes ) ); ?>"<?php if ( is_admin() ) { ?>
+		 data-nid="<?php echo esc_attr( $nid ); ?>"
+		 data-post-id="<?php the_ID(); ?>"
+		 aria-checked="false"<?php } ?>>
 
 	<div class="card">
 
@@ -57,7 +108,8 @@ $photo = ( $person->photos ) ? $person->photos[ $photo_index ]->thumbnail : fals
 		</h2>
 		<?php } ?>
 
-		<?php if ( $photo ) {
+		<?php
+		if ( $photo ) {
 
 			// Markup for directory page view.
 			if ( ! $profile && in_array( 'photos', $wrapper_classes, true ) ) {
@@ -81,10 +133,11 @@ $photo = ( $person->photos ) ? $person->photos[ $photo_index ]->thumbnail : fals
 				</figure>
 				<?php
 			}
-		} ?>
+		}
+		?>
 
 		<div class="contact">
-			<span class="title"><?php echo esc_html( $title ); ?></span>
+			<span class="title"><?php echo wp_kses_post( $title ); ?></span>
 			<span class="email"><a href="mailto:<?php echo esc_attr( $email ); ?>"><?php echo esc_html( $email ); ?></a></span>
 			<span class="phone"><?php echo esc_html( $phone ); ?></span>
 			<span class="office"><?php echo esc_html( $office ); ?></span>
@@ -95,18 +148,152 @@ $photo = ( $person->photos ) ? $person->photos[ $photo_index ]->thumbnail : fals
 	</div>
 
 	<div class="about">
-		<?php echo apply_filters( 'the_content', $person->content->rendered ); ?>
+		<?php echo wp_kses_post( apply_filters( 'the_content', $about ) ); ?>
 	</div>
 
 	<?php if ( is_admin() ) { ?>
 	<div class="wsu-person-controls">
-		<button class="wsu-person-edit" aria-label="Edit" data-id="<?php echo esc_attr( $person->id ); ?>" data-listed="<?php echo esc_attr( implode( ' ', $person->listed_on ) ); ?>">
+		<button type="button"
+				class="wsu-person-edit"
+				aria-label="Edit"
+				data-id="<?php echo esc_attr( $person->id ); ?>"
+				data-listed="<?php echo esc_attr( implode( ' ', $person->listed_on ) ); ?>">
 			<span class="dashicons dashicons-edit"></span>
 		</button>
-		<button class="wsu-person-remove" aria-label="Remove">
+		<button type="button" class="wsu-person-remove" aria-label="Remove">
 			<span class="dashicons dashicons-no"></span>
 		</button>
 	</div>
-	<?php } ?>
+
+	<button type="button" class="wsu-person-select button-link check">
+		<span class="media-modal-icon"></span>
+		<span class="screen-reader-text">Deselect</span>
+	</button>
+
+	<div class="person-modal-wrapper close">
+		<div class="person-modal content">
+
+			<div class="person-modal-title">
+				<h1><?php the_title(); ?> Details</h1>
+			</div>
+
+			<div class="person-modal-content">
+
+				<?php if ( $person->photos ) { ?>
+				<h2>Photos</h2>
+
+				<p class="description">Select which photo to display.</p>
+
+				<div class="person-photos choose">
+
+					<?php foreach ( $person->photos as $index => $photo ) { ?>
+					<div data-index="<?php echo esc_attr( $index ); ?>"<?php if ( isset( $directory_page['photo'] ) && $index === $directory_page['photo'] ) { echo ' class="selected"'; } ?>>
+						<img src="<?php echo esc_url( $photo->thumbnail ); ?>" />
+						<button type="button" class="wsu-person-select button-link check">
+							<span class="media-modal-icon"></span>
+							<span class="screen-reader-text">Deselect</span>
+						</button>
+					</div>
+					<?php } ?>
+
+				</div>
+				<?php } ?>
+
+				<?php if ( $person->working_titles ) { ?>
+				<h2>Titles</h2>
+
+				<p class="description">Select which title(s) to display.</p>
+
+				<div class="person-titles choose multiple">
+
+					<div data-index="ad"<?php if ( isset( $directory_page['title'] ) && in_array( 'ad', $directory_page['title'], true ) ) { echo ' class="selected"'; } ?>>
+						<span class="content"><?php echo esc_html( $person->position_title ); ?></span>
+						<button type="button" class="wsu-person-select button-link check">
+							<span class="media-modal-icon"></span>
+							<span class="screen-reader-text">Deselect</span>
+						</button>
+					</div>
+
+					<?php foreach ( $person->working_titles as $index => $title ) { ?>
+					<div data-index="<?php echo esc_attr( $index ); ?>"<?php if ( isset( $directory_page['title'] ) && in_array( $index, $directory_page['title'], true ) ) { echo ' class="selected"'; } ?>>
+						<span class="content"><?php echo esc_html( $title ); ?></span>
+						<button type="button" class="wsu-person-select button-link check">
+							<span class="media-modal-icon"></span>
+							<span class="screen-reader-text">Deselect</span>
+						</button>
+					</div>
+					<?php } ?>
+
+				</div>
+				<?php } ?>
+
+				<?php if ( $person->content->rendered || $person->bio_unit || $person->bio_university ) { ?>
+				<h2>About</h2>
+
+				<p class="description">Select what to display for the "About" area.</p>
+
+				<div class="person-content choose">
+
+					<?php if ( $person->content->rendered ) { ?>
+					<h3>Personal Biography</h3>
+					<div data-key="content">
+						<div class="content"><?php echo wp_kses_post( apply_filters( 'the_content', $person->content->rendered ) ); ?></div>
+						<button type="button" class="wsu-person-select button-link check">
+							<span class="media-modal-icon"></span>
+							<span class="screen-reader-text">Deselect</span>
+						</button>
+					</div>
+					<?php } ?>
+
+					<?php if ( $person->bio_unit ) { ?>
+					<h3>Unit Biography</h3>
+					<div data-key="bio_unit"<?php if ( isset( $directory_page['about'] ) && 'bio_unit' === $directory_page['about'] ) { echo ' class="selected"'; } ?>>
+						<div class="content"><?php echo wp_kses_post( apply_filters( 'the_content', $person->bio_unit ) ); ?></div>
+						<button type="button" class="wsu-person-select button-link check">
+							<span class="media-modal-icon"></span>
+							<span class="screen-reader-text">Deselect</span>
+						</button>
+					</div>
+					<?php } ?>
+
+					<?php if ( $person->bio_university ) { ?>
+					<h3>University Biography</h3>
+					<div data-key="bio_university"<?php if ( isset( $directory_page['about'] ) && 'bio_university' === $directory_page['about'] ) { echo ' class="selected"'; } ?>>
+						<div class="content"><?php echo wp_kses_post( apply_filters( 'the_content', $person->bio_university ) ); ?></div>
+						<button type="button" class="wsu-person-select button-link check">
+							<span class="media-modal-icon"></span>
+							<span class="screen-reader-text">Deselect</span>
+						</button>
+					</div>
+					<?php } ?>
+
+					<?php if ( $tags ) { ?>
+					<h3>Tags</h3>
+					<div data-key="tags"<?php if ( isset( $directory_page['about'] ) && 'tags' === $directory_page['about'] ) { echo ' class="selected"'; } ?>>
+						<div class="content"><?php echo esc_html( implode( ', ', $tags ) ); ?></div>
+						<button type="button" class="wsu-person-select button-link check">
+							<span class="media-modal-icon"></span>
+							<span class="screen-reader-text">Deselect</span>
+						</button>
+					</div>
+					<?php } ?>
+
+				</div>
+				<?php } // End if(). ?>
+
+			</div>
+
+			<div class="person-modal-toolbar">
+				<button type="button" class="button button-primary button-large person-update">Update</button>
+			</div>
+
+			<button type="button" class="button-link person-modal-button close">
+				<span class="person-modal-icon close">
+					<span class="screen-reader-text">Close person panel</span>
+				</span>
+			</button>
+		</div>
+	</div>
+	<?php } // End if(). ?>
 
 </article>
