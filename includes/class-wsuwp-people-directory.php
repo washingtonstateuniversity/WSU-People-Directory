@@ -137,7 +137,7 @@ class WSUWP_People_Directory {
 			return false;
 		}
 
-		$token = wp_cache_get( $user_id . ':' . $domain, 'wsuwp-people' );
+		$token = wp_cache_get( $uid . ':' . $domain, 'wsuwp-people' );
 		$i = wp_nonce_tick();
 
 		// Nonce generated 0-12 hours ago
