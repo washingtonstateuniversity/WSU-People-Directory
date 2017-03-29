@@ -31,6 +31,9 @@ class WSUWP_People_REST_API {
 	public function setup_hooks() {
 		add_action( 'init', array( $this, 'show_people_in_rest' ), 12 );
 
+		// Fires before the default cookie authentication check.
+		add_filter( 'rest_authentication_errors', array( $this, 'rest_verify_authentication' ), 90 );
+
 		add_action( 'rest_api_init', array( $this, 'custom_access_control_headers' ) );
 		add_action( 'rest_api_init', array( $this, 'register_api_fields' ) );
 
@@ -52,6 +55,71 @@ class WSUWP_People_REST_API {
 
 		$wp_post_types[ WSUWP_People_Post_Type::$post_type_slug ]->show_in_rest = true;
 		$wp_post_types[ WSUWP_People_Post_Type::$post_type_slug ]->rest_base = 'people';
+	}
+
+	/**
+	 * Authenticates a cross domain request to edit a person record.
+	 *
+	 * @since 0.3.0
+	 *
+	 * @global wp $wp
+	 *
+	 * @param WP_Error|mixed $result Error from another authentication handler. null if we
+	 *                               should handle it, another value if not.
+	 *
+	 * @return WP_Error|null|bool WP_Error if authentication error.
+	 *                            null if authentication wasn't used.
+	 *                            true if authentication succeeded.
+	 */
+	public function rest_verify_authentication( $result ) {
+		global $wp;
+
+		if ( ! empty( $result ) ) {
+			return $result;
+		}
+
+		// Only perform custom authentication on the people endpoint.
+		if ( 0 !== strpos( $wp->request, 'wp-json/wp/v2/people' ) ) {
+			return null;
+		}
+
+		// Determine if there is a nonce.
+		$nonce = null;
+
+		if ( isset( $_REQUEST['_wpnonce'] ) ) {
+			$nonce = $_REQUEST['_wpnonce'];
+		} elseif ( isset( $_SERVER['HTTP_X_WP_NONCE'] ) ) {
+			$nonce = $_SERVER['HTTP_X_WP_NONCE'];
+		}
+
+		$uid = null;
+
+		if ( isset( $_SERVER['HTTP_X_WSUWP_UID'] ) ) {
+			$uid = absint( $_SERVER['HTTP_X_WSUWP_UID'] );
+		}
+
+		$domain = null;
+
+		if ( isset( $_SERVER['HTTP_ORIGIN'] ) ) {
+			$domain = wp_parse_url( $_SERVER['HTTP_ORIGIN'], PHP_URL_HOST );
+		}
+
+		if ( null === $nonce || ! $uid || empty( $domain ) ) {
+			// No nonce at all, so act as if it's an unauthenticated request.
+			wp_set_current_user( 0 );
+			return true;
+		}
+
+		// Check the nonce.
+		$result = WSUWP_People_Directory::verify_rest_nonce( $nonce, $uid, $domain );
+
+		if ( ! $result ) {
+			return new WP_Error( 'rest_cookie_invalid_nonce', __( 'Cookie nonce is invalid' ), array( 'status' => 403 ) );
+		}
+
+		wp_set_current_user( $uid );
+
+		return true;
 	}
 
 	/**
