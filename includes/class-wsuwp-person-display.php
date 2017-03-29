@@ -64,6 +64,7 @@ class WSUWP_Person_Display {
 	 *
 	 * @param string $url  The post URL.
 	 * @param object $post The post object.
+	 *
 	 * @return string The modified URL.
 	 */
 	public function person_permalink( $url, $post ) {
@@ -122,15 +123,13 @@ class WSUWP_Person_Display {
 	}
 
 	/**
-	 * Filter the content for a person view.
+	 * Filters the content for a person view.
 	 *
 	 * @since 0.3.0
 	 *
-	 * @param string $content Current post content.
-	 *
 	 * @return string Modified content.
 	 */
-	public function content( $content ) {
+	public function content() {
 		remove_filter( 'the_content', array( $this, 'content' ) );
 
 		ob_start();
