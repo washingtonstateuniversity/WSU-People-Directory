@@ -423,9 +423,9 @@ class WSUWP_People_Directory_Page_Template {
 	/**
 	 * Save a person who has been added to a directory page.
 	 *
-	 * @param string $nid     The person's netID.
+	 * @param string $nid     The person's network ID.
 	 * @param int    $page_id ID of the page this person is associated with.
-	 * @param order  $order   The person's order on the page.
+	 * @param int    $order   The person's order on the page.
 	 */
 	private function save_person( $nid, $page_id, $order ) {
 		$person = WSUWP_People_Post_Type::get_rest_data( $nid );

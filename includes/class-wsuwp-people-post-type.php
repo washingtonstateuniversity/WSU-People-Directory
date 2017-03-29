@@ -1078,13 +1078,14 @@ class WSUWP_People_Post_Type {
 	}
 
 	/**
-	 * Given a WSU Network ID, retrive information about a person from people.wsu.edu.
+	 * Given a WSU Network ID, retrieve information about a person from people.wsu.edu.
 	 *
 	 * @since 0.3.0
 	 *
 	 * @param string $nid The user's network ID.
 	 *
-	 * @return array List of predefined information we'll expect on the other side.
+	 * @return object|bool List of predefined information we'll expect on the other side.
+	 *                     False if person is not available.
 	 */
 	public static function get_rest_data( $nid ) {
 		$request_url = add_query_arg(
