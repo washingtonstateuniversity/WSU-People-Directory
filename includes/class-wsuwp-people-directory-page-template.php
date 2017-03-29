@@ -571,11 +571,9 @@ class WSUWP_People_Directory_Page_Template {
 	 *
 	 * @since 0.3.0
 	 *
-	 * @param string $content Current post content.
-	 *
 	 * @return string Modified content.
 	 */
-	public function directory_content( $content ) {
+	public function directory_content() {
 		remove_filter( 'the_content', array( $this, 'directory_content' ) );
 
 		ob_start();
