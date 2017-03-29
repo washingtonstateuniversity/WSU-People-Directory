@@ -416,7 +416,7 @@ class WSUWP_People_Directory_Page_Template {
 
 		if ( $removed_people ) {
 			foreach ( $removed_people as $person ) {
-				delete_post_meta( $person, '_on_page', $post_id, $post_id );
+				delete_post_meta( $person, '_on_page', $post_id );
 				delete_post_meta( $person, "_order_on_page_{$post_id}" );
 			}
 		}
