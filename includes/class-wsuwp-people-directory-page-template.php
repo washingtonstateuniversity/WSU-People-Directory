@@ -395,8 +395,19 @@ class WSUWP_People_Directory_Page_Template {
 					}
 				}
 			} else {
-				// If no matching NID is found, save the profile.
-				$this->save_person( $nid, $post_id, $index );
+				$person = WSUWP_People_Post_Type::get_rest_data( $nid );
+
+				// If a matching person is found, save the profile. If not, remove from the nids list.
+				if ( $person ) {
+					$this->save_person( $person, $post_id, $index );
+				} else {
+					// This prevents a rare scenario in which a NID is somehow saved but a REST API
+					// request for its data is invalid.
+					$nids = get_post_meta( $post_id, '_wsu_people_directory_nids', true );
+					$nids = str_replace( $nid, '', $nids );
+					$nids = str_replace( '  ', ' ', $nids );
+					update_post_meta( $post_id, '_wsu_people_directory_nids', true );
+				}
 			}
 		}
 
@@ -423,17 +434,13 @@ class WSUWP_People_Directory_Page_Template {
 	/**
 	 * Save a person who has been added to a directory page.
 	 *
-	 * @param string $nid     The person's network ID.
+	 * @since 0.3.0
+	 *
+	 * @param object $person  The person as returned from the REST API.
 	 * @param int    $page_id ID of the page this person is associated with.
 	 * @param int    $order   The person's order on the page.
 	 */
-	private function save_person( $nid, $page_id, $order ) {
-		$person = WSUWP_People_Post_Type::get_rest_data( $nid );
-
-		if ( ! $person ) {
-			return;
-		}
-
+	private function save_person( $person, $page_id, $order ) {
 		$tags = array();
 		$taxonomy_data = array();
 
@@ -459,7 +466,7 @@ class WSUWP_People_Directory_Page_Template {
 			'post_status' => 'publish',
 			'post_type' => WSUWP_People_Post_Type::$post_type_slug,
 			'meta_input' => array(
-				'_wsuwp_profile_ad_nid' => $nid,
+				'_wsuwp_profile_ad_nid' => $person->nid,
 				'_on_page' => $page_id,
 				"_order_on_page_{$page_id}" => absint( $order ),
 			),
