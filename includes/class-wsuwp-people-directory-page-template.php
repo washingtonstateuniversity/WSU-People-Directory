@@ -125,7 +125,8 @@ class WSUWP_People_Directory_Page_Template {
 			'page_id' => $post->ID,
 		) );
 		wp_localize_script( 'wsuwp-people-sync', 'wsupeoplesync', array(
-			'nonce' => wp_create_nonce( 'wp_rest' ),
+			'nonce' => WSUWP_People_Directory::create_rest_nonce(),
+			'uid' => wp_get_current_user()->ID,
 			'site_url' => get_home_url(),
 		) );
 	}

@@ -43,6 +43,8 @@ class WSUWP_People_Directory {
 		add_action( 'init', 'WSUWP_People_Post_Type' );
 		add_action( 'init', 'WSUWP_People_Classification_Taxonomy' );
 
+		add_action( 'init', array( $this, 'add_global_cache_groups' ), 9 );
+
 		if ( apply_filters( 'wsuwp_people_show_in_rest', false ) ) {
 			require_once( dirname( __FILE__ ) . '/class-wsuwp-people-rest-api.php' );
 
@@ -61,6 +63,16 @@ class WSUWP_People_Directory {
 	}
 
 	/**
+	 * Adds a global cache group for use with the people directory
+	 * across a multisite install.
+	 *
+	 * @since 0.3.0
+	 */
+	public function add_global_cache_groups() {
+		wp_cache_add_global_groups( 'wsuwp-people' );
+	}
+
+	/**
 	 * The REST request URL.
 	 *
 	 * @since 0.3.0
@@ -72,6 +84,76 @@ class WSUWP_People_Directory {
 		$default = 'https://people.wsu.edu/wp-json/wp/v2/people';
 
 		return apply_filters( 'wsu_people_directory_rest_url', $default );
+	}
+
+	/**
+	 * Generates a nonce for use with people directory REST API requests.
+	 *
+	 * This follows the same logic used in WordPress core, but also stores the user's
+	 * unique token in a global cache group so that it's accessible by sites that do
+	 * not have access to the user's cookie.
+	 *
+	 * @since 0.3.0
+	 *
+	 * @return string A nonce for a people directory REST request.
+	 */
+	public static function create_rest_nonce() {
+		$user = wp_get_current_user();
+		$uid = (int) $user->ID;
+
+		$token = wp_get_session_token();
+		$key = $uid . ':' . get_site()->domain;
+
+		// Store the token in a global cache group.
+		wp_cache_set( $key, $token, 'wsuwp-people' );
+
+		$i = wp_nonce_tick();
+
+		return substr( wp_hash( $i . '|wsuwp_people|' . $uid . '|' . $token, 'nonce' ), -12, 10 );
+	}
+
+	/**
+	 * Verifies a nonce generated for use with the people directory REST API endpoint.
+	 *
+	 * This follows the same logic used in WordPress core, but retrieves the user's unique
+	 * token from a global cache group rather than the user's cookies, which are not
+	 * accessible during a CORS request.
+	 *
+	 * @since 0.3.0
+	 *
+	 * @param string $nonce   The one time use token.
+	 * @param int    $user_id The requesting user's ID.
+	 * @param string $domain  The origin domain.
+	 *
+	 * @return bool|int False if the nonce is invalid. 1 if generated 0-12 hours ago. 2 if 12-24 hours ago.
+	 */
+	public static function verify_rest_nonce( $nonce, $user_id, $domain ) {
+		$nonce = (string) $nonce;
+		$uid = (int) $user_id;
+		$domain = (string) $domain;
+		$action = 'wsuwp_people';
+
+		if ( empty( $nonce ) || empty( $user_id ) || empty( $domain ) ) {
+			return false;
+		}
+
+		$token = wp_cache_get( $uid . ':' . $domain, 'wsuwp-people' );
+		$i = wp_nonce_tick();
+
+		// Nonce generated 0-12 hours ago
+		$expected = substr( wp_hash( $i . '|' . $action . '|' . $uid . '|' . $token, 'nonce' ), -12, 10 );
+		if ( hash_equals( $expected, $nonce ) ) {
+			return 1;
+		}
+
+		// Nonce generated 12-24 hours ago
+		$expected = substr( wp_hash( ( $i - 1 ) . '|' . $action . '|' . $uid . '|' . $token, 'nonce' ), -12, 10 );
+		if ( hash_equals( $expected, $nonce ) ) {
+			return 2;
+		}
+
+		// Invalid nonce
+		return false;
 	}
 
 	/**

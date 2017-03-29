@@ -14,6 +14,7 @@
 			method: "POST",
 			beforeSend: function( xhr ) {
 				xhr.setRequestHeader( "X-WP-Nonce", window.wsupeoplesync.nonce );
+				xhr.setRequestHeader( "X-WSUWP-UID", window.wsupeoplesync.uid );
 			},
 			data:{
 				"listed_on": userListed
