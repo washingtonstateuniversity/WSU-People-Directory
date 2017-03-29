@@ -327,24 +327,22 @@ class WSUWP_People_Directory_Page_Template {
 	 * @since 0.3.0
 	 *
 	 * @param int $post_id Post ID.
-	 *
-	 * @return mixed
 	 */
 	public function save_post( $post_id ) {
 		if ( ! isset( $_POST['directory_page_nonce'] ) || ! wp_verify_nonce( $_POST['directory_page_nonce'], 'directory-page-configuration' ) ) {
-			return $post_id;
+			return;
 		}
 
 		if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
-			return $post_id;
+			return;
 		}
 
 		if ( ! current_user_can( 'edit_post', $post_id ) ) {
-			return $post_id;
+			return;
 		}
 
 		if ( ! isset( $_POST['page_template'] ) || key( self::$template ) !== $_POST['page_template'] ) {
-			return $post_id;
+			return;
 		}
 
 		// We'll check against this further down.
@@ -365,11 +363,11 @@ class WSUWP_People_Directory_Page_Template {
 
 		// Update associated people data.
 		if ( ! isset( $_POST['_wsu_people_directory_nids'] ) ) {
-			return $post_id;
+			return;
 		}
 
 		if ( $previous_nids === $_POST['_wsu_people_directory_nids'] ) {
-			return $post_id;
+			return;
 		}
 
 		// Save order data of the associated people.
@@ -384,10 +382,10 @@ class WSUWP_People_Directory_Page_Template {
 				'fields' => 'ids',
 			);
 
-			$person = get_posts( $person_query_args );
+			$people = get_posts( $person_query_args );
 
-			if ( $person ) {
-				foreach ( $person as $person ) {
+			if ( $people ) {
+				foreach ( $people as $person ) {
 					$on_page = get_post_meta( $person, '_on_page', true );
 					$order_on_page = get_post_meta( $person, "_order_on_page_{$post_id}", true );
 
@@ -416,7 +414,7 @@ class WSUWP_People_Directory_Page_Template {
 
 		if ( $removed_people ) {
 			foreach ( $removed_people as $person ) {
-				delete_post_meta( $person, '_on_page', $post_id, $post_id );
+				delete_post_meta( $person, '_on_page', $post_id );
 				delete_post_meta( $person, "_order_on_page_{$post_id}" );
 			}
 		}
@@ -425,9 +423,9 @@ class WSUWP_People_Directory_Page_Template {
 	/**
 	 * Save a person who has been added to a directory page.
 	 *
-	 * @param string $nid     The person's netID.
+	 * @param string $nid     The person's network ID.
 	 * @param int    $page_id ID of the page this person is associated with.
-	 * @param order  $order   The person's order on the page.
+	 * @param int    $order   The person's order on the page.
 	 */
 	private function save_person( $nid, $page_id, $order ) {
 		$person = WSUWP_People_Post_Type::get_rest_data( $nid );
@@ -573,11 +571,9 @@ class WSUWP_People_Directory_Page_Template {
 	 *
 	 * @since 0.3.0
 	 *
-	 * @param string $content Current post content.
-	 *
 	 * @return string Modified content.
 	 */
-	public function directory_content( $content ) {
+	public function directory_content() {
 		remove_filter( 'the_content', array( $this, 'directory_content' ) );
 
 		ob_start();
