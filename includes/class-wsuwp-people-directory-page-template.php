@@ -327,24 +327,22 @@ class WSUWP_People_Directory_Page_Template {
 	 * @since 0.3.0
 	 *
 	 * @param int $post_id Post ID.
-	 *
-	 * @return mixed
 	 */
 	public function save_post( $post_id ) {
 		if ( ! isset( $_POST['directory_page_nonce'] ) || ! wp_verify_nonce( $_POST['directory_page_nonce'], 'directory-page-configuration' ) ) {
-			return $post_id;
+			return;
 		}
 
 		if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
-			return $post_id;
+			return;
 		}
 
 		if ( ! current_user_can( 'edit_post', $post_id ) ) {
-			return $post_id;
+			return;
 		}
 
 		if ( ! isset( $_POST['page_template'] ) || key( self::$template ) !== $_POST['page_template'] ) {
-			return $post_id;
+			return;
 		}
 
 		// We'll check against this further down.
@@ -365,11 +363,11 @@ class WSUWP_People_Directory_Page_Template {
 
 		// Update associated people data.
 		if ( ! isset( $_POST['_wsu_people_directory_nids'] ) ) {
-			return $post_id;
+			return;
 		}
 
 		if ( $previous_nids === $_POST['_wsu_people_directory_nids'] ) {
-			return $post_id;
+			return;
 		}
 
 		// Save order data of the associated people.
