@@ -87,6 +87,76 @@ class WSUWP_People_Directory {
 	}
 
 	/**
+	 * Generates a nonce for use with people directory REST API requests.
+	 *
+	 * This follows the same logic used in WordPress core, but also stores the user's
+	 * unique token in a global cache group so that it's accessible by sites that do
+	 * not have access to the user's cookie.
+	 *
+	 * @since 0.3.0
+	 *
+	 * @return string A nonce for a people directory REST request.
+	 */
+	public static function create_rest_nonce() {
+		$user = wp_get_current_user();
+		$uid = (int) $user->ID;
+
+		$token = wp_get_session_token();
+		$key = $uid . ':' . get_site()->domain;
+
+		// Store the token in a global cache group.
+		wp_cache_set( $key, $token, 'wsuwp-people' );
+
+		$i = wp_nonce_tick();
+
+		return substr( wp_hash( $i . '|wsuwp_people|' . $uid . '|' . $token, 'nonce' ), -12, 10 );
+	}
+
+	/**
+	 * Verifies a nonce generated for use with the people directory REST API endpoint.
+	 *
+	 * This follows the same logic used in WordPress core, but retrieves the user's unique
+	 * token from a global cache group rather than the user's cookies, which are not
+	 * accessible during a CORS request.
+	 *
+	 * @since 0.3.0
+	 *
+	 * @param string $nonce   The one time use token.
+	 * @param int    $user_id The requesting user's ID.
+	 * @param string $domain  The origin domain.
+	 *
+	 * @return bool|int False if the nonce is invalid. 1 if generated 0-12 hours ago. 2 if 12-24 hours ago.
+	 */
+	public static function verify_rest_nonce( $nonce, $user_id, $domain ) {
+		$nonce = (string) $nonce;
+		$uid = (int) $user_id;
+		$domain = (string) $domain;
+		$action = 'wsuwp_people';
+
+		if ( empty( $nonce ) || empty( $user_id ) || empty( $domain ) ) {
+			return false;
+		}
+
+		$token = wp_cache_get( $user_id . ':' . $domain, 'wsuwp-people' );
+		$i = wp_nonce_tick();
+
+		// Nonce generated 0-12 hours ago
+		$expected = substr( wp_hash( $i . '|' . $action . '|' . $uid . '|' . $token, 'nonce'), -12, 10 );
+		if ( hash_equals( $expected, $nonce ) ) {
+			return 1;
+		}
+
+		// Nonce generated 12-24 hours ago
+		$expected = substr( wp_hash( ( $i - 1 ) . '|' . $action . '|' . $uid . '|' . $token, 'nonce' ), -12, 10 );
+		if ( hash_equals( $expected, $nonce ) ) {
+			return 2;
+		}
+
+		// Invalid nonce
+		return false;
+	}
+
+	/**
 	 * If the flag for flushing rewrite rules is set, flush them and delete the flag.
 	 *
 	 * @since 0.3.0
