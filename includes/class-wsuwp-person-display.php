@@ -58,15 +58,16 @@ class WSUWP_Person_Display {
 	}
 
 	/**
-	 * Change the permalink structure for a person.
+	 * Changes the permalink structure for a person.
 	 *
 	 * @since 0.3.0
 	 *
 	 * @param string $url  The post URL.
 	 * @param object $post The post object.
+	 * @return string The modified URL.
 	 */
 	public function person_permalink( $url, $post ) {
-		if ( get_post_type( $post ) !== WSUWP_People_Post_Type::$post_type_slug ) {
+		if ( WSUWP_People_Post_Type::$post_type_slug !== $post->post_type ) {
 			return $url;
 		}
 
