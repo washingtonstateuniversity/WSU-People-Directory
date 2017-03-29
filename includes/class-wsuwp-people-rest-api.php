@@ -136,7 +136,7 @@ class WSUWP_People_REST_API {
 	}
 
 	/**
-	 * Adds `X-WP-Nonce` and `X-WSUWP-NID` to the CORS headers supplied by default
+	 * Adds `X-WP-Nonce` and `X-WSUWP-UID` to the CORS headers supplied by default
 	 * in WordPress core.
 	 *
 	 * @since 0.3.0
