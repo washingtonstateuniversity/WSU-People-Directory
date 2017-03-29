@@ -141,7 +141,7 @@ class WSUWP_People_Directory {
 		$i = wp_nonce_tick();
 
 		// Nonce generated 0-12 hours ago
-		$expected = substr( wp_hash( $i . '|' . $action . '|' . $uid . '|' . $token, 'nonce'), -12, 10 );
+		$expected = substr( wp_hash( $i . '|' . $action . '|' . $uid . '|' . $token, 'nonce' ), -12, 10 );
 		if ( hash_equals( $expected, $nonce ) ) {
 			return 1;
 		}

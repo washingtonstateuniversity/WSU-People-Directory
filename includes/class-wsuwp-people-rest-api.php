@@ -86,8 +86,8 @@ class WSUWP_People_REST_API {
 		// Determine if there is a nonce.
 		$nonce = null;
 
-		if ( isset( $_REQUEST['_wpnonce'] ) ) {
-			$nonce = $_REQUEST['_wpnonce'];
+		if ( isset( $_REQUEST['_wpnonce'] ) ) { // @codingStandardsIgnoreLine
+			$nonce = $_REQUEST['_wpnonce']; // @codingStandardsIgnoreLine
 		} elseif ( isset( $_SERVER['HTTP_X_WP_NONCE'] ) ) {
 			$nonce = $_SERVER['HTTP_X_WP_NONCE'];
 		}
@@ -114,7 +114,9 @@ class WSUWP_People_REST_API {
 		$result = WSUWP_People_Directory::verify_rest_nonce( $nonce, $uid, $domain );
 
 		if ( ! $result ) {
-			return new WP_Error( 'rest_cookie_invalid_nonce', __( 'Cookie nonce is invalid' ), array( 'status' => 403 ) );
+			return new WP_Error( 'rest_cookie_invalid_nonce', __( 'Cookie nonce is invalid' ), array(
+				'status' => 403,
+			) );
 		}
 
 		wp_set_current_user( $uid );
