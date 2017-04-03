@@ -350,7 +350,6 @@ class WSUWP_People_Post_Type {
 				'title',
 				'editor',
 				'revisions',
-				'author',
 			),
 			'taxonomies' => array(
 				'post_tag',
