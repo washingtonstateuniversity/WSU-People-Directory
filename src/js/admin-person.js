@@ -104,6 +104,13 @@
 				populate_photos( data._embedded[ "wp:featuredmedia" ][ 0 ] );
 			}
 
+			// Add the `selected` class to a photo accordingly.
+			if ( "" !== $( ".use-photo" ).val() ) {
+				$( ".wsuwp-profile-photo-wrapper" ).eq( $( ".use-photo" ).val() ).addClass( "selected" );
+			} else {
+				$( ".wsuwp-profile-photo-wrapper" ).eq( 0 ).addClass( "selected" );
+			}
+
 			// Populate taxonomy data.
 			if ( data._embedded[ "wp:term" ] && data._embedded[ "wp:term" ] !== 0 ) {
 				$.each( data._embedded[ "wp:term" ], function( i, taxonomy ) {

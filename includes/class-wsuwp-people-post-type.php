@@ -877,8 +877,9 @@ class WSUWP_People_Post_Type {
 		wp_enqueue_media();
 
 		$photos = get_post_meta( $post->ID, '_wsuwp_profile_photos', true );
+		$not_primary = apply_filters( 'wsuwp_people_display', true );
 		?>
-		<div class="wsuwp-profile-photo-collection">
+		<div class="wsuwp-profile-photo-collection<?php if ( $not_primary ) { ?> selectable<?php } ?>">
 
 			<?php
 			if ( $photos ) {
@@ -920,7 +921,7 @@ class WSUWP_People_Post_Type {
 		<input type="button" class="wsuwp-profile-add-photo button" value="Add Photo(s)" />
 
 		<?php
-		if ( apply_filters( 'wsuwp_people_display', true ) ) {
+		if ( $not_primary ) {
 			$index_used = get_post_meta( $post->ID, '_use_photo', true );
 			?>
 			<input type="hidden" class="use-photo" name="_use_photo" value="<?php echo esc_attr( $index_used ); ?>" />
@@ -946,7 +947,7 @@ class WSUWP_People_Post_Type {
 					 data-width="<%= full_width %>"
 					 data-id="<%= id %>" />
 				<div class="wsuwp-profile-photo-controls">
-					<?php if ( apply_filters( 'wsuwp_people_display', true ) ) { ?>
+					<?php if ( $not_primary ) { ?>
 					<button type="button" class="wsuwp-profile-photo-select" aria-label="Select">
 						<span class="dashicons dashicons-yes"></span>
 					</button>
