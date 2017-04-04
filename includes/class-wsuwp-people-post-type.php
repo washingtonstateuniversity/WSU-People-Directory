@@ -512,7 +512,13 @@ class WSUWP_People_Post_Type {
 				$value = get_post_meta( $post->ID, $args['meta_key'], true );
 				?>
 				<div id="<?php echo esc_attr( $key ); ?>" class="wsuwp-profile-panel">
-					<?php wp_editor( $value, $args['meta_key'] ); ?>
+					<?php
+					if ( '_wsuwp_profile_bio_university' === $args['meta_key'] && ! current_user_can( 'create_sites' ) ) {
+						echo wp_kses_post( apply_filters( 'the_content', $value ) );
+					} else {
+						wp_editor( $value, $args['meta_key'] );
+					}
+					?>
 				</div>
 				<?php
 			}
