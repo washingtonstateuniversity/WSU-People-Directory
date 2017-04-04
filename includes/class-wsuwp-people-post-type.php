@@ -1066,12 +1066,6 @@ class WSUWP_People_Post_Type {
 			return $post_id;
 		}
 
-		// Save "last_name first_name" data (for alpha sorting purposes).
-		if ( ( isset( $_POST['_wsuwp_profile_ad_name_last'] ) && '' !== $_POST['_wsuwp_profile_ad_name_last'] ) &&
-				 ( isset( $_POST['_wsuwp_profile_ad_name_first'] ) && '' !== $_POST['_wsuwp_profile_ad_name_first'] ) ) {
-			update_post_meta( $post_id, '_wsuwp_profile_name', sanitize_text_field( $_POST['_wsuwp_profile_ad_name_last'] ) . ' ' . sanitize_text_field( $_POST['_wsuwp_profile_ad_name_first'] ) );
-		}
-
 		$keys = get_registered_meta_keys( 'post' );
 
 		foreach ( $keys as $key => $args ) {
