@@ -899,7 +899,7 @@ class WSUWP_People_Post_Type {
 							 data-id="<?php echo esc_attr( $photo_id ); ?>" />
 
 						<div class="wsuwp-profile-photo-controls">
-							<button class="wsuwp-profile-photo-remove" aria-label="Remove">
+							<button type="button" class="wsuwp-profile-photo-remove" aria-label="Remove">
 								<span class="dashicons dashicons-no"></span>
 							</button>
 						</div>
@@ -919,9 +919,18 @@ class WSUWP_People_Post_Type {
 
 		<input type="button" class="wsuwp-profile-add-photo button" value="Add Photo(s)" />
 
+		<?php
+		if ( apply_filters( 'wsuwp_people_display', true ) ) {
+			$index_used = get_post_meta( $post->ID, '_use_photo', true );
+			?>
+			<input type="hidden" class="use-photo" name="_use_photo" value="<?php echo esc_attr( $index_used ); ?>" />
+			<?php
+		}
+		?>
+
 		<div class="wsuwp-profile-photo-controls-tooltip" role="presentation">
 			<div class="wsuwp-profile-photo-controls-tooltip-arrow"></div>
-			<div class="wsuwp-profile-photo-controls-tooltip-inner">Remove</div>
+			<div class="wsuwp-profile-photo-controls-tooltip-inner"></div>
 		</div>
 
 		<script type="text/template" id="photo-template">
@@ -937,11 +946,17 @@ class WSUWP_People_Post_Type {
 					 data-width="<%= full_width %>"
 					 data-id="<%= id %>" />
 				<div class="wsuwp-profile-photo-controls">
-					<button class="wsuwp-profile-photo-remove" aria-label="Remove">
+					<?php if ( apply_filters( 'wsuwp_people_display', true ) ) { ?>
+					<button type="button" class="wsuwp-profile-photo-select" aria-label="Select">
+						<span class="dashicons dashicons-yes"></span>
+					</button>
+					<?php } ?>
+					<button type="button" class="wsuwp-profile-photo-remove" aria-label="Remove">
 						<span class="dashicons dashicons-no"></span>
 					</button>
 				</div>
 				<input type="hidden" class="wsuwp-profile-photo-id" name="_wsuwp_profile_photos[]" value="<%= id %>" />
+
 			</div>
 		</script>
 		<?php
@@ -1042,28 +1057,29 @@ class WSUWP_People_Post_Type {
 	 * @since 0.1.0
 	 *
 	 * @param int $post_id Post ID.
-	 *
-	 * @return mixed
 	 */
 	public function save_post( $post_id ) {
 		if ( ! isset( $_POST['wsuwsp_profile_nonce'] ) || ! wp_verify_nonce( $_POST['wsuwsp_profile_nonce'], 'wsuwsp_profile' ) ) {
-			return $post_id;
+			return;
 		}
 
 		if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
-			return $post_id;
+			return;
 		}
 
 		if ( ! current_user_can( 'edit_post', $post_id ) ) {
-			return $post_id;
+			return;
 		}
 
-		// Don't save any meta if this isn't people.wsu.edu.
-		// (We will store some data in the future.)
+		// Store only select meta if this isn't people.wsu.edu.
 		if ( apply_filters( 'wsuwp_people_display', true ) ) {
-			$nid = get_post_meta( $post_id, '_wsuwp_profile_ad_nid', true );
+			if ( isset( $_POST['_use_photo'] ) && '' !== $_POST['_use_photo'] ) {
+				update_post_meta( $post_id, '_use_photo', absint( $_POST['_use_photo'] ) );
+			} else {
+				delete_post_meta( $post_id, '_use_photo' );
+			}
 
-			return $post_id;
+			return;
 		}
 
 		$keys = get_registered_meta_keys( 'post' );

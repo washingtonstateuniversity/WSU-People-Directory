@@ -370,13 +370,14 @@
 
 		// Show control buttons tooltip.
 		$collection.on( "mouseover", ".wsuwp-profile-photo-controls button", function() {
-			var button = this.getBoundingClientRect(),
+			var text = this.getAttribute( "aria-label" ),
+				button = this.getBoundingClientRect(),
 				collection = $collection[ 0 ].getBoundingClientRect();
 
 			$tooltip.css( {
 				top: button.bottom - collection.top + "px",
 				left: button.right - collection.left - $tooltip.width() / 2 - 6 + "px"
-			} ).show();
+			} ).show().find( ".wsuwp-profile-photo-controls-tooltip-inner" ).html( text );
 		} );
 
 		// Hide control buttons tooltip.
@@ -385,11 +386,24 @@
 		} );
 
 		// Delete a photo.
-		$collection.on( "click", ".wsuwp-profile-photo-remove", function( e ) {
-			e.preventDefault();
+		$collection.on( "click", ".wsuwp-profile-photo-remove", function() {
 			$tooltip.hide();
 
 			$( this ).closest( ".wsuwp-profile-photo-wrapper" ).remove();
+		} );
+
+		// Select a photo for display on the front-end (non-people.wsu.edu sites only).
+		$collection.on( "click", ".wsuwp-profile-photo-select", function() {
+			var photo = $( this ).closest( ".wsuwp-profile-photo-wrapper" ),
+				input = $( ".use-photo" );
+
+			photo.toggleClass( "selected" ).siblings().removeClass( "selected" );
+
+			if ( photo.hasClass( "selected" ) ) {
+				input.val( $( ".wsuwp-profile-photo-wrapper" ).index( photo ) );
+			} else {
+				input.val( "" );
+			}
 		} );
 	} );
 }( jQuery, window, document ) );
