@@ -490,7 +490,7 @@ class WSUWP_People_Directory_Page_Template {
 		$page_id = absint( $_POST['page'] );
 		$meta = array();
 
-		if ( $_POST['title'] ) {
+		if ( isset( $_POST['title'] ) ) {
 			$titles = explode( ' ', $_POST['title'] );
 			foreach ( $titles as $title ) {
 				if ( 'ad' === $title ) {
@@ -501,8 +501,9 @@ class WSUWP_People_Directory_Page_Template {
 			}
 		}
 
-		if ( $_POST['photo'] ) {
+		if ( isset( $_POST['photo'] ) ) {
 			$meta['photo'] = absint( $_POST['photo'] );
+
 		}
 
 		if ( $_POST['about'] ) {
