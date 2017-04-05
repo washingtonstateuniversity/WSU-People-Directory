@@ -308,7 +308,6 @@
 
 	// Update a person's details.
 	function updatePersonDetails( data, $modal ) {
-		window.console.log( data );
 		$.post( window.wsupeople.ajax_url, data ).done( function() {
 			$modal.removeClass( "active" );
 			$people.sortable( "option", "disabled", false );

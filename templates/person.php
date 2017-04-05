@@ -2,6 +2,7 @@
 $post = get_post();
 $nid = get_post_meta( $post->ID, '_wsuwp_profile_ad_nid', true );
 $set_photo = get_post_meta( $post->ID, '_use_photo', true );
+$set_title = get_post_meta( $post->ID, '_use_title', true );
 $profile = get_query_var( 'wsuwp_people_profile' );
 
 $request_url = add_query_arg(
@@ -32,8 +33,23 @@ if ( empty( $person ) ) {
 
 $person = $person[0];
 
-// Card info.
+// Title(s).
 $title = ( ! empty( $person->working_titles ) ) ? implode( '<br />', $person->working_titles ) : $person->position_title;
+
+if ( $set_title ) {
+	$titles = explode( ' ', $set_title );
+
+	foreach ( $titles as $title_index ) {
+		if ( isset( $person->working_titles[ $title_index ] ) ) {
+			$set_titles[] = $person->working_titles[ $title_index ];
+		}
+	}
+
+	$title = implode( '<br />', $set_titles );
+}
+
+
+// Other card info.
 $email = ( ! empty( $person->email_alt ) ) ? $person->email_alt : $person->email;
 $ad_phone = ( ! empty( $person->phone_ext ) ) ? $person->phone . ' ext ' . $person->phone_ext : $person->phone;
 $phone = ( ! empty( $person->phone_alt ) ) ? $person->phone_alt : $ad_phone;

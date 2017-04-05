@@ -350,7 +350,6 @@ class WSUWP_People_Post_Type {
 				'title',
 				'editor',
 				'revisions',
-				'author',
 			),
 			'taxonomies' => array(
 				'post_tag',
@@ -513,7 +512,13 @@ class WSUWP_People_Post_Type {
 				$value = get_post_meta( $post->ID, $args['meta_key'], true );
 				?>
 				<div id="<?php echo esc_attr( $key ); ?>" class="wsuwp-profile-panel">
-					<?php wp_editor( $value, $args['meta_key'] ); ?>
+					<?php
+					if ( '_wsuwp_profile_bio_university' === $args['meta_key'] && ! current_user_can( 'create_sites' ) ) {
+						echo wp_kses_post( apply_filters( 'the_content', $value ) );
+					} else {
+						wp_editor( $value, $args['meta_key'] );
+					}
+					?>
 				</div>
 				<?php
 			}
@@ -783,6 +788,7 @@ class WSUWP_People_Post_Type {
 			<?php
 			$titles = get_post_meta( $post->ID, '_wsuwp_profile_title', true );
 			$degrees = get_post_meta( $post->ID, '_wsuwp_profile_degree', true );
+			$not_primary = apply_filters( 'wsuwp_people_display', true );
 			?>
 
 			<script type="text/template" class="wsuwp-profile-repeatable-field-template">
@@ -790,7 +796,14 @@ class WSUWP_People_Post_Type {
 					<label>
 						<span><%= label %></span>
 						<input type="text" name="<%= name %>[]" value="<%= value %>" />
-						<a class="wsuwp-profile-remove-repeatable-field">Remove</a>
+						<?php if ( $not_primary ) { ?>
+						<button type="button" class="wsuwp-profile-select-repeatable-field" aria-label="Select">
+							<span class="dashicons dashicons-yes"></span>
+						</button>
+						<?php } ?>
+						<button type="button" class="wsuwp-profile-remove-repeatable-field" aria-label="Remove">
+							<span class="dashicons dashicons-no"></span>
+						</button>
 					</label>
 				</p>
 			</script>
@@ -804,7 +817,14 @@ class WSUWP_People_Post_Type {
 							<label>
 								<span>Working Title</span>
 								<input type="text" name="_wsuwp_profile_title[]" value="<?php echo esc_attr( $title ); ?>" />
-								<a class="wsuwp-profile-remove-repeatable-field">Remove</a>
+								<?php if ( $not_primary ) { ?>
+								<button type="button" class="wsuwp-profile-select-repeatable-field" aria-label="Select">
+									<span class="dashicons dashicons-yes"></span>
+								</button>
+								<?php } ?>
+								<button type="button" class="wsuwp-profile-remove-repeatable-field" aria-label="Remove">
+									<span class="dashicons dashicons-no"></span>
+								</button>
 							</label>
 						</p>
 						<?php
@@ -815,7 +835,14 @@ class WSUWP_People_Post_Type {
 						<label>
 							<span>Working Title</span>
 							<input type="text" name="_wsuwp_profile_title[]" value="" />
-							<a class="wsuwp-profile-remove-repeatable-field">Remove</a>
+							<?php if ( $not_primary ) { ?>
+							<button type="button" class="wsuwp-profile-select-repeatable-field" aria-label="Select">
+								<span class="dashicons dashicons-yes"></span>
+							</button>
+							<?php } ?>
+							<button type="button" class="wsuwp-profile-remove-repeatable-field" aria-label="Remove">
+								<span class="dashicons dashicons-no"></span>
+							</button>
 						</label>
 					</p>
 					<?php
@@ -824,6 +851,15 @@ class WSUWP_People_Post_Type {
 				<p class="wsuwp-profile-add-repeatable">
 					<a data-label="Working Title" data-name="_wsuwp_profile_title" href="#">+ Add another title</a>
 				</p>
+
+				<?php
+				if ( $not_primary ) {
+					$index_used = get_post_meta( $post->ID, '_use_title', true );
+					?>
+					<input type="hidden" class="use-title" name="_use_title" value="<?php echo esc_attr( $index_used ); ?>" />
+					<?php
+				}
+				?>
 			</div>
 
 			<div class="wsuwp-profile-repeatable-field wsuwp-profile-degrees">
@@ -835,7 +871,9 @@ class WSUWP_People_Post_Type {
 							<label>
 								<span>Degree</span>
 								<input type="text" name="_wsuwp_profile_degree[]" value="<?php echo esc_attr( $degree ); ?>" />
-								<a class="wsuwp-profile-remove-repeatable-field">Remove</a>
+								<button type="button" class="wsuwp-profile-remove-repeatable-field" aria-label="Remove">
+									<span class="dashicons dashicons-no"></span>
+								</button>
 							</label>
 						</p>
 						<?php
@@ -846,7 +884,9 @@ class WSUWP_People_Post_Type {
 						<label>
 							<span>Degree</span>
 							<input type="text" name="_wsuwp_profile_degree[]" value="" />
-							<a class="wsuwp-profile-remove-repeatable-field">Remove</a>
+							<button type="button" class="wsuwp-profile-remove-repeatable-field" aria-label="Remove">
+								<span class="dashicons dashicons-no"></span>
+							</button>
 						</label>
 					</p>
 					<?php
@@ -872,8 +912,9 @@ class WSUWP_People_Post_Type {
 		wp_enqueue_media();
 
 		$photos = get_post_meta( $post->ID, '_wsuwp_profile_photos', true );
+		$not_primary = apply_filters( 'wsuwp_people_display', true );
 		?>
-		<div class="wsuwp-profile-photo-collection">
+		<div class="wsuwp-profile-photo-collection<?php if ( $not_primary ) { ?> selectable<?php } ?>">
 
 			<?php
 			if ( $photos ) {
@@ -894,7 +935,7 @@ class WSUWP_People_Post_Type {
 							 data-id="<?php echo esc_attr( $photo_id ); ?>" />
 
 						<div class="wsuwp-profile-photo-controls">
-							<button class="wsuwp-profile-photo-remove" aria-label="Remove">
+							<button type="button" class="wsuwp-profile-photo-remove" aria-label="Remove">
 								<span class="dashicons dashicons-no"></span>
 							</button>
 						</div>
@@ -914,9 +955,18 @@ class WSUWP_People_Post_Type {
 
 		<input type="button" class="wsuwp-profile-add-photo button" value="Add Photo(s)" />
 
+		<?php
+		if ( $not_primary ) {
+			$index_used = get_post_meta( $post->ID, '_use_photo', true );
+			?>
+			<input type="hidden" class="use-photo" name="_use_photo" value="<?php echo esc_attr( $index_used ); ?>" />
+			<?php
+		}
+		?>
+
 		<div class="wsuwp-profile-photo-controls-tooltip" role="presentation">
 			<div class="wsuwp-profile-photo-controls-tooltip-arrow"></div>
-			<div class="wsuwp-profile-photo-controls-tooltip-inner">Remove</div>
+			<div class="wsuwp-profile-photo-controls-tooltip-inner"></div>
 		</div>
 
 		<script type="text/template" id="photo-template">
@@ -932,11 +982,17 @@ class WSUWP_People_Post_Type {
 					 data-width="<%= full_width %>"
 					 data-id="<%= id %>" />
 				<div class="wsuwp-profile-photo-controls">
-					<button class="wsuwp-profile-photo-remove" aria-label="Remove">
+					<?php if ( $not_primary ) { ?>
+					<button type="button" class="wsuwp-profile-photo-select" aria-label="Select">
+						<span class="dashicons dashicons-yes"></span>
+					</button>
+					<?php } ?>
+					<button type="button" class="wsuwp-profile-photo-remove" aria-label="Remove">
 						<span class="dashicons dashicons-no"></span>
 					</button>
 				</div>
 				<input type="hidden" class="wsuwp-profile-photo-id" name="_wsuwp_profile_photos[]" value="<%= id %>" />
+
 			</div>
 		</script>
 		<?php
@@ -1037,34 +1093,35 @@ class WSUWP_People_Post_Type {
 	 * @since 0.1.0
 	 *
 	 * @param int $post_id Post ID.
-	 *
-	 * @return mixed
 	 */
 	public function save_post( $post_id ) {
 		if ( ! isset( $_POST['wsuwsp_profile_nonce'] ) || ! wp_verify_nonce( $_POST['wsuwsp_profile_nonce'], 'wsuwsp_profile' ) ) {
-			return $post_id;
+			return;
 		}
 
 		if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
-			return $post_id;
+			return;
 		}
 
 		if ( ! current_user_can( 'edit_post', $post_id ) ) {
-			return $post_id;
+			return;
 		}
 
-		// Don't save any meta if this isn't people.wsu.edu.
-		// (We will store some data in the future.)
+		// Store only select meta if this isn't people.wsu.edu.
 		if ( apply_filters( 'wsuwp_people_display', true ) ) {
-			$nid = get_post_meta( $post_id, '_wsuwp_profile_ad_nid', true );
+			if ( isset( $_POST['_use_photo'] ) && '' !== $_POST['_use_photo'] ) {
+				update_post_meta( $post_id, '_use_photo', absint( $_POST['_use_photo'] ) );
+			} else {
+				delete_post_meta( $post_id, '_use_photo' );
+			}
 
-			return $post_id;
-		}
+			if ( isset( $_POST['_use_title'] ) && '' !== $_POST['_use_title'] ) {
+				update_post_meta( $post_id, '_use_title', sanitize_text_field( $_POST['_use_title'] ) );
+			} else {
+				delete_post_meta( $post_id, '_use_title' );
+			}
 
-		// Save "last_name first_name" data (for alpha sorting purposes).
-		if ( ( isset( $_POST['_wsuwp_profile_ad_name_last'] ) && '' !== $_POST['_wsuwp_profile_ad_name_last'] ) &&
-				 ( isset( $_POST['_wsuwp_profile_ad_name_first'] ) && '' !== $_POST['_wsuwp_profile_ad_name_first'] ) ) {
-			update_post_meta( $post_id, '_wsuwp_profile_name', sanitize_text_field( $_POST['_wsuwp_profile_ad_name_last'] ) . ' ' . sanitize_text_field( $_POST['_wsuwp_profile_ad_name_first'] ) );
+			return;
 		}
 
 		$keys = get_registered_meta_keys( 'post' );
