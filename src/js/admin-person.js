@@ -77,6 +77,15 @@
 				}
 			} );
 
+			// Add the `selected` class to working titles accordingly.
+			if ( "" !== $( ".use-title" ).val() ) {
+				var titles = $( ".use-title" ).val().split( " " );
+
+				$.each( titles, function( i, value ) {
+					$( ".wsuwp-profile-titles p" ).eq( value ).addClass( "selected" );
+				} );
+			}
+
 			// Populate degree(s).
 			$.each( data.degree, function( i, value ) {
 				var field = $( "[name='_wsuwp_profile_degree[]']" )[ i ];
@@ -193,10 +202,17 @@
 		} );
 
 		// Remove a repeatable field.
-		$( ".wsuwp-profile-repeatable-field" ).on( "click", ".wsuwp-profile-remove-repeatable-field", function( e ) {
-			e.preventDefault();
-
+		$( ".wsuwp-profile-repeatable-field" ).on( "click", ".wsuwp-profile-remove-repeatable-field", function() {
 			$( this ).closest( "p" ).remove();
+		} );
+
+		// Select a working title for display on the front-end (non-people.wsu.edu sites only).
+		$( ".wsuwp-profile-titles" ).on( "click", ".wsuwp-profile-select-repeatable-field", function() {
+			$( this ).closest( "p" ).toggleClass( "selected" );
+
+			var selected_titles = $( ".wsuwp-profile-titles .selected" ).map( function() { return $( this ).index(); } ).get();
+
+			$( ".use-title" ).val( selected_titles.join( " " ) );
 		} );
 
 		// Capture data.

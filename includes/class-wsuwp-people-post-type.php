@@ -788,6 +788,7 @@ class WSUWP_People_Post_Type {
 			<?php
 			$titles = get_post_meta( $post->ID, '_wsuwp_profile_title', true );
 			$degrees = get_post_meta( $post->ID, '_wsuwp_profile_degree', true );
+			$not_primary = apply_filters( 'wsuwp_people_display', true );
 			?>
 
 			<script type="text/template" class="wsuwp-profile-repeatable-field-template">
@@ -795,7 +796,14 @@ class WSUWP_People_Post_Type {
 					<label>
 						<span><%= label %></span>
 						<input type="text" name="<%= name %>[]" value="<%= value %>" />
-						<a class="wsuwp-profile-remove-repeatable-field">Remove</a>
+						<?php if ( $not_primary ) { ?>
+						<button type="button" class="wsuwp-profile-select-repeatable-field" aria-label="Select">
+							<span class="dashicons dashicons-yes"></span>
+						</button>
+						<?php } ?>
+						<button type="button" class="wsuwp-profile-remove-repeatable-field" aria-label="Remove">
+							<span class="dashicons dashicons-no"></span>
+						</button>
 					</label>
 				</p>
 			</script>
@@ -809,7 +817,14 @@ class WSUWP_People_Post_Type {
 							<label>
 								<span>Working Title</span>
 								<input type="text" name="_wsuwp_profile_title[]" value="<?php echo esc_attr( $title ); ?>" />
-								<a class="wsuwp-profile-remove-repeatable-field">Remove</a>
+								<?php if ( $not_primary ) { ?>
+								<button type="button" class="wsuwp-profile-select-repeatable-field" aria-label="Select">
+									<span class="dashicons dashicons-yes"></span>
+								</button>
+								<?php } ?>
+								<button type="button" class="wsuwp-profile-remove-repeatable-field" aria-label="Remove">
+									<span class="dashicons dashicons-no"></span>
+								</button>
 							</label>
 						</p>
 						<?php
@@ -820,7 +835,14 @@ class WSUWP_People_Post_Type {
 						<label>
 							<span>Working Title</span>
 							<input type="text" name="_wsuwp_profile_title[]" value="" />
-							<a class="wsuwp-profile-remove-repeatable-field">Remove</a>
+							<?php if ( $not_primary ) { ?>
+							<button type="button" class="wsuwp-profile-select-repeatable-field" aria-label="Select">
+								<span class="dashicons dashicons-yes"></span>
+							</button>
+							<?php } ?>
+							<button type="button" class="wsuwp-profile-remove-repeatable-field" aria-label="Remove">
+								<span class="dashicons dashicons-no"></span>
+							</button>
 						</label>
 					</p>
 					<?php
@@ -829,6 +851,15 @@ class WSUWP_People_Post_Type {
 				<p class="wsuwp-profile-add-repeatable">
 					<a data-label="Working Title" data-name="_wsuwp_profile_title" href="#">+ Add another title</a>
 				</p>
+
+				<?php
+				if ( $not_primary ) {
+					$index_used = get_post_meta( $post->ID, '_use_title', true );
+					?>
+					<input type="hidden" class="use-title" name="_use_title" value="<?php echo esc_attr( $index_used ); ?>" />
+					<?php
+				}
+				?>
 			</div>
 
 			<div class="wsuwp-profile-repeatable-field wsuwp-profile-degrees">
@@ -840,7 +871,9 @@ class WSUWP_People_Post_Type {
 							<label>
 								<span>Degree</span>
 								<input type="text" name="_wsuwp_profile_degree[]" value="<?php echo esc_attr( $degree ); ?>" />
-								<a class="wsuwp-profile-remove-repeatable-field">Remove</a>
+								<button type="button" class="wsuwp-profile-remove-repeatable-field" aria-label="Remove">
+									<span class="dashicons dashicons-no"></span>
+								</button>
 							</label>
 						</p>
 						<?php
@@ -851,7 +884,9 @@ class WSUWP_People_Post_Type {
 						<label>
 							<span>Degree</span>
 							<input type="text" name="_wsuwp_profile_degree[]" value="" />
-							<a class="wsuwp-profile-remove-repeatable-field">Remove</a>
+							<button type="button" class="wsuwp-profile-remove-repeatable-field" aria-label="Remove">
+								<span class="dashicons dashicons-no"></span>
+							</button>
 						</label>
 					</p>
 					<?php
@@ -1078,6 +1113,12 @@ class WSUWP_People_Post_Type {
 				update_post_meta( $post_id, '_use_photo', absint( $_POST['_use_photo'] ) );
 			} else {
 				delete_post_meta( $post_id, '_use_photo' );
+			}
+
+			if ( isset( $_POST['_use_title'] ) && '' !== $_POST['_use_title'] ) {
+				update_post_meta( $post_id, '_use_title', sanitize_text_field( $_POST['_use_title'] ) );
+			} else {
+				delete_post_meta( $post_id, '_use_title' );
 			}
 
 			return;
