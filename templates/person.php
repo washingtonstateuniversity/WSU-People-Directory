@@ -3,6 +3,7 @@ $post = get_post();
 $nid = get_post_meta( $post->ID, '_wsuwp_profile_ad_nid', true );
 $set_photo = get_post_meta( $post->ID, '_use_photo', true );
 $set_title = get_post_meta( $post->ID, '_use_title', true );
+$set_about = get_post_meta( $post->ID, '_use_bio', true );
 $profile = get_query_var( 'wsuwp_people_profile' );
 
 $request_url = add_query_arg(
@@ -63,7 +64,12 @@ $photo_index = ( $set_photo ) ? $set_photo : 0;
 $photo = ( $person->photos ) ? $person->photos[ $photo_index ]->thumbnail : false;
 
 // About.
-$about = $person->content->rendered;
+if ( ! $set_about || 'personal' === $set_about ) {
+	$about = $person->content->rendered;
+} else {
+	$about = $person->$set_about;
+}
+
 
 // Taxonomy info.
 $tags = wp_get_post_tags( $post->ID, array(
