@@ -797,12 +797,14 @@ class WSUWP_People_Post_Type {
 						<span><%= label %></span>
 						<input type="text" name="<%= name %>[]" value="<%= value %>" />
 						<?php if ( $not_primary ) { ?>
-						<button type="button" class="wsuwp-profile-select-repeatable-field" aria-label="Select">
-							<span class="dashicons dashicons-yes"></span>
+						<button type="button" class="wsuwp-profile-button select">
+							<span class="dashicons dashicons-yes" aria-hidden="true"></span>
+							<span class="screen-reader-text">Select</span>
 						</button>
 						<?php } ?>
-						<button type="button" class="wsuwp-profile-remove-repeatable-field" aria-label="Remove">
-							<span class="dashicons dashicons-no"></span>
+						<button type="button" class="wsuwp-profile-button remove">
+							<span class="dashicons dashicons-no" aria-hidden="true"></span>
+							<span class="screen-reader-text">Delete</span>
 						</button>
 					</label>
 				</p>
@@ -818,12 +820,14 @@ class WSUWP_People_Post_Type {
 								<span>Working Title</span>
 								<input type="text" name="_wsuwp_profile_title[]" value="<?php echo esc_attr( $title ); ?>" />
 								<?php if ( $not_primary ) { ?>
-								<button type="button" class="wsuwp-profile-select-repeatable-field" aria-label="Select">
-									<span class="dashicons dashicons-yes"></span>
+								<button type="button" class="wsuwp-profile-button select">
+									<span class="dashicons dashicons-yes" aria-hidden="true"></span>
+									<span class="screen-reader-text">Select</span>
 								</button>
 								<?php } ?>
-								<button type="button" class="wsuwp-profile-remove-repeatable-field" aria-label="Remove">
-									<span class="dashicons dashicons-no"></span>
+								<button type="button" class="wsuwp-profile-button remove">
+									<span class="dashicons dashicons-no" aria-hidden="true"></span>
+									<span class="screen-reader-text">Delete</span>
 								</button>
 							</label>
 						</p>
@@ -836,12 +840,14 @@ class WSUWP_People_Post_Type {
 							<span>Working Title</span>
 							<input type="text" name="_wsuwp_profile_title[]" value="" />
 							<?php if ( $not_primary ) { ?>
-							<button type="button" class="wsuwp-profile-select-repeatable-field" aria-label="Select">
-								<span class="dashicons dashicons-yes"></span>
+							<button type="button" class="wsuwp-profile-button select">
+								<span class="dashicons dashicons-yes" aria-hidden="true"></span>
+								<span class="screen-reader-text">Select</span>
 							</button>
 							<?php } ?>
-							<button type="button" class="wsuwp-profile-remove-repeatable-field" aria-label="Remove">
-								<span class="dashicons dashicons-no"></span>
+							<button type="button" class="wsuwp-profile-button remove">
+								<span class="dashicons dashicons-no" aria-hidden="true"></span>
+								<span class="screen-reader-text">Delete</span>
 							</button>
 						</label>
 					</p>
@@ -871,8 +877,9 @@ class WSUWP_People_Post_Type {
 							<label>
 								<span>Degree</span>
 								<input type="text" name="_wsuwp_profile_degree[]" value="<?php echo esc_attr( $degree ); ?>" />
-								<button type="button" class="wsuwp-profile-remove-repeatable-field" aria-label="Remove">
-									<span class="dashicons dashicons-no"></span>
+								<button type="button" class="wsuwp-profile-button remove">
+									<span class="dashicons dashicons-no" aria-hidden="true"></span>
+									<span class="screen-reader-text">Delete</span>
 								</button>
 							</label>
 						</p>
@@ -884,8 +891,9 @@ class WSUWP_People_Post_Type {
 						<label>
 							<span>Degree</span>
 							<input type="text" name="_wsuwp_profile_degree[]" value="" />
-							<button type="button" class="wsuwp-profile-remove-repeatable-field" aria-label="Remove">
-								<span class="dashicons dashicons-no"></span>
+							<button type="button" class="wsuwp-profile-button remove">
+								<span class="dashicons dashicons-no" aria-hidden="true"></span>
+								<span class="screen-reader-text">Delete</span>
 							</button>
 						</label>
 					</p>
