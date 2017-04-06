@@ -149,44 +149,77 @@
 }
 
 /* Tabs */
-#wsuwp-profile-tabs {
-	margin-bottom: 20px;
+#wsuwp-profile-about-wrapper {
+	box-shadow: 0 1px 1px rgba(0, 0, 0, .04);
+	margin-top: 20px;
 }
 
-#wsuwp-profile-tabs > ul {
-	border-bottom: 1px solid #ccc;
-	margin: 20px 0 0;
-	padding: 9px 15px 0 10px;
-}
-
-#wsuwp-profile-tabs > ul li {
-	display: inline-block;
+.wsuwp-profile-about-tabs {
+	border-bottom: 1px solid #e5e5e5;
 	margin: 0;
+	padding: 0 15px 0 0;
 }
 
-#wsuwp-profile-tabs > ul li a {
-	border: 1px solid #ccc;
-	display: block;
+.wsuwp-profile-about-tabs li {
+	border: 1px solid #e5e5e5;
+	display: -webkit-box;
+	display: -ms-flexbox;
+	display: flex;
+	float: left;
+	margin: 0 0 -1px 0;
+}
+
+.wsuwp-profile-about-tabs li + li {
+	margin-left: 4px;
+}
+
+.wsuwp-profile-about-tabs li:hover {
+	background: #fff;
+}
+
+.wsuwp-profile-about-tabs .ui-tabs-active {
+	border-bottom-color: #fff;
+	background: #fff;
+}
+
+.wsuwp-profile-about-tabs a {
+	background: none;
+	border: none;
+	display: inline-block;
 	float: none;
-	font-size: 15px;
+	font-size: 14px;
 	font-weight: 700;
-	line-height: 24px;
-	margin-bottom: -1px;
+	line-height: 1.45;
+	margin: 0;
+	padding: 8px 12px;
 }
 
-#wsuwp-profile-tabs > ul li a:focus {
+.wsuwp-profile-about-tabs a:focus {
 	box-shadow: none;
 }
 
-#wsuwp-profile-tabs > ul li.ui-tabs-active a {
-	border-bottom: 1px solid #f1f1f1;
-	background: #f1f1f1;
+.wsuwp-profile-about-tabs .ui-tabs-active a {
 	color: #000;
+}
+
+.wsuwp-profile-about-tabs .wsuwp-profile-button {
+	margin: 6px 12px 0 0;
+}
+
+.wsuwp-profile-about-tabs li:hover .wsuwp-profile-button {
+	display: block;
+}
+
+.wsuwp-profile-about-tabs:after {
+	content: "";
+	display: table;
+	clear: both;
 }
 
 /* Tab panels */
 .wsuwp-profile-panel {
-	border: 1px solid #ccc;
+	background: #fff;
+	border: 1px solid #e5e5e5;
 	border-top: none;
 	padding: 20px;
 }
@@ -197,6 +230,10 @@
 
 .wsuwp-profile-panel p:nth-last-child(1) {
 	margin-bottom: 0;
+}
+
+#wp-content-editor-tools {
+	background: #fff;
 }
 
 #bio_unit,
@@ -233,7 +270,7 @@
 
 /* Added metabox areas */
 #after_title-sortables {
-	min-height: 10px;
+	padding-top: 10px;
 }
 
 /* AD/Network ID search */

@@ -456,20 +456,45 @@ class WSUWP_People_Post_Type {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @since ?
-	 *
 	 * @param WP_Post $post Post object.
 	 */
 	public function edit_form_after_title( $post ) {
 		if ( self::$post_type_slug !== $post->post_type ) {
 			return;
 		}
+
+		do_meta_boxes( get_current_screen(), 'after_title', $post );
+
 		?>
-		<?php do_meta_boxes( get_current_screen(), 'after_title', $post ); ?>
-		<div id="wsuwp-profile-tabs">
-			<ul>
-				<li class="wsuwp-profile-tab wsuwp-profile-bio-tab">
+		<div id="wsuwp-profile-about-wrapper">
+
+			<?php
+			$not_primary = apply_filters( 'wsuwp_people_display', true );
+			$use_bio = false;
+			if ( $not_primary ) {
+				$use_bio = get_post_meta( $post->ID, '_use_bio', true );
+				?>
+				<input type="hidden" class="use-bio" name="_use_bio" value="<?php echo esc_attr( $use_bio ); ?>" />
+				<?php
+			}
+			?>
+
+			<ul class="wsuwp-profile-about-tabs">
+				<li<?php if ( $use_bio && 'personal' === $use_bio ) { echo ' class="selected"'; } ?>
+					data-bio="personal">
 					<a href="#wsuwp-profile-default" class="nav-tab">Personal Biography</a>
+					<?php if ( $not_primary ) { ?>
+					<button type="button" class="wsuwp-profile-button select">
+						<span class="dashicons dashicons-yes" aria-hidden="true"></span>
+						<span class="screen-reader-text"><?php
+						if ( $use_bio && 'personal' === $use_bio ) {
+							echo 'Deselect';
+						} else {
+							echo 'Select';
+						}
+						?></span>
+					</button>
+					<?php } ?>
 				</li>
 				<?php
 				foreach ( self::$post_meta_keys as $key => $args ) {
@@ -478,8 +503,21 @@ class WSUWP_People_Post_Type {
 					}
 
 					?>
-					<li class="wsuwp-profile-tab wsuwp-profile-bio-tab">
+					<li<?php if ( $use_bio && $key === $use_bio ) { echo ' class="selected"'; } ?>
+						data-bio="<?php echo esc_attr( $key ); ?>">
 						<a href="#<?php echo esc_attr( $key ); ?>" class="nav-tab"><?php echo esc_html( $args['description'] ); ?></a>
+						<?php if ( $not_primary ) { ?>
+						<button type="button" class="wsuwp-profile-button select">
+							<span class="dashicons dashicons-yes" aria-hidden="true"></span>
+							<span class="screen-reader-text"><?php
+							if ( $use_bio && $key === $use_bio ) {
+								echo 'Deselect';
+							} else {
+								echo 'Select';
+							}
+							?></span>
+						</button>
+						<?php } ?>
 					</li>
 					<?php
 				}
@@ -1127,6 +1165,12 @@ class WSUWP_People_Post_Type {
 				update_post_meta( $post_id, '_use_title', sanitize_text_field( $_POST['_use_title'] ) );
 			} else {
 				delete_post_meta( $post_id, '_use_title' );
+			}
+
+			if ( isset( $_POST['_use_bio'] ) && '' !== $_POST['_use_bio'] ) {
+				update_post_meta( $post_id, '_use_bio', sanitize_text_field( $_POST['_use_bio'] ) );
+			} else {
+				delete_post_meta( $post_id, '_use_bio' );
 			}
 
 			return;
