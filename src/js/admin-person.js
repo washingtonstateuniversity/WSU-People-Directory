@@ -82,7 +82,11 @@
 				var titles = $( ".use-title" ).val().split( " " );
 
 				$.each( titles, function( i, value ) {
-					$( ".wsuwp-profile-titles p" ).eq( value ).addClass( "selected" );
+					$( ".wsuwp-profile-titles p" )
+					.eq( value )
+					.addClass( "selected" )
+					.find( ".screen-reader-text" )
+					.text( "Deselect" );
 				} );
 			}
 
@@ -115,9 +119,17 @@
 
 			// Add the `selected` class to a photo accordingly.
 			if ( "" !== $( ".use-photo" ).val() ) {
-				$( ".wsuwp-profile-photo-wrapper" ).eq( $( ".use-photo" ).val() ).addClass( "selected" );
+				$( ".wsuwp-profile-photo-wrapper" )
+				.eq( $( ".use-photo" ).val() )
+				.addClass( "selected" )
+				.find( ".wsuwp-profile-photo-select" )
+				.attr( "aria-label", "Deselect" );
 			} else {
-				$( ".wsuwp-profile-photo-wrapper" ).eq( 0 ).addClass( "selected" );
+				$( ".wsuwp-profile-photo-wrapper" )
+				.eq( 0 )
+				.addClass( "selected" )
+				.find( ".wsuwp-profile-photo-select" )
+				.attr( "aria-label", "Deselect" );
 			}
 
 			// Populate taxonomy data.
@@ -171,8 +183,25 @@
 		}
 
 		// Initialize tabs.
-		$( "#wsuwp-profile-tabs" ).tabs( {
+		$( "#wsuwp-profile-about-wrapper" ).tabs( {
 			active: 0
+		} );
+
+		// Select a bio for display on the front-end (non-people.wsu.edu sites only).
+		$( ".wsuwp-profile-about-tabs" ).on( "click", ".select", function() {
+			var $tab = $( this ).closest( "li" ),
+				$input = $( ".use-bio" );
+
+			$tab.toggleClass( "selected" );
+
+			if ( $tab.hasClass( "selected" ) ) {
+				$input.val( $tab.data( "bio" ) );
+				$tab.find( ".screen-reader-text" ).text( "Deselect" );
+				$tab.siblings().removeClass( "selected" ).find( ".screen-reader-text" ).text( "Select" );
+			} else {
+				$input.val( "" );
+				$tab.find( ".screen-reader-text" ).text( "Select" );
+			}
 		} );
 
 		// Make a REST request to populate a person with data from people.wsu.edu
@@ -202,17 +231,25 @@
 		} );
 
 		// Remove a repeatable field.
-		$( ".wsuwp-profile-repeatable-field" ).on( "click", ".wsuwp-profile-remove-repeatable-field", function() {
+		$( ".wsuwp-profile-repeatable-field" ).on( "click", ".remove", function() {
 			$( this ).closest( "p" ).remove();
 		} );
 
 		// Select a working title for display on the front-end (non-people.wsu.edu sites only).
-		$( ".wsuwp-profile-titles" ).on( "click", ".wsuwp-profile-select-repeatable-field", function() {
-			$( this ).closest( "p" ).toggleClass( "selected" );
+		$( ".wsuwp-profile-titles" ).on( "click", ".select", function() {
+			var $title = $( this ).closest( "p" );
+
+			$title.toggleClass( "selected" );
 
 			var selected_titles = $( ".wsuwp-profile-titles .selected" ).map( function() { return $( this ).index(); } ).get();
 
 			$( ".use-title" ).val( selected_titles.join( " " ) );
+
+			if ( $title.hasClass( "selected" ) ) {
+				$title.find( ".screen-reader-text" ).text( "Deselect" );
+			} else {
+				$title.find( ".screen-reader-text" ).text( "Select" );
+			}
 		} );
 
 		// Capture data.
@@ -417,15 +454,19 @@
 
 		// Select a photo for display on the front-end (non-people.wsu.edu sites only).
 		$collection.on( "click", ".wsuwp-profile-photo-select", function() {
-			var photo = $( this ).closest( ".wsuwp-profile-photo-wrapper" ),
-				input = $( ".use-photo" );
+			var $button = $( this ),
+				$photo = $button.closest( ".wsuwp-profile-photo-wrapper" ),
+				$input = $( ".use-photo" );
 
-			photo.toggleClass( "selected" ).siblings().removeClass( "selected" );
+			$photo.toggleClass( "selected" ).siblings().removeClass( "selected" );
 
-			if ( photo.hasClass( "selected" ) ) {
-				input.val( $( ".wsuwp-profile-photo-wrapper" ).index( photo ) );
+			if ( $photo.hasClass( "selected" ) ) {
+				$input.val( $( ".wsuwp-profile-photo-wrapper" ).index( $photo ) );
+				$button.attr( "aria-label", "Deselect" );
+				$photo.siblings().removeClass( "selected" ).find( ".wsuwp-profile-photo-select" ).attr( "aria-label", "Select" );
 			} else {
-				input.val( "" );
+				$input.val( "" );
+				$button.attr( "aria-label", "Select" );
 			}
 		} );
 	} );
