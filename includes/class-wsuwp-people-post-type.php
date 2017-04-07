@@ -319,6 +319,14 @@ class WSUWP_People_Post_Type {
 		add_filter( 'wp_post_revision_meta_keys', array( $this, 'add_meta_keys_to_revision' ) );
 
 		add_filter( 'manage_taxonomies_for_' . self::$post_type_slug . '_columns', array( $this, 'manage_people_taxonomy_columns' ) );
+
+		if ( apply_filters( 'wsuwp_people_display', true ) ) {
+			add_filter( 'manage_' . self::$post_type_slug . '_posts_columns', array( $this, 'add_people_bio_column' ) );
+			add_action( 'manage_posts_custom_column', array( $this, 'bio_column' ), 10, 2 );
+			add_action( 'quick_edit_custom_box', array( $this, 'display_bio_edit' ), 10, 2 );
+			add_action( 'bulk_edit_custom_box', array( $this, 'display_bio_edit' ), 10, 2 );
+			add_action( 'wp_ajax_save_bio_edit', array( $this, 'save_bio_edit' ) );
+		}
 	}
 
 	/**
@@ -428,6 +436,9 @@ class WSUWP_People_Post_Type {
 		if ( 'edit.php' === $hook_suffix ) {
 			wp_enqueue_style( 'wsuwp-people-admin', plugins_url( 'css/admin-people.css', dirname( __FILE__ ) ), array(), WSUWP_People_Directory::$version );
 			wp_enqueue_script( 'wsuwp-people-admin', plugins_url( 'js/admin-people.min.js', dirname( __FILE__ ) ), array( 'jquery' ), WSUWP_People_Directory::$version );
+			wp_localize_script( 'wsuwp-people-admin', 'wsupeople', array(
+				'nonce' => wp_create_nonce( 'person-meta' ),
+			) );
 		}
 
 	}
@@ -1398,5 +1409,102 @@ class WSUWP_People_Post_Type {
 		$columns[] = 'wsuwp_university_location';
 
 		return $columns;
+	}
+
+	/**
+	 * Add a column for biography display to the people list table.
+	 *
+	 * @since 0.3.0
+	 *
+	 * @param array $columns Default columns on the "All Profiles" screen.
+	 *
+	 * @return array
+	 */
+	public function add_people_bio_column( $columns ) {
+		$bio_column = array(
+			'use_bio' => 'Display Biography',
+		);
+
+		// Add the "Display Biography" column in before the "Date" column.
+		$new_columns = array_slice( $columns, 0, -2, true ) + $bio_column + array_slice( $columns, -2, null, true );
+
+		return $new_columns;
+	}
+
+	/**
+	 * Add a column for biography display to the people list table.
+	 *
+	 * @since 0.3.0
+	 *
+	 * @param string $column_name The name of the column to display.
+	 * @param int    $post_id     The ID of the current post.
+	 */
+	public function bio_column( $column_name, $post_id ) {
+		if ( 'use_bio' === $column_name ) {
+			$bio = esc_html( get_post_meta( $post_id, '_use_bio', true ) );
+
+			if ( 'personal' === $bio ) {
+				?><span data-bio="personal">Personal</span><?php
+			} elseif ( 'bio_unit' === $bio ) {
+				?><span data-bio="bio_unit">Unit</span><?php
+			} elseif ( 'bio_university' === "$bio" ) {
+				?><span data-bio="bio_university">University</span><?php
+			}
+		}
+	}
+
+	/**
+	 * Add a column for biography display to the people list table.
+	 *
+	 * @since 0.3.0
+	 *
+	 * @param string $column_name The name of the column to edit.
+	 * @param string $post_type   The type of the posts.
+	 */
+	public function display_bio_edit( $column_name, $post_type ) {
+		static $nonce = true;
+
+		if ( $nonce ) {
+			$nonce = true;
+
+			wp_nonce_field( 'wsuwp_profile', 'wsuwp_profile_nonce' );
+		}
+
+		if ( 'use_bio' === $column_name ) {
+		?>
+		<fieldset class="inline-edit-col-right inline-edit-book">
+			<div class="inline-edit-col column-use-bio">
+				<label class="inline-edit-group">
+					<span class="title">Biography to display</span>
+					<select name="_use_bio">
+						<option value="personal">Personal</option>
+						<option value="bio_unit">Unit</option>
+						<option value="bio_university">University</option>
+					</select>
+				</label>
+			</div>
+		</fieldset>
+		<?php
+		}
+	}
+
+	/**
+	 * Saves bulk edit changes to the biography display meta.
+	 *
+	 * @since 0.3.0
+	 */
+	public function save_bio_edit() {
+		check_ajax_referer( 'person-meta', 'nonce' );
+
+		$post_ids = ( ! empty( $_POST['post_ids'] ) ) ? $_POST['post_ids'] : array();
+		$use_bio = ( ! empty( $_POST['use_bio'] ) ) ? $_POST['use_bio'] : null;
+
+		if ( ! empty( $post_ids ) && is_array( $post_ids ) ) {
+			foreach ( $post_ids as $post_id ) {
+				update_post_meta( $post_id, '_use_bio', $use_bio );
+			}
+		}
+
+		exit();
 	}
 }

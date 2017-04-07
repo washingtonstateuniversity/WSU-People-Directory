@@ -1,5 +1,4 @@
-.appointment-checklist,
-.inline-edit-row fieldset label.inline-edit-status,
-.add-new-h2 {
-	display: none;
+.inline-edit-row .column-use-bio .title {
+	padding-right: .5em;
+	width: auto;
 }
