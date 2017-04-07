@@ -621,7 +621,7 @@ class WSUWP_People_Post_Type {
 	 */
 	public function display_position_info_meta_box( $post ) {
 
-		wp_nonce_field( 'wsuwsp_profile', 'wsuwsp_profile_nonce' );
+		wp_nonce_field( 'wsuwp_profile', 'wsuwp_profile_nonce' );
 
 		$nid = get_post_meta( $post->ID, '_wsuwp_profile_ad_nid', true );
 		$name_first = get_post_meta( $post->ID, '_wsuwp_profile_ad_name_first', true );
@@ -1152,7 +1152,7 @@ class WSUWP_People_Post_Type {
 	 * @param int $post_id Post ID.
 	 */
 	public function save_post( $post_id ) {
-		if ( ! isset( $_POST['wsuwsp_profile_nonce'] ) || ! wp_verify_nonce( $_POST['wsuwsp_profile_nonce'], 'wsuwsp_profile' ) ) {
+		if ( ! isset( $_POST['wsuwp_profile_nonce'] ) || ! wp_verify_nonce( $_POST['wsuwp_profile_nonce'], 'wsuwp_profile' ) ) {
 			return;
 		}
 
