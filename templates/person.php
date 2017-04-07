@@ -1,10 +1,10 @@
 <?php
 $post = get_post();
-$nid = get_post_meta( $post->ID, '_wsuwp_profile_ad_nid', true );
+$nid = ( $nid ) ? $nid : get_post_meta( $post->ID, '_wsuwp_profile_ad_nid', true );
 $set_photo = get_post_meta( $post->ID, '_use_photo', true );
 $set_title = get_post_meta( $post->ID, '_use_title', true );
 $set_about = get_post_meta( $post->ID, '_use_bio', true );
-$profile = get_query_var( 'wsuwp_people_profile' );
+$profile = ( $profile ) ? true : get_query_var( 'wsuwp_people_profile' );
 
 $request_url = add_query_arg(
 	array(
@@ -301,7 +301,7 @@ if ( $photo ) {
 					<?php } ?>
 
 				</div>
-				<?php } // End if(). ?>
+				<?php } ?>
 
 			</div>
 
@@ -316,6 +316,6 @@ if ( $photo ) {
 			</button>
 		</div>
 	</div>
-	<?php } // End if(). ?>
+	<?php } ?>
 
 </article>

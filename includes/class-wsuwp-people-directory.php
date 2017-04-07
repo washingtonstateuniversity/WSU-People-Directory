@@ -54,9 +54,11 @@ class WSUWP_People_Directory {
 		if ( apply_filters( 'wsuwp_people_display', true ) ) {
 			require_once( dirname( __FILE__ ) . '/class-wsuwp-people-directory-page-template.php' );
 			require_once( dirname( __FILE__ ) . '/class-wsuwp-person-display.php' );
+			require_once( dirname( __FILE__ ) . '/class-wsuwp-person-card-shortcode.php' );
 
 			add_action( 'init', 'WSUWP_People_Directory_Page_Template' );
 			add_action( 'init', 'WSUWP_Person_Display' );
+			add_action( 'init', 'WSUWP_Person_Card_Shortcode' );
 		}
 
 		add_action( 'init', array( $this, 'maybe_flush_rewrite_rules' ), 99 );
