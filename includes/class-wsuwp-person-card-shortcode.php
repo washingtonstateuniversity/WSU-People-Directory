@@ -30,6 +30,7 @@ class WSUWP_Person_Card_Shortcode {
 	 */
 	public function setup_hooks() {
 		add_shortcode( 'wsuwp_person_card', array( $this, 'display_wsuwp_person_card' ) );
+		add_action( 'register_shortcode_ui', array( $this, 'person_card_shortcode_ui' ) );
 	}
 
 	/**
@@ -39,6 +40,7 @@ class WSUWP_Person_Card_Shortcode {
 	 */
 	public function display_wsuwp_person_card( $atts ) {
 		$defaults = array(
+			'name' => '',
 			'nid' => '',
 			'cache_bust' => '',
 		);
@@ -69,5 +71,34 @@ class WSUWP_Person_Card_Shortcode {
 		wp_cache_set( $cache_key, $content, 'wsuwp_person_card', 1800 );
 
 		return $content;
+	}
+
+	/**
+	 * Adds Shortcode UI support for the person card shortcode.
+	 *
+	 * @since 0.3.0
+	 */
+	public function person_card_shortcode_ui() {
+		$args = array(
+			'label' => 'Person Card',
+			'listItemImage' => 'dashicons-admin-users',
+			'post_type' => array( 'post', 'page' ),
+			'attrs' => array(
+				array(
+					'label' => 'Search by name',
+					'attr' => 'name',
+					'type' => 'text',
+					'description' => 'Start typing to search for a person.',
+				),
+				array(
+					'label'    => 'Or enter NID',
+					'attr'     => 'nid',
+					'type'     => 'text',
+					'description' => "If you know the person's nid, you can enter it directly.",
+				),
+			),
+		);
+
+		shortcode_ui_register_for_shortcode( 'wsuwp_person_card', $args );
 	}
 }
