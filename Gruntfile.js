@@ -92,6 +92,10 @@ module.exports = function( grunt ) {
         },
 
         uglify: {
+            admin_card_shortcode: {
+                src: "src/js/admin-card-shortcode.js",
+                dest: "js/admin-card-shortcode.min.js"
+            },
             admin_page: {
                 src: "src/js/admin-page.js",
                 dest: "js/admin-page.min.js"

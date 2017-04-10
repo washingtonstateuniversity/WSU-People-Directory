@@ -31,6 +31,7 @@ class WSUWP_Person_Card_Shortcode {
 	public function setup_hooks() {
 		add_shortcode( 'wsuwp_person_card', array( $this, 'display_wsuwp_person_card' ) );
 		add_action( 'register_shortcode_ui', array( $this, 'person_card_shortcode_ui' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'admin_enqueue_scripts' ) );
 	}
 
 	/**
@@ -59,7 +60,7 @@ class WSUWP_Person_Card_Shortcode {
 			return $cached_content;
 		}
 
-		$nid = sanitize_text_field( $atts['nid'] );
+		$card_nid = sanitize_text_field( $atts['nid'] );
 		$profile = true;
 
 		ob_start();
@@ -100,5 +101,17 @@ class WSUWP_Person_Card_Shortcode {
 		);
 
 		shortcode_ui_register_for_shortcode( 'wsuwp_person_card', $args );
+	}
+
+	/**
+	 * Enqueues the scripts used in the admin interface.
+	 *
+	 * @since 0.3.0
+	 */
+	public function admin_enqueue_scripts() {
+		wp_enqueue_script( 'wsuwp-person-card-shortcode', plugins_url( 'js/admin-card-shortcode.min.js', dirname( __FILE__ ) ), array( 'jquery-ui-autocomplete' ), WSUWP_People_Directory::$version, true );
+		wp_localize_script( 'wsuwp-person-card-shortcode', 'wsupersoncard', array(
+			'rest_url' => WSUWP_People_Directory::REST_URL(),
+		) );
 	}
 }
