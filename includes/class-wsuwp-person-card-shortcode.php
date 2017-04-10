@@ -93,9 +93,9 @@ class WSUWP_Person_Card_Shortcode {
 					'description' => 'Start typing to search for a person.',
 				),
 				array(
-					'label'    => 'Or enter NID',
-					'attr'     => 'nid',
-					'type'     => 'text',
+					'label' => 'Or enter NID',
+					'attr' => 'nid',
+					'type' => 'text',
 					'description' => "If you know the person's nid, you can enter it directly.",
 				),
 			),
