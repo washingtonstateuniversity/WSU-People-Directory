@@ -60,8 +60,7 @@ class WSUWP_Person_Card_Shortcode {
 			return $cached_content;
 		}
 
-		$card_nid = sanitize_text_field( $atts['nid'] );
-		$profile = true;
+		$is_card_shortcode = sanitize_text_field( $atts['nid'] );
 
 		ob_start();
 
