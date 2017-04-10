@@ -52,6 +52,8 @@ class WSUWP_Person_Card_Shortcode {
 			return '';
 		}
 
+		wp_enqueue_style( 'wsu-person-card', plugin_dir_url( dirname( __FILE__ ) ) . 'css/person-card.css', array(), WSUWP_People_Directory::$version );
+
 		$cache_key = md5( wp_json_encode( $atts ) );
 
 		$cached_content = wp_cache_get( $cache_key, 'wsuwp_person_card' );

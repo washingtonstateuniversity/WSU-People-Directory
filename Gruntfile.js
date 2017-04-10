@@ -28,6 +28,10 @@ module.exports = function( grunt ) {
                 src: "src/css/admin-person.css",
                 dest: "css/admin-person.css"
             },
+            frontend_card_shortcode: {
+                src: "src/css/person-card.css",
+                dest: "css/person-card.css"
+            },
             frontend_people: {
                 src: "src/css/people.css",
                 dest: "css/people.css"
