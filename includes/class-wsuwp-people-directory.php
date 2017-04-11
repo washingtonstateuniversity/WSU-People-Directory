@@ -39,9 +39,11 @@ class WSUWP_People_Directory {
 	public function setup_hooks() {
 		require_once( dirname( __FILE__ ) . '/class-wsuwp-people-post-type.php' );
 		require_once( dirname( __FILE__ ) . '/class-wsuwp-people-classification-taxonomy.php' );
+		require_once( dirname( __FILE__ ) . '/class-wsuwp-people-user-profile.php' );
 
 		add_action( 'init', 'WSUWP_People_Post_Type' );
 		add_action( 'init', 'WSUWP_People_Classification_Taxonomy' );
+		add_action( 'init', 'WSUWP_People_User_Profile' );
 
 		add_action( 'init', array( $this, 'add_global_cache_groups' ), 9 );
 
