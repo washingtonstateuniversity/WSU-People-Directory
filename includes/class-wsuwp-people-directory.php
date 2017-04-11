@@ -61,6 +61,8 @@ class WSUWP_People_Directory {
 			add_action( 'init', 'WSUWP_Person_Card_Shortcode' );
 		}
 
+		add_action( 'init', array( $this, 'extend_content_syndicate' ), 12 );
+
 		add_action( 'init', array( $this, 'maybe_flush_rewrite_rules' ), 99 );
 	}
 
@@ -167,6 +169,18 @@ class WSUWP_People_Directory {
 		if ( get_transient( 'wsuwp_people_directory_flush_rewrites' ) ) {
 			flush_rewrite_rules();
 			delete_transient( 'wsuwp_people_directory_flush_rewrites' );
+		}
+	}
+
+	/**
+	 * Include the code used to extend WSUWP Content Synidcate with a people shortcode.
+	 *
+	 * @since 0.3.0
+	 */
+	public function extend_content_syndicate() {
+		if ( class_exists( 'WSU_Syndicate_Shortcode_Base' ) ) {
+			require_once( dirname( __FILE__ ) . '/class-wsu-syndicate-shortcode-people.php' );
+			new WSU_Syndicate_Shortcode_People();
 		}
 	}
 }
