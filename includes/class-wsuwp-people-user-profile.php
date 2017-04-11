@@ -47,8 +47,14 @@ class WSUWP_People_User_Profile {
 			return;
 		}
 
+		global $user_id;
+
 		wp_enqueue_style( 'wsuwp-people-user-profile', plugins_url( 'css/admin-user-profile.css', dirname( __FILE__ ) ), array(), WSUWP_People_Directory::$version );
 		wp_enqueue_script( 'wsuwp-people-user-profile', plugins_url( 'js/admin-user-profile.min.js', dirname( __FILE__ ) ), array( 'jquery' ), WSUWP_People_Directory::$version, true );
+		wp_localize_script( 'wsuwp-people-user-profile', 'wsupeople', array(
+			'rest_url' => WSUWP_People_Directory::REST_URL(),
+			'nid' => get_userdata( $user_id )->user_login,
+		) );
 	}
 
 	/**
