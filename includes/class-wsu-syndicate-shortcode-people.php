@@ -34,12 +34,14 @@ class WSU_Syndicate_Shortcode_People extends WSU_Syndicate_Shortcode_Base {
 	 */
 	public function display_shortcode( $atts ) {
 		$atts = $this->process_attributes( $atts );
+		$site_url = $this->get_request_url( $atts );
+		$content = $this->get_content_cache( $atts, 'wsuwp_people' );
 
-		if ( ! $site_url = $this->get_request_url( $atts ) ) {
+		if ( ! $site_url ) {
 			return '<!-- wsuwp_people ERROR - an empty host was supplied -->';
 		}
 
-		if ( $content = $this->get_content_cache( $atts, 'wsuwp_people' ) ) {
+		if ( $content ) {
 			return $content;
 		}
 
@@ -48,7 +50,10 @@ class WSU_Syndicate_Shortcode_People extends WSU_Syndicate_Shortcode_Base {
 
 		if ( $atts['count'] ) {
 			$count = ( 100 < absint( $atts['count'] ) ) ? 100 : $atts['count'];
-			$request_url = add_query_arg( array( 'per_page' => absint( $count ) ), $request_url );
+			$count_query_arg = array(
+				'per_page' => absint( $count ),
+			);
+			$request_url = add_query_arg( $count_query_arg, $request_url );
 		}
 
 		$response = wp_remote_get( $request_url );
