@@ -1,0 +1,8 @@
+.wsu-person {
+	float: right;
+	width: 198px;
+}
+
+.wsu-person .photo img {
+	display: block;
+}

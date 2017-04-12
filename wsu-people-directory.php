@@ -82,3 +82,12 @@ function WSUWP_People_Directory_Page_Template() {
 function WSUWP_Person_Display() {
 	return WSUWP_Person_Display::get_instance();
 }
+
+/**
+ * Retrieve the instance of the person card shortcode.
+ *
+ * @return WSUWP_Person_Card_Shortcode
+ */
+function WSUWP_Person_Card_Shortcode() {
+	return WSUWP_Person_Card_Shortcode::get_instance();
+}

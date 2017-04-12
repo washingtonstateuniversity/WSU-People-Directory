@@ -28,6 +28,10 @@ module.exports = function( grunt ) {
                 src: "src/css/admin-person.css",
                 dest: "css/admin-person.css"
             },
+            frontend_card_shortcode: {
+                src: "src/css/person-card.css",
+                dest: "css/person-card.css"
+            },
             frontend_people: {
                 src: "src/css/people.css",
                 dest: "css/people.css"
@@ -92,6 +96,10 @@ module.exports = function( grunt ) {
         },
 
         uglify: {
+            admin_card_shortcode: {
+                src: "src/js/admin-card-shortcode.js",
+                dest: "js/admin-card-shortcode.min.js"
+            },
             admin_page: {
                 src: "src/js/admin-page.js",
                 dest: "js/admin-page.min.js"

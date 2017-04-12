@@ -1,6 +1,7 @@
 <?php
 $post = get_post();
-$nid = get_post_meta( $post->ID, '_wsuwp_profile_ad_nid', true );
+$is_card_shortcode = ( isset( $card_nid ) ) ? $card_nid : false;
+$nid = ( $is_card_shortcode ) ? $is_card_shortcode : get_post_meta( $post->ID, '_wsuwp_profile_ad_nid', true );
 $set_photo = get_post_meta( $post->ID, '_use_photo', true );
 $set_title = get_post_meta( $post->ID, '_use_title', true );
 $set_about = get_post_meta( $post->ID, '_use_bio', true );
@@ -77,8 +78,10 @@ $tags = wp_get_post_tags( $post->ID, array(
 ) );
 
 // Directory page-specific info.
-if ( ! $profile ) {
+if ( ! $profile && ! $is_card_shortcode ) {
 	$directory_page = get_post_meta( $post->ID, "_display_on_page_{$page_id}", true );
+
+	$name = get_the_title();
 
 	if ( isset( $directory_page['title'] ) ) {
 		$titles = array();
@@ -108,6 +111,14 @@ if ( ! $profile ) {
 			$about = implode( ', ', $tags );
 		}
 	}
+
+	$link = trailingslashit( $base_url . $post->post_name );
+}
+
+// Card shortcode info.
+if ( $is_card_shortcode ) {
+	$name = $person->title->rendered;
+	$link = ( $person->website ) ? $person->website : $person->link;
 }
 
 // Person classes.
@@ -124,9 +135,8 @@ if ( $photo ) {
 	<div class="card">
 
 		<?php if ( ! $profile ) { ?>
-		<?php $link = trailingslashit( $base_url . $post->post_name ); ?>
 		<h2 class="name">
-			<a href="<?php echo esc_url( $link ); ?>"><?php the_title(); ?></a>
+			<a href="<?php echo esc_url( $link ); ?>"><?php echo esc_html( $name ); ?></a>
 		</h2>
 		<?php } ?>
 
@@ -134,24 +144,36 @@ if ( $photo ) {
 		if ( $photo ) {
 
 			// Markup for directory page view.
-			if ( ! $profile && in_array( 'photos', $wrapper_classes, true ) ) {
+			if ( ! $profile && ! $is_card_shortcode && in_array( 'photos', $wrapper_classes, true ) ) {
 				?>
 				<figure class="photo">
 					<a href="<?php echo esc_url( $link ); ?>">
 						<img src="<?php echo esc_url( plugins_url( 'images/placeholder.png', dirname( __FILE__ ) ) ); ?>"
 							 data-photo="<?php echo esc_url( $photo ); ?>"
-							 alt="<?php the_title(); ?>" />
+							 alt="<?php echo esc_html( $name ); ?>" />
 					</a>
 				</figure>
 				<?php
 			}
 
 			// Markup for individual person view.
-			if ( $profile && $photo ) {
+			if ( $profile ) {
 				?>
 				<figure class="photo">
 					<img src="<?php echo esc_url( $photo ); ?>"
-						 alt="<?php the_title(); ?>" />
+						 alt="<?php echo esc_html( $name ); ?>" />
+				</figure>
+				<?php
+			}
+
+			// Markup for card shortcode view.
+			if ( $is_card_shortcode ) {
+				?>
+				<figure class="photo">
+					<a href="<?php echo esc_url( $link ); ?>">
+						<img src="<?php echo esc_url( $photo ); ?>"
+							 alt="<?php echo esc_html( $name ); ?>" />
+					</a>
 				</figure>
 				<?php
 			}
@@ -173,7 +195,7 @@ if ( $photo ) {
 		<?php echo wp_kses_post( apply_filters( 'the_content', $about ) ); ?>
 	</div>
 
-	<?php if ( is_admin() ) { ?>
+	<?php if ( is_admin() && ! $is_card_shortcode ) { ?>
 	<div class="wsu-person-controls">
 		<button type="button"
 				class="wsu-person-edit"
@@ -301,7 +323,7 @@ if ( $photo ) {
 					<?php } ?>
 
 				</div>
-				<?php } // End if(). ?>
+				<?php } ?>
 
 			</div>
 
@@ -316,6 +338,6 @@ if ( $photo ) {
 			</button>
 		</div>
 	</div>
-	<?php } // End if(). ?>
+	<?php } ?>
 
 </article>
