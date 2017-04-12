@@ -41,6 +41,9 @@
 				degree_label = $degrees.find( "a" ).data( "label" ),
 				degree_name = $degrees.find( "a" ).data( "name" );
 
+			// Store the post ID as a data attribute of the NID field.
+			$nid.data( "post-id", data.id );
+
 			// Populate AD data.
 			$post_title.focus().val( data.title.rendered );
 			$given_name.html( data.first_name );
@@ -469,5 +472,72 @@
 				$button.attr( "aria-label", "Select" );
 			}
 		} );
+
+		// Post data to the user's people.wsu.edu profile.
+		if ( window.wsupeople.make_request ) {
+			$( "#publish" ).on( "click", function() {
+				var data = {},
+					name = $( "#title" ).val(),
+					office = $( "#_wsuwp_profile_alt_office" ).val(),
+					phone = $( "#_wsuwp_profile_alt_phone" ).val(),
+					email = $( "#_wsuwp_profile_alt_email" ).val(),
+					website = $( "#_wsuwp_profile_website" ).val(),
+					titles = false,
+					degrees = false,
+					personal_bio = window.tinymce.get( "content" ).getContent(),
+					unit_bio = window.tinymce.get( "_wsuwp_profile_bio_unit" ).getContent(),
+					university_bio = window.tinymce.get( "_wsuwp_profile_bio_university" ).getContent();
+
+				if ( name ) {
+					data.title = name;
+				}
+
+				if ( office ) {
+					data.office_alt = office;
+				}
+
+				if ( phone ) {
+					data.phone_alt = phone;
+				}
+
+				if ( email ) {
+					data.email_alt = email;
+				}
+
+				if ( website ) {
+					data.website = website;
+				}
+
+				if ( titles ) {
+					data.working_titles = titles;
+				}
+
+				if ( degrees ) {
+					data.degree = degrees;
+				}
+
+				if ( personal_bio ) {
+					data.content = personal_bio;
+				}
+
+				if ( unit_bio ) {
+					data.bio_unit = unit_bio;
+				}
+
+				if ( university_bio ) {
+					data.bio_university = university_bio;
+				}
+
+				$.ajax( {
+					url: window.wsupeople.rest_url + "/" + $nid.data( "post-id" ),
+					method: "POST",
+					beforeSend: function( xhr ) {
+						xhr.setRequestHeader( "X-WP-Nonce", window.wsupeople.nonce );
+						xhr.setRequestHeader( "X-WSUWP-UID", window.wsupeople.uid );
+					},
+					data: data
+				} );
+			} );
+		}
 	} );
 }( jQuery, window, document ) );

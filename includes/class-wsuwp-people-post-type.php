@@ -418,19 +418,21 @@ class WSUWP_People_Post_Type {
 				'rest_url' => WSUWP_People_Directory::REST_URL(),
 			);
 
-			// Make a REST request for data from people.wsu.edu when editing a person.
+			// Additional variables for editing a profile from sites other than the primary directory.
 			if ( 'post.php' === $hook_suffix && apply_filters( 'wsuwp_people_display', true ) ) {
 				$profile_vars['make_request'] = true;
+				$profile_vars['nonce'] = WSUWP_People_Directory::create_rest_nonce();
+				$profile_vars['uid'] = wp_get_current_user()->ID;
 			}
 
 			wp_enqueue_style( 'wsuwp-people-admin', plugins_url( 'css/admin-person.css', dirname( __FILE__ ) ), array(), WSUWP_People_Directory::$version );
 			wp_enqueue_script( 'wsuwp-people-admin', plugins_url( 'js/admin-person.min.js', dirname( __FILE__ ) ), array( 'jquery-ui-tabs', 'underscore' ), WSUWP_People_Directory::$version, true );
 			wp_localize_script( 'wsuwp-people-admin', 'wsupeople', $profile_vars );
-		}
 
-		// Disable autosaving on new people posts if this isn't people.wsu.edu.
-		if ( 'post-new.php' === $hook_suffix && apply_filters( 'wsuwp_people_display', true ) ) {
-			wp_dequeue_script( 'autosave' );
+			// Disable autosaving for sites other than the primary directory.
+			if ( apply_filters( 'wsuwp_people_display', true ) ) {
+				wp_dequeue_script( 'autosave' );
+			}
 		}
 
 		if ( 'edit.php' === $hook_suffix ) {
