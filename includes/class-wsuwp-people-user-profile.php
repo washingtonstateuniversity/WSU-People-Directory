@@ -54,6 +54,8 @@ class WSUWP_People_User_Profile {
 		wp_localize_script( 'wsuwp-people-user-profile', 'wsupeople', array(
 			'rest_url' => WSUWP_People_Directory::REST_URL(),
 			'nid' => get_userdata( $user_id )->user_login,
+			'nonce' => WSUWP_People_Directory::create_rest_nonce(),
+			'uid' => wp_get_current_user()->ID,
 		) );
 	}
 
@@ -86,6 +88,7 @@ class WSUWP_People_User_Profile {
 					);
 					wp_editor( $description, 'description', $settings );
 					?>
+					<input type="hidden" name="wsuwp_person_id" value="" />
 				</td>
 			</tr>
 		</table>

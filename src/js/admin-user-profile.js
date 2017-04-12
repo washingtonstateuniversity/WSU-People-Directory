@@ -1,9 +1,12 @@
 ( function( $, window ) {
+	var $default_description = $( ".user-description-wrap" ),
+		$tinymce_description = $( ".wsuwp-people-bio-wrap" ),
+		$id = $( "[name='wsuwp_person_id']" ),
+		$name = $( "#display_name" ),
+		$email = $( "#email" ),
+		$website = $( "#url" );
 
 	// Remove the default description and move the TinyMCE editor into its place.
-	var $default_description = $( ".user-description-wrap" ),
-		$tinymce_description = $( ".wsuwp-people-bio-wrap" );
-
 	$default_description.closest( "tr" ).remove();
 	$tinymce_description.detach().insertAfter( "h2:contains('About')" );
 
@@ -21,16 +24,10 @@
 
 	// Populate profile with data from people.wsu.edu.
 	function populateProfile( data ) {
-		var $id = $( "[name='wsuwp_person_id']" ),
-			$display_name = $( "#display_name" ),
-			$email = $( "#email" ),
-			$website = $( "#url" ),
-			$biography = window.tinyMCE.activeEditor;
-
 		$id.val( data.id );
 
-		if ( $display_name.find( "option:selected" ).text() !== data.title.rendered ) {
-			var $match = $display_name.find( "option:contains('" + data.title.rendered + "')" );
+		if ( $name.find( "option:selected" ).text() !== data.title.rendered ) {
+			var $match = $name.find( "option:contains('" + data.title.rendered + "')" );
 			if ( $match ) {
 				$match.attr( "selected", "selected" );
 			}
@@ -44,8 +41,26 @@
 			$website.val( data.website );
 		}
 
-		if ( "" === $biography.getContent() ) {
-			$biography.setContent( data.content.rendered );
+		if ( "" === window.tinyMCE.activeEditor.getContent() ) {
+			window.tinyMCE.activeEditor.setContent( data.content.rendered );
 		}
 	}
+
+	// Post data to the user's people.wsu.edu profile.
+	$( "#submit" ).on( "click", function() {
+		$.ajax( {
+			url: window.wsupeople.rest_url + "/" + $id.val(),
+			method: "POST",
+			beforeSend: function( xhr ) {
+				xhr.setRequestHeader( "X-WP-Nonce", window.wsupeople.nonce );
+				xhr.setRequestHeader( "X-WSUWP-UID", window.wsupeople.uid );
+			},
+			data:{
+				"title": $name.val(),
+				"email": $email.val(),
+				"website": $website.val(),
+				"content": window.tinyMCE.activeEditor.getContent()
+			}
+		} );
+	} );
 }( jQuery, window ) );
