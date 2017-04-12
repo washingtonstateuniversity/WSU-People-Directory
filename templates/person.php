@@ -1,6 +1,7 @@
 <?php
 $post = get_post();
-$nid = ( isset( $is_card_shortcode ) ) ? $is_card_shortcode : get_post_meta( $post->ID, '_wsuwp_profile_ad_nid', true );
+$is_card_shortcode = ( isset( $card_nid ) ) ? $card_nid : false;
+$nid = ( $is_card_shortcode ) ? $is_card_shortcode : get_post_meta( $post->ID, '_wsuwp_profile_ad_nid', true );
 $set_photo = get_post_meta( $post->ID, '_use_photo', true );
 $set_title = get_post_meta( $post->ID, '_use_title', true );
 $set_about = get_post_meta( $post->ID, '_use_bio', true );
