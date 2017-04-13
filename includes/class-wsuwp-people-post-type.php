@@ -321,6 +321,7 @@ class WSUWP_People_Post_Type {
 		add_filter( 'manage_taxonomies_for_' . self::$post_type_slug . '_columns', array( $this, 'manage_people_taxonomy_columns' ) );
 
 		if ( apply_filters( 'wsuwp_people_display', true ) ) {
+			add_action( 'wp_enqueue_editor', array( $this, 'admin_enqueue_secondary_scripts' ) );
 			add_filter( 'manage_' . self::$post_type_slug . '_posts_columns', array( $this, 'add_people_bio_column' ) );
 			add_action( 'manage_posts_custom_column', array( $this, 'bio_column' ), 10, 2 );
 			add_action( 'quick_edit_custom_box', array( $this, 'display_bio_edit' ), 10, 2 );
@@ -415,18 +416,10 @@ class WSUWP_People_Post_Type {
 				'nid_nonce' => wp_create_nonce( 'wsu-people-nid-lookup' ),
 				'post_id' => $post->ID,
 				'request_from' => ( apply_filters( 'wsuwp_people_display', true ) ) ? 'rest' : 'ad',
-				'rest_url' => WSUWP_People_Directory::REST_URL(),
 			);
 
-			// Additional variables for editing a profile from sites other than the primary directory.
-			if ( 'post.php' === $hook_suffix && apply_filters( 'wsuwp_people_display', true ) ) {
-				$profile_vars['make_request'] = true;
-				$profile_vars['nonce'] = WSUWP_People_Directory::create_rest_nonce();
-				$profile_vars['uid'] = wp_get_current_user()->ID;
-			}
-
 			wp_enqueue_style( 'wsuwp-people-admin', plugins_url( 'css/admin-person.css', dirname( __FILE__ ) ), array(), WSUWP_People_Directory::$version );
-			wp_enqueue_script( 'wsuwp-people-admin', plugins_url( 'js/admin-person.min.js', dirname( __FILE__ ) ), array( 'jquery-ui-tabs', 'underscore' ), WSUWP_People_Directory::$version, true );
+			wp_enqueue_script( 'wsuwp-people-admin', plugins_url( 'js/admin-edit-profile.min.js', dirname( __FILE__ ) ), array( 'jquery-ui-tabs', 'underscore' ), WSUWP_People_Directory::$version, true );
 			wp_localize_script( 'wsuwp-people-admin', 'wsupeople', $profile_vars );
 
 			// Disable autosaving for sites other than the primary directory.
@@ -435,14 +428,46 @@ class WSUWP_People_Post_Type {
 			}
 		}
 
-		if ( 'edit.php' === $hook_suffix ) {
+		if ( 'edit.php' === $hook_suffix && apply_filters( 'wsuwp_people_display', true ) ) {
 			wp_enqueue_style( 'wsuwp-people-admin', plugins_url( 'css/admin-people.css', dirname( __FILE__ ) ), array(), WSUWP_People_Directory::$version );
 			wp_enqueue_script( 'wsuwp-people-admin', plugins_url( 'js/admin-people.min.js', dirname( __FILE__ ) ), array( 'jquery' ), WSUWP_People_Directory::$version );
 			wp_localize_script( 'wsuwp-people-admin', 'wsupeople', array(
 				'nonce' => wp_create_nonce( 'person-meta' ),
 			) );
 		}
+	}
 
+	/**
+	 * Enqueue the scripts and styles used in the admin for sites other than the primary directory.
+	 *
+	 * @since 0.3.0
+	 *
+	 * @param array $to_load Contains boolean values whether TinyMCE and Quicktags are being loaded.
+	 */
+	public function admin_enqueue_secondary_scripts( $to_load ) {
+		$screen = get_current_screen();
+
+		if ( self::$post_type_slug !== $screen->post_type ) {
+			return;
+		}
+
+		// Make sure TinyMCE is loaded before loading the script.
+		if ( empty( $to_load['tinymce'] ) ) {
+			return;
+		}
+
+		$profile_vars = array(
+			'rest_url' => WSUWP_People_Directory::REST_URL(),
+		);
+
+		if ( 'add' !== $screen->action ) {
+			$profile_vars['load_data'] = true;
+			$profile_vars['nonce'] = WSUWP_People_Directory::create_rest_nonce();
+			$profile_vars['uid'] = wp_get_current_user()->ID;
+		}
+
+		wp_enqueue_script( 'wsuwp-people-edit-profile-secondary', plugins_url( 'src/js/admin-edit-profile-secondary.js', dirname( __FILE__ ) ), array( 'jquery', 'underscore' ), WSUWP_People_Directory::$version, true );
+		wp_localize_script( 'wsuwp-people-edit-profile-secondary', 'wsuwp_people_edit_profile_secondary', $profile_vars );
 	}
 
 	/**
@@ -565,7 +590,7 @@ class WSUWP_People_Post_Type {
 				<div id="<?php echo esc_attr( $key ); ?>" class="wsuwp-profile-panel">
 					<?php
 					if ( '_wsuwp_profile_bio_university' === $args['meta_key'] && ! current_user_can( 'create_sites' ) ) {
-						echo wp_kses_post( apply_filters( 'the_content', $value ) );
+						echo '<div class="readonly">' . wp_kses_post( apply_filters( 'the_content', $value ) ) . '</div>';
 					} else {
 						wp_editor( $value, $args['meta_key'] );
 					}
