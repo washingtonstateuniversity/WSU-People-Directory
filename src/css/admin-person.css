@@ -237,6 +237,16 @@
 	display: block;
 }
 
+.ui-tabs-panel .readonly {
+	color: #717171;
+	font-family: "Open Sans", "Lucida Sans", "Lucida Grande", "Lucida Sans Unicode", sans-serif;
+	padding: 9px 10px;
+}
+
+.ui-tabs-panel .readonly p {
+	font-size: 14px;
+}
+
 .ui-tabs-panel[aria-hidden="true"] {
 	border: 0;
 	clip: rect(0 0 0 0);
