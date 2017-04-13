@@ -28,6 +28,10 @@ module.exports = function( grunt ) {
                 src: "src/css/admin-person.css",
                 dest: "css/admin-person.css"
             },
+            admin_user_profile: {
+                src: "src/css/admin-user-profile.css",
+                dest: "css/admin-user-profile.css"
+            },
             frontend_card_shortcode: {
                 src: "src/css/person-card.css",
                 dest: "css/person-card.css"
@@ -115,6 +119,10 @@ module.exports = function( grunt ) {
             admin_person: {
                 src: "src/js/admin-person.js",
                 dest: "js/admin-person.min.js"
+            },
+            admin_user_profile: {
+                src: "src/js/admin-user-profile.js",
+                dest: "js/admin-user-profile.min.js"
             },
             frontend_people: {
                 src: "src/js/people.js",

@@ -77,6 +77,8 @@ function WSUWP_People_Directory_Page_Template() {
 /**
  * Retrieve the instance of the Person Display handler.
  *
+ * @since 0.3.0
+ *
  * @return WSUWP_Person_Display
  */
 function WSUWP_Person_Display() {
@@ -86,8 +88,21 @@ function WSUWP_Person_Display() {
 /**
  * Retrieve the instance of the person card shortcode.
  *
+ * @since 0.3.0
+ *
  * @return WSUWP_Person_Card_Shortcode
  */
 function WSUWP_Person_Card_Shortcode() {
 	return WSUWP_Person_Card_Shortcode::get_instance();
+}
+
+/**
+ * Retrieve the instance of the user profile handler.
+ *
+ * @since 0.3.0
+ *
+ * @return WSUWP_People_User_Profile
+ */
+function WSUWP_People_User_Profile() {
+	return WSUWP_People_User_Profile::get_instance();
 }
