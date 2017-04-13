@@ -61,9 +61,9 @@
 
 			var data = {
 				"action": "wsu_people_get_data_by_nid",
-				"_ajax_nonce": window.wsupeople.nid_nonce,
+				"_ajax_nonce": window.wsuwp_people_edit_profile.nid_nonce,
 				"network_id": $nid.val(),
-				"request_from": window.wsupeople.request_from,
+				"request_from": window.wsuwp_people_edit_profile.request_from,
 				"is_refresh": ( $( e.target ).is( "#refresh-ad-data" ) ) ? "true" : "false"
 			};
 
@@ -113,11 +113,11 @@
 
 			var data = {
 				"action": "wsu_people_confirm_nid_data",
-				"_ajax_nonce": window.wsupeople.nid_nonce,
+				"_ajax_nonce": window.wsuwp_people_edit_profile.nid_nonce,
 				"network_id": $nid.val(),
 				"confirm_ad_hash": $hash.val(),
 				"post_id": $( "#post_ID" ).val(),
-				"request_from": window.wsupeople.request_from
+				"request_from": window.wsuwp_people_edit_profile.request_from
 			};
 
 			var $description = $( ".load-ad-container .description" ),
@@ -170,7 +170,7 @@
 				multiple: true,
 				library: {
 					type: "image",
-					uploadedTo: window.wsupeople.post_id
+					uploadedTo: window.wsuwp_people_edit_profile.post_id
 				},
 				button: {
 					text: "Use photo(s)"

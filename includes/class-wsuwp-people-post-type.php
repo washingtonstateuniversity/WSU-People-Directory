@@ -418,9 +418,9 @@ class WSUWP_People_Post_Type {
 				'request_from' => ( apply_filters( 'wsuwp_people_display', true ) ) ? 'rest' : 'ad',
 			);
 
-			wp_enqueue_style( 'wsuwp-people-admin', plugins_url( 'css/admin-person.css', dirname( __FILE__ ) ), array(), WSUWP_People_Directory::$version );
-			wp_enqueue_script( 'wsuwp-people-admin', plugins_url( 'js/admin-edit-profile.min.js', dirname( __FILE__ ) ), array( 'jquery-ui-tabs', 'underscore' ), WSUWP_People_Directory::$version, true );
-			wp_localize_script( 'wsuwp-people-admin', 'wsupeople', $profile_vars );
+			wp_enqueue_style( 'wsuwp-people-edit-profile', plugins_url( 'css/admin-person.css', dirname( __FILE__ ) ), array(), WSUWP_People_Directory::$version );
+			wp_enqueue_script( 'wsuwp-people-edit-profile', plugins_url( 'js/admin-edit-profile.min.js', dirname( __FILE__ ) ), array( 'jquery-ui-tabs', 'underscore' ), WSUWP_People_Directory::$version, true );
+			wp_localize_script( 'wsuwp-people-edit-profile', 'wsuwp_people_edit_profile', $profile_vars );
 
 			// Disable autosaving for sites other than the primary directory.
 			if ( apply_filters( 'wsuwp_people_display', true ) ) {
