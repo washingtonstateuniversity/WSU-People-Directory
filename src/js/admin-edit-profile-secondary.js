@@ -11,7 +11,7 @@ var profile_original_titles,
 
 		// Make a REST request to for profile data from people.wsu.edu.
 		if ( window.wsuwp_people_edit_profile_secondary.load_data ) {
-			jQuery.ajax( {
+			$.ajax( {
 				url: window.wsuwp_people_edit_profile_secondary.rest_url,
 				data: {
 					_embed: true,
@@ -305,6 +305,34 @@ function populate_from_people_directory( data ) {
 		// Change focus to the post title field (the trigger above focuses the tag input).
 		$( "#title" ).focus();
 	}
+
+	// Disable inputs if a user doesn't have adequate permissions to edit the profile.
+	$.ajax( {
+		url: window.wsuwp_people_edit_profile_secondary.rest_url + "/" + data.id,
+		type: "POST",
+		beforeSend: function( xhr ) {
+			xhr.setRequestHeader( "X-WP-Nonce", window.wsuwp_people_edit_profile_secondary.nonce );
+			xhr.setRequestHeader( "X-WSUWP-UID", window.wsuwp_people_edit_profile_secondary.uid );
+		},
+		error: function() {
+			$( "#wsuwp_profile_additional_info input" ).prop( "disabled", true );
+			$( ".wsuwp-profile-button.remove" ).prop( "disabled", true );
+			$( "#new-tag-post_tag" ).prop( "disabled", true );
+			$( ".tabs-panel input" ).prop( "disabled", true );
+			$( ".wsuwp-profile-add-photo" ).prop( "disabled", true );
+			$( ".wsuwp-profile-photo-remove" ).prop( "disabled", true );
+
+			window.tinymce.get( "content" ).setMode( "readonly" );
+
+			if ( unit_bio ) {
+				unit_bio.setMode( "readonly" );
+			}
+
+			if ( university_bio ) {
+				university_bio.setMode( "readonly" );
+			}
+		}
+	} );
 }
 
 // Populate the photo collection with data from people.wsu.edu.
