@@ -75,7 +75,8 @@
 }
 
 .wsuwp-profile-degrees p:hover .wsuwp-profile-button.select,
-.wsuwp-profile-repeatable-field .selected:hover .wsuwp-profile-button.remove {
+.wsuwp-profile-repeatable-field .selected:hover .wsuwp-profile-button.remove,
+.wsuwp-profile-repeatable-field p:hover button:disabled {
 	display: none;
 }
 
@@ -89,6 +90,10 @@
 
 .wsuwp-profile-add-repeatable a {
 	text-decoration: none;
+}
+
+input:disabled {
+	background: #eee;
 }
 
 /* "Card" display */
