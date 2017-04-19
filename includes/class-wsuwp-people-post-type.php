@@ -783,6 +783,11 @@ class WSUWP_People_Post_Type {
 					<label for="_wsuwp_profile_ad_nid">Network ID</label>:
 					<input type="text" id="_wsuwp_profile_ad_nid" name="_wsuwp_profile_ad_nid" value="<?php echo esc_attr( $nid ); ?>" class="widefat" <?php echo esc_attr( $readonly ); ?> />
 
+				<?php if ( apply_filters( 'wsuwp_people_display', true ) ) { ?>
+					<?php $record_id = get_post_meta( $post->ID, '_wsuwp_profile_post_id', true ); ?>
+					<input type="hidden" id="_wsuwp_profile_post_id" name="_wsuwp_profile_post_id" value="<?php echo esc_attr( $record_id ); ?>" />
+				<?php } ?>
+
 				<?php if ( '' === $readonly ) : ?>
 					<div class="load-ad-container">
 						<p class="description">Enter the WSU Network ID for this user to populate data from Active Directory.</p>
@@ -1193,6 +1198,10 @@ class WSUWP_People_Post_Type {
 
 		// Store only select meta if this isn't people.wsu.edu.
 		if ( apply_filters( 'wsuwp_people_display', true ) ) {
+			if ( isset( $_POST['_wsuwp_profile_post_id'] ) && '' !== $_POST['_wsuwp_profile_post_id'] ) {
+				update_post_meta( $post_id, '_wsuwp_profile_post_id', absint( $_POST['_wsuwp_profile_post_id'] ) );
+			}
+
 			if ( isset( $_POST['_use_photo'] ) && '' !== $_POST['_use_photo'] ) {
 				update_post_meta( $post_id, '_use_photo', absint( $_POST['_use_photo'] ) );
 			} else {

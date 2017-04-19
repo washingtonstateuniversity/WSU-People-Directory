@@ -467,6 +467,7 @@ class WSUWP_People_Directory_Page_Template {
 			'post_status' => 'publish',
 			'post_type' => WSUWP_People_Post_Type::$post_type_slug,
 			'meta_input' => array(
+				'_wsuwp_profile_post_id' => $person->id,
 				'_wsuwp_profile_ad_nid' => $person->nid,
 				'_on_page' => $page_id,
 				"_order_on_page_{$page_id}" => absint( $order ),

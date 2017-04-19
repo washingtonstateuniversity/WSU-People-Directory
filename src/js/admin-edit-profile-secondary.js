@@ -167,9 +167,10 @@ function populate_from_people_directory( data ) {
 		unit_bio = window.tinymce.get( "_wsuwp_profile_bio_unit" ),
 		university_bio = window.tinymce.get( "_wsuwp_profile_bio_university" );
 
-	// Store the post ID as a data attribute of the NID field.
-	$( "#_wsuwp_profile_ad_nid" ).data( "post-id", data.id );
+	// Populate the post id field.
+	$( "#_wsuwp_profile_post_id" ).val( data.id );
 
+	// Populate the profile title.
 	$( "#title" ).focus().val( data.title.rendered ).data( "original", data.title.rendered );
 
 	// Populate AD data.
@@ -255,14 +256,14 @@ function populate_from_people_directory( data ) {
 	profile_original_degrees = data.degree;
 
 	// Populate photo collection.
-	if ( data._embedded[ "wp:photos" ] !== 0 ) {
+	if ( data._embedded && data._embedded[ "wp:photos" ] !== 0 ) {
 		$.each( data._embedded[ "wp:photos" ], function( i, photo ) {
 			populate_photos( photo );
 		} );
 	}
 
 	// Populate featured image as part of the photo collection.
-	if ( data._embedded[ "wp:featuredmedia" ] && data._embedded[ "wp:featuredmedia" ] !== 0 ) {
+	if ( data._embedded && data._embedded[ "wp:featuredmedia" ] && data._embedded[ "wp:featuredmedia" ] !== 0 ) {
 		populate_photos( data._embedded[ "wp:featuredmedia" ][ 0 ] );
 	}
 
@@ -282,7 +283,7 @@ function populate_from_people_directory( data ) {
 	}
 
 	// Populate taxonomy data.
-	if ( data._embedded[ "wp:term" ] && data._embedded[ "wp:term" ] !== 0 ) {
+	if ( data._embedded && data._embedded[ "wp:term" ] && data._embedded[ "wp:term" ] !== 0 ) {
 		$.each( data._embedded[ "wp:term" ], function( i, taxonomy ) {
 			if ( taxonomy ) {
 				$.each( taxonomy, function( i, term ) {
