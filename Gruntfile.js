@@ -104,6 +104,14 @@ module.exports = function( grunt ) {
                 src: "src/js/admin-card-shortcode.js",
                 dest: "js/admin-card-shortcode.min.js"
             },
+            admin_edit_profile: {
+                src: "src/js/admin-edit-profile.js",
+                dest: "js/admin-edit-profile.min.js"
+            },
+            admin_edit_profile_secondary: {
+                src: "src/js/admin-edit-profile-secondary.js",
+                dest: "js/admin-edit-profile-secondary.min.js"
+            },
             admin_page: {
                 src: "src/js/admin-page.js",
                 dest: "js/admin-page.min.js"
@@ -115,10 +123,6 @@ module.exports = function( grunt ) {
             admin_people_sync: {
                 src: "src/js/admin-people-sync.js",
                 dest: "js/admin-people-sync.min.js"
-            },
-            admin_person: {
-                src: "src/js/admin-person.js",
-                dest: "js/admin-person.min.js"
             },
             admin_user_profile: {
                 src: "src/js/admin-user-profile.js",

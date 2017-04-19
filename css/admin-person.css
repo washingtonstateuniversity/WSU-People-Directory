@@ -75,7 +75,8 @@
 }
 
 .wsuwp-profile-degrees p:hover .wsuwp-profile-button.select,
-.wsuwp-profile-repeatable-field .selected:hover .wsuwp-profile-button.remove {
+.wsuwp-profile-repeatable-field .selected:hover .wsuwp-profile-button.remove,
+.wsuwp-profile-repeatable-field p:hover button:disabled {
 	display: none;
 }
 
@@ -89,6 +90,10 @@
 
 .wsuwp-profile-add-repeatable a {
 	text-decoration: none;
+}
+
+input:disabled {
+	background: #eee;
 }
 
 /* "Card" display */
@@ -244,6 +249,16 @@
 #bio_unit.ui-tabs-panel,
 #bio_university.ui-tabs-panel {
 	display: block;
+}
+
+.ui-tabs-panel .readonly {
+	color: #717171;
+	font-family: "Open Sans", "Lucida Sans", "Lucida Grande", "Lucida Sans Unicode", sans-serif;
+	padding: 9px 10px;
+}
+
+.ui-tabs-panel .readonly p {
+	font-size: 14px;
 }
 
 .ui-tabs-panel[aria-hidden="true"] {
