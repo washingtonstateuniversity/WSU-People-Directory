@@ -27,9 +27,9 @@ class WSUWP_People_Directory_Page_Template {
 	 * @var array
 	 */
 	public $post_meta_keys = array(
-		'_wsu_people_directory_nids' => array(
+		'_wsu_people_directory_profile_ids' => array(
 			'type' => 'string',
-			'description' => 'A list of people to display on this page',
+			'description' => 'IDs of people records to display on this page',
 			'sanitize_callback' => 'sanitize_text_field',
 		),
 		'_wsu_people_directory_layout' => array(
@@ -157,20 +157,22 @@ class WSUWP_People_Directory_Page_Template {
 	public function display_people_directory_setup( $post ) {
 		wp_nonce_field( 'directory-page-configuration', 'directory_page_nonce' );
 
-		$nids = get_post_meta( $post->ID, '_wsu_people_directory_nids', true );
+		$page_id = $post->ID;
+		$ids = get_post_meta( $post->ID, '_wsu_people_directory_profile_ids', true );
 		$layout = get_post_meta( $post->ID, '_wsu_people_directory_layout', true );
 		$link = get_post_meta( $post->ID, '_wsu_people_directory_link', true );
 		$profile = get_post_meta( $post->ID, '_wsu_people_directory_profile', true );
 		$photos = get_post_meta( $post->ID, '_wsu_people_directory_show_photos', true );
+		$base_url = get_permalink( $post->ID );
 
 		?>
 			<p>
 				<label for="wsu-people-import">Import/add people</label>
 				<input type="text" id="wsu-people-import" value="" />
 				<input type="hidden"
-					   id="directory-page-nids"
-					   name="_wsu_people_directory_nids"
-					   value="<?php echo esc_attr( $nids ); ?>" />
+					   id="directory-page-profile-ids"
+					   name="_wsu_people_directory_profile_ids"
+					   value="<?php echo esc_attr( $ids ); ?>" />
 			</p>
 
 			<p>
@@ -210,7 +212,7 @@ class WSUWP_People_Directory_Page_Template {
 
 			<script type="text/template" id="wsu-person-template">
 
-				<article class="wsu-person<%= has_photo %>" data-nid="<%= nid %>">
+				<article class="wsu-person<%= has_photo %>" data-nid="<%= nid %>" data-profile-id="<%= id %>">
 
 					<div class="card">
 
@@ -255,17 +257,6 @@ class WSUWP_People_Directory_Page_Template {
 
 			</script>
 
-			<?php
-			$base_url = get_permalink( $post->ID );
-			$wrapper_classes = array( 'wsu-people-wrapper' );
-			$wrapper_classes[] = ( $layout ) ? esc_attr( $layout ) : 'table';
-
-			if ( $photos ) {
-				$wrapper_classes[] = 'photos';
-			}
-
-			?>
-
 			<div class="wsu-people-bulk-actions">
 
 				<button type="button" class="button toggle-select-mode">Bulk Select</button>
@@ -276,50 +267,9 @@ class WSUWP_People_Directory_Page_Template {
 
 			</div>
 
-			<div class="<?php echo esc_html( implode( ' ', $wrapper_classes ) ); ?>">
+			<?php
 
-				<div class="wsu-people">
-
-					<?php
-					if ( $nids ) {
-						$nids = explode( ' ', $nids );
-						$page_id = $post->ID;
-
-						$people_query_args = array(
-							'post_type' => WSUWP_People_Post_Type::$post_type_slug,
-							'posts_per_page' => count( $nids ),
-							'meta_key' => "_order_on_page_{$page_id}",
-							'orderby' => 'meta_value_num',
-							'order' => 'asc',
-							'meta_query' => array(
-								array(
-									'key' => '_on_page',
-									'value' => $page_id,
-								),
-							),
-						);
-
-						$people = new WP_Query( $people_query_args );
-
-						if ( $people->have_posts() ) {
-							while ( $people->have_posts() ) {
-								$people->the_post();
-								include plugin_dir_path( dirname( __FILE__ ) ) . 'templates/person.php';
-							}
-							wp_reset_postdata();
-						}
-					}
-					?>
-
-				</div>
-
-				<div class="wsu-person-controls-tooltip" role="presentation">
-					<div class="wsu-person-controls-tooltip-arrow"></div>
-					<div class="wsu-person-controls-tooltip-inner"></div>
-				</div>
-
-			</div>
-		<?php
+			include plugin_dir_path( dirname( __FILE__ ) ) . 'templates/people.php';
 	}
 
 	/**
@@ -347,7 +297,7 @@ class WSUWP_People_Directory_Page_Template {
 		}
 
 		// We'll check against this further down.
-		$previous_nids = get_post_meta( $post_id, '_wsu_people_directory_nids', true );
+		$previous_ids = get_post_meta( $post_id, '_wsu_people_directory_profile_ids', true );
 
 		$keys = get_registered_meta_keys( 'post' );
 
@@ -363,23 +313,24 @@ class WSUWP_People_Directory_Page_Template {
 		set_transient( 'wsuwp_people_directory_flush_rewrites', true );
 
 		// Update associated people data.
-		if ( ! isset( $_POST['_wsu_people_directory_nids'] ) ) {
+		if ( ! isset( $_POST['_wsu_people_directory_profile_ids'] ) ) {
 			return;
 		}
 
-		if ( $previous_nids === $_POST['_wsu_people_directory_nids'] ) {
-			return;
-		}
+		// Stop here if the order of people hasn't changed.
+		//if ( $previous_ids === $_POST['_wsu_people_directory_profile_ids'] ) {
+		//	return;
+		//}
 
 		// Save order data of the associated people.
-		$nids = explode( ' ', $_POST['_wsu_people_directory_nids'] );
+		$ids = explode( ' ', $_POST['_wsu_people_directory_profile_ids'] );
 
-		foreach ( $nids as $index => $nid ) {
+		foreach ( $ids as $index => $id ) {
 			$person_query_args = array(
 				'post_type' => WSUWP_People_Post_Type::$post_type_slug,
 				'posts_per_page' => 1,
-				'meta_key' => '_wsuwp_profile_ad_nid',
-				'meta_value' => $nid,
+				'meta_key' => '_wsuwp_profile_post_id',
+				'meta_value' => $id,
 				'fields' => 'ids',
 			);
 
@@ -396,18 +347,18 @@ class WSUWP_People_Directory_Page_Template {
 					}
 				}
 			} else {
-				$person = WSUWP_People_Post_Type::get_rest_data( $nid );
+				$person = $this->get_rest_data( $id );
 
-				// If a matching person is found, save the profile. If not, remove from the nids list.
+				// If a matching person is found, save the profile. If not, remove from the IDs list.
 				if ( $person ) {
 					$this->save_person( $person, $post_id, $index );
 				} else {
-					// This prevents a rare scenario in which a NID is somehow saved but a REST API
+					// This prevents a rare scenario in which an ID is somehow saved but a REST API
 					// request for its data is invalid.
-					$nids = get_post_meta( $post_id, '_wsu_people_directory_nids', true );
-					$nids = str_replace( $nid, '', $nids );
-					$nids = str_replace( '  ', ' ', $nids );
-					update_post_meta( $post_id, '_wsu_people_directory_nids', true );
+					$ids = get_post_meta( $post_id, '_wsu_people_directory_profile_ids', true );
+					$ids = str_replace( $id, '', $ids );
+					$ids = str_replace( '  ', ' ', $ids );
+					update_post_meta( $post_id, '_wsu_people_directory_profile_ids', true );
 				}
 			}
 		}
@@ -416,8 +367,8 @@ class WSUWP_People_Directory_Page_Template {
 		$removed_people_query_args = array(
 			'post_type' => WSUWP_People_Post_Type::$post_type_slug,
 			'posts_per_page' => -1,
-			'meta_key' => '_wsuwp_profile_ad_nid',
-			'meta_value' => $nids,
+			'meta_key' => '_wsuwp_profile_post_id',
+			'meta_value' => $ids,
 			'meta_compare' => 'not in',
 			'fields' => 'ids',
 		);
@@ -430,6 +381,36 @@ class WSUWP_People_Directory_Page_Template {
 				delete_post_meta( $person, "_order_on_page_{$post_id}" );
 			}
 		}
+	}
+
+	/**
+	 * Given a post ID, retrieve information about a person from people.wsu.edu.
+	 *
+	 * @since 0.3.0
+	 *
+	 * @param string $id The profile post ID.
+	 *
+	 * @return object|bool List of predefined information we'll expect on the other side.
+	 *                     False if person is not available.
+	 */
+	public static function get_rest_data( $id ) {
+		$request_url = add_query_arg(
+			array(
+				'_embed' => true,
+			),
+			trailingslashit( WSUWP_People_Directory::REST_URL() ) . $id
+		);
+
+		$response = wp_remote_get( $request_url );
+
+		if ( is_wp_error( $response ) ) {
+			return false;
+		}
+
+		$data = wp_remote_retrieve_body( $response );
+		$data = json_decode( $data );
+
+		return $data;
 	}
 
 	/**
