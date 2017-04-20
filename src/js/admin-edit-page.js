@@ -20,7 +20,7 @@
 	$( document ).ready( function() {
 
 		// Load photos asynchronously.
-		loadPhotos();
+		load_photos();
 
 		// Toggle default editor and People Directory Setup metabox visibility on template select.
 		$page_template_select.on( "change", function() {
@@ -40,7 +40,7 @@
 		$add_people.autocomplete( {
 			source: organizations,
 			select: function( e, ui ) {
-				makeRequest( ui );
+				make_request( ui );
 			}
 		} );
 
@@ -190,8 +190,8 @@
 				$modal = $( this ).closest( ".person-modal-wrapper" ),
 				data = {
 					action: "person_details",
-					nonce: window.wsupeople.nonce,
-					page: window.wsupeople.page_id,
+					nonce: window.wsuwp_people_edit_page.nonce,
+					page: window.wsuwp_people_edit_page.page_id,
 					post: $person.data( "post-id" )
 				};
 
@@ -228,36 +228,36 @@
 				$person.find( ".about" ).html(  $about.find( ".content" ).html() );
 			}
 
-			updatePersonDetails( data, $modal );
+			update_person_details( data, $modal );
 		} );
 	} );
 
 	// Load photos asynchronously.
-	function loadPhotos() {
+	function load_photos() {
 		$( ".has-photo .photo img" ).each( function() {
 			$( this ).attr( "src", $( this ).data( "photo" ) );
 		} );
 	}
 
 	// Get all the people for the given organization via a REST request.
-	function makeRequest( ui ) {
+	function make_request( ui ) {
 		$.ajax( {
-			url: window.wsupeople.rest_url,
+			url: window.wsuwp_people_edit_page.rest_url,
 			data: {
 				"filter[wsuwp_university_org]": ui.item.value,
 				per_page: 100
 			}
 		} ).done( function( response ) {
 			if ( response.length !== 0 ) {
-				response.sort( sortResponse );
-				createPerson( response );
-				loadPhotos();
+				response.sort( sort_response );
+				create_person( response );
+				load_photos();
 			}
 		} );
 	}
 
 	// Sort the retrieved people alphabetically by last name.
-	function sortResponse( a, b ) {
+	function sort_response( a, b ) {
 		if ( a.last_name < b.last_name ) {
 			return -1;
 		}
@@ -268,7 +268,7 @@
 	}
 
 	// Add a person retrieved from the REST request to the list.
-	function createPerson( person ) {
+	function create_person( person ) {
 		$.each( person, function( i, data ) {
 			var listed_ids = $people.find( ".wsu-person" ).map( function() { return $( this ).data( "profile-id" ); } ).get();
 
@@ -307,8 +307,8 @@
 	}
 
 	// Update a person's details.
-	function updatePersonDetails( data, $modal ) {
-		$.post( window.wsupeople.ajax_url, data ).done( function() {
+	function update_person_details( data, $modal ) {
+		$.post( window.wsuwp_people_edit_page.ajax_url, data ).done( function() {
 			$modal.removeClass( "active" );
 			$people.sortable( "option", "disabled", false );
 			$( "body" ).removeClass( "person-modal-open" );
