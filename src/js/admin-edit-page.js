@@ -4,7 +4,7 @@
 		$directory_configuration = $( "#wsuwp-people-directory-configuration" ),
 		$editor = $( "#postdivrich" ),
 		$add_people = $( "#wsu-people-import" ),
-		$page_nids = $( "#directory-page-nids" ),
+		$profile_ids = $( "#directory-page-profile-ids" ),
 		$layout_option = $( "#wsu-people-directory-layout" ),
 		$photos_option = $( "#wsu-people-directory-show-photos" ),
 		organizations = $( "#wsuwp_university_orgchecklist .selectit" ).map( function() { return $( this ).text(); } ).get(),
@@ -20,7 +20,7 @@
 	$( document ).ready( function() {
 
 		// Load photos asynchronously.
-		loadPhotos();
+		load_photos();
 
 		// Toggle default editor and People Directory Setup metabox visibility on template select.
 		$page_template_select.on( "change", function() {
@@ -40,7 +40,7 @@
 		$add_people.autocomplete( {
 			source: organizations,
 			select: function( e, ui ) {
-				makeRequest( ui );
+				make_request( ui );
 			}
 		} );
 
@@ -69,7 +69,7 @@
 				ui.placeholder.height( ui.item.height() );
 			},
 			stop: function() {
-				updateNidList();
+				update_id_list();
 			}
 		} );
 
@@ -130,7 +130,7 @@
 		// Delete bulk selected people.
 		$delete_selection.on( "click", function() {
 			$people.find( ".selected" ).remove();
-			updateNidList();
+			update_id_list();
 		} );
 
 		// Show control buttons tooltip.
@@ -163,7 +163,7 @@
 		$people.on( "click", ".wsu-person-remove", function() {
 			$( this ).closest( ".wsu-person" ).remove();
 
-			updateNidList();
+			update_id_list();
 		} );
 
 		// Close a person without updating.
@@ -190,8 +190,8 @@
 				$modal = $( this ).closest( ".person-modal-wrapper" ),
 				data = {
 					action: "person_details",
-					nonce: window.wsupeople.nonce,
-					page: window.wsupeople.page_id,
+					nonce: window.wsuwp_people_edit_page.nonce,
+					page: window.wsuwp_people_edit_page.page_id,
 					post: $person.data( "post-id" )
 				};
 
@@ -228,36 +228,36 @@
 				$person.find( ".about" ).html(  $about.find( ".content" ).html() );
 			}
 
-			updatePersonDetails( data, $modal );
+			update_person_details( data, $modal );
 		} );
 	} );
 
 	// Load photos asynchronously.
-	function loadPhotos() {
+	function load_photos() {
 		$( ".has-photo .photo img" ).each( function() {
 			$( this ).attr( "src", $( this ).data( "photo" ) );
 		} );
 	}
 
 	// Get all the people for the given organization via a REST request.
-	function makeRequest( ui ) {
+	function make_request( ui ) {
 		$.ajax( {
-			url: window.wsupeople.rest_url,
+			url: window.wsuwp_people_edit_page.rest_url,
 			data: {
 				"filter[wsuwp_university_org]": ui.item.value,
 				per_page: 100
 			}
 		} ).done( function( response ) {
 			if ( response.length !== 0 ) {
-				response.sort( sortResponse );
-				createPerson( response );
-				loadPhotos();
+				response.sort( sort_response );
+				create_person( response );
+				load_photos();
 			}
 		} );
 	}
 
 	// Sort the retrieved people alphabetically by last name.
-	function sortResponse( a, b ) {
+	function sort_response( a, b ) {
 		if ( a.last_name < b.last_name ) {
 			return -1;
 		}
@@ -268,22 +268,22 @@
 	}
 
 	// Add a person retrieved from the REST request to the list.
-	function createPerson( person ) {
+	function create_person( person ) {
 		$.each( person, function( i, data ) {
-			var $nids_field = $( "#directory-page-nids" ),
-				listed_nids = $people.find( ".wsu-person" ).map( function() { return $( this ).data( "nid" ); } ).get();
+			var listed_ids = $people.find( ".wsu-person" ).map( function() { return $( this ).data( "profile-id" ); } ).get();
 
 			// Don't add the person if they're already listed.
-			if ( -1 !== $.inArray( data.nid, listed_nids ) ) {
+			if ( -1 !== $.inArray( data.id, listed_ids ) ) {
 				return;
 			}
 
-			$nids_field.val( function() {
-				return this.value + " " + data.nid;
+			$profile_ids.val( function() {
+				return this.value + " " + data.id;
 			} );
 
 			$( ".wsu-people" ).append( $person_template( {
 				nid: data.nid,
+				id: data.id,
 				has_photo: ( 0 < data.photos.length ) ? " has-photo" : "",
 				slug: data.slug,
 				name: data.title.rendered,
@@ -299,16 +299,16 @@
 		} );
 	}
 
-	// Update the list of NIDs associated with this page.
-	function updateNidList() {
-		var nids = $people.find( ".wsu-person" ).map( function() { return $( this ).data( "nid" ); } ).get();
+	// Update the list of profile IDs associated with this page.
+	function update_id_list() {
+		var ids = $people.find( ".wsu-person" ).map( function() { return $( this ).data( "profile-id" ); } ).get();
 
-		$page_nids.val( nids.join( " " ) );
+		$profile_ids.val( ids.join( " " ) );
 	}
 
 	// Update a person's details.
-	function updatePersonDetails( data, $modal ) {
-		$.post( window.wsupeople.ajax_url, data ).done( function() {
+	function update_person_details( data, $modal ) {
+		$.post( window.wsuwp_people_edit_page.ajax_url, data ).done( function() {
 			$modal.removeClass( "active" );
 			$people.sortable( "option", "disabled", false );
 			$( "body" ).removeClass( "person-modal-open" );

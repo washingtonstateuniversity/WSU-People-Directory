@@ -112,9 +112,9 @@ module.exports = function( grunt ) {
                 src: "src/js/admin-edit-profile-secondary.js",
                 dest: "js/admin-edit-profile-secondary.min.js"
             },
-            admin_page: {
-                src: "src/js/admin-page.js",
-                dest: "js/admin-page.min.js"
+            admin_edit_page: {
+                src: "src/js/admin-edit-page.js",
+                dest: "js/admin-edit-page.min.js"
             },
             admin_people: {
                 src: "src/js/admin-people.js",
