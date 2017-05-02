@@ -2,7 +2,32 @@
 
 [![Build Status](https://travis-ci.org/washingtonstateuniversity/WSU-People-Directory.svg?branch=master)](https://travis-ci.org/washingtonstateuniversity/WSU-People-Directory)
 
-A WordPress plugin to maintain a central directory of people at Washington State University.
+A WordPress plugin to maintain a central directory of people.
+
+## Hooks
+
+WSU People is configured by default to work on Washington State University's WordPress platform. However, several hooks are included that can be used to adapt the plugin so that it works in other setups.
+
+## Organization Data
+
+The `wsuwp_people_get_organization_person_data` filter is available for providing organizational data about a person. This allows for the automatic collection of basic data that should be managed through active directory or some other means.
+
+A specific return structure is expected. Data will be sanitized after retrieval:
+
+```php
+$return_data = array(
+    'given_name' => '',
+    'surname' => '',
+    'title' => '',
+    'office' => '',
+    'street_address' => '',
+    'telephone_number' => '',
+    'email' => '',
+);
+```
+### REST API
+
+The `wsu_people_directory_rest_url` filter is available to modify the default REST URL used for people records. This is attached to `people.wsu.edu` by default, but can be used with any WordPress installation.
 
 ## REST API
 
