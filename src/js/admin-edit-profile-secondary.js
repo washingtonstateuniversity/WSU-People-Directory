@@ -1,11 +1,58 @@
 /* global _, existing_photos */
-var profile_original_titles,
-	profile_original_degrees,
-	profile_original_personal_bio,
-	profile_original_unit_bio,
-	profile_original_university_bio;
+var wsuwp = wsuwp || {};
+wsuwp.people = wsuwp.people || {};
 
-( function( $, window, document ) {
+( function( $, window, document, wsuwp ) {
+	/**
+	 * Tracks whether a REST request for profile data has
+	 * completed.
+	 *
+	 * @type {boolean}
+	 */
+	wsuwp.people.rest_response_complete = false;
+
+	/**
+	 * Contains a list of a person's working titles.
+	 *
+	 * @type {string}
+	 */
+	wsuwp.people.titles = "";
+
+	/**
+	 * Contains a list of a person's degrees.
+	 *
+	 * @type {string}
+	 */
+	wsuwp.people.degrees = "";
+
+	/**
+	 * Contains multiple biographies for a person.
+	 *
+	 * @type {{content: string, _wsuwp_profile_bio_unit: string, _wsuwp_profile_bio_university: string}}
+	 */
+	wsuwp.people.bio_content = {
+		"content": "",
+		"_wsuwp_profile_bio_unit": "",
+		"_wsuwp_profile_bio_university": ""
+	};
+
+	/**
+	 * Populate biography editors with existing data from the REST API
+	 * after that data has been received.
+	 *
+	 * This is registered as a callback when TinyMCE inits the editor.
+	 *
+	 * @param editor
+	 */
+	wsuwp.people.populate_editor = function( editor ) {
+		if ( false === wsuwp.people.rest_response_complete ) {
+			setTimeout( wsuwp.people.populate_editor.bind( null, editor ), 200 );
+			return;
+		}
+
+		window.tinymce.get( editor.id ).setContent( wsuwp.people.bio_content[ editor.id ] );
+	};
+
 	$( document ).ready( function() {
 		var $nid = $( "#_wsuwp_profile_ad_nid" );
 
@@ -113,27 +160,27 @@ var profile_original_titles,
 
 			if ( titles ) {
 				var new_titles = titles.map( function() { return $( this ).val(); } ).get();
-				if ( new_titles.join( "," ) !== profile_original_titles.join( "," ) ) {
+				if ( new_titles.join( "," ) !== wsuwp.people.titles.join( "," ) ) {
 					data.working_titles = new_titles;
 				}
 			}
 
 			if ( degrees ) {
 				var new_degrees = degrees.map( function() { return $( this ).val(); } ).get();
-				if ( new_degrees.join( "," ) !== profile_original_degrees.join( "," ) ) {
+				if ( new_degrees.join( "," ) !== wsuwp.people.degrees.join( "," ) ) {
 					data.degree = new_degrees;
 				}
 			}
 
-			if ( personal_bio && ( personal_bio.getContent() !== profile_original_personal_bio ) ) {
+			if ( personal_bio && ( personal_bio.getContent() !== wsuwp.people.bio_content.content ) ) {
 				data.content = personal_bio.getContent();
 			}
 
-			if ( unit_bio && ( unit_bio.getContent() !== profile_original_unit_bio ) ) {
+			if ( unit_bio && ( unit_bio.getContent() !== wsuwp.people.bio_content._wsuwp_profile_bio_unit ) ) {
 				data.bio_unit = unit_bio.getContent();
 			}
 
-			if ( university_bio && ( university_bio.getContent() !== profile_original_university_bio ) ) {
+			if ( university_bio && ( university_bio.getContent() !== wsuwp.people.bio_content._wsuwp_profile_bio_university ) ) {
 				data.bio_university = university_bio.getContent();
 			}
 
@@ -152,7 +199,7 @@ var profile_original_titles,
 		} );
 
 	} );
-}( jQuery, window, document ) );
+}( jQuery, window, document, wsuwp ) );
 
 // Populate profile with data from people.wsu.edu.
 function populate_from_people_directory( data ) {
@@ -163,9 +210,7 @@ function populate_from_people_directory( data ) {
 		working_title_name = $working_titles.find( "a" ).data( "name" ),
 		$degrees = $( ".wsuwp-profile-degrees .wsuwp-profile-add-repeatable" ),
 		degree_label = $degrees.find( "a" ).data( "label" ),
-		degree_name = $degrees.find( "a" ).data( "name" ),
-		unit_bio = window.tinymce.get( "_wsuwp_profile_bio_unit" ),
-		university_bio = window.tinymce.get( "_wsuwp_profile_bio_university" );
+		degree_name = $degrees.find( "a" ).data( "name" );
 
 	// Populate the post id field.
 	$( "#_wsuwp_profile_post_id" ).val( data.id );
@@ -189,24 +234,22 @@ function populate_from_people_directory( data ) {
 	$( "#_wsuwp_profile_website" ).val( data.website ).data( "original", data.website );
 
 	// Populate biographies.
-	window.tinymce.get( "content" ).setContent( data.content.rendered );
-	profile_original_personal_bio = data.content.rendered;
+	wsuwp.people.bio_content.content = data.content.rendered;
+	wsuwp.people.bio_content._wsuwp_profile_bio_unit = data.bio_unit;
+	wsuwp.people.bio_content._wsuwp_profile_bio_university = data.bio_university;
 
-	// Depending on the user's permissions, the unit biography might not be editable.
-	if ( unit_bio ) {
-		unit_bio.setContent( data.bio_unit );
-		profile_original_unit_bio = data.bio_unit;
-	} else {
-		$( "#bio_unit .readonly" ).html( data.bio_unit );
+	var readonly_bio_unit = $( "#bio_unit .readonly" );
+	var readonly_bio_university = $( "#bio_university .readonly" );
+
+	if ( 0 !== readonly_bio_unit.length ) {
+		readonly_bio_unit.html( wsuwp.people.bio_content._wsuwp_profile_bio_unit );
 	}
 
-	// Depending on the user's permissions, the university biography might not be editable.
-	if ( university_bio ) {
-		university_bio.setContent( data.bio_university );
-		profile_original_university_bio = data.bio_university;
-	} else {
-		$( "#bio_university .readonly" ).html( data.bio_university );
+	if ( 0 !== readonly_bio_university ) {
+		readonly_bio_university.html( wsuwp.people.bio_content._wsuwp_profile_bio_university );
 	}
+
+	wsuwp.people.rest_response_complete = true;
 
 	// Populate working title(s).
 	$.each( data.working_titles, function( i, value ) {
@@ -223,7 +266,7 @@ function populate_from_people_directory( data ) {
 		}
 	} );
 
-	profile_original_titles = data.working_titles;
+	wsuwp.people.titles = data.working_titles;
 
 	// Add the `selected` class to working titles accordingly.
 	if ( "" !== $( ".use-title" ).val() ) {
@@ -253,7 +296,7 @@ function populate_from_people_directory( data ) {
 		}
 	} );
 
-	profile_original_degrees = data.degree;
+	wsuwp.people.degrees = data.degree;
 
 	// Populate photo collection.
 	if ( data._embedded && data._embedded[ "wp:photos" ] !== 0 ) {
@@ -325,12 +368,12 @@ function populate_from_people_directory( data ) {
 
 			window.tinymce.get( "content" ).setMode( "readonly" );
 
-			if ( unit_bio ) {
-				unit_bio.setMode( "readonly" );
+			if ( 0 === readonly_bio_unit.length ) {
+				window.tinymce.get( "_wsuwp_profile_bio_unit" ).setMode( "readonly" );
 			}
 
-			if ( university_bio ) {
-				university_bio.setMode( "readonly" );
+			if ( 0 === readonly_bio_university.length ) {
+				window.tinymce.get( "_wsuwp_profile_bio_university" ).setMode( "readonly" );
 			}
 		}
 	} );

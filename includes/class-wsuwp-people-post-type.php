@@ -322,6 +322,7 @@ class WSUWP_People_Post_Type {
 
 		if ( apply_filters( 'wsuwp_people_display', true ) ) {
 			add_action( 'wp_enqueue_editor', array( $this, 'admin_enqueue_secondary_scripts' ) );
+			add_filter( 'wp_editor_settings', array( $this, 'filter_default_editor_settings' ), 10, 2 );
 			add_filter( 'manage_' . self::$post_type_slug . '_posts_columns', array( $this, 'add_people_bio_column' ) );
 			add_action( 'manage_posts_custom_column', array( $this, 'bio_column' ), 10, 2 );
 			add_action( 'quick_edit_custom_box', array( $this, 'display_bio_edit' ), 10, 2 );
@@ -468,6 +469,34 @@ class WSUWP_People_Post_Type {
 
 		wp_enqueue_script( 'wsuwp-people-edit-profile-secondary', plugins_url( 'src/js/admin-edit-profile-secondary.js', dirname( __FILE__ ) ), array( 'jquery', 'underscore' ), WSUWP_People_Directory::$version, true );
 		wp_localize_script( 'wsuwp-people-edit-profile-secondary', 'wsuwp_people_edit_profile_secondary', $profile_vars );
+	}
+
+	/**
+	 * Adds an init callback to any tinyMCE editor created on a secondary site
+	 * profile page. This will help mitigate race conditions when populating
+	 * with data from the main site via REST API.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array $settings
+	 * @param string $editor_id
+	 *
+	 * @return array
+	 */
+	public function filter_default_editor_settings( $settings, $editor_id ) {
+		if ( 'wsuwp_people_profile' !== get_current_screen()->id ) {
+			return $settings;
+		}
+
+		if ( isset( $settings['tinymce'] ) && is_array( $settings['tinymce'] ) ) {
+			$settings['tinymce']['init_instance_callback'] = 'wsuwp.people.populate_editor';
+		} else {
+			$settings['tinymce'] = array(
+				'init_instance_callback' => 'wsuwp.people.populate_editor',
+			);
+		}
+
+		return $settings;
 	}
 
 	/**
