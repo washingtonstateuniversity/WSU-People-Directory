@@ -1356,6 +1356,8 @@ class WSUWP_People_Post_Type {
 			}
 		}
 
+		$return_data = false;
+
 		// Try to retrieve a person from people.wsu.edu first.
 		// We do this in here so the above check for existing profiles can be performed.
 		if ( 'rest' === $_POST['request_from'] ) {
