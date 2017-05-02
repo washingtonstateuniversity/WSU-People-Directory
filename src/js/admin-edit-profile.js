@@ -1,5 +1,7 @@
-/* global _, populate_from_people_directory */
-( function( $, window, document ) {
+/* global _ */
+var wsuwp = wsuwp || {};
+
+( function( $, window, document, wsuwp ) {
 	$( document ).ready( function() {
 		var repeatable_field_template = _.template( $( ".wsuwp-profile-repeatable-field-template" ).html() ),
 			photo_template = _.template( $( "#photo-template" ).html() ),
@@ -75,7 +77,7 @@
 
 					// If the response has an id property, it's almost certainly from people.wsu.edu.
 					if ( response.data.id ) {
-						populate_from_people_directory( response.data );
+						wsuwp.people.populate_person_from_people_directory( response.data );
 					} else {
 						$( "#_wsuwp_profile_ad_name_first" ).html( response.data.given_name );
 						$( "#_wsuwp_profile_ad_name_last" ).html( response.data.surname );
@@ -251,7 +253,7 @@
 		} );
 	} );
 
-}( jQuery, window, document ) );
+}( jQuery, window, document, wsuwp ) );
 
 // Create an array of photo IDs already in the collection.
 function existing_photos() {

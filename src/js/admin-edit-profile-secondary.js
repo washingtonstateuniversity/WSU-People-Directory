@@ -53,6 +53,218 @@ wsuwp.people = wsuwp.people || {};
 		window.tinymce.get( editor.id ).setContent( wsuwp.people.bio_content[ editor.id ] );
 	};
 
+	/**
+	 * Populates a profile with data retrieved from the main site via the REST API.
+	 *
+	 * @param data
+	 */
+	wsuwp.people.populate_person_from_people_directory = function( data ) {
+		var $ = jQuery,
+			repeatable_field_template = _.template( $( ".wsuwp-profile-repeatable-field-template" ).html() ),
+			$working_titles = $( ".wsuwp-profile-titles .wsuwp-profile-add-repeatable" ),
+			working_title_label = $working_titles.find( "a" ).data( "label" ),
+			working_title_name = $working_titles.find( "a" ).data( "name" ),
+			$degrees = $( ".wsuwp-profile-degrees .wsuwp-profile-add-repeatable" ),
+			degree_label = $degrees.find( "a" ).data( "label" ),
+			degree_name = $degrees.find( "a" ).data( "name" );
+
+		// Populate the post id field.
+		$( "#_wsuwp_profile_post_id" ).val( data.id );
+
+		// Populate the profile title.
+		$( "#title" ).focus().val( data.title.rendered ).data( "original", data.title.rendered );
+
+		// Populate AD data.
+		$( "#_wsuwp_profile_ad_name_first" ).html( data.first_name );
+		$( "#_wsuwp_profile_ad_name_last" ).html( data.last_name );
+		$( "#_wsuwp_profile_ad_title" ).html( data.position_title );
+		$( "#_wsuwp_profile_ad_office" ).html( data.office );
+		$( "#_wsuwp_profile_ad_address" ).html( data.address );
+		$( "#_wsuwp_profile_ad_phone" ).html( data.phone );
+		$( "#_wsuwp_profile_ad_email" ).html( data.email );
+
+		// Populate additional/alternative fields.
+		$( "#_wsuwp_profile_alt_office" ).val( data.office_alt ).data( "original", data.office_alt );
+		$( "#_wsuwp_profile_alt_phone" ).val( data.phone_alt ).data( "original", data.phone_alt );
+		$( "#_wsuwp_profile_alt_email" ).val( data.email_alt ).data( "original", data.email_alt );
+		$( "#_wsuwp_profile_website" ).val( data.website ).data( "original", data.website );
+
+		// Populate biographies.
+		wsuwp.people.bio_content.content = data.content.rendered;
+		wsuwp.people.bio_content._wsuwp_profile_bio_unit = data.bio_unit;
+		wsuwp.people.bio_content._wsuwp_profile_bio_university = data.bio_university;
+
+		var readonly_bio_unit = $( "#bio_unit .readonly" );
+		var readonly_bio_university = $( "#bio_university .readonly" );
+
+		if ( 0 !== readonly_bio_unit.length ) {
+			readonly_bio_unit.html( wsuwp.people.bio_content._wsuwp_profile_bio_unit );
+		}
+
+		if ( 0 !== readonly_bio_university ) {
+			readonly_bio_university.html( wsuwp.people.bio_content._wsuwp_profile_bio_university );
+		}
+
+		wsuwp.people.rest_response_complete = true;
+
+		// Populate working title(s).
+		$.each( data.working_titles, function( i, value ) {
+			var field = $( "[name='_wsuwp_profile_title[]']" )[ i ];
+
+			if ( field ) {
+				$( field ).val( value );
+			} else {
+				$working_titles.before( repeatable_field_template( {
+					label: working_title_label,
+					name: working_title_name,
+					value: value
+				} ) );
+			}
+		} );
+
+		wsuwp.people.titles = data.working_titles;
+
+		// Add the `selected` class to working titles accordingly.
+		if ( "" !== $( ".use-title" ).val() ) {
+			var titles = $( ".use-title" ).val().split( " " );
+
+			$.each( titles, function( i, value ) {
+				$( ".wsuwp-profile-titles p" )
+					.eq( value )
+					.addClass( "selected" )
+					.find( ".screen-reader-text" )
+					.text( "Deselect" );
+			} );
+		}
+
+		// Populate degree(s).
+		$.each( data.degree, function( i, value ) {
+			var field = $( "[name='_wsuwp_profile_degree[]']" )[ i ];
+
+			if ( field ) {
+				$( field ).val( value );
+			} else {
+				$degrees.before( repeatable_field_template( {
+					label: degree_label,
+					name: degree_name,
+					value: value
+				} ) );
+			}
+		} );
+
+		wsuwp.people.degrees = data.degree;
+
+		// Populate photo collection.
+		if ( data._embedded && data._embedded[ "wp:photos" ] !== 0 ) {
+			$.each( data._embedded[ "wp:photos" ], function( i, photo ) {
+				wsuwp.people.populate_photos( photo );
+			} );
+		}
+
+		// Populate featured image as part of the photo collection.
+		if ( data._embedded && data._embedded[ "wp:featuredmedia" ] && data._embedded[ "wp:featuredmedia" ] !== 0 ) {
+			wsuwp.people.populate_photos( data._embedded[ "wp:featuredmedia" ][ 0 ] );
+		}
+
+		// Add the `selected` class to a photo accordingly.
+		if ( "" !== $( ".use-photo" ).val() ) {
+			$( ".wsuwp-profile-photo-wrapper" )
+				.eq( $( ".use-photo" ).val() )
+				.addClass( "selected" )
+				.find( ".wsuwp-profile-photo-select" )
+				.attr( "aria-label", "Deselect" );
+		} else {
+			$( ".wsuwp-profile-photo-wrapper" )
+				.eq( 0 )
+				.addClass( "selected" )
+				.find( ".wsuwp-profile-photo-select" )
+				.attr( "aria-label", "Deselect" );
+		}
+
+		// Populate taxonomy data.
+		if ( data._embedded && data._embedded[ "wp:term" ] && data._embedded[ "wp:term" ] !== 0 ) {
+			$.each( data._embedded[ "wp:term" ], function( i, taxonomy ) {
+				if ( taxonomy ) {
+					$.each( taxonomy, function( i, term ) {
+						if ( "post_tag" === term.taxonomy ) {
+							$( "#new-tag-post_tag" ).val( function( index, val ) {
+								return val + term.name + ", ";
+							} );
+						} else {
+							$( "#" + term.taxonomy + "-all" )
+								.find( ".selectit:contains('" + term.name + "')" )
+								.find( "input[type='checkbox']" ).prop( "checked", true );
+						}
+					} );
+				}
+			} );
+
+			// Add the tags.
+			$( ".tagadd" ).trigger( "click" );
+
+			// Change focus to the post title field (the trigger above focuses the tag input).
+			$( "#title" ).focus();
+		}
+
+		// Disable inputs if a user doesn't have adequate permissions to edit the profile.
+		$.ajax( {
+			url: window.wsuwp_people_edit_profile_secondary.rest_url + "/" + data.id,
+			type: "POST",
+			beforeSend: function( xhr ) {
+				xhr.setRequestHeader( "X-WP-Nonce", window.wsuwp_people_edit_profile_secondary.nonce );
+				xhr.setRequestHeader( "X-WSUWP-UID", window.wsuwp_people_edit_profile_secondary.uid );
+			},
+			error: function() {
+				$( "#wsuwp_profile_additional_info input" ).prop( "disabled", true );
+				$( ".wsuwp-profile-button.remove" ).prop( "disabled", true );
+				$( "#new-tag-post_tag" ).prop( "disabled", true );
+				$( ".tabs-panel input" ).prop( "disabled", true );
+				$( ".wsuwp-profile-add-photo" ).prop( "disabled", true );
+				$( ".wsuwp-profile-photo-remove" ).prop( "disabled", true );
+
+				window.tinymce.get( "content" ).setMode( "readonly" );
+
+				if ( 0 === readonly_bio_unit.length ) {
+					window.tinymce.get( "_wsuwp_profile_bio_unit" ).setMode( "readonly" );
+				}
+
+				if ( 0 === readonly_bio_university.length ) {
+					window.tinymce.get( "_wsuwp_profile_bio_university" ).setMode( "readonly" );
+				}
+			}
+		} );
+	};
+
+	/**
+	 * Populate the photo collection with data from the main site.
+	 *
+	 * @param data
+	 */
+	wsuwp.people.populate_photos = function( data ) {
+		var $ = jQuery,
+			photo_template = _.template( $( "#photo-template" ).html() ),
+			photo = data.media_details,
+			has_thumbnail = photo.sizes.thumbnail,
+			url = has_thumbnail ? photo.sizes.thumbnail.source_url : data.source_url,
+			width = has_thumbnail ? photo.sizes.thumbnail.width : photo.width,
+			height = has_thumbnail ? photo.sizes.thumbnail.height : photo.height;
+
+		// Avoid inserting duplicate images.
+		if ( -1 === $.inArray( data.id, existing_photos() ) ) {
+			$( ".wsuwp-profile-photo-collection" ).append( photo_template( {
+				src: url,
+				width: width,
+				height: height,
+				id: data.id,
+				alt: data.alt,
+				url: data.source_url,
+				title: data.title.rendered,
+				full_width: photo.width,
+				full_height: photo.height
+			} ) );
+		}
+	};
+
 	$( document ).ready( function() {
 		var $nid = $( "#_wsuwp_profile_ad_nid" );
 
@@ -66,7 +278,7 @@ wsuwp.people = wsuwp.people || {};
 				}
 			} ).done( function( response ) {
 				if ( response.length !== 0 ) {
-					populate_from_people_directory( response[ 0 ] );
+					wsuwp.people.populate_person_from_people_directory( response[ 0 ] );
 				}
 			} );
 		}
@@ -200,207 +412,3 @@ wsuwp.people = wsuwp.people || {};
 
 	} );
 }( jQuery, window, document, wsuwp ) );
-
-// Populate profile with data from people.wsu.edu.
-function populate_from_people_directory( data ) {
-	var $ = jQuery,
-		repeatable_field_template = _.template( $( ".wsuwp-profile-repeatable-field-template" ).html() ),
-		$working_titles = $( ".wsuwp-profile-titles .wsuwp-profile-add-repeatable" ),
-		working_title_label = $working_titles.find( "a" ).data( "label" ),
-		working_title_name = $working_titles.find( "a" ).data( "name" ),
-		$degrees = $( ".wsuwp-profile-degrees .wsuwp-profile-add-repeatable" ),
-		degree_label = $degrees.find( "a" ).data( "label" ),
-		degree_name = $degrees.find( "a" ).data( "name" );
-
-	// Populate the post id field.
-	$( "#_wsuwp_profile_post_id" ).val( data.id );
-
-	// Populate the profile title.
-	$( "#title" ).focus().val( data.title.rendered ).data( "original", data.title.rendered );
-
-	// Populate AD data.
-	$( "#_wsuwp_profile_ad_name_first" ).html( data.first_name );
-	$( "#_wsuwp_profile_ad_name_last" ).html( data.last_name );
-	$( "#_wsuwp_profile_ad_title" ).html( data.position_title );
-	$( "#_wsuwp_profile_ad_office" ).html( data.office );
-	$( "#_wsuwp_profile_ad_address" ).html( data.address );
-	$( "#_wsuwp_profile_ad_phone" ).html( data.phone );
-	$( "#_wsuwp_profile_ad_email" ).html( data.email );
-
-	// Populate additional/alternative fields.
-	$( "#_wsuwp_profile_alt_office" ).val( data.office_alt ).data( "original", data.office_alt );
-	$( "#_wsuwp_profile_alt_phone" ).val( data.phone_alt ).data( "original", data.phone_alt );
-	$( "#_wsuwp_profile_alt_email" ).val( data.email_alt ).data( "original", data.email_alt );
-	$( "#_wsuwp_profile_website" ).val( data.website ).data( "original", data.website );
-
-	// Populate biographies.
-	wsuwp.people.bio_content.content = data.content.rendered;
-	wsuwp.people.bio_content._wsuwp_profile_bio_unit = data.bio_unit;
-	wsuwp.people.bio_content._wsuwp_profile_bio_university = data.bio_university;
-
-	var readonly_bio_unit = $( "#bio_unit .readonly" );
-	var readonly_bio_university = $( "#bio_university .readonly" );
-
-	if ( 0 !== readonly_bio_unit.length ) {
-		readonly_bio_unit.html( wsuwp.people.bio_content._wsuwp_profile_bio_unit );
-	}
-
-	if ( 0 !== readonly_bio_university ) {
-		readonly_bio_university.html( wsuwp.people.bio_content._wsuwp_profile_bio_university );
-	}
-
-	wsuwp.people.rest_response_complete = true;
-
-	// Populate working title(s).
-	$.each( data.working_titles, function( i, value ) {
-		var field = $( "[name='_wsuwp_profile_title[]']" )[ i ];
-
-		if ( field ) {
-			$( field ).val( value );
-		} else {
-			$working_titles.before( repeatable_field_template( {
-				label: working_title_label,
-				name: working_title_name,
-				value: value
-			} ) );
-		}
-	} );
-
-	wsuwp.people.titles = data.working_titles;
-
-	// Add the `selected` class to working titles accordingly.
-	if ( "" !== $( ".use-title" ).val() ) {
-		var titles = $( ".use-title" ).val().split( " " );
-
-		$.each( titles, function( i, value ) {
-			$( ".wsuwp-profile-titles p" )
-			.eq( value )
-			.addClass( "selected" )
-			.find( ".screen-reader-text" )
-			.text( "Deselect" );
-		} );
-	}
-
-	// Populate degree(s).
-	$.each( data.degree, function( i, value ) {
-		var field = $( "[name='_wsuwp_profile_degree[]']" )[ i ];
-
-		if ( field ) {
-			$( field ).val( value );
-		} else {
-			$degrees.before( repeatable_field_template( {
-				label: degree_label,
-				name: degree_name,
-				value: value
-			} ) );
-		}
-	} );
-
-	wsuwp.people.degrees = data.degree;
-
-	// Populate photo collection.
-	if ( data._embedded && data._embedded[ "wp:photos" ] !== 0 ) {
-		$.each( data._embedded[ "wp:photos" ], function( i, photo ) {
-			populate_photos( photo );
-		} );
-	}
-
-	// Populate featured image as part of the photo collection.
-	if ( data._embedded && data._embedded[ "wp:featuredmedia" ] && data._embedded[ "wp:featuredmedia" ] !== 0 ) {
-		populate_photos( data._embedded[ "wp:featuredmedia" ][ 0 ] );
-	}
-
-	// Add the `selected` class to a photo accordingly.
-	if ( "" !== $( ".use-photo" ).val() ) {
-		$( ".wsuwp-profile-photo-wrapper" )
-		.eq( $( ".use-photo" ).val() )
-		.addClass( "selected" )
-		.find( ".wsuwp-profile-photo-select" )
-		.attr( "aria-label", "Deselect" );
-	} else {
-		$( ".wsuwp-profile-photo-wrapper" )
-		.eq( 0 )
-		.addClass( "selected" )
-		.find( ".wsuwp-profile-photo-select" )
-		.attr( "aria-label", "Deselect" );
-	}
-
-	// Populate taxonomy data.
-	if ( data._embedded && data._embedded[ "wp:term" ] && data._embedded[ "wp:term" ] !== 0 ) {
-		$.each( data._embedded[ "wp:term" ], function( i, taxonomy ) {
-			if ( taxonomy ) {
-				$.each( taxonomy, function( i, term ) {
-					if ( "post_tag" === term.taxonomy ) {
-						$( "#new-tag-post_tag" ).val( function( index, val ) {
-							return val + term.name + ", ";
-						} );
-					} else {
-						$( "#" + term.taxonomy + "-all" )
-						.find( ".selectit:contains('" + term.name + "')" )
-						.find( "input[type='checkbox']" ).prop( "checked", true );
-					}
-				} );
-			}
-		} );
-
-		// Add the tags.
-		$( ".tagadd" ).trigger( "click" );
-
-		// Change focus to the post title field (the trigger above focuses the tag input).
-		$( "#title" ).focus();
-	}
-
-	// Disable inputs if a user doesn't have adequate permissions to edit the profile.
-	$.ajax( {
-		url: window.wsuwp_people_edit_profile_secondary.rest_url + "/" + data.id,
-		type: "POST",
-		beforeSend: function( xhr ) {
-			xhr.setRequestHeader( "X-WP-Nonce", window.wsuwp_people_edit_profile_secondary.nonce );
-			xhr.setRequestHeader( "X-WSUWP-UID", window.wsuwp_people_edit_profile_secondary.uid );
-		},
-		error: function() {
-			$( "#wsuwp_profile_additional_info input" ).prop( "disabled", true );
-			$( ".wsuwp-profile-button.remove" ).prop( "disabled", true );
-			$( "#new-tag-post_tag" ).prop( "disabled", true );
-			$( ".tabs-panel input" ).prop( "disabled", true );
-			$( ".wsuwp-profile-add-photo" ).prop( "disabled", true );
-			$( ".wsuwp-profile-photo-remove" ).prop( "disabled", true );
-
-			window.tinymce.get( "content" ).setMode( "readonly" );
-
-			if ( 0 === readonly_bio_unit.length ) {
-				window.tinymce.get( "_wsuwp_profile_bio_unit" ).setMode( "readonly" );
-			}
-
-			if ( 0 === readonly_bio_university.length ) {
-				window.tinymce.get( "_wsuwp_profile_bio_university" ).setMode( "readonly" );
-			}
-		}
-	} );
-}
-
-// Populate the photo collection with data from people.wsu.edu.
-function populate_photos( data ) {
-	var $ = jQuery,
-		photo_template = _.template( $( "#photo-template" ).html() ),
-		photo = data.media_details,
-		has_thumbnail = photo.sizes.thumbnail,
-		url = has_thumbnail ? photo.sizes.thumbnail.source_url : data.source_url,
-		width = has_thumbnail ? photo.sizes.thumbnail.width : photo.width,
-		height = has_thumbnail ? photo.sizes.thumbnail.height : photo.height;
-
-	// Avoid inserting duplicate images.
-	if ( -1 === $.inArray( data.id, existing_photos() ) ) {
-		$( ".wsuwp-profile-photo-collection" ).append( photo_template( {
-			src: url,
-			width: width,
-			height: height,
-			id: data.id,
-			alt: data.alt,
-			url: data.source_url,
-			title: data.title.rendered,
-			full_width: photo.width,
-			full_height: photo.height
-		} ) );
-	}
-}
