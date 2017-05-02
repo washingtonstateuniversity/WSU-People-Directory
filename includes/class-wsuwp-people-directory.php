@@ -47,13 +47,13 @@ class WSUWP_People_Directory {
 
 		add_action( 'init', array( $this, 'add_global_cache_groups' ), 9 );
 
-		if ( apply_filters( 'wsuwp_people_show_in_rest', false ) ) {
+		if ( true === WSUWP_People_Directory::is_main_site() ) {
 			require_once( dirname( __FILE__ ) . '/class-wsuwp-people-rest-api.php' );
 
 			add_action( 'init', 'WSUWP_People_REST_API' );
 		}
 
-		if ( apply_filters( 'wsuwp_people_display', true ) ) {
+		if ( false === WSUWP_People_Directory::is_main_site() ) {
 			require_once( dirname( __FILE__ ) . '/class-wsuwp-people-directory-page-template.php' );
 			require_once( dirname( __FILE__ ) . '/class-wsuwp-person-display.php' );
 			require_once( dirname( __FILE__ ) . '/class-wsuwp-person-card-shortcode.php' );
@@ -76,6 +76,15 @@ class WSUWP_People_Directory {
 	 */
 	public function add_global_cache_groups() {
 		wp_cache_add_global_groups( 'wsuwp-people' );
+	}
+
+	/**
+	 * Determines if the current site is the main people directory.
+	 *
+	 * @return bool True if the main site. False if not.
+	 */
+	public static function is_main_site() {
+		return apply_filters( 'wsuwp_people_is_main_site', false );
 	}
 
 	/**

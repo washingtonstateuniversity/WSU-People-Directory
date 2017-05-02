@@ -320,7 +320,7 @@ class WSUWP_People_Post_Type {
 
 		add_filter( 'manage_taxonomies_for_' . self::$post_type_slug . '_columns', array( $this, 'manage_people_taxonomy_columns' ) );
 
-		if ( apply_filters( 'wsuwp_people_display', true ) ) {
+		if ( false === WSUWP_People_Directory::is_main_site() ) {
 			add_action( 'wp_enqueue_editor', array( $this, 'admin_enqueue_secondary_scripts' ) );
 			add_filter( 'wp_editor_settings', array( $this, 'filter_default_editor_settings' ), 10, 2 );
 			add_filter( 'manage_' . self::$post_type_slug . '_posts_columns', array( $this, 'add_people_bio_column' ) );
@@ -416,7 +416,7 @@ class WSUWP_People_Post_Type {
 			$profile_vars = array(
 				'nid_nonce' => wp_create_nonce( 'wsu-people-nid-lookup' ),
 				'post_id' => $post->ID,
-				'request_from' => ( apply_filters( 'wsuwp_people_display', true ) ) ? 'rest' : 'ad',
+				'request_from' => ( WSUWP_People_Directory::is_main_site() ) ? 'ad' : 'rest',
 			);
 
 			wp_enqueue_style( 'wsuwp-people-edit-profile', plugins_url( 'css/admin-person.css', dirname( __FILE__ ) ), array(), WSUWP_People_Directory::$version );
@@ -424,12 +424,12 @@ class WSUWP_People_Post_Type {
 			wp_localize_script( 'wsuwp-people-edit-profile', 'wsuwp_people_edit_profile', $profile_vars );
 
 			// Disable autosaving for sites other than the primary directory.
-			if ( apply_filters( 'wsuwp_people_display', true ) ) {
+			if ( false === WSUWP_People_Directory::is_main_site() ) {
 				wp_dequeue_script( 'autosave' );
 			}
 		}
 
-		if ( 'edit.php' === $hook_suffix && apply_filters( 'wsuwp_people_display', true ) ) {
+		if ( 'edit.php' === $hook_suffix && false === WSUWP_People_Directory::is_main_site() ) {
 			wp_enqueue_style( 'wsuwp-people-admin', plugins_url( 'css/admin-people.css', dirname( __FILE__ ) ), array(), WSUWP_People_Directory::$version );
 			wp_enqueue_script( 'wsuwp-people-admin', plugins_url( 'js/admin-people.min.js', dirname( __FILE__ ) ), array( 'jquery' ), WSUWP_People_Directory::$version );
 			wp_localize_script( 'wsuwp-people-admin', 'wsupeople', array(
@@ -536,9 +536,8 @@ class WSUWP_People_Post_Type {
 		<div id="wsuwp-profile-about-wrapper">
 
 			<?php
-			$not_primary = apply_filters( 'wsuwp_people_display', true );
 			$use_bio = false;
-			if ( $not_primary ) {
+			if ( false === WSUWP_People_Directory::is_main_site() ) {
 				$use_bio = get_post_meta( $post->ID, '_use_bio', true );
 				?>
 				<input type="hidden" class="use-bio" name="_use_bio" value="<?php echo esc_attr( $use_bio ); ?>" />
@@ -550,7 +549,7 @@ class WSUWP_People_Post_Type {
 				<li<?php if ( $use_bio && 'personal' === $use_bio ) { echo ' class="selected"'; } ?>
 					data-bio="personal">
 					<a href="#wsuwp-profile-default" class="nav-tab">Personal Biography</a>
-					<?php if ( $not_primary ) { ?>
+					<?php if ( false === WSUWP_People_Directory::is_main_site() ) { ?>
 					<button type="button" class="wsuwp-profile-button select">
 						<span class="dashicons dashicons-yes" aria-hidden="true"></span>
 						<span class="screen-reader-text"><?php
@@ -573,7 +572,7 @@ class WSUWP_People_Post_Type {
 					<li<?php if ( $use_bio && $key === $use_bio ) { echo ' class="selected"'; } ?>
 						data-bio="<?php echo esc_attr( $key ); ?>">
 						<a href="#<?php echo esc_attr( $key ); ?>" class="nav-tab"><?php echo esc_html( $args['description'] ); ?></a>
-						<?php if ( $not_primary ) { ?>
+						<?php if ( false === WSUWP_People_Directory::is_main_site() ) { ?>
 						<button type="button" class="wsuwp-profile-button select">
 							<span class="dashicons dashicons-yes" aria-hidden="true"></span>
 							<span class="screen-reader-text"><?php
@@ -657,7 +656,7 @@ class WSUWP_People_Post_Type {
 			'high'
 		);
 
-		if ( ! apply_filters( 'wsuwp_people_display', true ) ) {
+		if ( true === WSUWP_People_Directory::is_main_site() ) {
 			add_meta_box(
 				'wsuwp_profile_listing',
 				'Listed On',
@@ -744,7 +743,7 @@ class WSUWP_People_Post_Type {
 			<?php endif; ?>
 		</div>
 
-		<?php if ( ! apply_filters( 'wsuwp_people_display', true ) && $nid ) { ?>
+		<?php if ( true === WSUWP_People_Directory::is_main_site() && $nid ) { ?>
 		<p class="refresh-card">
 			<span class="spinner"></span>
 			<button class="button" id="refresh-ad-data">Refresh</button>
@@ -812,7 +811,7 @@ class WSUWP_People_Post_Type {
 					<label for="_wsuwp_profile_ad_nid">Network ID</label>:
 					<input type="text" id="_wsuwp_profile_ad_nid" name="_wsuwp_profile_ad_nid" value="<?php echo esc_attr( $nid ); ?>" class="widefat" <?php echo esc_attr( $readonly ); ?> />
 
-				<?php if ( apply_filters( 'wsuwp_people_display', true ) ) { ?>
+				<?php if ( false === WSUWP_People_Directory::is_main_site() ) { ?>
 					<?php $record_id = get_post_meta( $post->ID, '_wsuwp_profile_post_id', true ); ?>
 					<input type="hidden" id="_wsuwp_profile_post_id" name="_wsuwp_profile_post_id" value="<?php echo esc_attr( $record_id ); ?>" />
 				<?php } ?>
@@ -898,7 +897,6 @@ class WSUWP_People_Post_Type {
 			<?php
 			$titles = get_post_meta( $post->ID, '_wsuwp_profile_title', true );
 			$degrees = get_post_meta( $post->ID, '_wsuwp_profile_degree', true );
-			$not_primary = apply_filters( 'wsuwp_people_display', true );
 			?>
 
 			<script type="text/template" class="wsuwp-profile-repeatable-field-template">
@@ -906,7 +904,7 @@ class WSUWP_People_Post_Type {
 					<label>
 						<span><%= label %></span>
 						<input type="text" name="<%= name %>[]" value="<%= value %>" />
-						<?php if ( $not_primary ) { ?>
+						<?php if ( false === WSUWP_People_Directory::is_main_site() ) { ?>
 						<button type="button" class="wsuwp-profile-button select">
 							<span class="dashicons dashicons-yes" aria-hidden="true"></span>
 							<span class="screen-reader-text">Select</span>
@@ -929,7 +927,7 @@ class WSUWP_People_Post_Type {
 							<label>
 								<span>Working Title</span>
 								<input type="text" name="_wsuwp_profile_title[]" value="<?php echo esc_attr( $title ); ?>" />
-								<?php if ( $not_primary ) { ?>
+								<?php if ( false === WSUWP_People_Directory::is_main_site() ) { ?>
 								<button type="button" class="wsuwp-profile-button select">
 									<span class="dashicons dashicons-yes" aria-hidden="true"></span>
 									<span class="screen-reader-text">Select</span>
@@ -949,7 +947,7 @@ class WSUWP_People_Post_Type {
 						<label>
 							<span>Working Title</span>
 							<input type="text" name="_wsuwp_profile_title[]" value="" />
-							<?php if ( $not_primary ) { ?>
+							<?php if ( false === WSUWP_People_Directory::is_main_site() ) { ?>
 							<button type="button" class="wsuwp-profile-button select">
 								<span class="dashicons dashicons-yes" aria-hidden="true"></span>
 								<span class="screen-reader-text">Select</span>
@@ -969,7 +967,7 @@ class WSUWP_People_Post_Type {
 				</p>
 
 				<?php
-				if ( $not_primary ) {
+				if ( false === WSUWP_People_Directory::is_main_site() ) {
 					$index_used = get_post_meta( $post->ID, '_use_title', true );
 					?>
 					<input type="hidden" class="use-title" name="_use_title" value="<?php echo esc_attr( $index_used ); ?>" />
@@ -1030,9 +1028,8 @@ class WSUWP_People_Post_Type {
 		wp_enqueue_media();
 
 		$photos = get_post_meta( $post->ID, '_wsuwp_profile_photos', true );
-		$not_primary = apply_filters( 'wsuwp_people_display', true );
 		?>
-		<div class="wsuwp-profile-photo-collection<?php if ( $not_primary ) { ?> selectable<?php } ?>">
+		<div class="wsuwp-profile-photo-collection<?php if ( false === WSUWP_People_Directory::is_main_site() ) { ?> selectable<?php } ?>">
 
 			<?php
 			if ( $photos ) {
@@ -1074,7 +1071,7 @@ class WSUWP_People_Post_Type {
 		<input type="button" class="wsuwp-profile-add-photo button" value="Add Photo(s)" />
 
 		<?php
-		if ( $not_primary ) {
+		if ( false === WSUWP_People_Directory::is_main_site() ) {
 			$index_used = get_post_meta( $post->ID, '_use_photo', true );
 			?>
 			<input type="hidden" class="use-photo" name="_use_photo" value="<?php echo esc_attr( $index_used ); ?>" />
@@ -1100,7 +1097,7 @@ class WSUWP_People_Post_Type {
 					 data-width="<%= full_width %>"
 					 data-id="<%= id %>" />
 				<div class="wsuwp-profile-photo-controls">
-					<?php if ( $not_primary ) { ?>
+					<?php if ( false === WSUWP_People_Directory::is_main_site() ) { ?>
 					<button type="button" class="wsuwp-profile-photo-select" aria-label="Select">
 						<span class="dashicons dashicons-yes"></span>
 					</button>
@@ -1197,7 +1194,7 @@ class WSUWP_People_Post_Type {
 	 * @return array
 	 */
 	public function wp_insert_post_data( $data ) {
-		if ( apply_filters( 'wsuwp_people_display', true ) && self::$post_type_slug === $data['post_type'] ) {
+		if ( false === WSUWP_People_Directory::is_main_site() && self::$post_type_slug === $data['post_type'] ) {
 			$data['post_content'] = '';
 			$data['post_content_filtered'] = '';
 		}
@@ -1226,7 +1223,7 @@ class WSUWP_People_Post_Type {
 		}
 
 		// Store only select meta if this is a secondary site.
-		if ( apply_filters( 'wsuwp_people_display', true ) ) {
+		if ( false === WSUWP_People_Directory::is_main_site() ) {
 			if ( isset( $_POST['_wsuwp_profile_post_id'] ) && '' !== $_POST['_wsuwp_profile_post_id'] ) {
 				update_post_meta( $post_id, '_wsuwp_profile_post_id', absint( $_POST['_wsuwp_profile_post_id'] ) );
 			}
@@ -1409,7 +1406,7 @@ class WSUWP_People_Post_Type {
 		update_post_meta( $post_id, '_wsuwp_profile_ad_nid', $nid );
 
 		// Only save this meta on the main site.
-		if ( ! apply_filters( 'wsuwp_people_display', true ) ) {
+		if ( true === WSUWP_People_Directory::is_main_site() ) {
 			update_post_meta( $post_id, '_wsuwp_profile_ad_name_first', $confirm_data['given_name'] );
 			update_post_meta( $post_id, '_wsuwp_profile_ad_name_last', $confirm_data['surname'] );
 			update_post_meta( $post_id, '_wsuwp_profile_ad_title', $confirm_data['title'] );
