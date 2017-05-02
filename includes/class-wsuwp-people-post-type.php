@@ -1291,7 +1291,7 @@ class WSUWP_People_Post_Type {
 			'email' => '',
 		);
 
-		foreach( $return_data as $key => $value ) {
+		foreach ( $return_data as $key => $value ) {
 			if ( isset( $person_data[ $key ] ) ) {
 				$return_data[ $key ] = sanitize_text_field( $person_data[ $key ] );
 			}
