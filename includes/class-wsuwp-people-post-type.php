@@ -1265,21 +1265,21 @@ class WSUWP_People_Post_Type {
 	}
 
 	/**
-	 * Retrieves information about a person from active directory.
+	 * Retrieves information about a person from an organizational source.
 	 *
 	 * @since 0.1.0
+	 * @since 1.0.0 Updated for extension by other organizations.
 	 *
 	 * @param string $nid The user's unique ID. At WSU, this is a NID (network ID).
 	 *
 	 * @return array List of predefined information we'll expect on the other side.
 	 */
-	private function get_nid_data( $nid ) {
-		if ( false === function_exists( 'wsuwp_get_wsu_ad_by_login' ) ) {
+	private function get_organization_person_data( $nid ) {
+		$person_data = apply_filters( 'wsuwp_people_get_organization_person_data', false, $nid );
+
+		if ( empty( $person_data ) ) {
 			return array();
 		}
-
-		// Get data from the WSUWP SSO Authentication plugin.
-		$nid_data = wsuwp_get_wsu_ad_by_login( $nid );
 
 		$return_data = array(
 			'given_name' => '',
@@ -1289,35 +1289,12 @@ class WSUWP_People_Post_Type {
 			'street_address' => '',
 			'telephone_number' => '',
 			'email' => '',
-			'confirm_ad_hash' => '',
 		);
 
-		if ( isset( $nid_data['givenname'][0] ) ) {
-			$return_data['given_name'] = sanitize_text_field( $nid_data['givenname'][0] );
-		}
-
-		if ( isset( $nid_data['sn'][0] ) ) {
-			$return_data['surname'] = sanitize_text_field( $nid_data['sn'][0] );
-		}
-
-		if ( isset( $nid_data['title'][0] ) ) {
-			$return_data['title'] = sanitize_text_field( $nid_data['title'][0] );
-		}
-
-		if ( isset( $nid_data['physicaldeliveryofficename'][0] ) ) {
-			$return_data['office'] = sanitize_text_field( $nid_data['physicaldeliveryofficename'][0] );
-		}
-
-		if ( isset( $nid_data['streetaddress'][0] ) ) {
-			$return_data['street_address'] = sanitize_text_field( $nid_data['streetaddress'][0] );
-		}
-
-		if ( isset( $nid_data['telephonenumber'][0] ) ) {
-			$return_data['telephone_number'] = sanitize_text_field( $nid_data['telephonenumber'][0] );
-		}
-
-		if ( isset( $nid_data['mail'][0] ) ) {
-			$return_data['email'] = sanitize_text_field( $nid_data['mail'][0] );
+		foreach( $return_data as $key => $value ) {
+			if ( isset( $person_data[ $key ] ) ) {
+				$return_data[ $key ] = sanitize_text_field( $person_data[ $key ] );
+			}
 		}
 
 		$hash = md5( wp_json_encode( $return_data ) );
@@ -1365,7 +1342,7 @@ class WSUWP_People_Post_Type {
 		}
 
 		if ( ! $return_data || 'ad' === $_POST['request_from'] ) {
-			$return_data = $this->get_nid_data( $nid );
+			$return_data = $this->get_organization_person_data( $nid );
 		}
 
 		wp_send_json_success( $return_data );
@@ -1388,7 +1365,7 @@ class WSUWP_People_Post_Type {
 		}
 
 		// Data is sanitized before return.
-		$confirm_data = $this->get_nid_data( $nid );
+		$confirm_data = $this->get_organization_person_data( $nid );
 
 		if ( 'ad' === $_POST['request_from'] && $confirm_data['confirm_ad_hash'] !== $_POST['confirm_ad_hash'] ) {
 			wp_send_json_error( 'Previously retrieved data does not match the data attached to this network ID.' );
