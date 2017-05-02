@@ -1159,7 +1159,7 @@ class WSUWP_People_Post_Type {
 	}
 
 	/**
-	 * Save post content only if this is people.wsu.edu.
+	 * Removes post content before saving a person on a secondary site.
 	 *
 	 * @since 0.3.0
 	 *
@@ -1196,7 +1196,7 @@ class WSUWP_People_Post_Type {
 			return;
 		}
 
-		// Store only select meta if this isn't people.wsu.edu.
+		// Store only select meta if this is a secondary site.
 		if ( apply_filters( 'wsuwp_people_display', true ) ) {
 			if ( isset( $_POST['_wsuwp_profile_post_id'] ) && '' !== $_POST['_wsuwp_profile_post_id'] ) {
 				update_post_meta( $post_id, '_wsuwp_profile_post_id', absint( $_POST['_wsuwp_profile_post_id'] ) );
@@ -1234,11 +1234,11 @@ class WSUWP_People_Post_Type {
 	}
 
 	/**
-	 * Given a WSU Network ID, retrieve information about a person from people.wsu.edu.
+	 * Retrieves information about a person from the main site.
 	 *
 	 * @since 0.3.0
 	 *
-	 * @param string $nid The user's network ID.
+	 * @param string $nid The user's unique ID. At WSU, this is a NID (network ID).
 	 *
 	 * @return object|bool List of predefined information we'll expect on the other side.
 	 *                     False if person is not available.
@@ -1265,12 +1265,11 @@ class WSUWP_People_Post_Type {
 	}
 
 	/**
-	 * Given a WSU Network ID, retrieve information from active directory about
-	 * a user.
+	 * Retrieves information about a person from active directory.
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param string $nid The user's network ID.
+	 * @param string $nid The user's unique ID. At WSU, this is a NID (network ID).
 	 *
 	 * @return array List of predefined information we'll expect on the other side.
 	 */
@@ -1328,8 +1327,8 @@ class WSUWP_People_Post_Type {
 	}
 
 	/**
-	 * Process an ajax request for information attached to a network ID. We'll return
-	 * the data here for confirmation. Confirmation will be handled elsewhere.
+	 * Processes an AJAX request for information attached to a person's unique ID.
+	 * We'll return the data here for confirmation. Confirmation will be handled elsewhere.
 	 *
 	 * @since 0.1.0
 	 */
@@ -1371,8 +1370,9 @@ class WSUWP_People_Post_Type {
 	}
 
 	/**
-	 * Process an ajax request to confirm the AD information attached to a network ID. At
-	 * this point we'll do the lookup again and save the information to the current profile.
+	 * Processes an AJAX request to confirm the information attached to a person's unique ID
+	 * that has been pulled from a central source. At this point we'll do the lookup again
+	 * and save the information to the current profile.
 	 *
 	 * @since 0.1.0
 	 */
@@ -1400,7 +1400,7 @@ class WSUWP_People_Post_Type {
 
 		update_post_meta( $post_id, '_wsuwp_profile_ad_nid', $nid );
 
-		// Only save this meta on people.wsu.edu
+		// Only save this meta on the main site.
 		if ( ! apply_filters( 'wsuwp_people_display', true ) ) {
 			update_post_meta( $post_id, '_wsuwp_profile_ad_name_first', $confirm_data['given_name'] );
 			update_post_meta( $post_id, '_wsuwp_profile_ad_name_last', $confirm_data['surname'] );
