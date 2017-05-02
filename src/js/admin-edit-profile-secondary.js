@@ -266,7 +266,8 @@ wsuwp.people = wsuwp.people || {};
 	};
 
 	$( document ).ready( function() {
-		var $nid = $( "#_wsuwp_profile_ad_nid" );
+		var $nid = $( "#_wsuwp_profile_ad_nid" ),
+			post_id = $( "#_wsuwp_profile_post_id" ).val();
 
 		// Make a REST request to for profile data from people.wsu.edu.
 		if ( window.wsuwp_people_edit_profile_secondary.load_data ) {
@@ -399,7 +400,7 @@ wsuwp.people = wsuwp.people || {};
 			// Only push data if values have changed.
 			if ( !$.isEmptyObject( data ) ) {
 				$.ajax( {
-					url: window.wsuwp_people_edit_profile_secondary.rest_url + "/" + $nid.data( "post-id" ),
+					url: window.wsuwp_people_edit_profile_secondary.rest_url + "/" + post_id,
 					method: "POST",
 					beforeSend: function( xhr ) {
 						xhr.setRequestHeader( "X-WP-Nonce", window.wsuwp_people_edit_profile_secondary.nonce );
