@@ -162,7 +162,7 @@ class WSUWP_People_Directory_Page_Template {
 		$layout = get_post_meta( $post->ID, '_wsu_people_directory_layout', true );
 		$link = get_post_meta( $post->ID, '_wsu_people_directory_link', true );
 		$profile = get_post_meta( $post->ID, '_wsu_people_directory_profile', true );
-		$photos = get_post_meta( $post->ID, '_wsu_people_directory_show_photos', true );
+		$show_photo = get_post_meta( $post->ID, '_wsu_people_directory_show_photos', true );
 		$base_url = get_permalink( $post->ID );
 
 		?>
@@ -204,8 +204,8 @@ class WSUWP_People_Directory_Page_Template {
 			<p>
 				<label for="wsu-people-directory-show-photos">Show photos</label>
 				<select id="wsu-people-directory-show-photos" name="_wsu_people_directory_show_photos">
-					<option value="yes"<?php selected( 'yes', $photos ); ?>>Yes</option>
-					<option value="no"<?php selected( 'no', $photos ); ?>>No</option>
+					<option value="yes"<?php selected( 'yes', $show_photo ); ?>>Yes</option>
+					<option value="no"<?php selected( 'no', $show_photo ); ?>>No</option>
 				</select>
 
 			</p>
@@ -571,7 +571,12 @@ class WSUWP_People_Directory_Page_Template {
 
 		ob_start();
 
-		include plugin_dir_path( dirname( __FILE__ ) ) . 'templates/people.php';
+		// If a theme has a directory template, use it.
+		if ( $this->theme_has_template() ) {
+			include $this->theme_has_template();
+		} else {
+			include plugin_dir_path( dirname( __FILE__ ) ) . 'templates/people.php';
+		}
 
 		$content = ob_get_clean();
 

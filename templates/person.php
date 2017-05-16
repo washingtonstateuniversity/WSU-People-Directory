@@ -1,57 +1,23 @@
 <?php
-$post = get_post();
-$is_card_shortcode = ( isset( $card_nid ) ) ? $card_nid : false;
-$nid = ( $is_card_shortcode ) ? $is_card_shortcode : get_post_meta( $post->ID, '_wsuwp_profile_ad_nid', true );
-$set_photo = get_post_meta( $post->ID, '_use_photo', true );
-$set_title = get_post_meta( $post->ID, '_use_title', true );
-$set_about = get_post_meta( $post->ID, '_use_bio', true );
-$profile = get_query_var( 'wsuwp_people_profile' );
-
-if ( $profile || $is_card_shortcode ) {
-	$request_url = add_query_arg(
-		array(
-			'_embed' => true,
-			'wsu_nid' => $nid,
-		),
-		WSUWP_People_Directory::REST_URL()
-	);
-
-	$response = wp_remote_get( $request_url );
-
-	if ( is_wp_error( $response ) ) {
-		return '';
-	}
-
-	$data = wp_remote_retrieve_body( $response );
-
-	if ( empty( $data ) ) {
-		return '';
-	}
-
-	$person = json_decode( $data );
-
-	if ( empty( $person ) ) {
-		return '';
-	}
-
-	$person = $person[0];
-}
 
 $name = $person->title->rendered;
 
-// Title(s).
+// Position/working title(s).
 $title = ( ! empty( $person->working_titles ) ) ? implode( '<br />', $person->working_titles ) : $person->position_title;
 
-if ( $set_title ) {
-	$titles = explode( ' ', $set_title );
+if ( $use_title ) {
+	$titles = explode( ' ', $use_title );
+	$use_titles = array();
 
 	foreach ( $titles as $title_index ) {
-		if ( isset( $person->working_titles[ $title_index ] ) ) {
-			$set_titles[] = $person->working_titles[ $title_index ];
+		if ( 'ad' === $title_index ) {
+			$use_titles[] = $person->position_title;
+		} elseif ( isset( $person->working_titles[ $title_index ] ) ) {
+			$use_titles[] = $person->working_titles[ $title_index ];
 		}
 	}
 
-	$title = implode( '<br />', $set_titles );
+	$title = implode( '<br />', $use_titles );
 }
 
 // Other card info.
@@ -64,129 +30,61 @@ $degrees = ( ! empty( $person->degrees ) ) ? implode( '<br />', $person->degrees
 $website = $person->website;
 
 // Photo.
-$photo_index = ( $set_photo ) ? $set_photo : 0;
-$photo = ( $person->photos ) ? $person->photos[ $photo_index ]->thumbnail : false;
+$photo_index = ( $use_photo ) ? $use_photo : 0;
+$photo = ( $person->photos && $person->photos[ $photo_index ] ) ? $person->photos[ $photo_index ]->thumbnail : false;
+
+$tags = wp_get_post_tags( $local_record_id, array(
+	'fields' => 'names',
+) );
 
 // About.
-if ( ! $set_about || 'personal' === $set_about ) {
+if ( ! $use_about || 'personal' === $use_about ) {
 	$about = $person->content->rendered;
+} elseif ( 'tags' === $use_about ) {
+	$about = implode( ', ', $tags );
+} elseif ( 'none' === $use_about ) {
+	$about = false;
 } else {
-	$about = $person->$set_about;
-}
-
-// Directory page-specific info.
-if ( ! $profile && ! $is_card_shortcode ) {
-	$local_record = get_posts( array(
-		'post_type' => WSUWP_People_Post_Type::$post_type_slug,
-		'posts_per_page' => 1,
-		'meta_key' => '_wsuwp_profile_post_id',
-		'meta_value' => $person->id,
-	) );
-
-	if ( $local_record ) {
-		$local_record_id = $local_record[0]->ID;
-		$link = trailingslashit( $base_url . $local_record[0]->post_name );
-		$nid = get_post_meta( $local_record_id, '_wsuwp_profile_ad_nid', true );
-		$directory_page = get_post_meta( $local_record_id, "_display_on_page_{$page_id}", true );
-		$tags = wp_get_post_tags( $local_record_id, array(
-			'fields' => 'names',
-		) );
-
-		if ( isset( $directory_page['title'] ) ) {
-			$titles = array();
-
-			foreach ( $directory_page['title'] as $title_index ) {
-				if ( 'ad' === $title_index ) {
-					$titles[] = $person->position_title;
-				} else {
-					$titles[] = $person->working_titles[ $title_index ];
-				}
-			}
-
-			$title = implode( '<br />', $titles );
-		}
-
-		if ( isset( $directory_page['photo'] ) ) {
-			$index = $directory_page['photo'];
-			$photo = $person->photos[ $index ]->thumbnail;
-		}
-
-		if ( isset( $directory_page['about'] ) && 'content' !== $directory_page['about'] ) {
-			if ( 'bio_unit' === $directory_page['about'] ) {
-				$about = $person->bio_unit;
-			} elseif ( 'bio_university' === $directory_page['about'] ) {
-				$about = $person->bio_university;
-			} elseif ( 'tags' === $directory_page['about'] ) {
-				$about = implode( ', ', $tags );
-			}
-		}
-	}
-}
-
-// Card shortcode info.
-if ( $is_card_shortcode ) {
-	$link = ( $person->website ) ? $person->website : $person->link;
+	$about = $person->$use_about;
 }
 
 // Person classes.
 $person_classes = array( 'wsu-person' );
+
 if ( $photo ) {
 	$person_classes[] = 'has-photo';
 }
 ?>
 <article class="<?php echo esc_html( implode( ' ', $person_classes ) ); ?>"<?php if ( is_admin() ) { ?>
-		 data-nid="<?php echo esc_attr( $nid ); ?>"
+		 data-nid="<?php echo esc_attr( $person->nid ); ?>"
 		 data-profile-id="<?php echo esc_attr( $person->id ); ?>"
 		 data-post-id="<?php echo esc_attr( $local_record_id ); ?>"
 		 aria-checked="false"<?php } ?>>
 
 	<div class="card">
 
-		<?php if ( ! $profile ) { ?>
+		<?php if ( $show_header ) { ?>
 		<h2 class="name">
 			<a href="<?php echo esc_url( $link ); ?>"><?php echo esc_html( $name ); ?></a>
 		</h2>
 		<?php } ?>
 
-		<?php
-		if ( $photo ) {
+		<?php if ( $show_photo ) { ?>
+		<figure class="photo">
+			<?php if ( $link ) { ?><a href="<?php echo esc_url( $link ); ?>"><?php } ?>
 
-			// Markup for directory page view.
-			if ( ! $profile && ! $is_card_shortcode && in_array( 'photos', $wrapper_classes, true ) ) {
-				?>
-				<figure class="photo">
-					<a href="<?php echo esc_url( $link ); ?>">
-						<img src="<?php echo esc_url( plugins_url( 'images/placeholder.png', dirname( __FILE__ ) ) ); ?>"
-							 data-photo="<?php echo esc_url( $photo ); ?>"
-							 alt="<?php echo esc_html( $name ); ?>" />
-					</a>
-				</figure>
-				<?php
-			}
+			<?php if ( $lazy_load_photos ) { ?>
+				<img src="<?php echo esc_url( plugins_url( 'images/placeholder.png', dirname( __FILE__ ) ) ); ?>"
+					 data-photo="<?php echo esc_url( $photo ); ?>"
+					 alt="<?php echo esc_html( $name ); ?>" />
+			<?php } else { ?>
+				<img src="<?php echo esc_url( $photo ); ?>"
+					 alt="<?php echo esc_html( $name ); ?>" />
+			<?php } ?>
 
-			// Markup for individual person view.
-			if ( $profile ) {
-				?>
-				<figure class="photo">
-					<img src="<?php echo esc_url( $photo ); ?>"
-						 alt="<?php echo esc_html( $name ); ?>" />
-				</figure>
-				<?php
-			}
-
-			// Markup for card shortcode view.
-			if ( $is_card_shortcode ) {
-				?>
-				<figure class="photo">
-					<a href="<?php echo esc_url( $link ); ?>">
-						<img src="<?php echo esc_url( $photo ); ?>"
-							 alt="<?php echo esc_html( $name ); ?>" />
-					</a>
-				</figure>
-				<?php
-			}
-		}
-		?>
+			<?php if ( $link ) { ?></a><?php } ?>
+		</figure>
+		<?php } ?>
 
 		<div class="contact">
 			<span class="title"><?php echo wp_kses_post( $title ); ?></span>
@@ -199,11 +97,13 @@ if ( $photo ) {
 
 	</div>
 
+	<?php if ( $about ) { ?>
 	<div class="about">
 		<?php echo wp_kses_post( apply_filters( 'the_content', $about ) ); ?>
 	</div>
+	<?php } ?>
 
-	<?php if ( is_admin() && ! $is_card_shortcode ) { ?>
+	<?php if ( is_admin() && $lazy_load_photos ) { ?>
 	<div class="wsu-person-controls">
 		<button type="button"
 				class="wsu-person-edit"

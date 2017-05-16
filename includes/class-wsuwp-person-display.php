@@ -132,12 +132,48 @@ class WSUWP_Person_Display {
 	public function content() {
 		remove_filter( 'the_content', array( $this, 'content' ) );
 
+		$local_record_id = get_post()->ID;
+		$nid = get_post_meta( $local_record_id, '_wsuwp_profile_ad_nid', true );
+		$person = WSUWP_People_Post_Type::get_rest_data( $nid );
+		$local_data = $this->get_local_single_view_data( $local_record_id );
+		$show_header = false;
+		$show_photo = true;
+		$lazy_load_photos = false;
+		$link = false;
+		$use_title = $local_data['use_title'];
+		$use_photo = $local_data['use_photo'];
+		$use_about = $local_data['use_about'];
+
 		ob_start();
 
-		include plugin_dir_path( dirname( __FILE__ ) ) . 'templates/person.php';
+		// If a theme has a person template, use it.
+		if ( $this->theme_has_template() ) {
+			include $this->theme_has_template();
+		} else {
+			include plugin_dir_path( dirname( __FILE__ ) ) . 'templates/person.php';
+		}
 
 		$content = ob_get_clean();
 
 		return $content;
+	}
+
+	/**
+	 * Returns a set of data for displaying a person.
+	 *
+	 * @param string $post_id
+	 *
+	 * @since 0.3.0
+	 *
+	 * @return array
+	 */
+	public static function get_local_single_view_data( $post_id ) {
+		$local_data = array(
+			'use_photo' => get_post_meta( $post_id, '_use_photo', true ),
+			'use_title' => get_post_meta( $post_id, '_use_title', true ),
+			'use_about' => get_post_meta( $post_id, '_use_bio', true ),
+		);
+
+		return $local_data;
 	}
 }

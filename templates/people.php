@@ -5,16 +5,18 @@ if ( ! is_admin() ) {
 	$layout = get_post_meta( $page_id, '_wsu_people_directory_layout', true );
 	$link = get_post_meta( $page_id, '_wsu_people_directory_link', true );
 	$profile = get_post_meta( $page_id, '_wsu_people_directory_profile', true );
-	$photos = get_post_meta( $page_id, '_wsu_people_directory_show_photos', true );
+	$show_photo = get_post_meta( $page_id, '_wsu_people_directory_show_photos', true );
 	$base_url = get_permalink();
 }
 
 $wrapper_classes = array( 'wsu-people-wrapper' );
 $wrapper_classes[] = ( $layout ) ? esc_attr( $layout ) : 'table';
 
-if ( 'yes' === $photos ) {
+if ( 'yes' === $show_photo ) {
 	$wrapper_classes[] = 'photos';
 }
+
+$lazy_load_photos = true;
 
 ?>
 <div class="<?php echo esc_html( implode( ' ', $wrapper_classes ) ); ?>">
@@ -59,18 +61,42 @@ if ( 'yes' === $photos ) {
 
 			$response = wp_remote_get( $request_url );
 
-			if ( ! is_wp_error( $response ) ) {
-				$data = wp_remote_retrieve_body( $response );
+			if ( is_wp_error( $response ) ) {
+				return;
+			}
 
-				if ( ! empty( $data ) ) {
-					$people = json_decode( $data );
+			$data = wp_remote_retrieve_body( $response );
 
-					if ( ! empty( $people ) ) {
-						foreach ( $people as $person ) {
-							include dirname( __FILE__ ) . '/person.php';
-						}
-					}
+			if ( empty( $data ) ) {
+				return;
+			}
+
+			$people = json_decode( $data );
+
+			if ( empty( $people ) ) {
+				return;
+			}
+
+			foreach ( $people as $person ) {
+
+				$local_record = get_posts( array(
+					'post_type' => WSUWP_People_Post_Type::$post_type_slug,
+					'posts_per_page' => 1,
+					'meta_key' => '_wsuwp_profile_post_id',
+					'meta_value' => $person->id,
+				) );
+
+				if ( $local_record ) {
+					$local_record_id = $local_record[0]->ID;
+					$local_data = WSUWP_Person_Display::get_local_single_view_data( $local_record_id );
+					$listing_data = get_post_meta( $local_record_id, "_display_on_page_{$page_id}", true );
+					$show_header = true;
+					$link = trailingslashit( $base_url . $local_record[0]->post_name );
+					$use_title = ( isset( $listing_data['title'] ) ) ? $listing_data['title'] : $local_data['use_title'];
+					$use_photo = ( isset( $listing_data['photo'] ) ) ? $listing_data['photo'] : $local_data['use_photo'];
 				}
+
+				include dirname( __FILE__ ) . '/person.php';
 			}
 		}
 	}

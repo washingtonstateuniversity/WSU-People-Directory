@@ -1269,7 +1269,7 @@ class WSUWP_People_Post_Type {
 	 * @return object|bool List of predefined information we'll expect on the other side.
 	 *                     False if person is not available.
 	 */
-	public function get_rest_data( $nid ) {
+	public static function get_rest_data( $nid ) {
 		$request_url = add_query_arg(
 			array(
 				'_embed' => true,

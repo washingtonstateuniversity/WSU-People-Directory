@@ -62,7 +62,21 @@ class WSUWP_Person_Card_Shortcode {
 			return $cached_content;
 		}
 
-		$card_nid = sanitize_text_field( $atts['nid'] );
+		$nid = sanitize_text_field( $atts['nid'] );
+
+		$person = WSUWP_People_Post_Type::get_rest_data( $nid );
+
+		if ( ! $person ) {
+			return '';
+		}
+
+		$show_header = true;
+		$show_photo = true;
+		$lazy_load_photos = false;
+		$link = ( $person->website ) ? $person->website : $person->link;
+		$use_title = false;
+		$use_photo = false;
+		$use_about = false;
 
 		ob_start();
 
