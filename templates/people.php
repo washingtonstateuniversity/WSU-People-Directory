@@ -3,6 +3,7 @@ if ( ! is_admin() ) {
 	$page_id = get_the_ID();
 	$ids = get_post_meta( $page_id, '_wsu_people_directory_profile_ids', true );
 	$layout = get_post_meta( $page_id, '_wsu_people_directory_layout', true );
+	$listing_about = get_post_meta( $page_id, '_wsu_people_directory_about', true );
 	$link = get_post_meta( $page_id, '_wsu_people_directory_link', true );
 	$profile = get_post_meta( $page_id, '_wsu_people_directory_profile', true );
 	$show_photo = get_post_meta( $page_id, '_wsu_people_directory_show_photos', true );
@@ -96,6 +97,12 @@ $lazy_load_photos = true;
 					$link = trailingslashit( $base_url . $local_record[0]->post_name );
 					$use_title = ( isset( $listing_data['title'] ) ) ? $listing_data['title'] : $local_data['use_title'];
 					$use_photo = ( isset( $listing_data['photo'] ) ) ? $listing_data['photo'] : $local_data['use_photo'];
+
+					if ( $listing_about ) {
+						$use_about = $listing_about;
+					} else {
+						$use_about = ( isset( $listing_data['about'] ) ) ? $listing_data['about'] : $local_data['use_about'];
+					}
 				}
 
 				include $template;

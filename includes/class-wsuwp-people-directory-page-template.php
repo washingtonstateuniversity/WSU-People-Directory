@@ -37,6 +37,11 @@ class WSUWP_People_Directory_Page_Template {
 			'description' => 'The layout to use for the directory display',
 			'sanitize_callback' => 'sanitize_text_field',
 		),
+		'_wsu_people_directory_about' => array(
+			'type' => 'string',
+			'description' => 'The biographical or other information to show for people on this listing',
+			'sanitize_callback' => 'sanitize_text_field',
+		),
 		'_wsu_people_directory_link' => array(
 			'type' => 'string',
 			'description' => 'Link to full profiles',
@@ -160,11 +165,11 @@ class WSUWP_People_Directory_Page_Template {
 		$page_id = $post->ID;
 		$ids = get_post_meta( $post->ID, '_wsu_people_directory_profile_ids', true );
 		$layout = get_post_meta( $post->ID, '_wsu_people_directory_layout', true );
+		$listing_about = get_post_meta( $post->ID, '_wsu_people_directory_about', true );
 		$link = get_post_meta( $post->ID, '_wsu_people_directory_link', true );
 		$profile = get_post_meta( $post->ID, '_wsu_people_directory_profile', true );
 		$show_photo = get_post_meta( $post->ID, '_wsu_people_directory_show_photos', true );
 		$base_url = get_permalink( $post->ID );
-
 		?>
 			<p>
 				<label for="wsu-people-import">Import/add people</label>
@@ -181,6 +186,17 @@ class WSUWP_People_Directory_Page_Template {
 					<option value="table"<?php selected( 'table', $layout ); ?>>Table</option>
 					<option value="grid"<?php selected( 'grid', $layout ); ?>>Grid</option>
 					<option value="custom"<?php selected( 'custom', $layout ); ?>>Custom (provide your own CSS)</option>
+				</select>
+			</p>
+
+			<p>
+				<label for="wsu-people-directory-about">About</label>
+				<select id="wsu-people-directory-about" name="_wsu_people_directory_about">
+					<option value="personal"<?php selected( 'bio_personal', $listing_about ); ?>>Personal Biography</option>
+					<option value="bio_unit"<?php selected( 'bio_unit', $listing_about ); ?>>Unit Biography</option>
+					<option value="bio_university"<?php selected( 'bio_university', $listing_about ); ?>>University Biography</option>
+					<option value="bio_tags"<?php selected( 'bio_tags', $listing_about ); ?>>Tags</option>
+					<option value="none"<?php selected( 'none', $listing_about ); ?>>None</option>
 				</select>
 			</p>
 
