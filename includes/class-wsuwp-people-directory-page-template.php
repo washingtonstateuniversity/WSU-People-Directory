@@ -474,13 +474,15 @@ class WSUWP_People_Directory_Page_Template {
 
 		if ( isset( $_POST['title'] ) ) {
 			$titles = explode( ' ', $_POST['title'] );
+			$sanitized_titles = array();
 			foreach ( $titles as $title ) {
 				if ( 'ad' === $title ) {
-					$meta['title'][] = 'ad';
+					$sanitized_titles[] = 'ad';
 				} else {
-					$meta['title'][] = absint( $title );
+					$sanitized_titles[] = absint( $title );
 				}
 			}
+			$meta['title'] = implode( ' ', $sanitized_titles );
 		}
 
 		if ( isset( $_POST['photo'] ) ) {
