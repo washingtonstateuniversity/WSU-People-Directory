@@ -90,7 +90,7 @@ class WSUWP_Person_Display {
 	 *
 	 * @return string Path to the template file.
 	 */
-	public function theme_has_template() {
+	public static function theme_has_template() {
 		return locate_template( 'wsu-people-templates/person.php' );
 	}
 
@@ -108,11 +108,6 @@ class WSUWP_Person_Display {
 	public function template_include( $template ) {
 		if ( ! is_singular( WSUWP_People_Post_Type::$post_type_slug ) ) {
 			return $template;
-		}
-
-		// If a theme has a person template, use it.
-		if ( $this->theme_has_template() ) {
-			return $this->theme_has_template();
 		}
 
 		wp_enqueue_style( 'wsu-people-display', plugin_dir_url( dirname( __FILE__ ) ) . 'css/person.css', array(), WSUWP_People_Directory::$version );

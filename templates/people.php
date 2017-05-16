@@ -77,6 +77,8 @@ $lazy_load_photos = true;
 				return;
 			}
 
+			$template = ( WSUWP_Person_Display::theme_has_template() ) ? WSUWP_Person_Display::theme_has_template() : dirname( __FILE__ ) . '/person.php';
+
 			foreach ( $people as $person ) {
 
 				$local_record = get_posts( array(
@@ -96,7 +98,7 @@ $lazy_load_photos = true;
 					$use_photo = ( isset( $listing_data['photo'] ) ) ? $listing_data['photo'] : $local_data['use_photo'];
 				}
 
-				include dirname( __FILE__ ) . '/person.php';
+				include $template;
 			}
 		}
 	}

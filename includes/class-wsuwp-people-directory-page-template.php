@@ -543,11 +543,6 @@ class WSUWP_People_Directory_Page_Template {
 			return $template;
 		}
 
-		// If a theme has a directory template, use it.
-		if ( $this->theme_has_template() ) {
-			return $this->theme_has_template();
-		}
-
 		// Enqueue styles and scripts if appropriate.
 		if ( 'custom' !== get_post_meta( $post->ID, '_wsu_people_directory_layout', true ) ) {
 			wp_enqueue_style( 'wsu-people', plugin_dir_url( dirname( __FILE__ ) ) . 'css/people.css', array(), WSUWP_People_Directory::$version );

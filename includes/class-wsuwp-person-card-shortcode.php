@@ -70,6 +70,8 @@ class WSUWP_Person_Card_Shortcode {
 			return '';
 		}
 
+		$template = ( WSUWP_Person_Display::theme_has_template() ) ? WSUWP_Person_Display::theme_has_template() : plugin_dir_path( dirname( __FILE__ ) ) . 'templates/person.php';
+
 		$show_header = true;
 		$show_photo = true;
 		$lazy_load_photos = false;
@@ -80,7 +82,7 @@ class WSUWP_Person_Card_Shortcode {
 
 		ob_start();
 
-		require_once( plugin_dir_path( dirname( __FILE__ ) ) . 'templates/person.php' );
+		require_once( $template );
 
 		$content = ob_get_clean();
 
