@@ -58,9 +58,9 @@ class WSUWP_Person_Card_Shortcode {
 
 		$cached_content = wp_cache_get( $cache_key, 'wsuwp_person_card' );
 
-		if ( $cached_content ) {
-			return $cached_content;
-		}
+		//if ( $cached_content ) {
+		//	return $cached_content;
+		//}
 
 		$nid = sanitize_text_field( $atts['nid'] );
 
@@ -72,13 +72,12 @@ class WSUWP_Person_Card_Shortcode {
 
 		$template = ( WSUWP_Person_Display::theme_has_template() ) ? WSUWP_Person_Display::theme_has_template() : plugin_dir_path( dirname( __FILE__ ) ) . 'templates/person.php';
 
-		$show_header = true;
-		$show_photo = true;
-		$lazy_load_photos = false;
-		$link = ( $person->website ) ? $person->website : $person->link;
-		$use_title = false;
-		$use_photo = false;
-		$use_about = false;
+		$display_options = array(
+			'header' => true,
+			'link_url' => ( $person->website ) ? $person->website : $person->link,
+		);
+
+		$display = WSUWP_Person_Display::get_data( $person, $display_options );
 
 		ob_start();
 
