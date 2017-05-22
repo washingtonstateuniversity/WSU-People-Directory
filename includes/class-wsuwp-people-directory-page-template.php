@@ -189,21 +189,21 @@ class WSUWP_People_Directory_Page_Template {
 				</p>
 
 				<p>
+					<label for="wsu-people-directory-show-photos">Show photos</label>
+					<select id="wsu-people-directory-show-photos" name="_wsu_people_directory_show_photos">
+						<option value="yes"<?php selected( 'yes', $directory_data['profile_display_options']['photo'] ); ?>>Yes</option>
+						<option value="no"<?php selected( 'no', $directory_data['profile_display_options']['photo'] ); ?>>No</option>
+					</select>
+				</p>
+
+				<p>
 					<label for="wsu-people-directory-about">About</label>
 					<select id="wsu-people-directory-about" name="_wsu_people_directory_about">
 						<option value="personal"<?php selected( 'bio_personal', $directory_data['profile_display_options']['about'] ); ?>>Personal Biography</option>
 						<option value="bio_unit"<?php selected( 'bio_unit', $directory_data['profile_display_options']['about'] ); ?>>Unit Biography</option>
 						<option value="bio_university"<?php selected( 'bio_university', $directory_data['profile_display_options']['about'] ); ?>>University Biography</option>
-						<option value="bio_tags"<?php selected( 'bio_tags', $directory_data['profile_display_options']['about'] ); ?>>Tags</option>
+						<option value="tags"<?php selected( 'tags', $directory_data['profile_display_options']['about'] ); ?>>Tags</option>
 						<option value="none"<?php selected( 'none', $directory_data['profile_display_options']['about'] ); ?>>None</option>
-					</select>
-				</p>
-
-				<p>
-					<label for="wsu-people-directory-show-photos">Show photos</label>
-					<select id="wsu-people-directory-show-photos" name="_wsu_people_directory_show_photos">
-						<option value="yes"<?php selected( 'yes', $directory_data['profile_display_options']['photo'] ); ?>>Yes</option>
-						<option value="no"<?php selected( 'no', $directory_data['profile_display_options']['photo'] ); ?>>No</option>
 					</select>
 				</p>
 

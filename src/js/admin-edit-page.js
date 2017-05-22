@@ -7,6 +7,7 @@
 		$profile_ids = $( "#directory-page-profile-ids" ),
 		$layout_option = $( "#wsu-people-directory-layout" ),
 		$photos_option = $( "#wsu-people-directory-show-photos" ),
+		$about_option = $( "#wsu-people-directory-about" ),
 		organizations = $( "#wsuwp_university_orgchecklist .selectit" ).map( function() { return $( this ).text(); } ).get(),
 		$bulk_select = $( ".toggle-select-mode" ),
 		$select_all = $( ".select-all-people" ),
@@ -44,6 +45,15 @@
 			}
 		} );
 
+		// Update layout class when the "Layout" option is changed.
+		$layout_option.on( "change", function() {
+			var $layout = $( this ).val();
+			$layout_option.find( "option" ).not( ":selected" ).each( function() {
+				$people_wrapper.removeClass( $( this ).val() );
+			} );
+			$people_wrapper.addClass( $layout );
+		} );
+
 		// Toggle the "photos" class when the "Show Photos" option is changed.
 		$photos_option.on( "change", function() {
 			if ( "yes" === $( this ).val() ) {
@@ -53,13 +63,20 @@
 			}
 		} );
 
-		// Update layout class when the "Layout" option is changed.
-		$layout_option.on( "change", function() {
-			var $layout = $( this ).val();
-			$layout_option.find( "option" ).not( ":selected" ).each( function() {
-				$people_wrapper.removeClass( $( this ).val() );
+		// Update each profile's "about" content when the "about" option is changed.
+		$about_option.on( "change", function() {
+			var option_value = $( this ).val();
+
+			$people.find( ".wsu-person" ).each( function() {
+				var $about_option_container = $( this ).find( "div[data-key='" + option_value + "']" ),
+					$about_container = $( this ).find( ".about" );
+
+				if ( "none" === option_value || !$about_option_container.length ) {
+					$about_container.html( "" );
+				} else {
+					$about_container.html( $about_option_container.find( ".content" ).html() );
+				}
 			} );
-			$people_wrapper.addClass( $layout );
 		} );
 
 		// Use jQuery UI Sortable to allow reordering of people.
