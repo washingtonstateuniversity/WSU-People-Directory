@@ -58,9 +58,9 @@ class WSUWP_Person_Card_Shortcode {
 
 		$cached_content = wp_cache_get( $cache_key, 'wsuwp_person_card' );
 
-		//if ( $cached_content ) {
-		//	return $cached_content;
-		//}
+		if ( $cached_content ) {
+			return $cached_content;
+		}
 
 		$nid = sanitize_text_field( $atts['nid'] );
 
