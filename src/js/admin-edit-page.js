@@ -258,6 +258,10 @@
 
 	// Get all the people for the given organization via a REST request.
 	function make_request( ui ) {
+
+		// Display a loading indicator.
+		$people.html( "<span class='spinner'></span>" );
+
 		$.ajax( {
 			url: window.wsuwp_people_edit_page.rest_url,
 			data: {
@@ -265,10 +269,17 @@
 				per_page: 100
 			}
 		} ).done( function( response ) {
+
+			// Remove the loading indicator.
+			$people.find( ".spinner" ).remove();
+
 			if ( response.length !== 0 ) {
 				response.sort( sort_response );
 				create_person( response );
 				load_photos();
+
+				// Display the rest of the directory options now that they're relevant.
+				$( ".wsu-people-directory-extra-options" ).slideDown();
 			}
 		} );
 	}
@@ -298,7 +309,7 @@
 				return this.value + " " + data.id;
 			} );
 
-			$( ".wsu-people" ).append( $person_template( {
+			$people.append( $person_template( {
 				nid: data.nid,
 				id: data.id,
 				has_photo: ( 0 < data.photos.length ) ? " has-photo" : "",

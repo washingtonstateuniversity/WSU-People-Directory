@@ -164,10 +164,12 @@ class WSUWP_People_Directory_Page_Template {
 
 		$directory_data = $this->directory_data( $post->ID );
 		?>
-			<div class="wsu-people-directory-add">
+			<p class="wsu-people-directory-options-header">Add People</p>
+
+			<div class="wsu-people-directory-options add">
 
 				<p>
-					<label for="wsu-people-import">Import/add people</label>
+					<label for="wsu-people-import">Organization</label>
 					<input type="text" id="wsu-people-import" value="" />
 					<input type="hidden"
 						   id="directory-page-profile-ids"
@@ -177,7 +179,11 @@ class WSUWP_People_Directory_Page_Template {
 
 			</div>
 
-			<div class="wsu-people-directory-display">
+			<?php if ( 'raw' === $post->filter ) { ?><div class="wsu-people-directory-extra-options"><?php } ?>
+
+			<p class="wsu-people-directory-options-header">Display Options</p>
+
+			<div class="wsu-people-directory-options display">
 
 				<p>
 					<label for="wsu-people-directory-layout">Layout</label>
@@ -209,7 +215,9 @@ class WSUWP_People_Directory_Page_Template {
 
 			</div>
 
-			<div class="wsu-people-directory-functions">
+			<p class="wsu-people-directory-options-header">Interaction Options</p>
+
+			<div class="wsu-people-directory-options interaction">
 
 				<p>
 					<label for="wsu-people-directory-link">Link to full profiles</label>
@@ -227,6 +235,29 @@ class WSUWP_People_Directory_Page_Template {
 						<option value="lightbox"<?php selected( 'lightbox', $directory_data['profile_display_options']['link']['profile'] ); ?>>Lightbox</option>
 					</select>
 				</p>
+
+			</div>
+
+			<div class="wsu-people-bulk-actions">
+
+				<button type="button" class="button toggle-select-mode">Bulk Select</button>
+
+				<button type="button" class="button select-all-people">Select All</button>
+
+				<button type="button" class="button button-primary delete-selected-people" disabled="disabled">Delete Selected</button>
+
+			</div>
+
+			<?php if ( 'raw' === $post->filter ) { ?></div><?php } ?>
+
+			<div class="wsu-people-admin-wrapper">
+
+				<?php include plugin_dir_path( dirname( __FILE__ ) ) . 'templates/people.php'; ?>
+
+				<div class="wsu-person-controls-tooltip" role="presentation">
+					<div class="wsu-person-controls-tooltip-arrow"></div>
+					<div class="wsu-person-controls-tooltip-inner"></div>
+				</div>
 
 			</div>
 
@@ -276,27 +307,6 @@ class WSUWP_People_Directory_Page_Template {
 				</article>
 
 			</script>
-
-			<div class="wsu-people-bulk-actions">
-
-				<button type="button" class="button toggle-select-mode">Bulk Select</button>
-
-				<button type="button" class="button select-all-people">Select All</button>
-
-				<button type="button" class="button button-primary delete-selected-people" disabled="disabled">Delete Selected</button>
-
-			</div>
-
-			<div class="wsu-people-admin-wrapper">
-
-				<?php include plugin_dir_path( dirname( __FILE__ ) ) . 'templates/people.php'; ?>
-
-				<div class="wsu-person-controls-tooltip" role="presentation">
-					<div class="wsu-person-controls-tooltip-arrow"></div>
-					<div class="wsu-person-controls-tooltip-inner"></div>
-				</div>
-
-			</div>
 
 		<?php
 	}

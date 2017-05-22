@@ -1,7 +1,20 @@
 #wsuwp-people-directory-configuration,
 #wsuwp-people-directory-configuration .delete-selected-people,
-#wsuwp-people-directory-configuration .select-all-people {
+#wsuwp-people-directory-configuration .select-all-people,
+.wsu-people-directory-extra-options {
 	display: none;
+}
+
+.wsu-people-directory-options-header {
+	font-weight: 700;
+}
+
+.wsu-people-directory-options {
+	padding: 0 0 0 1em;
+}
+
+.wsu-people-directory-extra-options .wsu-people-directory-options-header:first-child {
+	margin-top: 0;
 }
 
 .wsu-people-bulk-actions {
@@ -10,6 +23,13 @@
 
 .wsu-people-admin-wrapper {
 	position: relative;
+}
+
+.wsu-people .spinner {
+	display: block;
+	float: none;
+	margin: 20px auto;
+	visibility: visible;
 }
 
 .wsu-person {
