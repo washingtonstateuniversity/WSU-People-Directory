@@ -8,9 +8,9 @@
  * @var object $person
  */
 ?>
-<article class="<?php echo esc_attr( $display['card_classes'] ); ?>"<?php if ( is_admin() ) { ?>
+<article class="<?php echo esc_attr( $display['card_classes'] ); ?>"
+		 data-profile-id="<?php echo esc_attr( $person->id ); ?>"<?php if ( is_admin() ) { ?>
 		 data-nid="<?php echo esc_attr( $person->nid ); ?>"
-		 data-profile-id="<?php echo esc_attr( $person->id ); ?>"
 		 data-post-id="<?php echo esc_attr( $display['local_record_id'] ); ?>"
 		 aria-checked="false"<?php } ?>>
 

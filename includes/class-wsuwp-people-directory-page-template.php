@@ -88,6 +88,7 @@ class WSUWP_People_Directory_Page_Template {
 
 		add_filter( 'theme_page_templates', array( $this, 'add_directory_template' ) );
 		add_filter( 'template_include', array( $this, 'template_include' ) );
+		add_action( 'wp_footer', array( $this, 'person_lightbox_template' ) );
 	}
 
 	/**
@@ -689,7 +690,11 @@ class WSUWP_People_Directory_Page_Template {
 		// Enqueue styles and scripts if appropriate.
 		if ( 'custom' !== get_post_meta( $post->ID, '_wsu_people_directory_layout', true ) ) {
 			wp_enqueue_style( 'wsu-people', plugin_dir_url( dirname( __FILE__ ) ) . 'css/people.css', array(), WSUWP_People_Directory::$version );
-			wp_enqueue_script( 'wsu-people', plugin_dir_url( dirname( __FILE__ ) ) . 'js/people.min.js', array( 'jquery' ), WSUWP_People_Directory::$version );
+			wp_enqueue_script( 'wsu-people', plugin_dir_url( dirname( __FILE__ ) ) . 'js/people.min.js', array( 'jquery', 'underscore' ), WSUWP_People_Directory::$version, true );
+
+			if ( 'lightbox' === get_post_meta( $post->ID, '_wsu_people_directory_profile', true ) ) {
+				wp_localize_script( 'wsu-people', 'wsu_people_rest_url', trailingslashit( WSUWP_People_Directory::REST_URL() ) );
+			}
 		}
 
 		add_filter( 'the_content', array( $this, 'directory_content' ) );
@@ -721,5 +726,55 @@ class WSUWP_People_Directory_Page_Template {
 		$content = ob_get_clean();
 
 		return $content;
+	}
+
+	/**
+	 * Output the underscore template for lightbox profiles.
+	 *
+	 * @since 0.3.0
+	 */
+	public function person_lightbox_template() {
+		$post = get_post();
+
+		if ( 'lightbox' !== get_post_meta( $post->ID, '_wsu_people_directory_profile', true ) ) {
+			return;
+		}
+
+		?>
+		<script type="text/template" id="wsu-person-lightbox-template">
+
+			<div class="wsu-people-lightbox wsu-people-lightbox-close" tabindex="-1">
+
+				<article class="wsu-person" role="dialog" aria-labelledby="wsu-person-name">
+
+					<div class="card">
+
+						<h2 class="name" id="wsu-person-name" tabindex="0"><%= name %></h2>
+
+						<figure class="photo">
+							<img src="<%= photo %>" alt="<%= name %>" />
+						</figure>
+
+						<div class="contact">
+							<div class="title"><%= title %></div>
+							<div class="email"><a href="mailto:<%= email %>"><%= email %></a></div>
+							<div class="phone"><%= phone %></div>
+							<div class="office"><%= office %></div>
+							<div class="address"><%= address %></div>
+							<div class="website"><a href="<%= website %>"><%= website %></a></div>
+						</div>
+
+					</div>
+
+					<div class="about"><%= content %></div>
+
+					<button type="button" class="wsu-people-lightbox-close" aria-label="Close this dialog window">&times;</button>
+
+				</article>
+
+			</div>
+
+		</script>
+		<?php
 	}
 }
