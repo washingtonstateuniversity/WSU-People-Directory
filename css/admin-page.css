@@ -46,6 +46,7 @@
 }
 
 #poststuff .wsu-person .name {
+	color: #717171;
 	font-size: 1rem;
 	font-weight: 700;
 	padding: 8px 0 3.2px;
@@ -55,6 +56,14 @@
 	color: #981e32;
 	pointer-events: none;
 	text-decoration: none;
+}
+
+#poststuff .wsu-person.link .name {
+	color: #981e32;
+}
+
+#poststuff .wsu-person.no-link .name a {
+	color: #717171;
 }
 
 .wsu-person .about p {

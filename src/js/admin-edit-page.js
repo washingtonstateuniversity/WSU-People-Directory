@@ -8,6 +8,7 @@
 		$layout_option = $( "#wsu-people-directory-layout" ),
 		$photos_option = $( "#wsu-people-directory-show-photos" ),
 		$about_option = $( "#wsu-people-directory-about" ),
+		$link_option = $( "#wsu-people-directory-link" ),
 		organizations = $( "#wsuwp_university_orgchecklist .selectit" ).map( function() { return $( this ).text(); } ).get(),
 		$bulk_select = $( ".toggle-select-mode" ),
 		$select_all = $( ".select-all-people" ),
@@ -75,6 +76,21 @@
 					$about_container.html( "" );
 				} else {
 					$about_container.html( $about_option_container.find( ".content" ).html() );
+				}
+			} );
+		} );
+
+		// Update each profile when the "link" option is changed.
+		$link_option.on( "change", function() {
+			var option_value = $( this ).val();
+
+			$people.find( ".wsu-person" ).each( function() {
+				var $personal_bio = $( this ).find( "div[data-key='personal']" );
+
+				if ( "no" === option_value || ( "if_bio" === option_value && !$personal_bio.length ) ) {
+					$( this ).addClass( "no-link" ).removeClass( "link" );
+				} else {
+					$( this ).removeClass( "no-link" ).addClass( "link" );
 				}
 			} );
 		} );
