@@ -130,7 +130,7 @@ class WSUWP_Person_Display {
 		$local_record_id = get_post()->ID;
 		$nid = get_post_meta( $local_record_id, '_wsuwp_profile_ad_nid', true );
 		$person = WSUWP_People_Post_Type::get_rest_data( $nid );
-		// Store _use_{*} metas as an array????
+
 		$display_options = array(
 			'title' => get_post_meta( $local_record_id, '_use_title', true ),
 			'use_photo' => get_post_meta( $local_record_id, '_use_photo', true ),
