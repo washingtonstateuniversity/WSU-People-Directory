@@ -132,11 +132,33 @@ module.exports = function( grunt ) {
                 src: "src/js/people.js",
                 dest: "js/people.min.js"
             }
+        },
+
+        watch: {
+            styles: {
+                files: [ "src/css/*.css", "src/js/*.js" ],
+                tasks: [ "default" ],
+                option: {
+                    livereload: 8000
+                }
+            }
+        },
+
+        connect: {
+            server: {
+                options: {
+                    open: "http://localhost:8000/style-guide/directory-table.html",
+                    port: 8000,
+                    hostname: "localhost"
+                }
+            }
         }
     } );
 
+    grunt.loadNpmTasks( "grunt-contrib-connect" );
     grunt.loadNpmTasks( "grunt-contrib-jshint" );
     grunt.loadNpmTasks( "grunt-contrib-uglify" );
+    grunt.loadNpmTasks( "grunt-contrib-watch" );
     grunt.loadNpmTasks( "grunt-jscs" );
     grunt.loadNpmTasks( "grunt-phpcs" );
     grunt.loadNpmTasks( "grunt-postcss" );
@@ -144,4 +166,5 @@ module.exports = function( grunt ) {
 
     // Default task(s).
     grunt.registerTask( "default", [ "postcss", "stylelint", "jscs", "jshint", "uglify", "phpcs" ] );
+    grunt.registerTask( "serve", [ "connect", "watch" ] );
 };

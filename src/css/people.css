@@ -246,6 +246,7 @@ input[type="search"]::-webkit-search-decoration {
 
 .grid .name {
 	font-size: 1rem;
+	padding-top: 0;
 	width: 100%;
 }
 
@@ -273,6 +274,15 @@ input[type="search"]::-webkit-search-decoration {
 .grid .contact {
 	overflow: hidden;
 	text-overflow: ellipsis;
+}
+
+.grid .contact span {
+	display: block;
+}
+
+
+.grid .about {
+	padding: 0 1rem 1rem;
 }
 
 @media only screen and ( max-width: 693px ) {
