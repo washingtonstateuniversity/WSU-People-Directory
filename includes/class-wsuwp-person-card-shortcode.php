@@ -62,11 +62,26 @@ class WSUWP_Person_Card_Shortcode {
 			return $cached_content;
 		}
 
-		$card_nid = sanitize_text_field( $atts['nid'] );
+		$nid = sanitize_text_field( $atts['nid'] );
+
+		$person = WSUWP_People_Post_Type::get_rest_data( $nid );
+
+		if ( ! $person ) {
+			return '';
+		}
+
+		$template = ( WSUWP_Person_Display::theme_has_template() ) ? WSUWP_Person_Display::theme_has_template() : plugin_dir_path( dirname( __FILE__ ) ) . 'templates/person.php';
+
+		$display_options = array(
+			'header' => true,
+			'link_url' => ( $person->website ) ? $person->website : $person->link,
+		);
+
+		$display = WSUWP_Person_Display::get_data( $person, $display_options );
 
 		ob_start();
 
-		require_once( plugin_dir_path( dirname( __FILE__ ) ) . 'templates/person.php' );
+		require_once( $template );
 
 		$content = ob_get_clean();
 

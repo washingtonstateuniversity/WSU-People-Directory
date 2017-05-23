@@ -90,8 +90,8 @@ class WSUWP_Person_Display {
 	 *
 	 * @return string Path to the template file.
 	 */
-	public function theme_has_template() {
-		return locate_template( 'wsu-people-templates/person.php' );
+	public static function theme_has_template() {
+		return locate_template( 'wsu-people/person.php' );
 	}
 
 	/**
@@ -108,11 +108,6 @@ class WSUWP_Person_Display {
 	public function template_include( $template ) {
 		if ( ! is_singular( WSUWP_People_Post_Type::$post_type_slug ) ) {
 			return $template;
-		}
-
-		// If a theme has a person template, use it.
-		if ( $this->theme_has_template() ) {
-			return $this->theme_has_template();
 		}
 
 		wp_enqueue_style( 'wsu-people-display', plugin_dir_url( dirname( __FILE__ ) ) . 'css/person.css', array(), WSUWP_People_Directory::$version );
@@ -132,12 +127,148 @@ class WSUWP_Person_Display {
 	public function content() {
 		remove_filter( 'the_content', array( $this, 'content' ) );
 
+		$local_record_id = get_post()->ID;
+		$nid = get_post_meta( $local_record_id, '_wsuwp_profile_ad_nid', true );
+		$person = WSUWP_People_Post_Type::get_rest_data( $nid );
+
+		$display_options = array(
+			'title' => get_post_meta( $local_record_id, '_use_title', true ),
+			'use_photo' => get_post_meta( $local_record_id, '_use_photo', true ),
+			'about' => get_post_meta( $local_record_id, '_use_bio', true ),
+		);
+
+		$display = WSUWP_Person_Display::get_data( $person, $display_options );
+
 		ob_start();
 
-		include plugin_dir_path( dirname( __FILE__ ) ) . 'templates/person.php';
+		// If a theme has a person template, use it.
+		if ( $this->theme_has_template() ) {
+			include $this->theme_has_template();
+		} else {
+			include plugin_dir_path( dirname( __FILE__ ) ) . 'templates/person.php';
+		}
 
 		$content = ob_get_clean();
 
 		return $content;
+	}
+
+	/**
+	 * Returns a set of data for displaying a person.
+	 *
+	 * @param object $person
+	 * @param array  $options
+	 *
+	 * @since 0.3.0
+	 *
+	 * @return array
+	 */
+	public static function get_data( $person, $options = array() ) {
+		$card_classes = 'wsu-person';
+		$ad_phone = ( ! empty( $person->phone_ext ) ) ? $person->phone . ' ext ' . $person->phone_ext : $person->phone;
+		$local_record_id = false;
+
+		// Default "about" content (personal biography).
+		$about = $person->content->rendered;
+
+		// Set up any directory-specific content.
+		if ( isset( $options['directory_view'] ) ) {
+			$local_record = get_posts( array(
+				'post_type' => WSUWP_People_Post_Type::$post_type_slug,
+				'posts_per_page' => 1,
+				'meta_key' => '_wsuwp_profile_post_id',
+				'meta_value' => $person->id,
+			) );
+
+			if ( $local_record ) {
+				$local_record_id = $local_record[0]->ID;
+				$directory_display = get_post_meta( $local_record_id, "_display_on_page_{$options['page_id']}", true );
+				$single_display_title = get_post_meta( $local_record_id, '_use_title', true );
+				$single_display_photo = get_post_meta( $local_record_id, '_use_photo', true );
+				$single_display_bio = get_post_meta( $local_record_id, '_use_bio', true );
+
+				if ( 'if_bio' === $options['link']['when'] && '' !== $about || 'yes' === $options['link']['when'] ) {
+					$options['link_url'] = trailingslashit( $options['link']['base_url'] . $local_record[0]->post_name );
+				}
+
+				$options['title'] = ( isset( $directory_display['title'] ) ) ? $directory_display['title'] : $single_display_title;
+				$options['use_photo'] = ( isset( $directory_display['photo'] ) ) ? $directory_display['photo'] : $single_display_photo;
+
+				// If the "about" option is set individually for this profile, use that instead of the global setting.
+				if ( isset( $directory_display['about'] ) ) {
+					$options['about'] = $directory_display['about'];
+				}
+			}
+		}
+
+		// Set up link URL.
+		$link = ( isset( $options['link_url'] ) ) ? $options['link_url'] : false;
+
+		// Set up what to display for the title.
+		if ( isset( $options['title'] ) && '' !== $options['title'] ) {
+			$title_indexes = explode( ' ', $options['title'] );
+			$use_titles = array();
+
+			foreach ( $title_indexes as $index ) {
+				if ( 'ad' === $index ) {
+					$use_titles[] = $person->position_title;
+				} elseif ( isset( $person->working_titles[ $index ] ) ) {
+					$use_titles[] = $person->working_titles[ $index ];
+				}
+			}
+
+			$title = implode( '<br />', $use_titles );
+		} else {
+			$title = ( ! empty( $person->working_titles ) ) ? implode( '<br />', $person->working_titles ) : $person->position_title;
+		}
+
+		// Set up the photo.
+		if ( isset( $options['photo'] ) && 'no' === $options['photo'] ) {
+			$photo = false;
+		} else {
+			if ( isset( $options['use_photo'] ) && '' !== $options['use_photo'] && $person->photos[ $options['use_photo'] ] ) {
+				$photo = $person->photos[ $options['use_photo'] ]->thumbnail;
+			} else {
+				$photo = ( $person->photos && $person->photos[0] ) ? $person->photos[0]->thumbnail : false;
+			}
+		}
+
+		// Adds the "has-photo" class to the card container.
+		if ( $photo ) {
+			$card_classes .= ( ! empty( $person->photos ) ) ? ' has-photo' : '';
+		}
+
+		// Set up what to display for the "about" content.
+		if ( isset( $options['about'] ) && 'personal' !== $options['about'] && '' !== $options['about'] ) {
+			if ( 'tags' === $options['about'] ) {
+				$tags = wp_get_post_tags( $local_record_id, array(
+					'fields' => 'names',
+				) );
+				$about = implode( ', ', $tags );
+			} elseif ( 'none' === $options['about'] ) {
+				$about = false;
+			} else {
+				$about = $person->$options['about'];
+			}
+		}
+
+		$data = array(
+			'card_classes' => $card_classes,
+			'name' => $person->title->rendered,
+			'title' => $title,
+			'email' => ( ! empty( $person->email_alt ) ) ? $person->email_alt : $person->email,
+			'phone' => ( ! empty( $person->phone_alt ) ) ? $person->phone_alt : $ad_phone,
+			'office' => ( ! empty( $person->office_alt ) ) ? $person->office_alt : $person->office,
+			'address' => $person->address,
+			'website' => $person->website,
+			'photo' => $photo,
+			'about' => $about,
+			'local_record_id' => $local_record_id,
+			'header' => ( isset( $options['header'] ) ) ? true : false,
+			'link' => $link,
+			'directory_view' => ( isset( $options['directory_view'] ) ) ? $directory_display : false,
+		);
+
+		return $data;
 	}
 }

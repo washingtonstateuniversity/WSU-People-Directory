@@ -37,6 +37,11 @@ class WSUWP_People_Directory_Page_Template {
 			'description' => 'The layout to use for the directory display',
 			'sanitize_callback' => 'sanitize_text_field',
 		),
+		'_wsu_people_directory_about' => array(
+			'type' => 'string',
+			'description' => 'The biographical or other information to show for people on this listing',
+			'sanitize_callback' => 'sanitize_text_field',
+		),
 		'_wsu_people_directory_link' => array(
 			'type' => 'string',
 			'description' => 'Link to full profiles',
@@ -157,58 +162,73 @@ class WSUWP_People_Directory_Page_Template {
 	public function display_people_directory_setup( $post ) {
 		wp_nonce_field( 'directory-page-configuration', 'directory_page_nonce' );
 
-		$page_id = $post->ID;
-		$ids = get_post_meta( $post->ID, '_wsu_people_directory_profile_ids', true );
-		$layout = get_post_meta( $post->ID, '_wsu_people_directory_layout', true );
-		$link = get_post_meta( $post->ID, '_wsu_people_directory_link', true );
-		$profile = get_post_meta( $post->ID, '_wsu_people_directory_profile', true );
-		$photos = get_post_meta( $post->ID, '_wsu_people_directory_show_photos', true );
-		$base_url = get_permalink( $post->ID );
-
+		$directory_data = $this->directory_data( $post->ID );
 		?>
-			<p>
-				<label for="wsu-people-import">Import/add people</label>
-				<input type="text" id="wsu-people-import" value="" />
-				<input type="hidden"
-					   id="directory-page-profile-ids"
-					   name="_wsu_people_directory_profile_ids"
-					   value="<?php echo esc_attr( $ids ); ?>" />
-			</p>
+			<div class="wsu-people-directory-add">
 
-			<p>
-				<label for="wsu-people-directory-layout">Layout</label>
-				<select id="wsu-people-directory-layout" name="_wsu_people_directory_layout">
-					<option value="table"<?php selected( 'table', $layout ); ?>>Table</option>
-					<option value="grid"<?php selected( 'grid', $layout ); ?>>Grid</option>
-					<option value="custom"<?php selected( 'custom', $layout ); ?>>Custom (provide your own CSS)</option>
-				</select>
-			</p>
+				<p>
+					<label for="wsu-people-import">Import/add people</label>
+					<input type="text" id="wsu-people-import" value="" />
+					<input type="hidden"
+						   id="directory-page-profile-ids"
+						   name="_wsu_people_directory_profile_ids"
+						   value="<?php echo esc_attr( $directory_data['ids'] ); ?>" />
+				</p>
 
-			<p>
-				<label for="wsu-people-directory-link">Link to full profiles</label>
-				<select id="wsu-people-directory-link" name="_wsu_people_directory_link">
-					<option value="if_bio"<?php selected( 'if_bio', $link ); ?>>If the person has a biography</option>
-					<option value="yes"<?php selected( 'yes', $link ); ?>>Yes</option>
-					<option value="no"<?php selected( 'no', $link ); ?>>No</option>
-				</select>
-			</p>
+			</div>
 
-			<p>
-				<label for="wsu-people-directory-profile">Open full profiles in a</label>
-				<select id="wsu-people-directory-profile" name="_wsu_people_directory_profile">
-					<option value="page"<?php selected( 'page', $profile ); ?>>Page</option>
-					<option value="lightbox"<?php selected( 'lightbox', $profile ); ?>>Lightbox</option>
-				</select>
-			</p>
+			<div class="wsu-people-directory-display">
 
-			<p>
-				<label for="wsu-people-directory-show-photos">Show photos</label>
-				<select id="wsu-people-directory-show-photos" name="_wsu_people_directory_show_photos">
-					<option value="yes"<?php selected( 'yes', $photos ); ?>>Yes</option>
-					<option value="no"<?php selected( 'no', $photos ); ?>>No</option>
-				</select>
+				<p>
+					<label for="wsu-people-directory-layout">Layout</label>
+					<select id="wsu-people-directory-layout" name="_wsu_people_directory_layout">
+						<option value="table"<?php selected( 'table', $directory_data['layout'] ); ?>>Table</option>
+						<option value="grid"<?php selected( 'grid', $directory_data['layout'] ); ?>>Grid</option>
+						<option value="custom"<?php selected( 'custom', $directory_data['layout'] ); ?>>Custom (provide your own CSS)</option>
+					</select>
+				</p>
 
-			</p>
+				<p>
+					<label for="wsu-people-directory-about">About</label>
+					<select id="wsu-people-directory-about" name="_wsu_people_directory_about">
+						<option value="personal"<?php selected( 'bio_personal', $directory_data['profile_display_options']['about'] ); ?>>Personal Biography</option>
+						<option value="bio_unit"<?php selected( 'bio_unit', $directory_data['profile_display_options']['about'] ); ?>>Unit Biography</option>
+						<option value="bio_university"<?php selected( 'bio_university', $directory_data['profile_display_options']['about'] ); ?>>University Biography</option>
+						<option value="bio_tags"<?php selected( 'bio_tags', $directory_data['profile_display_options']['about'] ); ?>>Tags</option>
+						<option value="none"<?php selected( 'none', $directory_data['profile_display_options']['about'] ); ?>>None</option>
+					</select>
+				</p>
+
+				<p>
+					<label for="wsu-people-directory-show-photos">Show photos</label>
+					<select id="wsu-people-directory-show-photos" name="_wsu_people_directory_show_photos">
+						<option value="yes"<?php selected( 'yes', $directory_data['profile_display_options']['photo'] ); ?>>Yes</option>
+						<option value="no"<?php selected( 'no', $directory_data['profile_display_options']['photo'] ); ?>>No</option>
+					</select>
+				</p>
+
+			</div>
+
+			<div class="wsu-people-directory-functions">
+
+				<p>
+					<label for="wsu-people-directory-link">Link to full profiles</label>
+					<select id="wsu-people-directory-link" name="_wsu_people_directory_link">
+						<option value="if_bio"<?php selected( 'if_bio', $directory_data['profile_display_options']['link']['when'] ); ?>>If the person has a biography</option>
+						<option value="yes"<?php selected( 'yes', $directory_data['profile_display_options']['link']['when'] ); ?>>Yes</option>
+						<option value="no"<?php selected( 'no', $directory_data['profile_display_options']['link']['when'] ); ?>>No</option>
+					</select>
+				</p>
+
+				<p>
+					<label for="wsu-people-directory-profile">Open full profiles in a</label>
+					<select id="wsu-people-directory-profile" name="_wsu_people_directory_profile">
+						<option value="page"<?php selected( 'page', $directory_data['profile_display_options']['link']['profile'] ); ?>>Page</option>
+						<option value="lightbox"<?php selected( 'lightbox', $directory_data['profile_display_options']['link']['profile'] ); ?>>Lightbox</option>
+					</select>
+				</p>
+
+			</div>
 
 			<script type="text/template" id="wsu-person-template">
 
@@ -267,9 +287,18 @@ class WSUWP_People_Directory_Page_Template {
 
 			</div>
 
-			<?php
+			<div class="wsu-people-admin-wrapper">
 
-			include plugin_dir_path( dirname( __FILE__ ) ) . 'templates/people.php';
+				<?php include plugin_dir_path( dirname( __FILE__ ) ) . 'templates/people.php'; ?>
+
+				<div class="wsu-person-controls-tooltip" role="presentation">
+					<div class="wsu-person-controls-tooltip-arrow"></div>
+					<div class="wsu-person-controls-tooltip-inner"></div>
+				</div>
+
+			</div>
+
+		<?php
 	}
 
 	/**
@@ -474,13 +503,15 @@ class WSUWP_People_Directory_Page_Template {
 
 		if ( isset( $_POST['title'] ) ) {
 			$titles = explode( ' ', $_POST['title'] );
+			$sanitized_titles = array();
 			foreach ( $titles as $title ) {
 				if ( 'ad' === $title ) {
-					$meta['title'][] = 'ad';
+					$sanitized_titles[] = 'ad';
 				} else {
-					$meta['title'][] = absint( $title );
+					$sanitized_titles[] = absint( $title );
 				}
 			}
+			$meta['title'] = implode( ' ', $sanitized_titles );
 		}
 
 		if ( isset( $_POST['photo'] ) ) {
@@ -522,7 +553,111 @@ class WSUWP_People_Directory_Page_Template {
 	 * @return string Path to the template file.
 	 */
 	public function theme_has_template() {
-		return locate_template( 'wsu-people-templates/people.php' );
+		return locate_template( 'wsu-people/people.php' );
+	}
+
+	/**
+	 * Returns a set of meta data for displaying a directory page.
+	 *
+	 * @since 0.3.0
+	 *
+	 * @param int $post_id
+	 *
+	 * @return array
+	 */
+	public function directory_data( $post_id ) {
+		$ids = get_post_meta( $post_id, '_wsu_people_directory_profile_ids', true );
+		$people_array = array();
+
+		// Loop through the local records in their display order and add an `include`
+		// parameter to the request URL for each one, then leverage `orderby=include`
+		// to retrieve the primary records in the desired order. Silly, but effective.
+		if ( $ids ) {
+			$id_array = explode( ' ', $ids );
+
+			$people_query_args = array(
+				'post_type' => WSUWP_People_Post_Type::$post_type_slug,
+				'posts_per_page' => count( $id_array ),
+				'meta_key' => "_order_on_page_{$post_id}",
+				'orderby' => 'meta_value_num',
+				'order' => 'asc',
+				'meta_query' => array(
+					array(
+						'key' => '_on_page',
+						'value' => $post_id,
+					),
+				),
+			);
+
+			$people = new WP_Query( $people_query_args );
+
+			if ( $people->have_posts() ) {
+				$request_url = add_query_arg( array(
+					'per_page' => count( $id_array ),
+					'orderby' => 'include',
+				), WSUWP_People_Directory::REST_URL() );
+
+				while ( $people->have_posts() ) {
+					$people->the_post();
+					$profile_id = get_post_meta( get_the_ID(), '_wsuwp_profile_post_id', true );
+					$request_url = add_query_arg( 'include[]', $profile_id, $request_url );
+				}
+				wp_reset_postdata();
+
+				$response = wp_remote_get( $request_url );
+
+				if ( ! is_wp_error( $response ) ) {
+					$data = wp_remote_retrieve_body( $response );
+
+					if ( ! empty( $data ) ) {
+						$people = json_decode( $data );
+
+						if ( ! empty( $people ) ) {
+							$people_array = $people;
+						}
+					}
+				}
+			}
+		}
+
+		$layout = get_post_meta( $post_id, '_wsu_people_directory_layout', true );
+		$show_photos = get_post_meta( $post_id, '_wsu_people_directory_show_photos', true );
+		$open_profiles_as = get_post_meta( $post_id, '_wsu_people_directory_profile', true );
+		$wrapper_classes = 'wsu-people-wrapper';
+		$wrapper_classes .= ( $layout ) ? ' ' . esc_attr( $layout ) : ' table';
+		$theme_template = WSUWP_Person_Display::theme_has_template();
+
+		if ( 'yes' === $show_photos ) {
+			$wrapper_classes .= ' photos';
+		}
+
+		if ( 'lightbox' === $open_profiles_as ) {
+			$wrapper_classes .= ' lightbox';
+		}
+
+		$data = array(
+			'wrapper_classes' => $wrapper_classes,
+			'ids' => $ids,
+			'layout' => $layout,
+			'people' => $people_array,
+			'actions_template' => plugin_dir_path( dirname( __FILE__ ) ) . 'templates/directory-actions.php',
+			'person_card_template' => ( $theme_template ) ? $theme_template : plugin_dir_path( dirname( __FILE__ ) ) . 'templates/person.php',
+			'profile_display_options' => array(
+				'directory_view' => true,
+				'about' => get_post_meta( $post_id, '_wsu_people_directory_about', true ),
+				'link' => array(
+					'when' => get_post_meta( $post_id, '_wsu_people_directory_link', true ),
+					'base_url' => get_permalink( $post_id ),
+					'profile' => $open_profiles_as,
+				),
+				'photo' => $show_photos,
+				'page_id' => $post_id,
+				'header' => true,
+				'lazy_load_photos' => true,
+			),
+		);
+
+		return $data;
 	}
 
 	/**
@@ -539,11 +674,6 @@ class WSUWP_People_Directory_Page_Template {
 
 		if ( key( self::$template ) !== get_page_template_slug( $post->ID ) ) {
 			return $template;
-		}
-
-		// If a theme has a directory template, use it.
-		if ( $this->theme_has_template() ) {
-			return $this->theme_has_template();
 		}
 
 		// Enqueue styles and scripts if appropriate.
@@ -567,9 +697,16 @@ class WSUWP_People_Directory_Page_Template {
 	public function directory_content() {
 		remove_filter( 'the_content', array( $this, 'directory_content' ) );
 
+		$directory_data = $this->directory_data( get_post()->ID );
+
 		ob_start();
 
-		include plugin_dir_path( dirname( __FILE__ ) ) . 'templates/people.php';
+		// If a theme has a directory template, use it.
+		if ( $this->theme_has_template() ) {
+			include $this->theme_has_template();
+		} else {
+			include plugin_dir_path( dirname( __FILE__ ) ) . 'templates/people.php';
+		}
 
 		$content = ob_get_clean();
 
