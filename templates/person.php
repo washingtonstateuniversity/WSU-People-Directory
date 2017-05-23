@@ -2,7 +2,7 @@
 /**
  * Person template.
  *
- * This template can be overridden by including `wsu-people-templates/person.php` in your theme.
+ * This template can be overridden by including `wsu-people/person.php` in your theme.
  *
  * @var array  $display
  * @var object $person

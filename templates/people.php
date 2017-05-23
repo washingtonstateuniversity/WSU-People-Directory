@@ -2,7 +2,7 @@
 /**
  * Directory template.
  *
- * This template can be overridden by including `wsu-people-templates/people.php` in your theme.
+ * This template can be overridden by including `wsu-people/people.php` in your theme.
  *
  * @var array $directory_data
  */

@@ -91,7 +91,7 @@ class WSUWP_Person_Display {
 	 * @return string Path to the template file.
 	 */
 	public static function theme_has_template() {
-		return locate_template( 'wsu-people-templates/person.php' );
+		return locate_template( 'wsu-people/person.php' );
 	}
 
 	/**

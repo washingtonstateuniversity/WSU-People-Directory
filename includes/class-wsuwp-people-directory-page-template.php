@@ -553,7 +553,7 @@ class WSUWP_People_Directory_Page_Template {
 	 * @return string Path to the template file.
 	 */
 	public function theme_has_template() {
-		return locate_template( 'wsu-people-templates/people.php' );
+		return locate_template( 'wsu-people/people.php' );
 	}
 
 	/**
