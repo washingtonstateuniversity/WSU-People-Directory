@@ -6,3 +6,7 @@
 .wsu-person .photo img {
 	display: block;
 }
+
+.wsu-person .contact span {
+	display: block;
+}

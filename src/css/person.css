@@ -1,3 +1,27 @@
-.contact span {
+.wsu-person .card {
+	display: flex;
+	margin-bottom: 2rem;
+}
+
+.wsu-person .photo {
 	display: block;
+	width: 198px;
+}
+
+.wsu-person .photo img {
+	display: block;
+	max-width: 100%;
+	width: 100%;
+}
+
+.wsu-person .contact {
+	padding-left: 2rem;
+}
+
+.wsu-person .contact span {
+	display: block;
+}
+
+.wsu-person .about {
+	clear: both;
 }
