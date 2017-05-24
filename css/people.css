@@ -3,13 +3,13 @@ input[type="search"]::-webkit-search-decoration {
 	display: none;
 }
 
-.wsu-people-actions .search input {
+.wsu-people-filters .search input {
 	background: #fff;
 	border-radius: 1px;
 	border: 1px solid #5e6a71;
 	box-sizing: border-box;
 	color: #8d959a;
-	font-family: "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Geneva, Verdana, sans-serif;
+	font-family: "Open Sans", "Lucida Sans", "Lucida Grande", "Lucida Sans Unicode", sans-serif;
 	font-size: 1em;
 	height: 2rem;
 	line-height: 20px;
@@ -21,66 +21,79 @@ input[type="search"]::-webkit-search-decoration {
 	appearance: none;
 }
 
-.wsu-people-actions .search input:focus {
+.wsu-people-filters .search input:focus {
 	color: #981e32;
 }
 
-.wsu-people-actions .search input::-webkit-input-placeholder {
+.wsu-people-filters .search input::-webkit-input-placeholder {
 	color: #8d959a;
-	font-family: "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Geneva, Verdana, sans-serif;
+	font-family: "Open Sans", "Lucida Sans", "Lucida Grande", "Lucida Sans Unicode", sans-serif;
 	font-size: 14px;
 	font-style: italic;
 }
 
-.wsu-people-actions .search input::-moz-placeholder {
+.wsu-people-filters .search input::-moz-placeholder {
 	color: #8d959a;
-	font-family: "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Geneva, Verdana, sans-serif;
+	font-family: "Open Sans", "Lucida Sans", "Lucida Grande", "Lucida Sans Unicode", sans-serif;
 	font-size: 14px;
 	font-style: italic;
 	opacity: 1;
 }
 
-.wsu-people-actions .search input:-ms-input-placeholder {
+.wsu-people-filters .search input:-ms-input-placeholder {
 	color: #8d959a;
-	font-family: "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Geneva, Verdana, sans-serif;
+	font-family: "Open Sans", "Lucida Sans", "Lucida Grande", "Lucida Sans Unicode", sans-serif;
 	font-size: 14px;
 	font-style: italic;
 }
 
-.wsu-people-actions .search input:-moz-placeholder {
+.wsu-people-filters .search input:-moz-placeholder {
 	color: #8d959a;
-	font-family: "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Geneva, Verdana, sans-serif;
+	font-family: "Open Sans", "Lucida Sans", "Lucida Grande", "Lucida Sans Unicode", sans-serif;
 	font-size: 14px;
 	font-style: italic;
 	opacity: 1;
 }
 
 /* Filters */
-.wsu-people-filter-label {
+.wsu-people-filter-label,
+.wsu-people-filter-label:hover,
+.wsu-people-filter-label:focus {
 	background: #fff;
 	border: 1px solid #5e6a71;
+	border-radius: 0;
 	box-sizing: border-box;
+	color: #8d959a;
 	cursor: pointer;
+	font-size: 14px;
+	font-style: italic;
 	height: 2rem;
 	line-height: 2rem;
+	outline: none;
 	padding: 0 2rem 0 1rem;
 	position: relative;
+	text-align: left;
+	width: 100%;
 }
 
 .wsu-people-filter-label:after {
-	content: "\F501";
+	content: "\002b";
 	display: block;
-	font-family: Spine-Icons;
+	font-style: normal;
 	position: absolute;
 	right: 1rem;
-	top: 0;
 	text-align: right;
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
+	top: 0;
+	-webkit-transition: -webkit-transform .25s;
+	transition: -webkit-transform .25s;
+	transition: transform .25s;
+	transition: transform .25s, -webkit-transform .25s;
 }
 
-.wsu-people-filter-label.open:after {
-	content: "\F500";
+.wsu-people-filter-label[aria-expanded="true"]:after {
+	-webkit-transform: rotate(-45deg);
+	    -ms-transform: rotate(-45deg);
+	        transform: rotate(-45deg);
 }
 
 .wsu-people-filter-terms {
@@ -90,7 +103,7 @@ input[type="search"]::-webkit-search-decoration {
 	padding: 0;
 }
 
-.wsu-people-filter-label.open + .wsu-people-filter-terms {
+.open + .wsu-people-filter-terms {
 	display: block;
 }
 
@@ -98,7 +111,7 @@ input[type="search"]::-webkit-search-decoration {
 	padding: 0;
 }
 
-.wsu-people-filter-terms input {
+.wsu-people-filter-terms input[type="checkbox"] {
 	display: none;
 }
 
@@ -125,14 +138,14 @@ input[type="search"]::-webkit-search-decoration {
 }
 
 /* Table layout */
-.table .wsu-people-actions {
+.table .wsu-people-filters {
 	display: -webkit-box;
 	display: -ms-flexbox;
 	display: flex;
 	margin: 0 -.5rem 1rem;
 }
 
-.table .wsu-people-action {
+.table .wsu-people-filter {
 	box-sizing: border-box;
 	padding: 0 .5rem;
 	width: 50%;

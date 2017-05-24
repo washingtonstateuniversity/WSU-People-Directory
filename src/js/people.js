@@ -73,7 +73,7 @@
 	} );
 
 	// Shows/hides profiles according to text entered into the search input.
-	$( ".wsu-people-actions .search" ).on( "keyup", "input", function() {
+	$( ".wsu-people-filters .search" ).on( "keyup", "input", function() {
 		var	search_value = $( this ).val(),
 			profiles = $( this ).closest( ".wsu-people-wrapper" ).find( ".wsu-person" );
 
@@ -81,9 +81,9 @@
 			profiles.each( function() {
 				var person = $( this );
 				if ( person.text().toLowerCase().indexOf( search_value.toLowerCase() ) === -1 ) {
-					person.hide( "fast" );
+					person.hide( "fast" ).attr( "aria-hidden", "true" );
 				} else {
-					person.show( "fast" );
+					person.show( "fast" ).removeAttr( "aria-hidden" );
 				}
 			} );
 		} else {
@@ -93,23 +93,25 @@
 
 	// Toggles filter options visibility.
 	$( ".wsu-people-filter-label" ).on( "click", function() {
-		$( this ).toggleClass( "open" );
+		var expanded = ( "false" === $( this ).attr( "aria-expanded" ) ) ? "true" : "false";
+
+		$( this ).attr( "aria-expanded", expanded ).next( "ul" ).slideToggle( 250 );
 	} );
 
 	// Shows/hides profiles according to selected filter options.
 	$( ".wsu-people-filter-terms" ).on( "change", "input:checkbox", function() {
-		var sort_class = [],
-			profiles = $( this ).closest( ".wsu-people-wrapper" ).find( ".wsu-person" );
+		var classes = [],
+			$profiles = $( this ).closest( ".wsu-people-wrapper" ).find( ".wsu-person" );
 
-		$( ".wsuwp-people-filter-terms input:checkbox:checked" ).each( function() {
-			sort_class.push( "." + $( this ).data( "id" ) );
+		$( ".wsu-people-filter-terms input:checkbox:checked" ).each( function() {
+			classes.push( "." + $( this ).val() );
 		} );
 
-		if ( "" !== sort_class ) {
-			profiles.not( sort_class.join( "," ) ).hide( "fast" );
-			profiles.filter( sort_class.join( "," ) ).show( "fast" );
+		if ( classes.length > 0 ) {
+			$profiles.not( classes.join( "," ) ).hide( 250 ).attr( "aria-hidden", "true" );
+			$profiles.filter( classes.join( "," ) ).show( 250 ).removeAttr( "aria-hidden" );
 		} else {
-			profiles.show( "fast" );
+			$profiles.show( 250 ).removeAttr( "aria-hidden" );
 		}
 	} );
 

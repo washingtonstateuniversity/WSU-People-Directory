@@ -32,6 +32,16 @@
 	visibility: visible;
 }
 
+.wsu-people-filter.search {
+	background: none;
+	pointer-events: none;
+}
+
+.wsu-people-filter-label {
+	font-size: 14px;
+	margin: 0;
+}
+
 .wsu-person {
 	color: #717171;
 	cursor: move;

@@ -198,6 +198,23 @@ class WSUWP_Person_Display {
 				if ( isset( $directory_display['about'] ) ) {
 					$options['about'] = $directory_display['about'];
 				}
+
+				// Add classes for taxonomy terms (leveraged by filters).
+				$get_terms_args = array(
+					'fields' => 'names',
+				);
+
+				$locations = wp_get_post_terms( $local_record_id, 'wsuwp_university_location', $get_terms_args );
+
+				foreach ( $locations as $location ) {
+					$card_classes .= ' location-' . sanitize_title( $location );
+				}
+
+				$units = wp_get_post_terms( $local_record_id, 'wsuwp_university_org', $get_terms_args );
+
+				foreach ( $units as $unit ) {
+					$card_classes .= ' unit-' . sanitize_title( $unit );
+				}
 			}
 		}
 

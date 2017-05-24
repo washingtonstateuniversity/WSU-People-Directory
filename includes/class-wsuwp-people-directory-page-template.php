@@ -57,6 +57,11 @@ class WSUWP_People_Directory_Page_Template {
 			'description' => 'Whether to show photos on this people listing',
 			'sanitize_callback' => 'sanitize_text_field',
 		),
+		'_wsu_people_directory_filters' => array(
+			'type' => 'array',
+			'description' => 'Various methods by which to filter a directory',
+			'sanitize_callback' => 'WSUWP_People_Directory_Page_Template::sanitize_filter_checkboxes',
+		),
 	);
 
 	/**
@@ -237,6 +242,38 @@ class WSUWP_People_Directory_Page_Template {
 					</select>
 				</p>
 
+				<p>Allow filtering by</p>
+
+				<ul>
+					<li>
+						<label>
+							<input type="checkbox"
+								   name="_wsu_people_directory_filters[]"
+								   value="search"
+									<?php if ( is_array( $directory_data['filters']['options'] ) && in_array( 'search', $directory_data['filters']['options'], true ) ) { echo 'checked="checked"'; } ?>>
+							Search
+						</label>
+					</li>
+					<li>
+						<label>
+							<input type="checkbox"
+								   name="_wsu_people_directory_filters[]"
+								   value="location"
+									<?php if ( is_array( $directory_data['filters']['options'] ) && in_array( 'location', $directory_data['filters']['options'], true ) ) { echo 'checked="checked"'; } ?>>
+							Location
+						</label>
+					</li>
+					<li>
+						<label>
+							<input type="checkbox"
+								   name="_wsu_people_directory_filters[]"
+								   value="unit"
+									<?php if ( is_array( $directory_data['filters']['options'] ) && in_array( 'unit', $directory_data['filters']['options'], true ) ) { echo 'checked="checked"'; } ?>>
+							Unit
+						</label>
+					</li>
+				</ul>
+
 			</div>
 
 			<div class="wsu-people-bulk-actions">
@@ -313,6 +350,32 @@ class WSUWP_People_Directory_Page_Template {
 	}
 
 	/**
+	 * Sanitizes filter checkboxes.
+	 *
+	 * @since 0.3.0
+	 *
+	 * @param array $values
+	 *
+	 * @return array
+	 */
+	public static function sanitize_filter_checkboxes( $values ) {
+		if ( ! is_array( $values ) || 0 === count( $values ) ) {
+			return array();
+		}
+
+		$sanitized_values = array();
+		$accepted_values = array( 'search', 'location', 'unit' );
+
+		foreach ( $values as $index => $value ) {
+			if ( in_array( $value, $accepted_values, true ) ) {
+				$sanitized_values[] = sanitize_text_field( $value );
+			}
+		}
+
+		return $sanitized_values;
+	}
+
+	/**
 	 * Save data associated with a people directory page.
 	 *
 	 * @since 0.3.0
@@ -346,6 +409,8 @@ class WSUWP_People_Directory_Page_Template {
 
 				// Each piece of meta is registered with sanitization.
 				update_post_meta( $post_id, $key, $_POST[ $key ] );
+			} else {
+				delete_post_meta( $post_id, $key );
 			}
 		}
 
@@ -580,6 +645,10 @@ class WSUWP_People_Directory_Page_Template {
 		$ids = get_post_meta( $post_id, '_wsu_people_directory_profile_ids', true );
 		$people_array = array();
 
+		$filters = get_post_meta( $post_id, '_wsu_people_directory_filters', true );
+		$locations = array();
+		$units = array();
+
 		// Loop through the local records in their display order and add an `include`
 		// parameter to the request URL for each one, then leverage `orderby=include`
 		// to retrieve the primary records in the desired order. Silly, but effective.
@@ -612,6 +681,22 @@ class WSUWP_People_Directory_Page_Template {
 					$people->the_post();
 					$profile_id = get_post_meta( get_the_ID(), '_wsuwp_profile_post_id', true );
 					$request_url = add_query_arg( 'include[]', $profile_id, $request_url );
+
+					if ( is_array( $filters ) ) {
+						$get_terms_args = array(
+							'fields' => 'names',
+						);
+
+						if ( in_array( 'location', $filters, true ) ) {
+							$profile_locations = wp_get_post_terms( get_the_ID(), 'wsuwp_university_location', $get_terms_args );
+							$locations = array_merge( $locations, $profile_locations );
+						}
+
+						if ( in_array( 'unit', $filters, true ) ) {
+							$profile_units = wp_get_post_terms( get_the_ID(), 'wsuwp_university_org', $get_terms_args );
+							$units = array_merge( $units, $profile_units );
+						}
+					}
 				}
 				wp_reset_postdata();
 
@@ -651,7 +736,12 @@ class WSUWP_People_Directory_Page_Template {
 			'ids' => $ids,
 			'layout' => $layout,
 			'people' => $people_array,
-			'actions_template' => plugin_dir_path( dirname( __FILE__ ) ) . 'templates/directory-actions.php',
+			'filters' => array(
+				'options' => $filters,
+				'template' => plugin_dir_path( dirname( __FILE__ ) ) . 'templates/filters.php',
+				'location' => array_unique( $locations ),
+				'unit' => array_unique( $units ),
+			),
 			'person_card_template' => ( $theme_template ) ? $theme_template : plugin_dir_path( dirname( __FILE__ ) ) . 'templates/person.php',
 			'profile_display_options' => array(
 				'directory_view' => true,
