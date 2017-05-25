@@ -239,6 +239,7 @@ class WSUWP_Person_Display {
 				if ( is_admin() ) {
 					$card_attributes .= ' data-nid="' . $person->nid . '"';
 					$card_attributes .= ' data-post-id="' . $local_record_id . '"';
+					$card_attributes .= ' data-listed="' . implode( ' ', $person->listed_on ) . '"';
 					$card_attributes .= ' aria-checked="false"';
 				}
 			}

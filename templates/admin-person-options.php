@@ -6,11 +6,7 @@
  */
 ?>
 <div class="wsu-person-controls">
-	<button type="button"
-			class="wsu-person-edit"
-			aria-label="Edit"
-			data-id="<?php echo esc_attr( $person->id ); ?>"
-			data-listed="<?php echo esc_attr( implode( ' ', $person->listed_on ) ); ?>">
+	<button type="button" class="wsu-person-edit" aria-label="Edit">
 		<span class="dashicons dashicons-edit"></span>
 	</button>
 	<button type="button" class="wsu-person-remove" aria-label="Remove">
