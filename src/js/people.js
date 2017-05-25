@@ -22,20 +22,61 @@
 			url: window.wsu_people_rest_url + profile_id
 		} )
 		.done( function( response ) {
+			var email = ( response.email_alt ) ? response.email_alt : response.email,
+				phone = ( response.phone_alt ) ? response.phone_alt : response.phone,
+				office = ( response.office_alt ) ? response.office_alt : response.office,
+				photo = false,
+				title = response.position_title,
+				about = response.content.rendered,
+				photo_index = $person.data( "photo" ),
+				title_index = $person.data( "title" ),
+				about_index = $person.data( "about" );
+
+			// Grabs the locally set photo, taking care to avoid any undefined properties.
+			if ( photo_index && response.photos[ photo_index ] ) {
+				photo = ( response.photos[ photo_index ].thumbnail ) ? response.photos[ photo_index ].thumbnail : response.photos[ photo_index ].full;
+			} else if ( response.photos[ 0 ] ) {
+				photo = ( response.photos[ 0 ].thumbnail ) ? response.photos[ 0 ].thumbnail : response.photos[ 0 ].full;
+			}
+
+			// Grabs the locally set title.
+			if ( title_index && response.working_titles.length ) {
+				if ( String( title_index ).indexOf( " " ) > 0 ) {
+					var titles = [];
+
+					$.each( title_index.split( " " ), function( i ) {
+						if ( response.working_titles[ i ] ) {
+							titles.push( response.working_titles[ i ] );
+						}
+					} );
+
+					title = titles.join( "<br />" );
+				} else if ( response.working_titles[ title_index ] ) {
+					title = response.working_titles[ title_index ];
+				}
+			} else if ( response.working_titles.length ) {
+				title = response.working_titles.join( "<br />" );
+			}
+
+			// Grabs the locally set "about" content.
+			if ( about_index && "" !== response[ about_index ] ) {
+				about = response[ about_index ];
+			}
+
 			focused_before_modal = document.activeElement;
 
 			$( "body > a, body > div" ).attr( "aria-hidden", "true" );
 
-			$( "body" ).append( lightbox_template( {
-				name: $person.find( ".name" ).text(), // Seems like a good idea.
-				photo: response.photos[ 0 ].medium, // Revisit
-				title: response.position_title, // Revisit
-				email: $person.find( ".email a" ).text(),
-				phone: $person.find( ".phone" ).text(),
-				office: $person.find( ".office" ).text(),
-				address: $person.find( ".address" ).text(),
-				website: $person.find( ".website a" ).attr( "href" ),
-				content: response.content.rendered // Revisit
+			$( "body" ).addClass( "wsu-people-lightbox-open" ).append( lightbox_template( {
+				name: $person.find( ".name" ).text(), // Seems like a good idea to grab this locally.
+				photo: photo,
+				title: title,
+				email: email,
+				phone: phone,
+				office: office,
+				address: response.address,
+				website: response.website,
+				about: about
 			} ) );
 
 			$( "#wsu-person-name" ).focus();
@@ -118,6 +159,8 @@
 	// Closes the modal.
 	function close_people_modal() {
 		$( ".wsu-people-lightbox" ).remove();
+
+		$( "body" ).removeClass( "wsu-people-lightbox-open" );
 
 		$( "body > a, body > div" ).removeAttr( "aria-hidden" );
 

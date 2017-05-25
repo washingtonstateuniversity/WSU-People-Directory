@@ -8,11 +8,7 @@
  * @var object $person
  */
 ?>
-<article class="<?php echo esc_attr( $display['card_classes'] ); ?>"
-		 data-profile-id="<?php echo esc_attr( $person->id ); ?>"<?php if ( is_admin() ) { ?>
-		 data-nid="<?php echo esc_attr( $person->nid ); ?>"
-		 data-post-id="<?php echo esc_attr( $display['local_record_id'] ); ?>"
-		 aria-checked="false"<?php } ?>>
+<article class="<?php echo esc_attr( $display['card_classes'] ); ?>"<?php echo wp_kses_post( $display['card_attributes'] ); ?>>
 
 	<div class="card">
 

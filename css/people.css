@@ -331,30 +331,27 @@ input[type="search"]::-webkit-search-decoration {
 }
 
 /* Lightbox */
+.wsu-people-lightbox-open {
+	overflow: hidden;
+}
+
 .wsu-people-lightbox {
-	-webkit-box-align: center;
-	    -ms-flex-align: center;
-	        align-items: center;
 	background: rgba(0, 0, 0, .75);
-	display: -webkit-box;
-	display: -ms-flexbox;
-	display: flex;
-	height: 100%;
-	-webkit-box-pack: center;
-	    -ms-flex-pack: center;
-	        justify-content: center;
+	bottom: 0;
 	left: 0;
+	overflow-y: scroll;
 	position: fixed;
 	top: 0;
-	width: 100%;
+	right: 0;
 	z-index: 100000;
 }
 
 .wsu-people-lightbox .wsu-person {
 	background: #fff;
 	box-sizing: border-box;
-	height: 90%;
+	margin: 2rem auto;
 	max-width: 990px;
+	min-height: 90vh;
 	padding: 2rem;
 	position: relative;
 	width: 90%;
@@ -368,6 +365,7 @@ button.wsu-people-lightbox-close {
 	font-size: 20px;
 	left: 0;
 	line-height: 2rem;
+	margin: 0;
 	padding: 0;
 	position: absolute;
 	top: 0;

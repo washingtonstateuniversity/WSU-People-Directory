@@ -165,6 +165,7 @@ class WSUWP_Person_Display {
 	 */
 	public static function get_data( $person, $options = array() ) {
 		$card_classes = 'wsu-person';
+		$card_attributes = '';
 		$ad_phone = ( ! empty( $person->phone_ext ) ) ? $person->phone . ' ext ' . $person->phone_ext : $person->phone;
 		$local_record_id = false;
 
@@ -214,6 +215,31 @@ class WSUWP_Person_Display {
 
 				foreach ( $units as $unit ) {
 					$card_classes .= ' unit-' . sanitize_title( $unit );
+				}
+
+				// Add attributes to be leveraged for opening this profile in a modal.
+				if ( 'lightbox' === $options['link']['profile'] ) {
+					$card_attributes .= ' data-profile-id="' . $person->id . '"';
+
+					if ( ! is_admin() ) {
+						if ( $single_display_photo ) {
+							$card_attributes .= ' data-photo="' . $single_display_photo . '"';
+						}
+
+						if ( $single_display_title ) {
+							$card_attributes .= ' data-title="' . $single_display_title . '"';
+						}
+
+						if ( $single_display_bio ) {
+							$card_attributes .= ' data-about="' . $single_display_bio . '"';
+						}
+					}
+				}
+
+				if ( is_admin() ) {
+					$card_attributes .= ' data-nid="' . $person->nid . '"';
+					$card_attributes .= ' data-post-id="' . $local_record_id . '"';
+					$card_attributes .= ' aria-checked="false"';
 				}
 			}
 		}
@@ -271,6 +297,7 @@ class WSUWP_Person_Display {
 
 		$data = array(
 			'card_classes' => $card_classes,
+			'card_attributes' => $card_attributes,
 			'name' => $person->title->rendered,
 			'title' => $title,
 			'email' => ( ! empty( $person->email_alt ) ) ? $person->email_alt : $person->email,

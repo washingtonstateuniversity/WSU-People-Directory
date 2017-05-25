@@ -841,9 +841,11 @@ class WSUWP_People_Directory_Page_Template {
 
 						<h2 class="name" id="wsu-person-name" tabindex="0"><%= name %></h2>
 
+						<% if ( photo ) { %>
 						<figure class="photo">
 							<img src="<%= photo %>" alt="<%= name %>" />
 						</figure>
+						<% } %>
 
 						<div class="contact">
 							<div class="title"><%= title %></div>
@@ -851,12 +853,14 @@ class WSUWP_People_Directory_Page_Template {
 							<div class="phone"><%= phone %></div>
 							<div class="office"><%= office %></div>
 							<div class="address"><%= address %></div>
+							<% if ( website ) { %>
 							<div class="website"><a href="<%= website %>"><%= website %></a></div>
+							<% } %>
 						</div>
 
 					</div>
 
-					<div class="about"><%= content %></div>
+					<div class="about"><%= about %></div>
 
 					<button type="button" class="wsu-people-lightbox-close" aria-label="Close this dialog window">&times;</button>
 
