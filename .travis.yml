@@ -48,8 +48,7 @@ before_script:
     fi
   - |
     if [[ "$WP_TRAVISCI" == "grunt" ]] ; then
-      composer global require wp-coding-standards/wpcs
-      phpcs --config-set installed_paths $HOME/.composer/vendor/wp-coding-standards/wpcs
+      composer install
       npm --version
       node --version
       nvm install stable
