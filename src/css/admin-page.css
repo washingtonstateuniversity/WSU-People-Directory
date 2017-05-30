@@ -1,7 +1,20 @@
 #wsuwp-people-directory-configuration,
 #wsuwp-people-directory-configuration .delete-selected-people,
-#wsuwp-people-directory-configuration .select-all-people {
+#wsuwp-people-directory-configuration .select-all-people,
+.wsu-people-directory-extra-options {
 	display: none;
+}
+
+.wsu-people-directory-options-header {
+	font-weight: 700;
+}
+
+.wsu-people-directory-options {
+	padding: 0 0 0 1em;
+}
+
+.wsu-people-directory-extra-options .wsu-people-directory-options-header:first-child {
+	margin-top: 0;
 }
 
 .wsu-people-bulk-actions {
@@ -10,6 +23,23 @@
 
 .wsu-people-admin-wrapper {
 	position: relative;
+}
+
+.wsu-people .spinner {
+	display: block;
+	float: none;
+	margin: 20px auto;
+	visibility: visible;
+}
+
+.wsu-people-filter.search {
+	background: none;
+	pointer-events: none;
+}
+
+.wsu-people-filter-label {
+	font-size: 14px;
+	margin: 0;
 }
 
 .wsu-person {
@@ -26,6 +56,7 @@
 }
 
 #poststuff .wsu-person .name {
+	color: #717171;
 	font-size: 1rem;
 	font-weight: 700;
 	padding: 8px 0 3.2px;
@@ -35,6 +66,14 @@
 	color: #981e32;
 	pointer-events: none;
 	text-decoration: none;
+}
+
+#poststuff .wsu-person.link .name {
+	color: #981e32;
+}
+
+#poststuff .wsu-person.no-link .name a {
+	color: #717171;
 }
 
 .wsu-person .about p {

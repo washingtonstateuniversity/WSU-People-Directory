@@ -7,6 +7,8 @@
 		$profile_ids = $( "#directory-page-profile-ids" ),
 		$layout_option = $( "#wsu-people-directory-layout" ),
 		$photos_option = $( "#wsu-people-directory-show-photos" ),
+		$about_option = $( "#wsu-people-directory-about" ),
+		$link_option = $( "#wsu-people-directory-link" ),
 		organizations = $( "#wsuwp_university_orgchecklist .selectit" ).map( function() { return $( this ).text(); } ).get(),
 		$bulk_select = $( ".toggle-select-mode" ),
 		$select_all = $( ".select-all-people" ),
@@ -44,6 +46,15 @@
 			}
 		} );
 
+		// Update layout class when the "Layout" option is changed.
+		$layout_option.on( "change", function() {
+			var $layout = $( this ).val();
+			$layout_option.find( "option" ).not( ":selected" ).each( function() {
+				$people_wrapper.removeClass( $( this ).val() );
+			} );
+			$people_wrapper.addClass( $layout );
+		} );
+
 		// Toggle the "photos" class when the "Show Photos" option is changed.
 		$photos_option.on( "change", function() {
 			if ( "yes" === $( this ).val() ) {
@@ -53,13 +64,35 @@
 			}
 		} );
 
-		// Update layout class when the "Layout" option is changed.
-		$layout_option.on( "change", function() {
-			var $layout = $( this ).val();
-			$layout_option.find( "option" ).not( ":selected" ).each( function() {
-				$people_wrapper.removeClass( $( this ).val() );
+		// Update each profile's "about" content when the "about" option is changed.
+		$about_option.on( "change", function() {
+			var option_value = $( this ).val();
+
+			$people.find( ".wsu-person" ).each( function() {
+				var $about_option_container = $( this ).find( "div[data-key='" + option_value + "']" ),
+					$about_container = $( this ).find( ".about" );
+
+				if ( "none" === option_value || !$about_option_container.length ) {
+					$about_container.html( "" );
+				} else {
+					$about_container.html( $about_option_container.find( ".content" ).html() );
+				}
 			} );
-			$people_wrapper.addClass( $layout );
+		} );
+
+		// Update each profile when the "link" option is changed.
+		$link_option.on( "change", function() {
+			var option_value = $( this ).val();
+
+			$people.find( ".wsu-person" ).each( function() {
+				var $personal_bio = $( this ).find( "div[data-key='personal']" );
+
+				if ( "no" === option_value || ( "if_bio" === option_value && !$personal_bio.length ) ) {
+					$( this ).addClass( "no-link" ).removeClass( "link" );
+				} else {
+					$( this ).removeClass( "no-link" ).addClass( "link" );
+				}
+			} );
 		} );
 
 		// Use jQuery UI Sortable to allow reordering of people.
@@ -241,6 +274,10 @@
 
 	// Get all the people for the given organization via a REST request.
 	function make_request( ui ) {
+
+		// Display a loading indicator.
+		$people.html( "<span class='spinner'></span>" );
+
 		$.ajax( {
 			url: window.wsuwp_people_edit_page.rest_url,
 			data: {
@@ -248,10 +285,17 @@
 				per_page: 100
 			}
 		} ).done( function( response ) {
+
+			// Remove the loading indicator.
+			$people.find( ".spinner" ).remove();
+
 			if ( response.length !== 0 ) {
 				response.sort( sort_response );
 				create_person( response );
 				load_photos();
+
+				// Display the rest of the directory options now that they're relevant.
+				$( ".wsu-people-directory-extra-options" ).slideDown();
 			}
 		} );
 	}
@@ -281,7 +325,7 @@
 				return this.value + " " + data.id;
 			} );
 
-			$( ".wsu-people" ).append( $person_template( {
+			$people.append( $person_template( {
 				nid: data.nid,
 				id: data.id,
 				has_photo: ( 0 < data.photos.length ) ? " has-photo" : "",

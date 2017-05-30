@@ -57,6 +57,11 @@ class WSUWP_People_Directory_Page_Template {
 			'description' => 'Whether to show photos on this people listing',
 			'sanitize_callback' => 'sanitize_text_field',
 		),
+		'_wsu_people_directory_filters' => array(
+			'type' => 'array',
+			'description' => 'Various methods by which to filter a directory',
+			'sanitize_callback' => 'WSUWP_People_Directory_Page_Template::sanitize_filter_checkboxes',
+		),
 	);
 
 	/**
@@ -88,6 +93,7 @@ class WSUWP_People_Directory_Page_Template {
 
 		add_filter( 'theme_page_templates', array( $this, 'add_directory_template' ) );
 		add_filter( 'template_include', array( $this, 'template_include' ) );
+		add_action( 'wp_footer', array( $this, 'person_lightbox_template' ) );
 	}
 
 	/**
@@ -164,10 +170,12 @@ class WSUWP_People_Directory_Page_Template {
 
 		$directory_data = $this->directory_data( $post->ID );
 		?>
-			<div class="wsu-people-directory-add">
+			<p class="wsu-people-directory-options-header">Add People</p>
+
+			<div class="wsu-people-directory-options add">
 
 				<p>
-					<label for="wsu-people-import">Import/add people</label>
+					<label for="wsu-people-import">Organization</label>
 					<input type="text" id="wsu-people-import" value="" />
 					<input type="hidden"
 						   id="directory-page-profile-ids"
@@ -177,7 +185,11 @@ class WSUWP_People_Directory_Page_Template {
 
 			</div>
 
-			<div class="wsu-people-directory-display">
+			<?php if ( 'raw' === $post->filter ) { ?><div class="wsu-people-directory-extra-options"><?php } ?>
+
+			<p class="wsu-people-directory-options-header">Display Options</p>
+
+			<div class="wsu-people-directory-options display">
 
 				<p>
 					<label for="wsu-people-directory-layout">Layout</label>
@@ -189,17 +201,6 @@ class WSUWP_People_Directory_Page_Template {
 				</p>
 
 				<p>
-					<label for="wsu-people-directory-about">About</label>
-					<select id="wsu-people-directory-about" name="_wsu_people_directory_about">
-						<option value="personal"<?php selected( 'bio_personal', $directory_data['profile_display_options']['about'] ); ?>>Personal Biography</option>
-						<option value="bio_unit"<?php selected( 'bio_unit', $directory_data['profile_display_options']['about'] ); ?>>Unit Biography</option>
-						<option value="bio_university"<?php selected( 'bio_university', $directory_data['profile_display_options']['about'] ); ?>>University Biography</option>
-						<option value="bio_tags"<?php selected( 'bio_tags', $directory_data['profile_display_options']['about'] ); ?>>Tags</option>
-						<option value="none"<?php selected( 'none', $directory_data['profile_display_options']['about'] ); ?>>None</option>
-					</select>
-				</p>
-
-				<p>
 					<label for="wsu-people-directory-show-photos">Show photos</label>
 					<select id="wsu-people-directory-show-photos" name="_wsu_people_directory_show_photos">
 						<option value="yes"<?php selected( 'yes', $directory_data['profile_display_options']['photo'] ); ?>>Yes</option>
@@ -207,9 +208,22 @@ class WSUWP_People_Directory_Page_Template {
 					</select>
 				</p>
 
+				<p>
+					<label for="wsu-people-directory-about">About</label>
+					<select id="wsu-people-directory-about" name="_wsu_people_directory_about">
+						<option value="personal"<?php selected( 'bio_personal', $directory_data['profile_display_options']['about'] ); ?>>Personal Biography</option>
+						<option value="bio_unit"<?php selected( 'bio_unit', $directory_data['profile_display_options']['about'] ); ?>>Unit Biography</option>
+						<option value="bio_university"<?php selected( 'bio_university', $directory_data['profile_display_options']['about'] ); ?>>University Biography</option>
+						<option value="tags"<?php selected( 'tags', $directory_data['profile_display_options']['about'] ); ?>>Tags</option>
+						<option value="none"<?php selected( 'none', $directory_data['profile_display_options']['about'] ); ?>>None</option>
+					</select>
+				</p>
+
 			</div>
 
-			<div class="wsu-people-directory-functions">
+			<p class="wsu-people-directory-options-header">Interaction Options</p>
+
+			<div class="wsu-people-directory-options interaction">
 
 				<p>
 					<label for="wsu-people-directory-link">Link to full profiles</label>
@@ -227,6 +241,61 @@ class WSUWP_People_Directory_Page_Template {
 						<option value="lightbox"<?php selected( 'lightbox', $directory_data['profile_display_options']['link']['profile'] ); ?>>Lightbox</option>
 					</select>
 				</p>
+
+				<p>Allow filtering by</p>
+
+				<ul>
+					<li>
+						<label>
+							<input type="checkbox"
+								   name="_wsu_people_directory_filters[]"
+								   value="search"
+									<?php if ( is_array( $directory_data['filters']['options'] ) && in_array( 'search', $directory_data['filters']['options'], true ) ) { echo 'checked="checked"'; } ?>>
+							Search
+						</label>
+					</li>
+					<li>
+						<label>
+							<input type="checkbox"
+								   name="_wsu_people_directory_filters[]"
+								   value="location"
+									<?php if ( is_array( $directory_data['filters']['options'] ) && in_array( 'location', $directory_data['filters']['options'], true ) ) { echo 'checked="checked"'; } ?>>
+							Location
+						</label>
+					</li>
+					<li>
+						<label>
+							<input type="checkbox"
+								   name="_wsu_people_directory_filters[]"
+								   value="unit"
+									<?php if ( is_array( $directory_data['filters']['options'] ) && in_array( 'unit', $directory_data['filters']['options'], true ) ) { echo 'checked="checked"'; } ?>>
+							Unit
+						</label>
+					</li>
+				</ul>
+
+			</div>
+
+			<div class="wsu-people-bulk-actions">
+
+				<button type="button" class="button toggle-select-mode">Bulk Select</button>
+
+				<button type="button" class="button select-all-people">Select All</button>
+
+				<button type="button" class="button button-primary delete-selected-people" disabled="disabled">Delete Selected</button>
+
+			</div>
+
+			<?php if ( 'raw' === $post->filter ) { ?></div><?php } ?>
+
+			<div class="wsu-people-admin-wrapper">
+
+				<?php include plugin_dir_path( dirname( __FILE__ ) ) . 'templates/people.php'; ?>
+
+				<div class="wsu-person-controls-tooltip" role="presentation">
+					<div class="wsu-person-controls-tooltip-arrow"></div>
+					<div class="wsu-person-controls-tooltip-inner"></div>
+				</div>
 
 			</div>
 
@@ -277,28 +346,33 @@ class WSUWP_People_Directory_Page_Template {
 
 			</script>
 
-			<div class="wsu-people-bulk-actions">
-
-				<button type="button" class="button toggle-select-mode">Bulk Select</button>
-
-				<button type="button" class="button select-all-people">Select All</button>
-
-				<button type="button" class="button button-primary delete-selected-people" disabled="disabled">Delete Selected</button>
-
-			</div>
-
-			<div class="wsu-people-admin-wrapper">
-
-				<?php include plugin_dir_path( dirname( __FILE__ ) ) . 'templates/people.php'; ?>
-
-				<div class="wsu-person-controls-tooltip" role="presentation">
-					<div class="wsu-person-controls-tooltip-arrow"></div>
-					<div class="wsu-person-controls-tooltip-inner"></div>
-				</div>
-
-			</div>
-
 		<?php
+	}
+
+	/**
+	 * Sanitizes filter checkboxes.
+	 *
+	 * @since 0.3.0
+	 *
+	 * @param array $values
+	 *
+	 * @return array
+	 */
+	public static function sanitize_filter_checkboxes( $values ) {
+		if ( ! is_array( $values ) || 0 === count( $values ) ) {
+			return array();
+		}
+
+		$sanitized_values = array();
+		$accepted_values = array( 'search', 'location', 'unit' );
+
+		foreach ( $values as $index => $value ) {
+			if ( in_array( $value, $accepted_values, true ) ) {
+				$sanitized_values[] = sanitize_text_field( $value );
+			}
+		}
+
+		return $sanitized_values;
 	}
 
 	/**
@@ -335,6 +409,8 @@ class WSUWP_People_Directory_Page_Template {
 
 				// Each piece of meta is registered with sanitization.
 				update_post_meta( $post_id, $key, $_POST[ $key ] );
+			} else {
+				delete_post_meta( $post_id, $key );
 			}
 		}
 
@@ -569,6 +645,10 @@ class WSUWP_People_Directory_Page_Template {
 		$ids = get_post_meta( $post_id, '_wsu_people_directory_profile_ids', true );
 		$people_array = array();
 
+		$filters = get_post_meta( $post_id, '_wsu_people_directory_filters', true );
+		$locations = array();
+		$units = array();
+
 		// Loop through the local records in their display order and add an `include`
 		// parameter to the request URL for each one, then leverage `orderby=include`
 		// to retrieve the primary records in the desired order. Silly, but effective.
@@ -601,6 +681,22 @@ class WSUWP_People_Directory_Page_Template {
 					$people->the_post();
 					$profile_id = get_post_meta( get_the_ID(), '_wsuwp_profile_post_id', true );
 					$request_url = add_query_arg( 'include[]', $profile_id, $request_url );
+
+					if ( is_array( $filters ) ) {
+						$get_terms_args = array(
+							'fields' => 'names',
+						);
+
+						if ( in_array( 'location', $filters, true ) ) {
+							$profile_locations = wp_get_post_terms( get_the_ID(), 'wsuwp_university_location', $get_terms_args );
+							$locations = array_merge( $locations, $profile_locations );
+						}
+
+						if ( in_array( 'unit', $filters, true ) ) {
+							$profile_units = wp_get_post_terms( get_the_ID(), 'wsuwp_university_org', $get_terms_args );
+							$units = array_merge( $units, $profile_units );
+						}
+					}
 				}
 				wp_reset_postdata();
 
@@ -640,7 +736,12 @@ class WSUWP_People_Directory_Page_Template {
 			'ids' => $ids,
 			'layout' => $layout,
 			'people' => $people_array,
-			'actions_template' => plugin_dir_path( dirname( __FILE__ ) ) . 'templates/directory-actions.php',
+			'filters' => array(
+				'options' => $filters,
+				'template' => plugin_dir_path( dirname( __FILE__ ) ) . 'templates/filters.php',
+				'location' => array_unique( $locations ),
+				'unit' => array_unique( $units ),
+			),
 			'person_card_template' => ( $theme_template ) ? $theme_template : plugin_dir_path( dirname( __FILE__ ) ) . 'templates/person.php',
 			'profile_display_options' => array(
 				'directory_view' => true,
@@ -679,7 +780,11 @@ class WSUWP_People_Directory_Page_Template {
 		// Enqueue styles and scripts if appropriate.
 		if ( 'custom' !== get_post_meta( $post->ID, '_wsu_people_directory_layout', true ) ) {
 			wp_enqueue_style( 'wsu-people', plugin_dir_url( dirname( __FILE__ ) ) . 'css/people.css', array(), WSUWP_People_Directory::$version );
-			wp_enqueue_script( 'wsu-people', plugin_dir_url( dirname( __FILE__ ) ) . 'js/people.min.js', array( 'jquery' ), WSUWP_People_Directory::$version );
+			wp_enqueue_script( 'wsu-people', plugin_dir_url( dirname( __FILE__ ) ) . 'js/people.min.js', array( 'jquery', 'underscore' ), WSUWP_People_Directory::$version, true );
+
+			if ( 'lightbox' === get_post_meta( $post->ID, '_wsu_people_directory_profile', true ) ) {
+				wp_localize_script( 'wsu-people', 'wsu_people_rest_url', trailingslashit( WSUWP_People_Directory::REST_URL() ) );
+			}
 		}
 
 		add_filter( 'the_content', array( $this, 'directory_content' ) );
@@ -711,5 +816,59 @@ class WSUWP_People_Directory_Page_Template {
 		$content = ob_get_clean();
 
 		return $content;
+	}
+
+	/**
+	 * Output the underscore template for lightbox profiles.
+	 *
+	 * @since 0.3.0
+	 */
+	public function person_lightbox_template() {
+		$post = get_post();
+
+		if ( 'lightbox' !== get_post_meta( $post->ID, '_wsu_people_directory_profile', true ) ) {
+			return;
+		}
+
+		?>
+		<script type="text/template" id="wsu-person-lightbox-template">
+
+			<div class="wsu-people-lightbox wsu-people-lightbox-close" tabindex="-1">
+
+				<article class="wsu-person" role="dialog" aria-labelledby="wsu-person-name">
+
+					<div class="card">
+
+						<h2 class="name" id="wsu-person-name" tabindex="0"><%= name %></h2>
+
+						<% if ( photo ) { %>
+						<figure class="photo">
+							<img src="<%= photo %>" alt="<%= name %>" />
+						</figure>
+						<% } %>
+
+						<div class="contact">
+							<div class="title"><%= title %></div>
+							<div class="email"><a href="mailto:<%= email %>"><%= email %></a></div>
+							<div class="phone"><%= phone %></div>
+							<div class="office"><%= office %></div>
+							<div class="address"><%= address %></div>
+							<% if ( website ) { %>
+							<div class="website"><a href="<%= website %>"><%= website %></a></div>
+							<% } %>
+						</div>
+
+					</div>
+
+					<div class="about"><%= about %></div>
+
+					<button type="button" class="wsu-people-lightbox-close" aria-label="Close this dialog window">&times;</button>
+
+				</article>
+
+			</div>
+
+		</script>
+		<?php
 	}
 }

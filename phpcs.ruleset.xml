@@ -5,6 +5,7 @@
     <rule ref="WordPress-Extra">
         <exclude name="WordPress.NamingConventions.ValidFunctionName" />
         <exclude name="Generic.PHP.DisallowAlternativePHPTags.MaybeASPShortOpenTagFound" />
+        <exclude name="Generic.PHP.DisallowAlternativePHPTags.MaybeASPOpenTagFound" />
         <exclude name="Squiz.Commenting.LongConditionClosingComment" />
     </rule>
 </ruleset>
