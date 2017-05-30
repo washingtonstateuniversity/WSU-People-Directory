@@ -244,7 +244,7 @@ input[type="search"]::-webkit-search-decoration {
 		margin-right: 0;
 	}
 
-	.table .has-photo .contact {
+	.table.photos .has-photo .contact {
 		margin-left: 0;
 	}
 }
