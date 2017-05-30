@@ -84,7 +84,6 @@ input[type="search"]::-webkit-search-decoration {
 	right: 1rem;
 	text-align: right;
 	top: 0;
-	-webkit-transition: -webkit-transform .25s;
 	transition: -webkit-transform .25s;
 	transition: transform .25s;
 	transition: transform .25s, -webkit-transform .25s;
