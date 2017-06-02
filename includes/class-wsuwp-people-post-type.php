@@ -303,12 +303,10 @@ class WSUWP_People_Post_Type {
 
 		add_action( 'admin_enqueue_scripts', array( $this, 'admin_enqueue_scripts' ) );
 
-		add_filter( 'enter_title_here', array( $this, 'enter_title_here' ) );
 		add_action( 'edit_form_after_title', array( $this, 'edit_form_after_title' ) );
 		add_action( 'edit_form_after_editor', array( $this, 'edit_form_after_editor' ) );
 
-		add_action( 'add_meta_boxes_' . self::$post_type_slug, array( $this, 'add_meta_boxes' ) );
-		add_action( 'do_meta_boxes', array( $this, 'do_meta_boxes' ), 10, 3 );
+		add_action( 'add_meta_boxes_' . self::$post_type_slug, array( $this, 'person_meta_boxes' ) );
 
 		add_filter( 'wp_insert_post_data', array( $this, 'wp_insert_post_data' ) );
 		add_action( 'save_post_' . self::$post_type_slug, array( $this, 'save_post' ) );
@@ -357,7 +355,6 @@ class WSUWP_People_Post_Type {
 			'menu_position' => 5,
 			'menu_icon' => 'dashicons-groups',
 			'supports' => array(
-				'title',
 				'editor',
 				'revisions',
 			),
@@ -411,6 +408,7 @@ class WSUWP_People_Post_Type {
 			return;
 		}
 
+		// Enqueue Edit/Add New Profile scripts and styles.
 		if ( 'post-new.php' === $hook_suffix || 'post.php' === $hook_suffix ) {
 			$post = get_post();
 			$profile_vars = array(
@@ -420,15 +418,16 @@ class WSUWP_People_Post_Type {
 			);
 
 			wp_enqueue_style( 'wsuwp-people-edit-profile', plugins_url( 'css/admin-person.css', dirname( __FILE__ ) ), array(), WSUWP_People_Directory::$version );
-			wp_enqueue_script( 'wsuwp-people-edit-profile', plugins_url( 'js/admin-edit-profile.min.js', dirname( __FILE__ ) ), array( 'jquery-ui-tabs', 'underscore' ), WSUWP_People_Directory::$version, true );
+			wp_enqueue_script( 'wsuwp-people-edit-profile', plugins_url( 'js/admin-edit-profile.min.js', dirname( __FILE__ ) ), array( 'underscore' ), WSUWP_People_Directory::$version, true );
 			wp_localize_script( 'wsuwp-people-edit-profile', 'wsuwp_people_edit_profile', $profile_vars );
 
-			// Disable autosaving for sites other than the primary directory.
+			// Disable autosaving on spoke sites.
 			if ( false === WSUWP_People_Directory::is_main_site() ) {
 				wp_dequeue_script( 'autosave' );
 			}
 		}
 
+		// Enqueue All Profiles list table scripts and styles.
 		if ( 'edit.php' === $hook_suffix && false === WSUWP_People_Directory::is_main_site() ) {
 			wp_enqueue_style( 'wsuwp-people-admin', plugins_url( 'css/admin-people.css', dirname( __FILE__ ) ), array(), WSUWP_People_Directory::$version );
 			wp_enqueue_script( 'wsuwp-people-admin', plugins_url( 'js/admin-people.min.js', dirname( __FILE__ ) ), array( 'jquery' ), WSUWP_People_Directory::$version );
@@ -500,28 +499,9 @@ class WSUWP_People_Post_Type {
 	}
 
 	/**
-	 * Change the "Enter title here" text for the people content type.
+	 * Adds the interface for editing a profile.
 	 *
-	 * @since 0.1.0
-	 *
-	 * @param string $title The placeholder text displayed in the title input field.
-	 *
-	 * @return string
-	 */
-	public function enter_title_here( $title ) {
-		$screen = get_current_screen();
-
-		if ( self::$post_type_slug === $screen->post_type ) {
-			$title = 'Enter name here';
-		}
-
-		return $title;
-	}
-
-	/**
-	 * Add tabs for each biography above the default editor.
-	 *
-	 * @since 0.1.0
+	 * @since 0.3.0
 	 *
 	 * @param WP_Post $post Post object.
 	 */
@@ -530,73 +510,181 @@ class WSUWP_People_Post_Type {
 			return;
 		}
 
-		do_meta_boxes( get_current_screen(), 'after_title', $post );
+		wp_nonce_field( 'wsuwp_profile', 'wsuwp_profile_nonce' );
 
+		// AD data
+		$nid = get_post_meta( $post->ID, '_wsuwp_profile_ad_nid', true );
+		$name_first = get_post_meta( $post->ID, '_wsuwp_profile_ad_name_first', true );
+		$name_last = get_post_meta( $post->ID, '_wsuwp_profile_ad_name_last', true );
+		$title = get_post_meta( $post->ID, '_wsuwp_profile_ad_title', true );
+		$email = get_post_meta( $post->ID, '_wsuwp_profile_ad_email', true );
+		$phone = get_post_meta( $post->ID, '_wsuwp_profile_ad_phone', true );
+		$phone_ext = get_post_meta( $post->ID, '_wsuwp_profile_ad_phone_ext', true );
+		$office = get_post_meta( $post->ID, '_wsuwp_profile_ad_office', true );
+		$address = get_post_meta( $post->ID, '_wsuwp_profile_ad_address', true );
+
+		// Override data.
+		$working_titles = get_post_meta( $post->ID, '_wsuwp_profile_title', true );
+		$email_alt = get_post_meta( $post->ID, '_wsuwp_profile_alt_email', true );
+		$phone_alt = get_post_meta( $post->ID, '_wsuwp_profile_alt_phone', true );
+		$office_alt = get_post_meta( $post->ID, '_wsuwp_profile_alt_office', true );
+		$address_alt = get_post_meta( $post->ID, '_wsuwp_profile_alt_address', true ); // This doesn't exist... yet
+
+		// Additional data.
+		$website = get_post_meta( $post->ID, '_wsuwp_profile_website', true );
+		$degrees = get_post_meta( $post->ID, '_wsuwp_profile_degree', true );
+		$photos = get_post_meta( $post->ID, '_wsuwp_profile_photos', true );
+
+		// Show the override data if it exists, otherwise show the AD data.
+		$email_value = ( $email_alt ) ? $email_alt : $email;
+		$office_value = ( $office_alt ) ? $office_alt : $office;
+		$phone_value = ( $phone_alt ) ? $phone_alt : $phone;
+		$address_value = ( $address_alt ) ? $address_alt : $address;
 		?>
-		<div id="wsuwp-profile-about-wrapper">
+		<div class="wsu-person" data-nid="<?php echo esc_html( $nid ); ?>">
 
-			<?php
-			$use_bio = false;
-			if ( false === WSUWP_People_Directory::is_main_site() ) {
-				$use_bio = get_post_meta( $post->ID, '_use_bio', true );
-				?>
-				<input type="hidden" class="use-bio" name="_use_bio" value="<?php echo esc_attr( $use_bio ); ?>" />
-				<?php
-			}
-			?>
-
-			<ul class="wsuwp-profile-about-tabs">
-				<li<?php if ( $use_bio && 'personal' === $use_bio ) { echo ' class="selected"'; } ?>
-					data-bio="personal">
-					<a href="#wsuwp-profile-default" class="nav-tab">Personal Biography</a>
+			<script type="text/template" class="wsu-person-repeatable-meta-template">
+				<div>
+					<div contenteditable="true" data-placeholder="Enter <%= type %> here"><%= value %></div>
+					<input type="hidden" name="_wsuwp_profile_<%= type %>[]" value="<%= value %>" />
 					<?php if ( false === WSUWP_People_Directory::is_main_site() ) { ?>
-					<button type="button" class="wsuwp-profile-button select">
-						<span class="dashicons dashicons-yes" aria-hidden="true"></span>
-						<span class="screen-reader-text"><?php
-						if ( $use_bio && 'personal' === $use_bio ) {
-							echo 'Deselect';
-						} else {
-							echo 'Select';
-						}
-						?></span>
+					<% if ( 'title' === type ) { %>
+					<button type="button" class="wsu-person-button wsu-person-select dashicons dashicons-yes">
+						<span class="screen-reader-text">Display</span>
 					</button>
+					<% } %>
 					<?php } ?>
-				</li>
-				<?php
-				foreach ( self::$post_meta_keys as $key => $args ) {
-					if ( ! isset( $args['render_as_wp_editor'] ) ) {
-						continue;
-					}
+					<button type="button" class="wsu-person-button wsu-person-remove dashicons dashicons-no">
+						<span class="screen-reader-text">Delete</span>
+					</button>
+				</div>
+			</script>
 
-					?>
-					<li<?php if ( $use_bio && $key === $use_bio ) { echo ' class="selected"'; } ?>
-						data-bio="<?php echo esc_attr( $key ); ?>">
-						<a href="#<?php echo esc_attr( $key ); ?>" class="nav-tab"><?php echo esc_html( $args['description'] ); ?></a>
-						<?php if ( false === WSUWP_People_Directory::is_main_site() ) { ?>
-						<button type="button" class="wsuwp-profile-button select">
-							<span class="dashicons dashicons-yes" aria-hidden="true"></span>
-							<span class="screen-reader-text"><?php
-							if ( $use_bio && $key === $use_bio ) {
-								echo 'Deselect';
-							} else {
-								echo 'Select';
-							}
-							?></span>
-						</button>
+			<div class="wsu-person-card">
+
+				<header>
+
+					<div contenteditable="true"
+						 class="wsu-person-name"
+						 data-placeholder="Enter name here"><?php echo esc_html( $post->post_title ); ?></div>
+					<input type="hidden" name="post_title" value="<?php echo esc_attr( $post->post_title ); ?>" />
+
+					<div class="wsu-person-repeatable-meta wsu-person-degree">
+					<?php if ( $degrees && is_array( $degrees ) ) { ?>
+						<?php foreach ( $degrees as $degree ) { ?>
+						<div>
+							<div contenteditable="true" data-placeholder="Enter degree here"><?php echo esc_html( $degree ); ?></div>
+							<input type="hidden" name="_wsuwp_profile_degree[]" value="<?php echo esc_attr( $degree ); ?>" />
+							<button type="button" class="wsu-person-button wsu-person-remove dashicons dashicons-no">
+								<span class="screen-reader-text">Delete</span>
+							</button>
+						</div>
 						<?php } ?>
-					</li>
+					<?php } else { ?>
+						<div>
+							<div contenteditable="true" data-placeholder="Enter degree here"></div>
+							<input type="hidden" name="_wsuwp_profile_degree[]" value="" />
+							<button type="button" class="wsu-person-button wsu-person-remove dashicons dashicons-no">
+								<span class="screen-reader-text">Delete</span>
+							</button>
+						</div>
+					<?php } ?>
+						<button type="button"
+							    data-type="degree"
+							    class="wsu-person-button wsu-person-add-repeatable-meta">+ Add another degree</button>
+					</div>
+
+				</header>
+
+				<figure class="wsu-person-photo">
+
 					<?php
-				}
-				?>
-			</ul>
-			<div id="wsuwp-profile-default" class="wsuwp-profile-panel">
+					if ( $photos && is_array( $photos ) ) {
+						foreach ( $photos as $photo ) {
+							echo '';
+						}
+					} else {
+						?><figcaption>Add photo(s) here</figcaption><?php
+					}
+					?>
+
+				</figure>
+
+				<div class="wsu-person-contact">
+
+					<div class="wsu-person-repeatable-meta wsu-person-title">
+						<?php if ( $working_titles && is_array( $working_titles ) ) { ?>
+						<?php foreach ( $working_titles as $i => $working_title ) { ?>
+						<div>
+							<div contenteditable="true" data-placeholder="Enter title here"><?php echo esc_html( $working_title ); ?></div>
+							<input type="hidden" name="_wsuwp_profile_title[]" value="<?php echo esc_attr( $working_title ); ?>" />
+							<?php if ( false === WSUWP_People_Directory::is_main_site() ) { ?>
+							<button type="button" class="wsu-person-button wsu-person-select dashicons dashicons-yes">
+								<span class="screen-reader-text">Select to display</span>
+							</button>
+							<?php } ?>
+							<button type="button" class="wsu-person-button wsu-person-remove dashicons dashicons-no">
+								<span class="screen-reader-text">Delete</span>
+							</button>
+						</div>
+						<?php } ?>
+						<?php } else { ?>
+						<div>
+							<div contenteditable="true" data-placeholder="Enter title here"><?php echo esc_html( $title ); ?></div>
+							<input type="hidden" name="_wsuwp_profile_title[]" value="<?php echo esc_attr( $title ); ?>" />
+							<?php if ( false === WSUWP_People_Directory::is_main_site() ) { ?>
+							<button type="button" class="wsu-person-button wsu-person-select dashicons dashicons-yes">
+								<span class="screen-reader-text">Select to display</span>
+							</button>
+							<?php } ?>
+							<button type="button" class="wsu-person-button wsu-person-remove dashicons dashicons-no">
+								<span class="screen-reader-text">Delete</span>
+							</button>
+						</div>
+						<?php } ?>
+						<button type="button"
+								data-type="title"
+							    class="wsu-person-button wsu-person-add-repeatable-meta">+ Add another title</button>
+					</div>
+
+					<div contenteditable="true"
+						 class="wsu-person-email"
+						 data-placeholder="Enter email address here"><?php echo esc_html( $email_value ); ?></div>
+					<input type="hidden" name="_wsuwp_profile_alt_email" value="<?php echo esc_attr( $email_value ); ?>" /><br />
+
+					<div contenteditable="true"
+						 class="wsu-person-phone"
+						 data-placeholder="Enter phone number here (xxx-xxx-xxxx)"><?php echo esc_html( $phone_value ); ?></div>
+					<input type="hidden" name="_wsuwp_profile_alt_phone" value="<?php echo esc_attr( $phone_value ); ?>" /><br />
+
+					<div contenteditable="true"
+						 class="wsu-person-office"
+						 data-placeholder="Enter office here"><?php echo esc_html( $office_value ); ?></div>
+					<input type="hidden" name="_wsuwp_profile_alt_office" value="<?php echo esc_attr( $office_value ); ?>" /><br />
+
+					<div contenteditable="true"
+						 class="wsu-person-address"
+						 data-placeholder="Enter mailing address here"><?php echo esc_html( $address_value ); ?></div>
+					<input type="hidden" name="_wsuwp_profile_alt_address" value="<?php echo esc_attr( $address_value ); ?>" /><br />
+
+					<div contenteditable="true"
+						 class="wsu-person-website"
+						 data-placeholder="Enter website URL here"><?php echo esc_html( $website ); ?></div>
+					<input type="hidden" name="_wsuwp_profile_website" value="<?php echo esc_attr( $website ); ?>" />
+
+				</div>
+
+			</div>
+
+			<div class="wsu-person-about">
 		<?php
 	}
 
 	/**
-	 * Add panels for each biography below the default editor.
+	 * Continues the interface for editing a profile.
+	 * This piece includes the TinyMCE editors for biographical data entry.
 	 *
-	 * @since 0.1.0
+	 * @since 0.3.0
 	 *
 	 * @param WP_Post $post Post object.
 	 */
@@ -604,57 +692,44 @@ class WSUWP_People_Post_Type {
 		if ( self::$post_type_slug !== $post->post_type ) {
 			return;
 		}
-		?>
-			</div><!--wsuwp-profile-default-->
 
-			<?php
-			foreach ( self::$post_meta_keys as $key => $args ) {
-				if ( ! isset( $args['render_as_wp_editor'] ) ) {
-					continue;
-				}
-
-				$value = get_post_meta( $post->ID, $args['meta_key'], true );
-				?>
-				<div id="<?php echo esc_attr( $key ); ?>" class="wsuwp-profile-panel">
-					<?php
-					if ( '_wsuwp_profile_bio_university' === $args['meta_key'] && ! current_user_can( 'create_sites' ) ) {
-						echo '<div class="readonly">' . wp_kses_post( apply_filters( 'the_content', $value ) ) . '</div>';
-					} else {
-						wp_editor( $value, $args['meta_key'] );
-					}
-					?>
-				</div>
-				<?php
+		foreach ( self::$post_meta_keys as $key => $args ) {
+			if ( ! isset( $args['render_as_wp_editor'] ) ) {
+				continue;
 			}
-			?>
 
-		</div><!--wsuwp-profile-tabs-->
+			$value = get_post_meta( $post->ID, $args['meta_key'], true );
+
+			if ( '_wsuwp_profile_bio_university' === $args['meta_key'] && ! current_user_can( 'create_sites' ) ) {
+				echo '<div class="readonly">' . wp_kses_post( apply_filters( 'the_content', $value ) ) . '</div>';
+			} else {
+				wp_editor( $value, $args['meta_key'] );
+			}
+		}
+		?>
+
+		</div><!--wsuwp-person-about-->
+		</div><!--wsuwp-person-->
 		<?php
 	}
 
 	/**
-	 * Add the meta boxes used for capturing information about a person.
+	 * Handles the meta boxes used for capturing information about a person.
 	 *
-	 * @since 0.1.0
+	 * @since 0.3.0
+	 *
+	 * @param WP_Post $post The post object.
 	 */
-	public function add_meta_boxes() {
-		add_meta_box(
-			'wsuwp_profile_additional_info',
-			'Additional Profile Information',
-			array( $this, 'display_additional_info_meta_box' ),
-			self::$post_type_slug,
-			'after_title',
-			'high'
-		);
+	public function person_meta_boxes( $post ) {
+		remove_meta_box( 'submitdiv', self::$post_type_slug, 'side' );
+		remove_meta_box( 'wsuwp_university_orgdiv', self::$post_type_slug, 'side' );
+		remove_meta_box( 'wsuwp_university_categorydiv', self::$post_type_slug, 'side' );
+		remove_meta_box( 'wsuwp_university_locationdiv', self::$post_type_slug, 'side' );
+		remove_meta_box( 'classificationdiv', self::$post_type_slug, 'side' );
 
-		add_meta_box(
-			'wsuwp_profile_photos',
-			'Photos',
-			array( $this, 'display_photo_meta_box' ),
-			self::$post_type_slug,
-			'normal',
-			'high'
-		);
+		$box_title = ( 'auto-draft' === $post->post_status ) ? 'Create Profile' : 'Update Profile';
+
+		add_meta_box( 'submitdiv', $box_title, array( $this, 'publish_meta_box' ), self::$post_type_slug, 'side', 'high' );
 
 		if ( true === WSUWP_People_Directory::is_main_site() ) {
 			add_meta_box(
@@ -665,124 +740,6 @@ class WSUWP_People_Post_Type {
 				'normal'
 			);
 		}
-	}
-
-	/**
-	 * Display a meta box used to show a person's "card".
-	 *
-	 * @since 0.1.0
-	 *
-	 * @param WP_Post $post Post object.
-	 */
-	public function display_position_info_meta_box( $post ) {
-
-		wp_nonce_field( 'wsuwp_profile', 'wsuwp_profile_nonce' );
-
-		$nid = get_post_meta( $post->ID, '_wsuwp_profile_ad_nid', true );
-		$name_first = get_post_meta( $post->ID, '_wsuwp_profile_ad_name_first', true );
-		$name_last = get_post_meta( $post->ID, '_wsuwp_profile_ad_name_last', true );
-		$title = get_post_meta( $post->ID, '_wsuwp_profile_ad_title', true );
-		$email = get_post_meta( $post->ID, '_wsuwp_profile_ad_email', true );
-		$office = get_post_meta( $post->ID, '_wsuwp_profile_ad_office', true );
-		$address = get_post_meta( $post->ID, '_wsuwp_profile_ad_address', true );
-		$phone = get_post_meta( $post->ID, '_wsuwp_profile_ad_phone', true );
-		$phone_ext = get_post_meta( $post->ID, '_wsuwp_profile_ad_phone_ext', true );
-
-		$classifications = wp_get_post_terms( $post->ID, WSUWP_People_Classification_Taxonomy::$taxonomy_slug, array(
-			'fields' => 'names',
-		) );
-
-		?>
-		<div class="profile-card">
-
-			<div>
-				<div>Given Name:</div>
-				<div class="profile-card-data" id="_wsuwp_profile_ad_name_first"><?php echo esc_html( $name_first ); ?></div>
-			</div>
-
-			<div>
-				<div>Surname:</div>
-				<div class="profile-card-data" id="_wsuwp_profile_ad_name_last"><?php echo esc_html( $name_last ); ?></div>
-			</div>
-
-			<div>
-				<div>Title:</div>
-				<div class="profile-card-data" id="_wsuwp_profile_ad_title"><?php echo esc_html( $title ); ?></div>
-			</div>
-
-			<div>
-				<div>Office:</div>
-				<div class="profile-card-data" id="_wsuwp_profile_ad_office"><?php echo esc_html( $office ); ?></div>
-			</div>
-
-			<div>
-				<div>Street Address:</div>
-				<div class="profile-card-data" id="_wsuwp_profile_ad_address"><?php echo esc_html( $address ); ?></div>
-			</div>
-
-			<div>
-				<div>Phone:</div>
-				<div class="profile-card-data" id="_wsuwp_profile_ad_phone"><?php echo esc_html( $phone );
-				if ( $phone_ext ) { echo ' ' . esc_html( $phone_ext ); } ?></div>
-			</div>
-
-			<div>
-				<div>Email:</div>
-				<div class="profile-card-data" id="_wsuwp_profile_ad_email"><?php echo esc_html( $email ); ?></div>
-			</div>
-
-			<?php if ( $classifications ) : ?>
-				<div>
-					<div>Classification</div>
-					<div>
-						<ul>
-							<?php foreach ( $classifications as $classification ) { echo '<li>' . esc_html( $classification ) . '</li>'; } ?>
-						</ul>
-					</div>
-				</div>
-			<?php endif; ?>
-		</div>
-
-		<?php if ( true === WSUWP_People_Directory::is_main_site() && $nid ) { ?>
-		<p class="refresh-card">
-			<span class="spinner"></span>
-			<button class="button" id="refresh-ad-data">Refresh</button>
-			<button class="button profile-hide-button" id="undo-ad-data-refresh">Undo</button>
-			<button class="button button-primary profile-hide-button refresh" id="confirm-ad-data">Confirm</button>
-			<input type="hidden" id="confirm-ad-hash" name="confirm_ad_hash" value="">
-		</p>
-		<?php } ?>
-		<!--<p class="description">Notify <a href="#">HR</a> if any of this information is incorrect or needs updated.</p>-->
-		<?php
-	}
-
-	/**
-	 * Remove, move, and replace meta boxes as they are created and output.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @param string  $post_type The current post type meta boxes are displayed for.
-	 * @param string  $context   The context in which meta boxes are being output.
-	 * @param WP_Post $post      The post object.
-	 */
-	public function do_meta_boxes( $post_type, $context, $post ) {
-		if ( self::$post_type_slug !== $post_type ) {
-			return;
-		}
-
-		$box_title = ( 'auto-draft' === $post->post_status ) ? 'Create Profile' : 'Update Profile';
-
-		remove_meta_box( 'submitdiv', self::$post_type_slug, 'side' );
-		add_meta_box( 'submitdiv', $box_title, array( $this, 'publish_meta_box' ), self::$post_type_slug, 'side', 'high' );
-
-		add_meta_box(
-			'wsuwp_profile_position_info',
-			'Position and Contact Information',
-			array( $this, 'display_position_info_meta_box' ),
-			self::$post_type_slug,
-			'side',
-			'high'
-		);
 	}
 
 	/**
@@ -863,254 +820,6 @@ class WSUWP_People_Post_Type {
 		</div>
 
 	<?php
-	}
-
-	/**
-	 * Display a meta box to collect alternate contact information,
-	 * working titles and degrees for a person.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @param WP_Post $post Post object.
-	 */
-	public function display_additional_info_meta_box( $post ) {
-		?>
-		<div class="wsuwp-profile-additional">
-			<p>
-				<label for="_wsuwp_profile_alt_office">Office</label><br />
-				<input type="text" id="_wsuwp_profile_alt_office" name="_wsuwp_profile_alt_office" value="<?php echo esc_attr( get_post_meta( $post->ID, '_wsuwp_profile_alt_office', true ) ); ?>" class="widefat" />
-			</p>
-			<p>
-				<label for="_wsuwp_profile_alt_phone">Phone Number <span class="description">(xxx-xxx-xxxx)</span></label><br />
-				<input type="text" id="_wsuwp_profile_alt_phone" name="_wsuwp_profile_alt_phone" value="<?php echo esc_attr( get_post_meta( $post->ID, '_wsuwp_profile_alt_phone', true ) ); ?>" class="widefat" />
-			</p>
-			<p>
-				<label for="_wsuwp_profile_alt_email">Email Address</label><br />
-				<input type="text" id="_wsuwp_profile_alt_email" name="_wsuwp_profile_alt_email" value="<?php echo esc_attr( get_post_meta( $post->ID, '_wsuwp_profile_alt_email', true ) ); ?>" class="widefat" />
-			</p>
-			<p>
-				<label for="_wsuwp_profile_website">Website URL</label><br />
-				<input type="text" id="_wsuwp_profile_website" name="_wsuwp_profile_website" value="<?php echo esc_attr( get_post_meta( $post->ID, '_wsuwp_profile_website', true ) ); ?>" class="widefat" />
-			</p>
-		</div>
-		<div class="wsuwp-profile-additional">
-			<?php
-			$titles = get_post_meta( $post->ID, '_wsuwp_profile_title', true );
-			$degrees = get_post_meta( $post->ID, '_wsuwp_profile_degree', true );
-			?>
-
-			<script type="text/template" class="wsuwp-profile-repeatable-field-template">
-				<p>
-					<label>
-						<span><%= label %></span>
-						<input type="text" name="<%= name %>[]" value="<%= value %>" />
-						<?php if ( false === WSUWP_People_Directory::is_main_site() ) { ?>
-						<button type="button" class="wsuwp-profile-button select">
-							<span class="dashicons dashicons-yes" aria-hidden="true"></span>
-							<span class="screen-reader-text">Select</span>
-						</button>
-						<?php } ?>
-						<button type="button" class="wsuwp-profile-button remove">
-							<span class="dashicons dashicons-no" aria-hidden="true"></span>
-							<span class="screen-reader-text">Delete</span>
-						</button>
-					</label>
-				</p>
-			</script>
-
-			<div class="wsuwp-profile-repeatable-field wsuwp-profile-titles">
-				<?php
-				if ( $titles && is_array( $titles ) ) {
-					foreach ( $titles as $title ) {
-						?>
-						<p>
-							<label>
-								<span>Working Title</span>
-								<input type="text" name="_wsuwp_profile_title[]" value="<?php echo esc_attr( $title ); ?>" />
-								<?php if ( false === WSUWP_People_Directory::is_main_site() ) { ?>
-								<button type="button" class="wsuwp-profile-button select">
-									<span class="dashicons dashicons-yes" aria-hidden="true"></span>
-									<span class="screen-reader-text">Select</span>
-								</button>
-								<?php } ?>
-								<button type="button" class="wsuwp-profile-button remove">
-									<span class="dashicons dashicons-no" aria-hidden="true"></span>
-									<span class="screen-reader-text">Delete</span>
-								</button>
-							</label>
-						</p>
-						<?php
-					}
-				} else {
-					?>
-					<p>
-						<label>
-							<span>Working Title</span>
-							<input type="text" name="_wsuwp_profile_title[]" value="" />
-							<?php if ( false === WSUWP_People_Directory::is_main_site() ) { ?>
-							<button type="button" class="wsuwp-profile-button select">
-								<span class="dashicons dashicons-yes" aria-hidden="true"></span>
-								<span class="screen-reader-text">Select</span>
-							</button>
-							<?php } ?>
-							<button type="button" class="wsuwp-profile-button remove">
-								<span class="dashicons dashicons-no" aria-hidden="true"></span>
-								<span class="screen-reader-text">Delete</span>
-							</button>
-						</label>
-					</p>
-					<?php
-				}
-				?>
-				<p class="wsuwp-profile-add-repeatable">
-					<a data-label="Working Title" data-name="_wsuwp_profile_title" href="#">+ Add another title</a>
-				</p>
-
-				<?php
-				if ( false === WSUWP_People_Directory::is_main_site() ) {
-					$index_used = get_post_meta( $post->ID, '_use_title', true );
-					?>
-					<input type="hidden" class="use-title" name="_use_title" value="<?php echo esc_attr( $index_used ); ?>" />
-					<?php
-				}
-				?>
-			</div>
-
-			<div class="wsuwp-profile-repeatable-field wsuwp-profile-degrees">
-				<?php
-				if ( $degrees && is_array( $degrees ) ) {
-					foreach ( $degrees as $degree ) {
-						?>
-						<p>
-							<label>
-								<span>Degree</span>
-								<input type="text" name="_wsuwp_profile_degree[]" value="<?php echo esc_attr( $degree ); ?>" />
-								<button type="button" class="wsuwp-profile-button remove">
-									<span class="dashicons dashicons-no" aria-hidden="true"></span>
-									<span class="screen-reader-text">Delete</span>
-								</button>
-							</label>
-						</p>
-						<?php
-					}
-				} else {
-					?>
-					<p>
-						<label>
-							<span>Degree</span>
-							<input type="text" name="_wsuwp_profile_degree[]" value="" />
-							<button type="button" class="wsuwp-profile-button remove">
-								<span class="dashicons dashicons-no" aria-hidden="true"></span>
-								<span class="screen-reader-text">Delete</span>
-							</button>
-						</label>
-					</p>
-					<?php
-				}
-				?>
-				<p class="wsuwp-profile-add-repeatable">
-					<a data-label="Degree" data-name="_wsuwp_profile_degree" href="#">+ Add another degree</a>
-				</p>
-			</div>
-		</div>
-		<div class="clear"></div>
-		<?php
-	}
-
-	/**
-	 * Display a meta box used to show a person's photos.
-	 *
-	 * @since 0.3.0
-	 *
-	 * @param WP_Post $post Post object.
-	 */
-	public function display_photo_meta_box( $post ) {
-		wp_enqueue_media();
-
-		$photos = get_post_meta( $post->ID, '_wsuwp_profile_photos', true );
-		?>
-		<div class="wsuwp-profile-photo-collection<?php if ( false === WSUWP_People_Directory::is_main_site() ) { ?> selectable<?php } ?>">
-
-			<?php
-			if ( $photos ) {
-				foreach ( $photos as $photo_id ) {
-					$photo = wp_prepare_attachment_for_js( $photo_id );
-					?>
-					<div class="wsuwp-profile-photo-wrapper">
-
-						<img class="wsuwp-profile-photo"
-							 src='<?php echo esc_url( $photo['sizes']['thumbnail']['url'] ); ?>'
-							 width='<?php echo esc_attr( $photo['sizes']['thumbnail']['width'] ); ?>'
-							 height='<?php echo esc_attr( $photo['sizes']['thumbnail']['height'] ); ?>'
-							 title='<?php echo esc_attr( $photo['title'] ); ?>'
-							 alt='<?php echo esc_attr( $photo['alt'] ); ?>'
-							 data-url='<?php echo esc_attr( $photo['url'] ); ?>'
-							 data-height='<?php echo esc_attr( $photo['height'] ); ?>'
-							 data-width='<?php echo esc_attr( $photo['width'] ); ?>'
-							 data-id="<?php echo esc_attr( $photo_id ); ?>" />
-
-						<div class="wsuwp-profile-photo-controls">
-							<button type="button" class="wsuwp-profile-photo-remove" aria-label="Remove">
-								<span class="dashicons dashicons-no"></span>
-							</button>
-						</div>
-
-						<input type="hidden"
-							   class="wsuwp-profile-photo-id"
-							   name="_wsuwp_profile_photos[]"
-							   value="<?php echo esc_attr( $photo_id ); ?>" />
-
-					</div>
-					<?php
-				}
-			}
-			?>
-
-		</div>
-
-		<input type="button" class="wsuwp-profile-add-photo button" value="Add Photo(s)" />
-
-		<?php
-		if ( false === WSUWP_People_Directory::is_main_site() ) {
-			$index_used = get_post_meta( $post->ID, '_use_photo', true );
-			?>
-			<input type="hidden" class="use-photo" name="_use_photo" value="<?php echo esc_attr( $index_used ); ?>" />
-			<?php
-		}
-		?>
-
-		<div class="wsuwp-profile-photo-controls-tooltip" role="presentation">
-			<div class="wsuwp-profile-photo-controls-tooltip-arrow"></div>
-			<div class="wsuwp-profile-photo-controls-tooltip-inner"></div>
-		</div>
-
-		<script type="text/template" id="photo-template">
-			<div class="wsuwp-profile-photo-wrapper">
-				<img class="wsuwp-profile-photo"
-					 src="<%= src %>"
-					 width="<%= width %>"
-					 height="<%= height %>"
-					 title="<%= title %>"
-					 alt="<%= alt %>"
-					 data-url="<%= url %>"
-					 data-height="<%= full_height %>"
-					 data-width="<%= full_width %>"
-					 data-id="<%= id %>" />
-				<div class="wsuwp-profile-photo-controls">
-					<?php if ( false === WSUWP_People_Directory::is_main_site() ) { ?>
-					<button type="button" class="wsuwp-profile-photo-select" aria-label="Select">
-						<span class="dashicons dashicons-yes"></span>
-					</button>
-					<?php } ?>
-					<button type="button" class="wsuwp-profile-photo-remove" aria-label="Remove">
-						<span class="dashicons dashicons-no"></span>
-					</button>
-				</div>
-				<input type="hidden" class="wsuwp-profile-photo-id" name="_wsuwp_profile_photos[]" value="<%= id %>" />
-
-			</div>
-		</script>
-		<?php
 	}
 
 	/**
