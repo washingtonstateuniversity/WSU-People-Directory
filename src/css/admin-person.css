@@ -1,284 +1,3 @@
-/* Buttons */
-.wsuwp-profile-button {
-	background: #fff;
-	border: 1px solid #ddd;
-	box-shadow: inset 0 1px 2px rgba(0, 0, 0, .07);
-	cursor: pointer;
-	display: none;
-	height: 25px;
-	margin: 1px 0 0;
-	padding: 2px;
-	position: relative;
-}
-
-.wsuwp-profile-button.select:hover {
-	border-color: #0073aa;
-	color: #0073aa;
-}
-
-.wsuwp-profile-button.select:focus {
-	outline: none;
-}
-
-.selected .select {
-	display: block;
-	background: #0073aa;
-	border-color: #0073aa;
-	box-shadow: inset 0 0 0 1px #fff;
-	color: #fff;
-	text-shadow: 0 1px 1px rgba(0, 0, 0, .2);
-}
-
-.selected .select:hover .dashicons-yes:before {
-	color: #fff;
-	content: "\f460";
-}
-
-.wsuwp-profile-button.remove:hover {
-	border-color: #c00;
-	color: #c00;
-}
-
-/* Additional information metabox */
-#wsuwp_profile_additional_info .inside {
-	display: flex;
-}
-
-.wsuwp-profile-additional {
-	width: 50%;
-	padding: 0 8px;
-}
-
-.wsuwp-profile-repeatable-field label {
-	display: flex;
-	flex-wrap: wrap;
-}
-
-.wsuwp-profile-repeatable-field label span {
-	width: 100%;
-}
-
-.wsuwp-profile-repeatable-field label input {
-	flex: 1 0 auto;
-	margin-bottom: 0;
-}
-
-.wsuwp-profile-titles button + button {
-	margin-left: 1px;
-}
-
-.wsuwp-profile-degrees p:hover .wsuwp-profile-button.select,
-.wsuwp-profile-repeatable-field .selected:hover .wsuwp-profile-button.remove,
-.wsuwp-profile-repeatable-field p:hover button:disabled {
-	display: none;
-}
-
-.wsuwp-profile-repeatable-field p:hover button {
-	display: block;
-}
-
-.wsuwp-profile-add-repeatable {
-	text-align: right;
-}
-
-.wsuwp-profile-add-repeatable a {
-	text-decoration: none;
-}
-
-input:disabled {
-	background: #eee;
-}
-
-/* "Card" display */
-.profile-card {
-	display: table;
-	margin-top: 1em;
-}
-
-.profile-card div {
-	display: table-row;
-}
-
-.profile-card div div {
-	display: table-cell;
-	padding-bottom: .75em;
-	vertical-align: top;
-}
-
-.profile-card div div:first-of-type {
-	font-weight: 700;
-	width: 45%;
-}
-
-.profile-card div div:last-of-type {
-	width: 55%;
-}
-
-.profile-card div div ul,
-.profile-card div div ul li:last-of-type {
-	margin: 0;
-}
-
-.refresh-card {
-	text-align: right;
-}
-
-.refresh-card .spinner {
-	float: none;
-	margin-top: -4px;
-}
-
-/* Phone and extension fields */
-.phone-fields {
-	display: table;
-}
-
-.phone-fields div {
-	display: table-cell;
-	vertical-align: bottom;
-}
-
-.phone-fields div:first-of-type {
-	width: 75%;
-}
-
-.phone-fields div:last-of-type {
-	width: 25%;
-}
-
-/* Tabs */
-#wsuwp-profile-about-wrapper {
-	box-shadow: 0 1px 1px rgba(0, 0, 0, .04);
-	margin-top: 20px;
-}
-
-.wsuwp-profile-about-tabs {
-	border-bottom: 1px solid #e5e5e5;
-	margin: 0;
-	padding: 0 15px 0 0;
-}
-
-.wsuwp-profile-about-tabs li {
-	border: 1px solid #e5e5e5;
-	display: flex;
-	float: left;
-	margin: 0 0 -1px 0;
-}
-
-.wsuwp-profile-about-tabs li + li {
-	margin-left: 4px;
-}
-
-.wsuwp-profile-about-tabs li:hover {
-	background: #fff;
-}
-
-.wsuwp-profile-about-tabs .ui-tabs-active {
-	border-bottom-color: #fff;
-	background: #fff;
-}
-
-.wsuwp-profile-about-tabs a {
-	background: none;
-	border: none;
-	display: inline-block;
-	float: none;
-	font-size: 14px;
-	font-weight: 700;
-	line-height: 1.45;
-	margin: 0;
-	padding: 8px 12px;
-}
-
-.wsuwp-profile-about-tabs a:focus {
-	box-shadow: none;
-}
-
-.wsuwp-profile-about-tabs .ui-tabs-active a {
-	color: #000;
-}
-
-.wsuwp-profile-about-tabs .wsuwp-profile-button {
-	margin: 6px 12px 0 0;
-}
-
-.wsuwp-profile-about-tabs li:hover .wsuwp-profile-button {
-	display: block;
-}
-
-.wsuwp-profile-about-tabs:after {
-	content: "";
-	display: table;
-	clear: both;
-}
-
-/* Tab panels */
-.wsuwp-profile-panel {
-	background: #fff;
-	border: 1px solid #e5e5e5;
-	border-top: none;
-	padding: 20px;
-}
-
-.wsuwp-profile-panel p:nth-child(1) {
-	margin-top: 0;
-}
-
-.wsuwp-profile-panel p:nth-last-child(1) {
-	margin-bottom: 0;
-}
-
-#wp-content-editor-tools {
-	background: #fff;
-}
-
-#bio_unit,
-#bio_university {
-	display: none;
-}
-
-#bio_unit.ui-tabs-panel,
-#bio_university.ui-tabs-panel {
-	display: block;
-}
-
-.ui-tabs-panel .readonly {
-	color: #717171;
-	font-family: "Open Sans", "Lucida Sans", "Lucida Grande", "Lucida Sans Unicode", sans-serif;
-	padding: 9px 10px;
-}
-
-.ui-tabs-panel .readonly p {
-	font-size: 14px;
-}
-
-.ui-tabs-panel[aria-hidden="true"] {
-	border: 0;
-	clip: rect(0 0 0 0);
-	display: block !important;
-	height: 1px;
-	margin: -1px;
-	overflow: hidden;
-	padding: 0;
-	position: absolute;
-	width: calc(100% - 42px);
-}
-
-#wp-content-editor-tools {
-	margin: 0;
-	padding-top: 0;
-}
-
-#postdivrich,
-.wp-editor-wrap:not(:last-child):not(#wp-content-wrap) {
-	margin-bottom: 16px;
-}
-
-/* Added metabox areas */
-#after_title-sortables {
-	padding-top: 10px;
-}
-
 /* AD/Network ID search */
 .wp-core-ui .profile-hide-button {
 	display: none;
@@ -288,109 +7,109 @@ input:disabled {
 	margin-top: 7px;
 }
 
-/* Photo collection */
-.wsuwp-profile-photo-collection {
-	display: flex;
-	flex-wrap: wrap;
-	margin: 0 -4px;
+/* Card layout */
+.wsu-person[data-nid=""] {
+	visibility: hidden;
+	opacity: 0;
 }
 
-.wsuwp-profile-photo-wrapper {
-	box-sizing: border-box;
-	padding: 4px;
-	position: relative;
+.wsu-person {
+	transition: opacity .5s ease-in-out;
 }
 
-.wsuwp-profile-photo {
-	display: block;
-	height: auto;
+.wsu-person-card {
+	background: #fff;
+	border: 1px solid #e5e5e5;
+	box-shadow: 0 1px 1px rgba(0, 0, 0, .04);
+	font-size: 14px;
+	padding: 12px;
+}
+
+.wsu-person-photo {
+	display: inline-block;
+	margin: 0 16px 16px 0;
+	min-height: 198px;
 	min-width: 198px;
-	width: 100%;
 }
 
-.selectable .wsuwp-profile-photo {
-	opacity: .65;
+.wsu-person-contact {
+	display: inline-block;
+	vertical-align: top;
 }
 
-.selectable .selected .wsuwp-profile-photo {
-	opacity: 1;
+/* Editable areas */
+[contenteditable="true"] {
+	display: inline-block;
+	margin-bottom: .25rem;
+	min-width: 1px; /* Gives enough space for the cursor to show up. */
 }
 
-.wsuwp-profile-photo-controls {
-	background: #f5f5f5;
-	border: 1px solid #a0a5aa;
-	border-radius: 2px;
-	box-shadow: 0 1px 3px rgba(0, 0, 0, .15);
-	box-sizing: border-box;
-	display: none;
-	left: 50%;
-	padding: 1px;
-	position: absolute;
-	top: 0;
-	transform: translateX(-50%);
+[contenteditable="true"]:empty:before {
+	color: #767676;
+	content: attr(data-placeholder);
+	display: inline-block;
 }
 
-.wsuwp-profile-photo-wrapper:hover .wsuwp-profile-photo-controls {
-	display: block;
+[contenteditable="true"]:focus:empty:before {
+	content: none;
 }
 
-.wsuwp-profile-photo-controls button {
-	background: #f5f5f5;
-	border: 1px solid transparent;
-	border-radius: 2px;
+/* Editable area customizations */
+.wsu-person-name {
+	display: inline-block;
+	font-size: 22px;
+	height: 38px;
+	line-height: 38px;
+	margin-right: 7px;
+}
+
+.wsu-person-degree,
+.wsu-person-degree > div {
+	display: inline-block;
+}
+
+.wsu-person-degree [contenteditable="true"]:after {
+	content: ",";
+	display: inline-block;
+}
+
+.wsu-person-degree div:last-of-type [contenteditable="true"]:after {
+	content: none;
+}
+
+/* Buttons */
+.wsu-person-button {
+	background: none;
+	border: none;
 	cursor: pointer;
-	line-height: normal;
-	margin: 2px;
-	padding: 2px 3px;
-}
-
-.wsuwp-profile-photo-controls button:focus,
-.wsuwp-profile-photo-controls button:hover {
-	background: #fafafa;
-	border-color: #555d66;
-	box-shadow: inset 0 1px 0 #fff, 0 1px 0 rgba(0, 0, 0, .08);
-	color: #23282d;
-	outline: 0;
-}
-
-.wsuwp-profile-photo-controls .dashicons {
-	color: #555d66;
-	line-height: 20px;
-	margin: 0;
 	padding: 0;
-	text-align: center;
 }
 
-.wsuwp-profile-photo-controls-tooltip {
+.wsu-person-repeatable-meta .wsu-person-button {
 	display: none;
-	margin-top: 2px;
-	opacity: .8;
-	padding: 5px 0 0;
-	position: absolute;
-	zoom: 1;
 }
 
-.wsuwp-profile-photo-controls-tooltip-arrow {
-	border: 5px solid #000;
-	border-top: none;
-	border-left-color: transparent;
-	border-right-color: transparent;
-	height: 0;
-	left: 50%;
-	line-height: 0;
-	margin-left: -5px;
-	position: absolute;
-	top: 0;
-	width: 0;
+.wsu-person-repeatable-meta:hover .wsu-person-add-repeatable-meta,
+.wsu-person-repeatable-meta [contenteditable="true"]:focus ~ .wsu-person-button {
+	display: inline-block;
 }
 
-.wsuwp-profile-photo-controls-tooltip-inner {
-	background-color: #000;
-	border-radius: 3px;
-	color: #fff;
-	font-size: 12px;
-	max-width: 200px;
-	padding: 5px 8px 4px;
-	text-align: center;
-	white-space: normal;
+.wsu-person-add-repeatable-meta {
+	color: #0073aa;
+	margin-bottom: .25em;
+	text-decoration: underline;
+}
+
+.wsu-person-add-repeatable-meta:hover {
+	color: #00a0d2;
+}
+
+/* Photo collection */
+.wsu-person-card figcaption {
+	color: #767676;
+}
+
+/* TinyMCE Editors */
+.wp-editor-wrap {
+	padding-top: 21px;
 }
