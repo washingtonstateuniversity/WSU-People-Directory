@@ -475,7 +475,7 @@ class WSUWP_People_Post_Type {
 			$profile_vars['uid'] = wp_get_current_user()->ID;
 		}
 
-		wp_enqueue_script( 'wsuwp-people-edit-profile-secondary', plugins_url( 'src/js/admin-edit-profile-secondary.js', dirname( __FILE__ ) ), array( 'jquery', 'underscore' ), WSUWP_People_Directory::$version, true );
+		wp_enqueue_script( 'wsuwp-people-edit-profile-secondary', plugins_url( 'js/admin-edit-profile-secondary.min.js', dirname( __FILE__ ) ), array( 'jquery', 'underscore' ), WSUWP_People_Directory::$version, true );
 		wp_localize_script( 'wsuwp-people-edit-profile-secondary', 'wsuwp_people_edit_profile_secondary', $profile_vars );
 	}
 
@@ -553,13 +553,13 @@ class WSUWP_People_Post_Type {
 		<div class="wsu-person" data-nid="<?php echo esc_html( $nid ); ?>">
 
 			<script type="text/template" class="wsu-person-repeatable-meta-template">
-				<div>
+				<div class="wsu-person-repeatable-meta-entry">
 					<div contenteditable="true" data-placeholder="Enter <%= type %> here"><%= value %></div>
 					<input type="hidden" name="_wsuwp_profile_<%= type %>[]" value="<%= value %>" />
 					<?php if ( false === WSUWP_People_Directory::is_main_site() ) { ?>
 					<% if ( 'title' === type ) { %>
 					<button type="button" class="wsu-person-button wsu-person-select dashicons dashicons-yes">
-						<span class="screen-reader-text">Display</span>
+						<span class="screen-reader-text">Select</span>
 					</button>
 					<% } %>
 					<?php } ?>
@@ -575,13 +575,14 @@ class WSUWP_People_Post_Type {
 
 					<div contenteditable="true"
 						 class="wsu-person-name"
+						 data-original=""
 						 data-placeholder="Enter name here"><?php echo esc_html( $post->post_title ); ?></div>
 					<input type="hidden" name="post_title" value="<?php echo esc_attr( $post->post_title ); ?>" />
 
 					<div class="wsu-person-repeatable-meta wsu-person-degree">
 					<?php if ( $degrees && is_array( $degrees ) ) { ?>
 						<?php foreach ( $degrees as $degree ) { ?>
-						<div>
+						<div class="wsu-person-repeatable-meta-entry">
 							<div contenteditable="true" data-placeholder="Enter degree here"><?php echo esc_html( $degree ); ?></div>
 							<input type="hidden" name="_wsuwp_profile_degree[]" value="<?php echo esc_attr( $degree ); ?>" />
 							<button type="button" class="wsu-person-button wsu-person-remove dashicons dashicons-no">
@@ -590,7 +591,7 @@ class WSUWP_People_Post_Type {
 						</div>
 						<?php } ?>
 					<?php } else { ?>
-						<div>
+						<div class="wsu-person-repeatable-meta-entry">
 							<div contenteditable="true" data-placeholder="Enter degree here"></div>
 							<input type="hidden" name="_wsuwp_profile_degree[]" value="" />
 							<button type="button" class="wsu-person-button wsu-person-remove dashicons dashicons-no">
@@ -624,12 +625,12 @@ class WSUWP_People_Post_Type {
 					<div class="wsu-person-repeatable-meta wsu-person-title">
 						<?php if ( $working_titles && is_array( $working_titles ) ) { ?>
 						<?php foreach ( $working_titles as $i => $working_title ) { ?>
-						<div>
+						<div class="wsu-person-repeatable-meta-entry">
 							<div contenteditable="true" data-placeholder="Enter title here"><?php echo esc_html( $working_title ); ?></div>
 							<input type="hidden" name="_wsuwp_profile_title[]" value="<?php echo esc_attr( $working_title ); ?>" />
 							<?php if ( false === WSUWP_People_Directory::is_main_site() ) { ?>
 							<button type="button" class="wsu-person-button wsu-person-select dashicons dashicons-yes">
-								<span class="screen-reader-text">Select to display</span>
+								<span class="screen-reader-text">Select</span>
 							</button>
 							<?php } ?>
 							<button type="button" class="wsu-person-button wsu-person-remove dashicons dashicons-no">
@@ -638,7 +639,7 @@ class WSUWP_People_Post_Type {
 						</div>
 						<?php } ?>
 						<?php } else { ?>
-						<div>
+						<div class="wsu-person-repeatable-meta-entry">
 							<div contenteditable="true" data-placeholder="Enter title here"><?php echo esc_html( $title ); ?></div>
 							<input type="hidden" name="_wsuwp_profile_title[]" value="<?php echo esc_attr( $title ); ?>" />
 							<?php if ( false === WSUWP_People_Directory::is_main_site() ) { ?>
@@ -654,30 +655,39 @@ class WSUWP_People_Post_Type {
 						<button type="button"
 								data-type="title"
 							    class="wsu-person-button wsu-person-add-repeatable-meta">+ Add another title</button>
+						<?php if ( false === WSUWP_People_Directory::is_main_site() ) { ?>
+						<?php $index_used = get_post_meta( $post->ID, '_use_title', true ); ?>
+						<input type="hidden" class="use-title" name="_use_title" value="<?php echo esc_attr( $index_used ); ?>" />
+						<?php } ?>
 					</div>
 
 					<div contenteditable="true"
 						 class="wsu-person-email"
+						 data-original=""
 						 data-placeholder="Enter email address here"><?php echo esc_html( $email_value ); ?></div>
 					<input type="hidden" name="_wsuwp_profile_alt_email" value="<?php echo esc_attr( $email_value ); ?>" /><br />
 
 					<div contenteditable="true"
 						 class="wsu-person-phone"
+						 data-original=""
 						 data-placeholder="Enter phone number here (xxx-xxx-xxxx)"><?php echo esc_html( $phone_value ); ?></div>
 					<input type="hidden" name="_wsuwp_profile_alt_phone" value="<?php echo esc_attr( $phone_value ); ?>" /><br />
 
 					<div contenteditable="true"
 						 class="wsu-person-office"
+						 data-original=""
 						 data-placeholder="Enter office here"><?php echo esc_html( $office_value ); ?></div>
 					<input type="hidden" name="_wsuwp_profile_alt_office" value="<?php echo esc_attr( $office_value ); ?>" /><br />
 
 					<div contenteditable="true"
 						 class="wsu-person-address"
+						 data-original=""
 						 data-placeholder="Enter mailing address here"><?php echo esc_html( $address_value ); ?></div>
 					<input type="hidden" name="_wsuwp_profile_alt_address" value="<?php echo esc_attr( $address_value ); ?>" /><br />
 
 					<div contenteditable="true"
 						 class="wsu-person-website"
+						 data-original=""
 						 data-placeholder="Enter website URL here"><?php echo esc_html( $website ); ?></div>
 					<input type="hidden" name="_wsuwp_profile_website" value="<?php echo esc_attr( $website ); ?>" />
 
@@ -686,6 +696,10 @@ class WSUWP_People_Post_Type {
 			</div>
 
 			<div class="wsu-person-about">
+
+				<div id="bio_personal" class="wsu-person-bio">
+
+					<h2>Personal Biography</h2>
 		<?php
 	}
 
@@ -702,18 +716,31 @@ class WSUWP_People_Post_Type {
 			return;
 		}
 
+		?>
+		</div><!--bio_personal-->
+		<?php
+
 		foreach ( self::$post_meta_keys as $key => $args ) {
 			if ( ! isset( $args['render_as_wp_editor'] ) ) {
 				continue;
 			}
 
-			$value = get_post_meta( $post->ID, $args['meta_key'], true );
+			?>
+			<div id="<?php echo esc_attr( $key );?>" class="wsu-person-bio">
 
-			if ( '_wsuwp_profile_bio_university' === $args['meta_key'] && ! current_user_can( 'create_sites' ) ) {
-				echo '<div class="readonly">' . wp_kses_post( apply_filters( 'the_content', $value ) ) . '</div>';
-			} else {
-				wp_editor( $value, $args['meta_key'] );
-			}
+				<h2><?php echo esc_html( $args['description'] ); ?></h2>
+
+				<?php
+				$value = get_post_meta( $post->ID, $args['meta_key'], true );
+
+				if ( '_wsuwp_profile_bio_university' === $args['meta_key'] && ! current_user_can( 'create_sites' ) ) {
+					echo '<div class="readonly">' . wp_kses_post( apply_filters( 'the_content', $value ) ) . '</div>';
+				} else {
+					wp_editor( $value, $args['meta_key'] );
+				}
+				?>
+			</div>
+			<?php
 		}
 		?>
 

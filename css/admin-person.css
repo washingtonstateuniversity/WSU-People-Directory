@@ -43,7 +43,8 @@
 }
 
 /* Editable areas */
-[contenteditable="true"] {
+[contenteditable="true"],
+[contenteditable="false"] {
 	display: inline-block;
 	margin-bottom: .25rem;
 	min-width: 1px; /* Gives enough space for the cursor to show up. */
@@ -53,6 +54,10 @@
 	color: #767676;
 	content: attr(data-placeholder);
 	display: inline-block;
+}
+
+[contenteditable="false"] {
+	color: #767676;
 }
 
 [contenteditable="true"]:focus:empty:before {
@@ -95,8 +100,13 @@
 }
 
 .wsu-person-repeatable-meta:hover .wsu-person-add-repeatable-meta,
-.wsu-person-repeatable-meta [contenteditable="true"]:focus ~ .wsu-person-button {
+.wsu-person-repeatable-meta div:hover .wsu-person-button {
 	display: inline-block;
+}
+
+.wsu-person-select:hover:before,
+.selected .wsu-person-select:before {
+	color: #0073aa;
 }
 
 .wsu-person-add-repeatable-meta {
@@ -115,6 +125,25 @@
 }
 
 /* TinyMCE Editors */
+#poststuff .wsu-person-bio h2 {
+	padding: 30px 12px 0 0;
+}
+
 .wp-editor-wrap {
 	padding-top: 21px;
+}
+
+.wsu-person-bio .readonly {
+	background: #fff;
+	border: 1px solid #e5e5e5;
+	box-shadow: 0 1px 1px rgba(0, 0, 0, .04);
+	color: #717171;
+	margin-top: 21px;
+	padding: 9px 10px;
+}
+
+.wsu-person-bio .readonly p {
+	font: 14px/22px "Open Sans", "Lucida Sans", "Lucida Grande", "Lucida Sans Unicode", sans-serif;
+	margin: 0;
+	padding-bottom: 1em;
 }

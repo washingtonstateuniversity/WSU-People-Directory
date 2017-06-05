@@ -51,6 +51,14 @@ wsuwp.people = wsuwp.people || {};
 		}
 
 		window.tinymce.get( editor.id ).setContent( wsuwp.people.bio_content[ editor.id ] );
+
+		if ( window.tinymce.get( "_wsuwp_profile_bio_unit" ) ) {
+			window.tinymce.get( "_wsuwp_profile_bio_unit" ).setMode( "readonly" );
+		}
+
+		if ( window.tinymce.get( "_wsuwp_profile_bio_university" ) ) {
+			window.tinymce.get( "_wsuwp_profile_bio_university" ).setMode( "readonly" );
+		}
 	};
 
 	/**
@@ -60,63 +68,55 @@ wsuwp.people = wsuwp.people || {};
 	 */
 	wsuwp.people.populate_person_from_people_directory = function( data ) {
 		var $ = jQuery,
-			repeatable_field_template = _.template( $( ".wsuwp-profile-repeatable-field-template" ).html() ),
-			$working_titles = $( ".wsuwp-profile-titles .wsuwp-profile-add-repeatable" ),
-			working_title_label = $working_titles.find( "a" ).data( "label" ),
-			working_title_name = $working_titles.find( "a" ).data( "name" ),
-			$degrees = $( ".wsuwp-profile-degrees .wsuwp-profile-add-repeatable" ),
-			degree_label = $degrees.find( "a" ).data( "label" ),
-			degree_name = $degrees.find( "a" ).data( "name" );
+			repeatable_meta_template = _.template( $( ".wsu-person-repeatable-meta-template" ).html() ),
+			$add_title_button = $( ".wsu-person-title .wsu-person-add-repeatable-meta" ),
+			$add_degree_button = $( ".wsu-person-degree .wsu-person-add-repeatable-meta" );
 
-		// Populate the post id field.
+		// Populate the NID.
+		$( ".wsu-person" ).attr( "data-nid", data.nid );
+
+		// Populate the primary record id.
 		$( "#_wsuwp_profile_post_id" ).val( data.id );
 
-		// Populate the profile title.
-		$( "#title" ).focus().val( data.title.rendered ).data( "original", data.title.rendered );
+		// Populate card data.
+		$( ".wsu-person-name" ).text( data.title.rendered ).data( "original", data.title.rendered )
+			.next( "input" ).val( data.title.rendered );
 
-		// Populate AD data.
-		$( "#_wsuwp_profile_ad_name_first" ).html( data.first_name );
-		$( "#_wsuwp_profile_ad_name_last" ).html( data.last_name );
-		$( "#_wsuwp_profile_ad_title" ).html( data.position_title );
-		$( "#_wsuwp_profile_ad_office" ).html( data.office );
-		$( "#_wsuwp_profile_ad_address" ).html( data.address );
-		$( "#_wsuwp_profile_ad_phone" ).html( data.phone );
-		$( "#_wsuwp_profile_ad_email" ).html( data.email );
+		$( ".wsu-person-email" ).text( data.email_alt ).data( "original", data.email_alt )
+			.next( "input" ).val( data.email_alt );
 
-		// Populate additional/alternative fields.
-		$( "#_wsuwp_profile_alt_office" ).val( data.office_alt ).data( "original", data.office_alt );
-		$( "#_wsuwp_profile_alt_phone" ).val( data.phone_alt ).data( "original", data.phone_alt );
-		$( "#_wsuwp_profile_alt_email" ).val( data.email_alt ).data( "original", data.email_alt );
-		$( "#_wsuwp_profile_website" ).val( data.website ).data( "original", data.website );
+		$( ".wsu-person-phone" ).text( data.phone_alt ).data( "original", data.phone_alt )
+			.next( "input" ).val( data.phone_alt );
+
+		$( ".wsu-person-office" ).text( data.office_alt ).data( "original", data.office_alt )
+			.next( "input" ).val( data.office_alt );
+
+		$( ".wsu-person-address" ).text( data.address_alt ).data( "original", data.address_alt )
+			.next( "input" ).val( data.address_alt );
+
+		$( ".wsu-person-website" ).text( data.website ).data( "original", data.website )
+			.next( "input" ).val( data.website );
 
 		// Populate biographies.
 		wsuwp.people.bio_content.content = data.content.rendered;
 		wsuwp.people.bio_content._wsuwp_profile_bio_unit = data.bio_unit;
 		wsuwp.people.bio_content._wsuwp_profile_bio_university = data.bio_university;
 
-		var readonly_bio_unit = $( "#bio_unit .readonly" );
-		var readonly_bio_university = $( "#bio_university .readonly" );
-
-		if ( 0 !== readonly_bio_unit.length ) {
-			readonly_bio_unit.html( wsuwp.people.bio_content._wsuwp_profile_bio_unit );
-		}
-
-		if ( 0 !== readonly_bio_university ) {
-			readonly_bio_university.html( wsuwp.people.bio_content._wsuwp_profile_bio_university );
-		}
+		// Populate the read-only biographies.
+		$( "#bio_unit .readonly" ).html( data.bio_unit );
+		$( "#bio_university .readonly" ).html( data.bio_university );
 
 		wsuwp.people.rest_response_complete = true;
 
-		// Populate working title(s).
+		// Populate title(s).
 		$.each( data.working_titles, function( i, value ) {
-			var field = $( "[name='_wsuwp_profile_title[]']" )[ i ];
+			var $field = $( ".wsu-person-title > div" )[ i ];
 
-			if ( field ) {
-				$( field ).val( value );
+			if ( $field ) {
+				$( $field ).find( "div" ).text( value ).next( "input" ).val( value );
 			} else {
-				$working_titles.before( repeatable_field_template( {
-					label: working_title_label,
-					name: working_title_name,
+				$add_title_button.before( repeatable_meta_template( {
+					type: $add_title_button.data( "type" ),
 					value: value
 				} ) );
 			}
@@ -124,12 +124,12 @@ wsuwp.people = wsuwp.people || {};
 
 		wsuwp.people.titles = data.working_titles;
 
-		// Add the `selected` class to working titles accordingly.
+		// Add the `selected` class to titles accordingly.
 		if ( "" !== $( ".use-title" ).val() ) {
 			var titles = $( ".use-title" ).val().split( " " );
 
 			$.each( titles, function( i, value ) {
-				$( ".wsuwp-profile-titles p" )
+				$( ".wsu-person-title .wsu-person-repeatable-meta-entry" )
 					.eq( value )
 					.addClass( "selected" )
 					.find( ".screen-reader-text" )
@@ -139,14 +139,13 @@ wsuwp.people = wsuwp.people || {};
 
 		// Populate degree(s).
 		$.each( data.degree, function( i, value ) {
-			var field = $( "[name='_wsuwp_profile_degree[]']" )[ i ];
+			var $field = $( ".wsu-person-degree > div" )[ i ];
 
-			if ( field ) {
-				$( field ).val( value );
+			if ( $field ) {
+				$( $field ).find( "div" ).text( value ).next( "input" ).val( value );
 			} else {
-				$degrees.before( repeatable_field_template( {
-					label: degree_label,
-					name: degree_name,
+				$add_degree_button.before( repeatable_meta_template( {
+					type: $add_degree_button.data( "type" ),
 					value: value
 				} ) );
 			}
@@ -154,7 +153,7 @@ wsuwp.people = wsuwp.people || {};
 
 		wsuwp.people.degrees = data.degree;
 
-		// Populate photo collection.
+		/* Populate photo collection.
 		if ( data._embedded && data._embedded[ "wp:photos" ] !== 0 ) {
 			$.each( data._embedded[ "wp:photos" ], function( i, photo ) {
 				wsuwp.people.populate_photos( photo );
@@ -179,7 +178,7 @@ wsuwp.people = wsuwp.people || {};
 				.addClass( "selected" )
 				.find( ".wsuwp-profile-photo-select" )
 				.attr( "aria-label", "Deselect" );
-		}
+		}*/
 
 		// Populate taxonomy data.
 		if ( data._embedded && data._embedded[ "wp:term" ] && data._embedded[ "wp:term" ] !== 0 ) {
@@ -202,8 +201,8 @@ wsuwp.people = wsuwp.people || {};
 			// Add the tags.
 			$( ".tagadd" ).trigger( "click" );
 
-			// Change focus to the post title field (the trigger above focuses the tag input).
-			$( "#title" ).focus();
+			// Change focus to the name field (the trigger above focuses the tag input).
+			$( ".wsu-person-name" ).focus();
 		}
 
 		// Disable inputs if a user doesn't have adequate permissions to edit the profile.
@@ -215,22 +214,12 @@ wsuwp.people = wsuwp.people || {};
 				xhr.setRequestHeader( "X-WSUWP-UID", window.wsuwp_people_edit_profile_secondary.uid );
 			},
 			error: function() {
-				$( "#wsuwp_profile_additional_info input" ).prop( "disabled", true );
-				$( ".wsuwp-profile-button.remove" ).prop( "disabled", true );
+				$( ".wsu-person-card [contenteditable='true']" ).prop( "contenteditable", false );
+				$( ".wsu-person-remove" ).remove();
+				$( ".wsu-person-add-repeatable-meta" ).remove();
 				$( "#new-tag-post_tag" ).prop( "disabled", true );
-				$( ".tabs-panel input" ).prop( "disabled", true );
-				$( ".wsuwp-profile-add-photo" ).prop( "disabled", true );
-				$( ".wsuwp-profile-photo-remove" ).prop( "disabled", true );
 
 				window.tinymce.get( "content" ).setMode( "readonly" );
-
-				if ( 0 === readonly_bio_unit.length ) {
-					window.tinymce.get( "_wsuwp_profile_bio_unit" ).setMode( "readonly" );
-				}
-
-				if ( 0 === readonly_bio_university.length ) {
-					window.tinymce.get( "_wsuwp_profile_bio_university" ).setMode( "readonly" );
-				}
 			}
 		} );
 	};
@@ -301,13 +290,13 @@ wsuwp.people = wsuwp.people || {};
 			}
 		} );
 
-		// Select a working title for display on the front end.
-		$( ".wsuwp-profile-titles" ).on( "click", ".select", function() {
-			var $title = $( this ).closest( "p" );
+		// Select a title for display on the front end.
+		$( ".wsu-person-title" ).on( "click", ".wsu-person-select", function() {
+			var $title = $( this ).closest( ".wsu-person-repeatable-meta-entry" );
 
 			$title.toggleClass( "selected" );
 
-			var selected_titles = $( ".wsuwp-profile-titles .selected" ).map( function() { return $( this ).index(); } ).get();
+			var selected_titles = $( ".wsu-person-title .selected" ).map( function() { return $( this ).index(); } ).get();
 
 			$( ".use-title" ).val( selected_titles.join( " " ) );
 
@@ -319,7 +308,7 @@ wsuwp.people = wsuwp.people || {};
 		} );
 
 		// Select a photo for display on the front end.
-		$( ".wsuwp-profile-photo-collection" ).on( "click", ".wsuwp-profile-photo-select", function() {
+		/*$( ".wsuwp-profile-photo-collection" ).on( "click", ".wsuwp-profile-photo-select", function() {
 			var $button = $( this ),
 				$photo = $button.closest( ".wsuwp-profile-photo-wrapper" ),
 				$input = $( ".use-photo" );
@@ -334,52 +323,57 @@ wsuwp.people = wsuwp.people || {};
 				$input.val( "" );
 				$button.attr( "aria-label", "Select" );
 			}
-		} );
+		} );*/
 
 		// Post data to the user's people.wsu.edu profile.
 		$( "#publish" ).on( "click", function() {
 			var data = {},
-				name = $( "#title" ),
-				office = $( "#_wsuwp_profile_alt_office" ),
-				phone = $( "#_wsuwp_profile_alt_phone" ),
-				email = $( "#_wsuwp_profile_alt_email" ),
-				website = $( "#_wsuwp_profile_website" ),
-				titles = $( "[name='_wsuwp_profile_title[]']" ),
-				degrees = $( "[name='_wsuwp_profile_degree[]']" ),
+				name = $( ".wsu-person-name" ),
+				email = $( ".wsu-person-email" ),
+				phone = $( ".wsu-person-phone" ),
+				office = $( ".wsu-person-office" ),
+				address = $( ".wsu-person-address" ),
+				website = $( ".wsu-person-website" ),
+				titles = $( ".wsu-person-title > div > div" ),
+				degrees = $( ".wsu-person-degree > div > div" ),
 				personal_bio = window.tinymce.get( "content" ),
 				unit_bio = window.tinymce.get( "_wsuwp_profile_bio_unit" ),
 				university_bio = window.tinymce.get( "_wsuwp_profile_bio_university" );
 
 			// Only add changed values to the data array.
-			if ( name.val() !== name.data( "original" ) ) {
-				data.title = name.val();
+			if ( name.text() !== name.data( "original" ) ) {
+				data.title = name.text();
 			}
 
-			if ( office.val() !== office.data( "original" ) ) {
-				data.office_alt = office.val();
+			if ( email.text() !== email.data( "original" ) ) {
+				data.email_alt = email.text();
 			}
 
-			if ( phone.val() !== phone.data( "original" ) ) {
-				data.phone_alt = phone.val();
+			if ( phone.text() !== phone.data( "original" ) ) {
+				data.phone_alt = phone.text();
 			}
 
-			if ( email.val() !== email.data( "original" ) ) {
-				data.email_alt = email.val();
+			if ( office.text() !== office.data( "original" ) ) {
+				data.office_alt = office.text();
 			}
 
-			if ( website.val() !== website.data( "original" ) ) {
-				data.website = website.val();
+			if ( address.text() !== address.data( "original" ) ) {
+				data.address_alt = address.text();
+			}
+
+			if ( website.text() !== website.data( "original" ) ) {
+				data.website = website.text();
 			}
 
 			if ( titles ) {
-				var new_titles = titles.map( function() { return $( this ).val(); } ).get();
+				var new_titles = titles.map( function() { return $( this ).text(); } ).get();
 				if ( new_titles.join( "," ) !== wsuwp.people.titles.join( "," ) ) {
 					data.working_titles = new_titles;
 				}
 			}
 
 			if ( degrees ) {
-				var new_degrees = degrees.map( function() { return $( this ).val(); } ).get();
+				var new_degrees = degrees.map( function() { return $( this ).text(); } ).get();
 				if ( new_degrees.join( "," ) !== wsuwp.people.degrees.join( "," ) ) {
 					data.degree = new_degrees;
 				}
