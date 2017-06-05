@@ -796,6 +796,7 @@ class WSUWP_People_Post_Type {
 		$nid = get_post_meta( $post->ID, '_wsuwp_profile_ad_nid', true );
 
 		$readonly = empty( trim( $nid ) ) ? '' : 'readonly';
+		$data_location = ( false === WSUWP_People_Directory::is_main_site() ) ? 'people.wsu.edu' : 'Active Directory';
 		?>
 		<div class="submitbox" id="submitpost">
 
@@ -809,15 +810,15 @@ class WSUWP_People_Post_Type {
 					<input type="hidden" id="_wsuwp_profile_post_id" name="_wsuwp_profile_post_id" value="<?php echo esc_attr( $record_id ); ?>" />
 				<?php } ?>
 
-				<?php if ( '' === $readonly ) : ?>
-					<div class="load-ad-container">
-						<p class="description">Enter the WSU Network ID for this user to populate data from Active Directory.</p>
-					</div>
-				<?php else : ?>
-					<div class="load-ad-container">
-						<p class="description">The WSU Network ID used to populate this profile's data from Active Directory.</p>
-					</div>
-				<?php endif; ?>
+				<div class="load-ad-container">
+					<p class="description" data-location="<?php echo esc_attr( $data_location ); ?>"><?php
+					if ( '' === $readonly ) { ?>
+						Enter the WSU Network ID for this user to populate data from <?php echo esc_html( $data_location ); ?>.
+					<?php } else { ?>
+						The WSU Network ID used to populate this profile's data from <?php echo esc_html( $data_location ); ?>.
+					<?php } ?></p>
+				</div>
+
 				</div>
 			</div>
 			<div id="major-publishing-actions">

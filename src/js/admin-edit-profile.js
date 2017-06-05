@@ -97,7 +97,7 @@ var wsuwp = wsuwp || {};
 				if ( response.success ) {
 
 					$nid.attr( "readonly", true );
-					$description.html( "The WSU Network ID used to populate this profile's data from Active Directory." );
+					$description.html( "The WSU Network ID used to populate this profile's data from " + $description.data( "location" ) + "." );
 
 					$( ".spinner" ).css( "visibility", "hidden" );
 
