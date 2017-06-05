@@ -355,6 +355,7 @@ class WSUWP_People_Post_Type {
 			'menu_position' => 5,
 			'menu_icon' => 'dashicons-groups',
 			'supports' => array(
+				'title',
 				'editor',
 				'revisions',
 			),

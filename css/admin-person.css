@@ -1,3 +1,8 @@
+/* Hide the default post title field */
+#titlediv {
+	display: none;
+}
+
 /* AD/Network ID search */
 .wp-core-ui .profile-hide-button {
 	display: none;
