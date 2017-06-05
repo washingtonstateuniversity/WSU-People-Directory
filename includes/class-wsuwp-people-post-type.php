@@ -103,6 +103,14 @@ class WSUWP_People_Post_Type {
 			'register_as_meta' => true,
 			'updatable_via_rest' => true,
 		),
+		'address_alt' => array(
+			'type' => 'string',
+			'description' => '',
+			'sanitize_callback' => 'sanitize_text_field',
+			'meta_key' => '_wsuwp_profile_alt_address',
+			'register_as_meta' => true,
+			'updatable_via_rest' => true,
+		),
 		'website' => array(
 			'type' => 'string',
 			'description' => '',
@@ -529,7 +537,7 @@ class WSUWP_People_Post_Type {
 		$email_alt = get_post_meta( $post->ID, '_wsuwp_profile_alt_email', true );
 		$phone_alt = get_post_meta( $post->ID, '_wsuwp_profile_alt_phone', true );
 		$office_alt = get_post_meta( $post->ID, '_wsuwp_profile_alt_office', true );
-		$address_alt = get_post_meta( $post->ID, '_wsuwp_profile_alt_address', true ); // This doesn't exist... yet
+		$address_alt = get_post_meta( $post->ID, '_wsuwp_profile_alt_address', true );
 
 		// Additional data.
 		$website = get_post_meta( $post->ID, '_wsuwp_profile_website', true );
