@@ -52,11 +52,11 @@ wsuwp.people = wsuwp.people || {};
 
 		window.tinymce.get( editor.id ).setContent( wsuwp.people.bio_content[ editor.id ] );
 
-		if ( window.tinymce.get( "_wsuwp_profile_bio_unit" ) ) {
+		if ( 0 !== $( "#bio_unit .readonly" ).length ) {
 			window.tinymce.get( "_wsuwp_profile_bio_unit" ).setMode( "readonly" );
 		}
 
-		if ( window.tinymce.get( "_wsuwp_profile_bio_university" ) ) {
+		if ( 0 !== $( "#bio_university .readonly" ).length ) {
 			window.tinymce.get( "_wsuwp_profile_bio_university" ).setMode( "readonly" );
 		}
 	};
