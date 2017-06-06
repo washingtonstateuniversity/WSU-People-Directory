@@ -623,7 +623,7 @@ class WSUWP_People_Post_Type {
 				<div class="wsu-person-contact">
 
 					<div class="wsu-person-repeatable-meta wsu-person-title">
-						<?php if ( $working_titles && is_array( $working_titles ) ) { ?>
+					<?php if ( $working_titles && is_array( $working_titles ) ) { ?>
 						<?php foreach ( $working_titles as $i => $working_title ) { ?>
 						<div class="wsu-person-repeatable-meta-entry">
 							<div contenteditable="true" data-placeholder="Enter title here"><?php echo esc_html( $working_title ); ?></div>
@@ -633,12 +633,14 @@ class WSUWP_People_Post_Type {
 								<span class="screen-reader-text">Select</span>
 							</button>
 							<?php } ?>
+							<?php if ( 0 !== $i ) { ?>
 							<button type="button" class="wsu-person-button wsu-person-remove dashicons dashicons-no">
 								<span class="screen-reader-text">Delete</span>
 							</button>
+							<?php } ?>
 						</div>
 						<?php } ?>
-						<?php } else { ?>
+					<?php } else { ?>
 						<div class="wsu-person-repeatable-meta-entry">
 							<div contenteditable="true" data-placeholder="Enter title here"><?php echo esc_html( $title ); ?></div>
 							<input type="hidden" name="_wsuwp_profile_title[]" value="<?php echo esc_attr( $title ); ?>" />
@@ -647,9 +649,6 @@ class WSUWP_People_Post_Type {
 								<span class="screen-reader-text">Select to display</span>
 							</button>
 							<?php } ?>
-							<button type="button" class="wsu-person-button wsu-person-remove dashicons dashicons-no">
-								<span class="screen-reader-text">Delete</span>
-							</button>
 						</div>
 						<?php } ?>
 						<button type="button"
@@ -658,7 +657,7 @@ class WSUWP_People_Post_Type {
 						<?php if ( false === WSUWP_People_Directory::is_main_site() ) { ?>
 						<?php $index_used = get_post_meta( $post->ID, '_use_title', true ); ?>
 						<input type="hidden" class="use-title" name="_use_title" value="<?php echo esc_attr( $index_used ); ?>" />
-						<?php } ?>
+					<?php } ?>
 					</div>
 
 					<div contenteditable="true"
