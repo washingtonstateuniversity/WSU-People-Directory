@@ -119,6 +119,23 @@
 	color: #00a0d2;
 }
 
+/* Button customizations */
+.wsu-person-degree .wsu-person-add-repeatable-meta {
+	display: inline-block;
+}
+
+.wsu-person-degree .wsu-person-add-repeatable-meta:after {
+	content: " a degree";
+}
+
+.wsu-person-degree div + .wsu-person-add-repeatable-meta {
+	display: none;
+}
+
+.wsu-person-degree div + .wsu-person-add-repeatable-meta:after {
+	content: " another degree";
+}
+
 /* Photo collection */
 .wsu-person-card figcaption {
 	color: #767676;

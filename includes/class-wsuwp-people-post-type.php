@@ -590,18 +590,10 @@ class WSUWP_People_Post_Type {
 							</button>
 						</div>
 						<?php } ?>
-					<?php } else { ?>
-						<div class="wsu-person-repeatable-meta-entry">
-							<div contenteditable="true" data-placeholder="Enter degree here"></div>
-							<input type="hidden" name="_wsuwp_profile_degree[]" value="" />
-							<button type="button" class="wsu-person-button wsu-person-remove dashicons dashicons-no">
-								<span class="screen-reader-text">Delete</span>
-							</button>
-						</div>
 					<?php } ?>
 						<button type="button"
 							    data-type="degree"
-							    class="wsu-person-button wsu-person-add-repeatable-meta">+ Add another degree</button>
+							    class="wsu-person-button wsu-person-add-repeatable-meta">+ Add</button>
 					</div>
 
 				</header>
