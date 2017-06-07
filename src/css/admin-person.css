@@ -43,10 +43,14 @@
 }
 
 .card .contact {
-	align-items: flex-start;
-	display: flex;
-	flex-direction: column;
 	float: left;
+	line-height: 0;
+	white-space: pre-line;
+}
+
+.contact span {
+	display: inline-block;
+	line-height: normal;
 }
 
 /* Editable areas */
@@ -95,20 +99,29 @@
 }
 
 /* Buttons */
-.wsu-person-button {
+.card button {
 	background: none;
 	border: none;
 	cursor: pointer;
+	display: none;
 	padding: 0;
 }
 
-.wsu-person-button {
-	display: none;
+.card .dashicons {
+	font-size: 16px;
+	height: 16px;
+	width: 16px;
+	vertical-align: text-bottom;
 }
 
-span:hover ~ .wsu-person-add-repeatable-meta,
-.wsu-person-add-repeatable-meta:hover,
-span:hover + .wsu-person-button {
+.card .wsu-person-remove:hover,
+.card .wsu-person-remove:focus {
+	color: #c00;
+	outline: none;
+}
+
+.card span:hover ~ .wsu-person-add-repeatable-meta,
+.card .wsu-person-add-repeatable-meta:hover {
 	display: inline-block;
 }
 
@@ -128,14 +141,14 @@ span:hover + .wsu-person-button {
 }
 
 /* Button customizations */
-.wsu-person-add-degree {
+.card .wsu-person-add-degree {
 	display: inline-block;
 	opacity: 0;
 }
 
-h2 + .wsu-person-add-degree,
-.degree:hover ~ .wsu-person-add-degree,
-.wsu-person-add-degree:hover {
+.card h2 + .wsu-person-add-degree,
+.card .degree:hover ~ .wsu-person-add-degree,
+.card .wsu-person-add-degree:hover {
 	opacity: 1;
 }
 

@@ -553,7 +553,9 @@ class WSUWP_People_Post_Type {
 		<div class="wsu-person" data-nid="<?php echo esc_html( $nid ); ?>">
 
 			<script type="text/template" class="wsu-person-repeatable-meta-template">
-				<span contenteditable="true" class="<%= type %>" data-placeholder="Enter <%= type %> here"><%= value %></span>
+				<span contenteditable="true" class="<%= type %>" data-placeholder="Enter <%= type %> here"><%= value %></span><button type="button" class="wsu-person-remove dashicons dashicons-no">
+						<span class="screen-reader-text">Delete</span>
+				</button>
 				<input type="hidden" data-for="<%= type %>" name="_wsuwp_profile_<%= type %>[]" value="<%= value %>" />
 			</script>
 
@@ -564,22 +566,19 @@ class WSUWP_People_Post_Type {
 			<input type="hidden" data-for="address" name="_wsuwp_profile_alt_address" value="<?php echo esc_attr( $address_value ); ?>" />
 			<input type="hidden" data-for="website" name="_wsuwp_profile_website" value="<?php echo esc_attr( $website ); ?>" />
 
-			<?php
-			if ( $working_titles && is_array( $working_titles ) ) {
-				foreach ( $working_titles as $working_title ) {
-					?><input type="hidden" data-for="title" name="_wsuwp_profile_title[]" value="<?php echo esc_attr( $working_title ); ?>" /><?php
-				}
-			} else {
-				?><input type="hidden" data-for="title" name="_wsuwp_profile_title[]" value="" /><?php
-			} ?>
+			<?php if ( $working_titles && is_array( $working_titles ) ) { ?>
+				<?php foreach ( $working_titles as $working_title ) { ?>
+				<input type="hidden" data-for="title" name="_wsuwp_profile_title[]" value="<?php echo esc_attr( $working_title ); ?>" />
+				<?php } ?>
+			<?php } else { ?>
+			<input type="hidden" data-for="title" name="_wsuwp_profile_title[]" value="" />
+			<?php } ?>
 
-			<?php
-			if ( $degrees && is_array( $degrees ) ) {
-				foreach ( $degrees as $degree ) {
-					?><input type="hidden" data-for="degree" name="_wsuwp_profile_degree[]" value="<?php echo esc_attr( $degree ); ?>" /><?php
-				}
-			}
-			?>
+			<?php if ( $degrees && is_array( $degrees ) ) { ?>
+				<?php foreach ( $degrees as $degree ) { ?>
+				<input type="hidden" data-for="degree" name="_wsuwp_profile_degree[]" value="<?php echo esc_attr( $degree ); ?>" />
+				<?php } ?>
+			<?php } ?>
 
 			<?php if ( false === WSUWP_People_Directory::is_main_site() ) { ?>
 			<?php $index_used = get_post_meta( $post->ID, '_use_title', true ); ?>
@@ -594,19 +593,13 @@ class WSUWP_People_Post_Type {
 						 class="name"
 						 data-placeholder="Enter name here"><?php echo esc_html( $post->post_title ); ?></h2>
 
-					<?php
-					if ( $degrees && is_array( $degrees ) ) {
-						foreach ( $degrees as $degree ) { ?>
+					<?php if ( $degrees && is_array( $degrees ) ) { ?>
+						<?php foreach ( $degrees as $degree ) { ?>
 						<span contenteditable="true"
-								class="degree"
-								data-placeholder="Enter degree here"><?php echo esc_html( $degree ); ?></span>
-						<?php }
-					}
-					?>
-
-					<button type="button"
-						    data-type="degree"
-						    class="wsu-person-button wsu-person-add-repeatable-meta wsu-person-add-degree">+ Add</button>
+							  class="degree"
+							  data-placeholder="Enter degree here"><?php echo esc_html( $degree ); ?></span>
+						<?php } ?>
+					<?php } ?>
 
 				</header>
 
@@ -626,22 +619,17 @@ class WSUWP_People_Post_Type {
 
 				<div class="contact">
 
-					<?php
-					if ( $working_titles && is_array( $working_titles ) ) {
-						foreach ( $working_titles as $working_title ) { ?>
+					<?php if ( $working_titles && is_array( $working_titles ) ) { ?>
+						<?php foreach ( $working_titles as $working_title ) { ?>
 						<span contenteditable="true"
 								class="title"
 								data-placeholder="Enter title here"><?php echo esc_html( $working_title ); ?></span>
-						<?php }
-					} else { ?>
-						<span contenteditable="true"
-								class="title"
-								data-placeholder="Enter title here"><?php echo esc_html( $title ); ?></span>
+						<?php } ?>
+					<?php } else { ?>
+					<span contenteditable="true"
+							class="title"
+							data-placeholder="Enter title here"><?php echo esc_html( $title ); ?></span>
 					<?php } ?>
-
-					<button type="button"
-							data-type="title"
-							class="wsu-person-button wsu-person-add-repeatable-meta wsu-person-add-title">+ Add another title</button>
 
 					<span contenteditable="true"
 						 class="email"

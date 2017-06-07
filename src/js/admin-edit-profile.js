@@ -3,16 +3,26 @@ var wsuwp = wsuwp || {};
 
 ( function( $, window, document, wsuwp ) {
 	$( document ).ready( function() {
-		var $loading = $( "#publishing-action .spinner" ),
+		var $load = $( "#load-ad-data" ),
+			$loading = $( "#publishing-action .spinner" ),
 			$nid = $( "#_wsuwp_profile_ad_nid" ),
 			$hash = $( "#confirm-ad-hash" ),
 			$confirm = $( "#confirm-ad-data" ),
 			$card = $( ".wsu-person .card" ),
-			$add_repeatable_meta = $( ".wsu-person-add-repeatable-meta" ),
 			repeatable_meta_template = _.template( $( ".wsu-person-repeatable-meta-template" ).html() );
 
+		// Insert the repeatable meta area buttons.
+		$( ".card header" ).append( "<button type='button' data-type='degree' class='wsu-person-add-repeatable-meta wsu-person-add-degree'>+ Add</button>" );
+		$( ".contact .title" ).last().after( "\n<button type='button' data-type='title' class='wsu-person-add-repeatable-meta wsu-person-add-title'>+ Add another title</button>" );
+		$.each( $( ".contact .title" ).slice( 1 ), function() {
+			$( this ).after( "<button type='button' class='wsu-person-remove dashicons dashicons-no'><span class='screen-reader-text'>Delete</span></button>" );
+		} );
+		$.each( $( "header .degree" ), function() {
+			$( this ).after( "<button type='button' class='wsu-person-remove dashicons dashicons-no'><span class='screen-reader-text'>Delete</span></button>" );
+		} );
+
 		// Capture data.
-		$( "#load-ad-data" ).on( "click", function( e ) {
+		$load.on( "click", function( e ) {
 			e.preventDefault();
 			e.target.disabled = true;
 
@@ -107,13 +117,18 @@ var wsuwp = wsuwp || {};
 			} );
 		} );
 
-		// Copy content from the editable div into its respective input.
+		// Copy content from `contenteditable` elements into their respective inputs.
 		$card.on( "focusout", "[contenteditable='true']", function() {
 			var field = $( this ).attr( "class" ),
 				index = $( this ).index( "." + field ),
 				value = $( this ).text();
 
 			$( "[data-for='" + field + "']" ).eq( index ).val( value );
+
+			// Hide any visible repeatable area remove buttons.
+			setTimeout( function() {
+				$( ".title + button:not(:focus), .degree + button:not(:focus)" ).hide( 50 );
+			}, 1 );
 		} );
 
 		// Ignore the Enter key in editable divs.
@@ -124,16 +139,36 @@ var wsuwp = wsuwp || {};
 		} );
 
 		// Add a repeatable meta area.
-		$add_repeatable_meta.click( function() {
+		$card.on( "click", ".wsu-person-add-repeatable-meta", function() {
 			$( this ).before( repeatable_meta_template( {
 				type: $( this ).data( "type" ),
 				value: ""
 			} ) );
 		} );
 
-		// Remove a repeatable meta area.
+		// Surface a repeatable meta area remove button.
+		$card.on( "focus", ".title, .degree", function() {
+			$( this ).next( "button" ).show( 50 );
+		} );
+
+		// Hide any visible repeatable area remove buttons.
+		$card.on( "focusout", ".title, .degree, .wsu-person-remove", function() {
+
+			// Give enough time for the `focusin` to happen.
+			setTimeout( function() {
+				$( ".title + button:not(:focus), .degree + button:not(:focus)" ).hide( 50 );
+			}, 1 );
+		} );
+
+		// Remove a repeatable meta area and its associated input.
 		$card.on( "click", ".wsu-person-remove", function() {
-			$( this ).closest( "div" ).remove();
+			var $span = $( this ).prev( "span" ),
+				field = $span.attr( "class" ),
+				index = $span.index( "." + field );
+
+			$span.remove();
+			$( "[data-for='" + field + "']" ).eq( index ).remove();
+			$( this ).remove();
 		} );
 	} );
 }( jQuery, window, document, wsuwp ) );
