@@ -7,7 +7,7 @@ var wsuwp = wsuwp || {};
 			$nid = $( "#_wsuwp_profile_ad_nid" ),
 			$hash = $( "#confirm-ad-hash" ),
 			$confirm = $( "#confirm-ad-data" ),
-			$card = $( ".wsu-person-card" ),
+			$card = $( ".wsu-person .card" ),
 			$add_repeatable_meta = $( ".wsu-person-add-repeatable-meta" ),
 			repeatable_meta_template = _.template( $( ".wsu-person-repeatable-meta-template" ).html() );
 
@@ -45,23 +45,23 @@ var wsuwp = wsuwp || {};
 					} else {
 						$( ".wsu-person" ).attr( "data-nid", $nid.val() );
 
-						$( ".wsu-person-name" ).text( response.data.given_name + " " + response.data.surname )
-							.next( "input" ).val( response.data.given_name + " " + response.data.surname );
+						$( ".wsu-person .name" ).text( response.data.given_name + " " + response.data.surname );
+						$( "[name='post_title']" ).val( response.data.given_name + " " + response.data.surname );
 
-						$( ".wsu-person-title [contenteditable='true']" ).text( response.data.title )
-							.next( "input" ).val( response.data.title );
+						$( ".wsu-person .title" ).text( response.data.title );
+						$( "[name='_wsuwp_profile_title[]']" ).val( response.data.title );
 
-						$( ".wsu-person-email" ).text( response.data.email )
-							.next( "input" ).val( response.data.email );
+						$( ".wsu-person .email" ).text( response.data.email );
+						$( "[name='_wsuwp_profile_alt_email']" ).val( response.data.email );
 
-						$( ".wsu-person-phone" ).text( response.data.telephone_number )
-							.next( "input" ).val( response.data.telephone_number );
+						$( ".wsu-person .phone" ).text( response.data.telephone_number );
+						$( "[name='_wsuwp_profile_alt_phone']" ).val( response.data.telephone_number );
 
-						$( ".wsu-person-office" ).text( response.data.office )
-							.next( "input" ).val( response.data.office );
+						$( ".wsu-person .office" ).text( response.data.office );
+						$( "[name='_wsuwp_profile_alt_office']" ).val( response.data.office );
 
-						$( ".wsu-person-address" ).text( response.data.street_address )
-							.next( "input" ).val( response.data.street_address );
+						$( ".wsu-person .address" ).text( response.data.street_address );
+						$( "[name='_wsuwp_profile_alt_address']" ).val( response.data.street_address );
 
 						$hash.val( response.data.confirm_ad_hash );
 					}
@@ -109,7 +109,11 @@ var wsuwp = wsuwp || {};
 
 		// Copy content from the editable div into its respective input.
 		$card.on( "focusout", "[contenteditable='true']", function() {
-			$( this ).next( "input" ).val( $( this ).text() );
+			var field = $( this ).attr( "class" ),
+				index = $( this ).index( "." + field ),
+				value = $( this ).text();
+
+			$( "[data-for='" + field + "']" ).eq( index ).val( value );
 		} );
 
 		// Ignore the Enter key in editable divs.

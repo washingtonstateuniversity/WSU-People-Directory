@@ -22,32 +22,43 @@
 	transition: opacity .5s ease-in-out;
 }
 
-.wsu-person-card {
-	background: #fff;
-	border: 1px solid #e5e5e5;
-	box-shadow: 0 1px 1px rgba(0, 0, 0, .04);
+.wsu-person .card {
 	font-size: 14px;
+	margin: 0;
+	max-width: none;
 	padding: 12px;
 }
 
-.wsu-person-photo {
-	display: inline-block;
+.wsu-person .card:after {
+	content: "";
+	display: table;
+	clear: both;
+}
+
+.card .photo {
+	float: left;
 	margin: 0 16px 16px 0;
 	min-height: 198px;
 	min-width: 198px;
 }
 
-.wsu-person-contact {
-	display: inline-block;
-	vertical-align: top;
+.card .contact {
+	align-items: flex-start;
+	display: flex;
+	flex-direction: column;
+	float: left;
 }
 
 /* Editable areas */
 [contenteditable="true"],
 [contenteditable="false"] {
 	display: inline-block;
-	margin-bottom: .25rem;
+	padding-bottom: .25rem;
 	min-width: 1px; /* Gives enough space for the cursor to show up. */
+}
+
+[contenteditable="true"]:focus {
+	outline: none;
 }
 
 [contenteditable="true"]:empty:before {
@@ -65,25 +76,21 @@
 }
 
 /* Editable area customizations */
-.wsu-person-name {
+#poststuff .name {
 	display: inline-block;
 	font-size: 22px;
 	height: 38px;
 	line-height: 38px;
 	margin-right: 7px;
+	padding: 0;
 }
 
-.wsu-person-degree,
-.wsu-person-degree > div {
-	display: inline-block;
-}
-
-.wsu-person-degree [contenteditable="true"]:after {
+.degree:after {
 	content: ",";
 	display: inline-block;
 }
 
-.wsu-person-degree div:last-of-type [contenteditable="true"]:after {
+.degree:last-of-type:after {
 	content: none;
 }
 
@@ -95,12 +102,13 @@
 	padding: 0;
 }
 
-.wsu-person-repeatable-meta .wsu-person-button {
+.wsu-person-button {
 	display: none;
 }
 
-.wsu-person-repeatable-meta:hover .wsu-person-add-repeatable-meta,
-.wsu-person-repeatable-meta div:hover .wsu-person-button {
+span:hover ~ .wsu-person-add-repeatable-meta,
+.wsu-person-add-repeatable-meta:hover,
+span:hover + .wsu-person-button {
 	display: inline-block;
 }
 
@@ -120,24 +128,27 @@
 }
 
 /* Button customizations */
-.wsu-person-degree .wsu-person-add-repeatable-meta {
+.wsu-person-add-degree {
 	display: inline-block;
+	opacity: 0;
 }
 
-.wsu-person-degree .wsu-person-add-repeatable-meta:after {
-	content: " a degree";
+h2 + .wsu-person-add-degree,
+.degree:hover ~ .wsu-person-add-degree,
+.wsu-person-add-degree:hover {
+	opacity: 1;
 }
 
-.wsu-person-degree div + .wsu-person-add-repeatable-meta {
-	display: none;
-}
-
-.wsu-person-degree div + .wsu-person-add-repeatable-meta:after {
+.wsu-person-add-degree:after {
 	content: " another degree";
 }
 
+h2 + .wsu-person-add-degree:after {
+	content: " a degree";
+}
+
 /* Photo collection */
-.wsu-person-card figcaption {
+.wsu-person .card figcaption {
 	color: #767676;
 }
 

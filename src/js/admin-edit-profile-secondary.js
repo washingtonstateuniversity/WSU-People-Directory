@@ -69,8 +69,8 @@ wsuwp.people = wsuwp.people || {};
 	wsuwp.people.populate_person_from_people_directory = function( data ) {
 		var $ = jQuery,
 			repeatable_meta_template = _.template( $( ".wsu-person-repeatable-meta-template" ).html() ),
-			$add_title_button = $( ".wsu-person-title .wsu-person-add-repeatable-meta" ),
-			$add_degree_button = $( ".wsu-person-degree .wsu-person-add-repeatable-meta" );
+			$add_title_button = $( ".wsu-person-add-title" ),
+			$add_degree_button = $( ".wsu-person-add-degree" );
 
 		// Populate the NID.
 		$( ".wsu-person" ).attr( "data-nid", data.nid );
@@ -79,23 +79,23 @@ wsuwp.people = wsuwp.people || {};
 		$( "#_wsuwp_profile_post_id" ).val( data.id );
 
 		// Populate card data.
-		$( ".wsu-person-name" ).text( data.title.rendered ).data( "original", data.title.rendered )
-			.next( "input" ).val( data.title.rendered );
+		$( ".wsu-person .name" ).text( data.title.rendered ).data( "original", data.title.rendered );
+		$( "[data-for='name']" ).val( data.title.rendered );
 
-		$( ".wsu-person-email" ).text( data.email_alt ).data( "original", data.email_alt )
-			.next( "input" ).val( data.email_alt );
+		$( ".wsu-person .email" ).text( data.email_alt ).data( "original", data.email_alt );
+		$( "[data-for='email']" ).val( data.email_alt );
 
-		$( ".wsu-person-phone" ).text( data.phone_alt ).data( "original", data.phone_alt )
-			.next( "input" ).val( data.phone_alt );
+		$( ".wsu-person .phone" ).text( data.phone_alt ).data( "original", data.phone_alt );
+		$( "[data-for='phone']" ).val( data.phone_alt );
 
-		$( ".wsu-person-office" ).text( data.office_alt ).data( "original", data.office_alt )
-			.next( "input" ).val( data.office_alt );
+		$( ".wsu-person .office" ).text( data.office_alt ).data( "original", data.office_alt );
+		$( "[data-for='office']" ).val( data.office_alt );
 
-		$( ".wsu-person-address" ).text( data.address_alt ).data( "original", data.address_alt )
-			.next( "input" ).val( data.address_alt );
+		$( ".wsu-person .address" ).text( data.address_alt ).data( "original", data.address_alt );
+		$( "[data-for='address']" ).val( data.address_alt );
 
-		$( ".wsu-person-website" ).text( data.website ).data( "original", data.website )
-			.next( "input" ).val( data.website );
+		$( ".wsu-person .website" ).text( data.website ).data( "original", data.website );
+		$( "[data-for='website']" ).val( data.website );
 
 		// Populate biographies.
 		wsuwp.people.bio_content.content = data.content.rendered;
@@ -110,10 +110,11 @@ wsuwp.people = wsuwp.people || {};
 
 		// Populate title(s).
 		$.each( data.working_titles, function( i, value ) {
-			var $field = $( ".wsu-person-title > div" )[ i ];
+			var $field = $( ".contact .title" )[ i ];
 
 			if ( $field ) {
-				$( $field ).find( "div" ).text( value ).next( "input" ).val( value );
+				$( $field ).text( value );
+				$( "[data-for='title']" ).val( value );
 			} else {
 				$add_title_button.before( repeatable_meta_template( {
 					type: $add_title_button.data( "type" ),
@@ -129,7 +130,7 @@ wsuwp.people = wsuwp.people || {};
 			var titles = $( ".use-title" ).val().split( " " );
 
 			$.each( titles, function( i, value ) {
-				$( ".wsu-person-title .wsu-person-repeatable-meta-entry" )
+				$( ".contact .title" )
 					.eq( value )
 					.addClass( "selected" )
 					.find( ".screen-reader-text" )
@@ -139,10 +140,10 @@ wsuwp.people = wsuwp.people || {};
 
 		// Populate degree(s).
 		$.each( data.degree, function( i, value ) {
-			var $field = $( ".wsu-person-degree > div" )[ i ];
+			var $field = $( ".contact .degree" )[ i ];
 
 			if ( $field ) {
-				$( $field ).find( "div" ).text( value ).next( "input" ).val( value );
+				$( $field ).text( value ).next( "input" ).val( value );
 			} else {
 				$add_degree_button.before( repeatable_meta_template( {
 					type: $add_degree_button.data( "type" ),
@@ -328,14 +329,14 @@ wsuwp.people = wsuwp.people || {};
 		// Post data to the user's people.wsu.edu profile.
 		$( "#publish" ).on( "click", function() {
 			var data = {},
-				name = $( ".wsu-person-name" ),
-				email = $( ".wsu-person-email" ),
-				phone = $( ".wsu-person-phone" ),
-				office = $( ".wsu-person-office" ),
-				address = $( ".wsu-person-address" ),
-				website = $( ".wsu-person-website" ),
-				titles = $( ".wsu-person-title > div > div" ),
-				degrees = $( ".wsu-person-degree > div > div" ),
+				name = $( ".wsu-person .name" ),
+				email = $( ".wsu-person .email" ),
+				phone = $( ".wsu-person .phone" ),
+				office = $( ".wsu-person .office" ),
+				address = $( ".wsu-person .address" ),
+				website = $( ".wsu-person .website" ),
+				titles = $( ".wsu-person .title" ),
+				degrees = $( ".wsu-person .degree" ),
 				personal_bio = window.tinymce.get( "content" ),
 				unit_bio = window.tinymce.get( "_wsuwp_profile_bio_unit" ),
 				university_bio = window.tinymce.get( "_wsuwp_profile_bio_university" );
