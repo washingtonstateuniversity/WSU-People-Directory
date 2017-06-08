@@ -51,6 +51,7 @@
 .contact span {
 	display: inline-block;
 	line-height: normal;
+	min-height: 17px;
 }
 
 /* Editable areas */
@@ -132,7 +133,7 @@
 
 .wsu-person-add-repeatable-meta {
 	color: #0073aa;
-	margin-bottom: .25em;
+	margin: 0 0 .25em;
 	text-decoration: underline;
 }
 

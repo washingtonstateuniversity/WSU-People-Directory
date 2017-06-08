@@ -124,11 +124,6 @@ var wsuwp = wsuwp || {};
 				value = $( this ).text();
 
 			$( "[data-for='" + field + "']" ).eq( index ).val( value );
-
-			// Hide any visible repeatable area remove buttons.
-			setTimeout( function() {
-				$( ".title + button:not(:focus), .degree + button:not(:focus)" ).hide( 50 );
-			}, 1 );
 		} );
 
 		// Ignore the Enter key in editable divs.
@@ -148,7 +143,7 @@ var wsuwp = wsuwp || {};
 
 		// Surface a repeatable meta area remove button.
 		$card.on( "focus", ".title, .degree", function() {
-			$( this ).next( "button" ).show( 50 );
+			$( this ).next( "button:not(.wsu-person-add-repeatable-meta)" ).show( 50 );
 		} );
 
 		// Hide any visible repeatable area remove buttons.
@@ -156,7 +151,7 @@ var wsuwp = wsuwp || {};
 
 			// Give enough time for the `focusin` to happen.
 			setTimeout( function() {
-				$( ".title + button:not(:focus), .degree + button:not(:focus)" ).hide( 50 );
+				$( ".wsu-person-remove:not(:focus):not(:active)" ).hide( 50 );
 			}, 1 );
 		} );
 
