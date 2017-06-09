@@ -147,12 +147,18 @@ var wsuwp = wsuwp || {};
 		} );
 
 		// Hide any visible repeatable area remove buttons.
-		$card.on( "focusout", ".title, .degree, .wsu-person-remove", function() {
+		$card.on( "focusout", ".title, .degree, .wsu-person-remove", function( e ) {
+			var $new_target = $( e.relatedTarget );
 
-			// Give enough time for the `focusin` to happen.
-			setTimeout( function() {
-				$( ".wsu-person-remove:not(:focus):not(:active)" ).hide( 50 );
-			}, 1 );
+			if ( $new_target.hasClass( "wsu-person-remove" ) ) {
+				$( ".wsu-person-remove:not(:focus)" ).hide( 50 );
+			} else if ( $new_target.hasClass( "title" ) || $new_target.hasClass( "title" ) ) {
+				var index = $new_target.next( ".wsu-person-remove" ).index( ".wsu-person-remove" );
+
+				$( ".wsu-person-remove" ).not( ":eq(" + index + ")" ).hide( 50 );
+			} else {
+				$( ".wsu-person-remove" ).hide( 50 );
+			}
 		} );
 
 		// Remove a repeatable meta area and its associated input.
