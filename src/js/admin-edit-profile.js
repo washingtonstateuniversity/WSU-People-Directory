@@ -172,4 +172,10 @@ var wsuwp = wsuwp || {};
 			$( this ).remove();
 		} );
 	} );
+
+	// Select 2
+	$( ".taxonomy-select2" ).select2( {
+		placeholder: "+ Add",
+		closeOnSelect: false
+	} );
 }( jQuery, window, document, wsuwp ) );
