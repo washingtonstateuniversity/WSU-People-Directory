@@ -838,9 +838,10 @@ class WSUWP_People_Post_Type {
 	 *
 	 */
 	public function display_university_taxonomies_meta_box( $post ) {
-		$university_taxonomies = array( 'wsuwp_university_org', 'wsuwp_university_location', 'wsuwp_university_category', 'post_tag' );
+		// Reversed because that seems to better match the order of importance.
+		$taxonomies = array_reverse( get_post_taxonomies( $post ) );
 
-		foreach ( $university_taxonomies as $taxonomy ) {
+		foreach ( $taxonomies as $taxonomy ) {
 			$terms = get_terms( array(
 				'hide_empty' => false,
 				'taxonomy' => $taxonomy,
@@ -973,6 +974,15 @@ class WSUWP_People_Post_Type {
 
 		if ( ! current_user_can( 'edit_post', $post_id ) ) {
 			return;
+		}
+
+		// Make sure taxonomy terms are properly removed when none are selected.
+		$taxonomies = get_post_taxonomies( $post_id );
+
+		foreach ( $taxonomies as $taxonomy ) {
+			if ( ! isset( $_POST['tax_input'][ $taxonomy ] ) ) {
+				wp_set_object_terms( $post_id, '', $taxonomy );
+			}
 		}
 
 		// Store only select meta if this is a secondary site.
