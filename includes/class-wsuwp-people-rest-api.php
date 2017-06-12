@@ -375,14 +375,20 @@ class WSUWP_People_REST_API {
 	public function show_university_taxonomies_in_rest() {
 		global $wp_taxonomies;
 
-		$wp_taxonomies['wsuwp_university_category']->show_in_rest = true;
-		$wp_taxonomies['wsuwp_university_category']->rest_base = 'university_category';
+		if ( taxonomy_exists( 'wsuwp_university_category' ) ) {
+			$wp_taxonomies['wsuwp_university_category']->show_in_rest = true;
+			$wp_taxonomies['wsuwp_university_category']->rest_base = 'university_category';
+		}
 
-		$wp_taxonomies['wsuwp_university_location']->show_in_rest = true;
-		$wp_taxonomies['wsuwp_university_location']->rest_base = 'location';
+		if ( taxonomy_exists( 'wsuwp_university_location' ) ) {
+			$wp_taxonomies['wsuwp_university_location']->show_in_rest = true;
+			$wp_taxonomies['wsuwp_university_location']->rest_base = 'location';
+		}
 
-		$wp_taxonomies['wsuwp_university_org']->show_in_rest = true;
-		$wp_taxonomies['wsuwp_university_org']->rest_base = 'organization';
+		if ( taxonomy_exists( 'wsuwp_university_org' ) ) {
+			$wp_taxonomies['wsuwp_university_org']->show_in_rest = true;
+			$wp_taxonomies['wsuwp_university_org']->rest_base = 'organization';
+		}
 	}
 
 	/**
