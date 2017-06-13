@@ -155,7 +155,7 @@ var wsuwp = wsuwp || {};
 			var $new_target = $( e.relatedTarget );
 
 			if ( $new_target.hasClass( "wsu-person-remove" ) ) {
-				$( ".wsu-person-remove:not(:focus)" ).hide( 50 );
+				return;
 			} else if ( $new_target.hasClass( "title" ) || $new_target.hasClass( "title" ) ) {
 				var index = $new_target.next( ".wsu-person-remove" ).index( ".wsu-person-remove" );
 
