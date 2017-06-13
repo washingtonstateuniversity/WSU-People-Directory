@@ -848,22 +848,36 @@ class WSUWP_People_Post_Type {
 			) );
 
 			$name = get_taxonomy( $taxonomy )->labels->name;
+			$name = str_replace( 'University ', '', $name );
 			?>
 
 			<p class="post-attributes-label-wrapper">
 				<label class="post-attributes-label" for="<?php echo esc_attr( $taxonomy ); ?>"><?php echo esc_html( $name ); ?></label>
 			</p>
 
-			<select class="taxonomy-select2"
-					id="<?php echo esc_attr( $taxonomy ); ?>"
-					name="tax_input[<?php echo esc_attr( $taxonomy ); ?>][]"
-					multiple>
-				<?php foreach ( $terms as $term ) { ?>
-				<option value="<?php echo esc_attr( $term->term_id ); ?>"<?php if ( has_term( $term->term_id, $taxonomy ) ) { echo ' selected="selected"'; } ?>><?php echo esc_html( $term->name ); ?></option>
-				<?php } ?>
-			</select>
-
 			<?php
+			$dropdown = wp_dropdown_categories( array(
+				'class' => 'taxonomy-select2',
+				'echo' => false,
+				'hide_empty' => false,
+				'hierarchical' => true,
+				'id' => $taxonomy,
+				'name' => 'tax_input[' . $taxonomy . '][]',
+				'taxonomy' => $taxonomy,
+			) );
+
+			$dropdown = str_replace( '<select', '<select multiple="multiple" style="width: 100%"', $dropdown );
+			$dropdown = str_replace( '&nbsp;', '', $dropdown );
+
+			$selected_terms = get_the_terms( $post->ID, $taxonomy );
+
+			if ( $selected_terms && ! is_wp_error( $selected_terms ) ) {
+				foreach ( $selected_terms as $term ) {
+					$dropdown = str_replace( 'value="' . $term->term_id . '"', 'value="' . $term->term_id . '" selected="selected"', $dropdown );
+				}
+			}
+
+			echo $dropdown; // @codingStandardsIgnoreLine
 		}
 	}
 

@@ -173,9 +173,15 @@ var wsuwp = wsuwp || {};
 		} );
 	} );
 
-	// Select 2
+	// Initialize Select2.
 	$( ".taxonomy-select2" ).select2( {
 		placeholder: "+ Add",
-		closeOnSelect: false
+		closeOnSelect: false,
+		templateResult: function( data, container ) {
+			if ( data.element ) {
+				$( container ).addClass( $( data.element ).attr( "class" ) );
+			}
+			return data.text;
+		}
 	} );
 }( jQuery, window, document, wsuwp ) );

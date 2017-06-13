@@ -191,8 +191,8 @@ h2 + .wsu-person-add-degree:after {
 }
 
 /* Taxonomy metabox */
-.select2-container {
-	min-width: 100%;
+.taxonomy-select2 {
+	display: none;
 }
 
 .select2-container--default .select2-selection--multiple,
@@ -272,4 +272,12 @@ h2 + .wsu-person-add-degree:after {
 	height: 24px;
 	margin: 0;
 	max-width: 100%;
+}
+
+.level-1 {
+	padding-left: 1rem;
+}
+
+.level-2 {
+	padding-left: 2rem;
 }
