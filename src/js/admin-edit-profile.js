@@ -74,6 +74,9 @@ var wsuwp = wsuwp || {};
 						$( "[name='_wsuwp_profile_alt_address']" ).val( response.data.street_address );
 
 						$hash.val( response.data.confirm_ad_hash );
+
+						$( "#wsuwp-university-taxonomies" ).addClass( "show" );
+						$( "#wsuwp-profile-listing" ).addClass( "show" );
 					}
 				} else {
 					window.alert( response.data );

@@ -744,7 +744,7 @@ class WSUWP_People_Post_Type {
 
 		if ( true === WSUWP_People_Directory::is_main_site() ) {
 			add_meta_box(
-				'wsuwp_profile_listing',
+				'wsuwp-profile-listing',
 				'Listed On',
 				array( $this, 'display_listing_meta_box' ),
 				self::$post_type_slug,

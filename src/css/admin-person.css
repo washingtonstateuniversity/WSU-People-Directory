@@ -12,16 +12,30 @@
 	margin-top: 7px;
 }
 
-/* Card layout */
-.wsu-person[data-nid=""] {
-	visibility: hidden;
+/* Hide metaboxes until they are needed */
+.wsu-person[data-nid=""],
+.post-new-php #wsuwp-university-taxonomies,
+.post-new-php #wsuwp-profile-listing {
+	height: 0;
 	opacity: 0;
+	overflow: hidden;
+	visibility: hidden;
 }
 
-.wsu-person {
+.wsu-person,
+.post-new-php #wsuwp-university-taxonomies.show,
+.post-new-php #wsuwp-profile-listing.show {
+	height: auto;
 	transition: opacity .5s ease-in-out;
 }
 
+.post-new-php #wsuwp-university-taxonomies.show,
+.post-new-php #wsuwp-profile-listing.show {
+	opacity: 1;
+	visibility: visible;
+}
+
+/* Card layout */
 .wsu-person .card {
 	font-size: 14px;
 	margin: 0;
@@ -272,6 +286,10 @@ h2 + .wsu-person-add-degree:after {
 	height: 24px;
 	margin: 0;
 	max-width: 100%;
+}
+
+.select2-container--default .select2-results > .select2-results__options {
+	max-height: 500px;
 }
 
 .level-1 {
