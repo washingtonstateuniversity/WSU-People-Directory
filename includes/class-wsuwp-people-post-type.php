@@ -856,7 +856,7 @@ class WSUWP_People_Post_Type {
 			</p>
 
 			<?php
-			$dropdown = wp_dropdown_categories( array(
+			$dropdown_args = array(
 				'class' => 'taxonomy-select2',
 				'echo' => false,
 				'hide_empty' => false,
@@ -864,8 +864,13 @@ class WSUWP_People_Post_Type {
 				'id' => $taxonomy,
 				'name' => 'tax_input[' . $taxonomy . '][]',
 				'taxonomy' => $taxonomy,
-			) );
+			);
 
+			if ( 'post_tag' === $taxonomy ) {
+				$dropdown_args['value_field'] = 'name';
+			}
+
+			$dropdown = wp_dropdown_categories( $dropdown_args );
 			$dropdown = str_replace( '<select', '<select multiple="multiple" style="width: 100%"', $dropdown );
 			$dropdown = str_replace( '&nbsp;', '', $dropdown );
 
@@ -873,7 +878,8 @@ class WSUWP_People_Post_Type {
 
 			if ( $selected_terms && ! is_wp_error( $selected_terms ) ) {
 				foreach ( $selected_terms as $term ) {
-					$dropdown = str_replace( 'value="' . $term->term_id . '"', 'value="' . $term->term_id . '" selected="selected"', $dropdown );
+					$value = ( 'post_tag' === $taxonomy ) ? $term->name : $term->term_id;
+					$dropdown = str_replace( 'value="' . $value . '"', 'value="' . $value . '" selected="selected"', $dropdown );
 				}
 			}
 

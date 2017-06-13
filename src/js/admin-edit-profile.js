@@ -48,9 +48,10 @@ var wsuwp = wsuwp || {};
 				$loading.css( "visibility", "hidden" );
 
 				if ( response.success ) {
-
-					// If the response has an id property, it's almost certainly from people.wsu.edu.
-					if ( response.data.id ) {
+					if ( $.isEmptyObject( response.data ) ) {
+						window.alert( "Sorry, a profile for " + $nid.val() + " could not be found." );
+						return;
+					} else if ( response.data.id ) {
 						wsuwp.people.populate_person_from_people_directory( response.data );
 					} else {
 						$( ".wsu-person" ).attr( "data-nid", $nid.val() );
@@ -74,10 +75,10 @@ var wsuwp = wsuwp || {};
 						$( "[name='_wsuwp_profile_alt_address']" ).val( response.data.street_address );
 
 						$hash.val( response.data.confirm_ad_hash );
-
-						$( "#wsuwp-university-taxonomies" ).addClass( "show" );
-						$( "#wsuwp-profile-listing" ).addClass( "show" );
 					}
+
+					$( "#wsuwp-university-taxonomies" ).addClass( "show" );
+					$( "#wsuwp-profile-listing" ).addClass( "show" );
 				} else {
 					window.alert( response.data );
 					return;
