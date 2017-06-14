@@ -48,9 +48,10 @@ var wsuwp = wsuwp || {};
 				$loading.css( "visibility", "hidden" );
 
 				if ( response.success ) {
-
-					// If the response has an id property, it's almost certainly from people.wsu.edu.
-					if ( response.data.id ) {
+					if ( $.isEmptyObject( response.data ) ) {
+						window.alert( "Sorry, a profile for " + $nid.val() + " could not be found." );
+						return;
+					} else if ( response.data.id ) {
 						wsuwp.people.populate_person_from_people_directory( response.data );
 					} else {
 						$( ".wsu-person" ).attr( "data-nid", $nid.val() );
@@ -75,6 +76,9 @@ var wsuwp = wsuwp || {};
 
 						$hash.val( response.data.confirm_ad_hash );
 					}
+
+					$( "#wsuwp-university-taxonomies" ).addClass( "show" );
+					$( "#wsuwp-profile-listing" ).addClass( "show" );
 				} else {
 					window.alert( response.data );
 					return;
@@ -151,7 +155,7 @@ var wsuwp = wsuwp || {};
 			var $new_target = $( e.relatedTarget );
 
 			if ( $new_target.hasClass( "wsu-person-remove" ) ) {
-				$( ".wsu-person-remove:not(:focus)" ).hide( 50 );
+				return;
 			} else if ( $new_target.hasClass( "title" ) || $new_target.hasClass( "title" ) ) {
 				var index = $new_target.next( ".wsu-person-remove" ).index( ".wsu-person-remove" );
 
@@ -171,5 +175,17 @@ var wsuwp = wsuwp || {};
 			$( "[data-for='" + field + "']" ).eq( index ).remove();
 			$( this ).remove();
 		} );
+	} );
+
+	// Initialize Select2.
+	$( ".taxonomy-select2" ).select2( {
+		placeholder: "+ Add",
+		closeOnSelect: false,
+		templateResult: function( data, container ) {
+			if ( data.element ) {
+				$( container ).addClass( $( data.element ).attr( "class" ) );
+			}
+			return data.text;
+		}
 	} );
 }( jQuery, window, document, wsuwp ) );

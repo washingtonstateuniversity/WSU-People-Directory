@@ -187,23 +187,14 @@ wsuwp.people = wsuwp.people || {};
 				if ( taxonomy ) {
 					$.each( taxonomy, function( i, term ) {
 						if ( "post_tag" === term.taxonomy ) {
-							$( "#new-tag-post_tag" ).val( function( index, val ) {
-								return val + term.name + ", ";
-							} );
+							$( "#post_tag" ).val( term.name ).trigger( "change" );
 						} else {
-							$( "#" + term.taxonomy + "-all" )
-								.find( ".selectit:contains('" + term.name + "')" )
-								.find( "input[type='checkbox']" ).prop( "checked", true );
+							$( "#" + term.taxonomy ).find( "option:contains(" + term.name + ")" ).attr( "selected", "selected" );
+							$( "#" + term.taxonomy ).trigger( "change" );
 						}
 					} );
 				}
 			} );
-
-			// Add the tags.
-			$( ".tagadd" ).trigger( "click" );
-
-			// Change focus to the name field (the trigger above focuses the tag input).
-			$( ".wsu-person-name" ).focus();
 		}
 
 		// Disable inputs if a user doesn't have adequate permissions to edit the profile.
