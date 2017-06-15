@@ -12,6 +12,7 @@ var wsuwp = wsuwp || {};
 			$photo_collection = $( ".wsu-person-photo-collection" ),
 			repeatable_meta_template = _.template( $( ".wsu-person-repeatable-meta-template" ).html() ),
 			photo_template = _.template( $( ".wsu-person-photo-template" ).html() ),
+			previous_focus,
 			media_frame;
 
 		// Insert the repeatable meta area buttons.
@@ -186,6 +187,7 @@ var wsuwp = wsuwp || {};
 			}
 
 			var position = $( this ).offset();
+			previous_focus = document.activeElement;
 
 			$( "body" ).addClass( "wsu-person-photo-collection-open" );
 
@@ -193,12 +195,42 @@ var wsuwp = wsuwp || {};
 				"top": position.top,
 				"left": position.left
 			} );
+
+			$( ".wsu-person-add-photo" ).focus();
+		} );
+
+		// Handle keyboard interactions with the photo collection.
+		$( document ).keydown( function( e ) {
+			if ( !$( "body" ).hasClass( "wsu-person-photo-collection-open" ) ) {
+				return;
+			}
+
+			// Trap the focus within the photo collection.
+			if ( e.which === 9 ) {
+				var focusable_elements = $photo_collection.find( "button" ),
+					focused_element_index = focusable_elements.index( $( ":focus" ) );
+
+				if ( e.shiftKey && 0 === focused_element_index ) {
+					focusable_elements[ focusable_elements.length - 1 ].focus();
+					e.preventDefault();
+				} else if ( !event.shiftKey && focused_element_index === focusable_elements.length - 1 ) {
+					focusable_elements[ 0 ].focus();
+					e.preventDefault();
+				}
+			}
+
+			// Close the photo collection when the Escape key is pushed.
+			if ( e.which === 27 ) {
+				$( "body" ).removeClass( "wsu-person-photo-collection-open" );
+				previous_focus.focus();
+			}
 		} );
 
 		// Close photo collection.
 		$( document ).on( "click", ".wsu-person-photo-collection-close", function( e ) {
 			if ( e.target === this ) {
 				$( "body" ).removeClass( "wsu-person-photo-collection-open" );
+				previous_focus.focus();
 			}
 		} );
 

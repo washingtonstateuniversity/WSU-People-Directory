@@ -623,6 +623,7 @@ class WSUWP_People_Post_Type {
 				}
 				?>
 				<button type="button" class="wsu-person-add-photo">+ Add another photo</button>
+				<button type="button" class="wsu-person-photo-collection-close">Close</button>
 			</div>
 
 		</div>

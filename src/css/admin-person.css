@@ -184,7 +184,7 @@ h2 + .wsu-person-add-degree:after {
 	top: 0;
 }
 
-.wsu-person-photo-wrapper:hover  .wsu-person-remove {
+.wsu-person-photo-wrapper:hover .wsu-person-remove {
 	display: block;
 }
 
