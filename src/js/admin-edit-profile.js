@@ -222,16 +222,14 @@ var wsuwp = wsuwp || {};
 
 			// Close the photo collection when the Escape key is pushed.
 			if ( e.which === 27 ) {
-				$( "body" ).removeClass( "wsu-person-photo-collection-open" );
-				previous_focus.focus();
+				wsuwp.close_photo_collection();
 			}
 		} );
 
 		// Close photo collection.
 		$( document ).on( "click", ".wsu-person-photo-collection-close", function( e ) {
 			if ( e.target === this ) {
-				$( "body" ).removeClass( "wsu-person-photo-collection-open" );
-				previous_focus.focus();
+				wsuwp.close_photo_collection();
 			}
 		} );
 
@@ -300,6 +298,23 @@ var wsuwp = wsuwp || {};
 				ui.helper.height( "" ).width( "" );
 			}
 		} );
+
+		// Close the photo collection and update the card photo.
+		wsuwp.close_photo_collection = function() {
+			var $card_photo = $( ".photo img" ),
+				$primary_photo = $( ".wsu-person-photo-wrapper:first-of-type img" );
+
+			if ( $primary_photo.length ) {
+				$card_photo.attr( "src", $primary_photo.attr( "src" ) );
+			} else {
+				$card_photo.remove();
+				$( ".photo" ).addClass( "wsu-person-add-photo" )
+					.find( "figcaption" ).text( "+ Add photo(s)" );
+			}
+
+			$( "body" ).removeClass( "wsu-person-photo-collection-open" );
+			previous_focus.focus();
+		};
 	} );
 
 	// Initialize Select2.

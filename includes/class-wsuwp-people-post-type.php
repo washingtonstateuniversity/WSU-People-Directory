@@ -562,7 +562,7 @@ class WSUWP_People_Post_Type {
 		}
 		?>
 		<script type="text/template" class="wsu-person-repeatable-meta-template">
-			<span contenteditable="true" class="<%= type %>" data-placeholder="Enter <%= type %> here"><%= value %></span><button type="button" class="wsu-person-remove dashicons dashicons-no">
+			<span contenteditable="true" class="<%= type %>" data-placeholder="Enter <%= type %> here"><%= value %></span><button type="button" class="wsu-person-remove">
 					<span class="screen-reader-text">Delete</span>
 			</button>
 			<input type="hidden" data-for="<%= type %>" name="_wsuwp_profile_<%= type %>[]" value="<%= value %>" />
@@ -571,7 +571,7 @@ class WSUWP_People_Post_Type {
 		<script type="text/template" class="wsu-person-photo-template">
 			<div class="wsu-person-photo-wrapper">
 				<img src="<%= src %>" alt="<?php echo esc_attr( $post->post_title ); ?>" />
-				<button type="button" class="wsu-person-remove dashicons dashicons-no">
+				<button type="button" class="wsu-person-remove">
 					<span class="screen-reader-text">Delete</span>
 				</button>
 				<input type="hidden" name="_wsuwp_profile_photos[]" value="<%= id %>" />
@@ -613,7 +613,7 @@ class WSUWP_People_Post_Type {
 						<div class="wsu-person-photo-wrapper">
 							<img src="<?php echo esc_url( wp_get_attachment_image_src( $photo_id )[0] ); ?>"
 								 alt="<?php echo esc_attr( $post->post_title ); ?>" />
-							<button type="button" class="wsu-person-remove dashicons dashicons-no">
+							<button type="button" class="wsu-person-remove">
 								<span class="screen-reader-text">Delete</span>
 							</button>
 							<input type="hidden" name="_wsuwp_profile_photos[]" value="<?php echo esc_attr( $photo_id ); ?>" />
@@ -623,7 +623,10 @@ class WSUWP_People_Post_Type {
 				}
 				?>
 				<button type="button" class="wsu-person-add-photo">+ Add another photo</button>
-				<button type="button" class="wsu-person-photo-collection-close">Close</button>
+
+				<div class="wsu-person-photo-collection-toolbar">
+					<button type="button" class="wsu-person-photo-collection-close button button-primary button-large">Update</button>
+				</div>
 			</div>
 
 		</div>

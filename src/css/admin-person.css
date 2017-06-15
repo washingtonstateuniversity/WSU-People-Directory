@@ -67,15 +67,14 @@
 	white-space: pre-line;
 }
 
-.contact span {
+.contact span[contenteditable] {
 	display: inline-block;
 	line-height: normal;
 	min-height: 17px;
 }
 
 /* Editable areas */
-[contenteditable="true"],
-[contenteditable="false"] {
+[contenteditable] {
 	display: inline-block;
 	padding-bottom: .25rem;
 	min-width: 1px; /* Gives enough space for the cursor to show up. */
@@ -120,7 +119,7 @@
 
 /* Buttons */
 .card button,
-.wsu-person-photo-wrapper button {
+.wsu-person-photo-collection button {
 	background: none;
 	border: none;
 	cursor: pointer;
@@ -128,17 +127,39 @@
 	padding: 0;
 }
 
-.wsu-person-remove.dashicons {
-	font-size: 16px;
-	height: 16px;
-	width: 16px;
-	vertical-align: text-bottom;
+.wsu-person-remove {
+	border-radius: 50%;
+	height: 20px;
+	position: relative;
+	vertical-align: text-top;
+	width: 21px;
 }
 
-.wsu-person-remove:hover,
 .wsu-person-remove:focus {
-	color: #c00;
+	box-shadow: 0 0 0 1px #5b9dd9, 0 0 2px 1px rgba(30, 140, 190, .8);
 	outline: none;
+}
+
+.wsu-person-remove:before {
+	border-radius: 50%;
+	color: #0073aa;
+	content: "\f153";
+	display: block;
+	font: 400 16px/20px dashicons;
+	height: 20px;
+	line-height: 1.28;
+	text-align: center;
+	speak: none;
+	text-indent: 0;
+	top: 0;
+	position: absolute;
+	width: 20px;
+	-webkit-font-smoothing: antialiased;
+}
+
+.wsu-person-remove:hover:before,
+.wsu-person-remove:focus:before {
+	color: #c00;
 }
 
 .card span:hover ~ .wsu-person-add-repeatable-meta,
@@ -153,9 +174,12 @@
 	text-decoration: underline;
 }
 
+.wsu-person-add-repeatable-meta:focus,
 .wsu-person-add-repeatable-meta:hover,
+.wsu-person-add-photo:focus,
 .wsu-person-add-photo:hover {
 	color: #00a0d2;
+	outline: none;
 }
 
 /* Button customizations */
@@ -184,8 +208,17 @@ h2 + .wsu-person-add-degree:after {
 	top: 0;
 }
 
-.wsu-person-photo-wrapper:hover .wsu-person-remove {
-	display: block;
+.wsu-person-photo-wrapper:hover .wsu-person-remove,
+.wsu-person-photo-collection > button {
+	display: inline;
+}
+
+.wsu-person-add-photo {
+	margin: 24px 6px 12px auto;
+}
+
+.wsu-person-add-photo:first-child {
+	margin-top: 228px;
 }
 
 /* Photo collection */
@@ -194,6 +227,7 @@ h2 + .wsu-person-add-degree:after {
 }
 
 .card .photo img {
+	left: 0;
 	position: absolute;
 	transition: opacity .2s ease-in-out, z-index .2s ease-in-out;
 	z-index: 1;
@@ -234,6 +268,8 @@ h2 + .wsu-person-add-degree:after {
 }
 
 .wsu-person-photo-collection {
+	background: #f3f3f3;
+	box-shadow: inset 0 4px 4px -4px rgba(0, 0, 0, .1);
 	height: 0;
 	overflow: hidden;
 	position: absolute;
@@ -244,7 +280,8 @@ h2 + .wsu-person-add-degree:after {
 
 .wsu-person-photo-collection-open .wsu-person-photo-collection {
 	height: auto;
-	margin: -3px;
+	margin: -6px;
+	padding: 3px;
 	overflow: visible;
 	width: 204px;
 }
@@ -270,6 +307,16 @@ h2 + .wsu-person-add-degree:after {
 .wsu-person-photo-wrapper img {
 	display: block;
 	width: 100%;
+}
+
+.wsu-person-photo-collection-toolbar {
+	background: #fff;
+	border-bottom: 1px solid #ddd;
+	box-shadow: 0 -4px 4px -4px rgba(0, 0, 0, .1);
+	box-sizing: border-box;
+	height: 60px;
+	margin: 0 -3px -3px;
+	padding: 15px 16px 0 0;
 }
 
 /* TinyMCE Editors */
