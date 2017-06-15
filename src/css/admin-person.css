@@ -244,38 +244,32 @@ h2 + .wsu-person-add-degree:after {
 
 .wsu-person-photo-collection-open .wsu-person-photo-collection {
 	height: auto;
+	margin: -3px;
 	overflow: visible;
-	width: 198px;
+	width: 204px;
 }
 
 .wsu-person-photo-wrapper {
 	box-sizing: border-box;
+	cursor: move;
 	float: left;
-	margin-bottom: 6px;
+	height: 96px;
+	margin: 3px;
 	position: relative;
 	width: 96px;
 }
 
-.wsu-person-photo-wrapper:nth-of-type(odd) {
-	margin-left: 3px;
-}
-
-.wsu-person-photo-wrapper:nth-of-type(even) {
-	margin-right: 3px;
-}
-
-.wsu-person-photo-wrapper:first-child {
-	margin: 0 0 6px;
+.wsu-person-photo-wrapper:first-child,
+.placeholder:first-child ~ .ui-sortable-helper,
+.ui-sortable-helper:first-child + .placeholder,
+.ui-sortable-helper:first-child + .wsu-person-photo-wrapper:not(.placeholder) {
+	height: 198px;
 	width: 198px;
 }
 
 .wsu-person-photo-wrapper img {
 	display: block;
 	width: 100%;
-}
-
-button.wsu-person-add-photo {
-	clear: both;
 }
 
 /* TinyMCE Editors */

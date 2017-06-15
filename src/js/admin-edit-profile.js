@@ -189,6 +189,7 @@ var wsuwp = wsuwp || {};
 			var position = $( this ).offset();
 			previous_focus = document.activeElement;
 
+			$( window ).scrollTop( 0 );
 			$( "body" ).addClass( "wsu-person-photo-collection-open" );
 
 			$photo_collection.css( {
@@ -288,6 +289,16 @@ var wsuwp = wsuwp || {};
 		// Remove a photo from the collection.
 		$photo_collection.on( "click", ".wsu-person-remove", function() {
 			$( this ).parent( ".wsu-person-photo-wrapper" ).remove();
+		} );
+
+		// Use jQuery UI Sortable to allow reordering of photos.
+		$photo_collection.sortable( {
+			cursor: "move",
+			placeholder: "wsu-person-photo-wrapper placeholder",
+			items: "> .wsu-person-photo-wrapper",
+			start: function( e, ui ) {
+				ui.helper.height( "" ).width( "" );
+			}
 		} );
 	} );
 
