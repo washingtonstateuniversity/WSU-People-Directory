@@ -50,10 +50,15 @@
 }
 
 .card .photo {
+	align-items: center;
+	cursor: pointer;
+	display: flex;
 	float: left;
+	height: 198px;
+	justify-content: center;
 	margin: 0 16px 16px 0;
-	min-height: 198px;
-	min-width: 198px;
+	position: relative;
+	width: 198px;
 }
 
 .card .contact {
@@ -114,7 +119,8 @@
 }
 
 /* Buttons */
-.card button {
+.card button,
+.wsu-person-photo-wrapper button {
 	background: none;
 	border: none;
 	cursor: pointer;
@@ -122,15 +128,15 @@
 	padding: 0;
 }
 
-.card .dashicons {
+.wsu-person-remove.dashicons {
 	font-size: 16px;
 	height: 16px;
 	width: 16px;
 	vertical-align: text-bottom;
 }
 
-.card .wsu-person-remove:hover,
-.card .wsu-person-remove:focus {
+.wsu-person-remove:hover,
+.wsu-person-remove:focus {
 	color: #c00;
 	outline: none;
 }
@@ -140,18 +146,15 @@
 	display: inline-block;
 }
 
-.wsu-person-select:hover:before,
-.selected .wsu-person-select:before {
-	color: #0073aa;
-}
-
-.wsu-person-add-repeatable-meta {
+.wsu-person-add-repeatable-meta,
+.wsu-person-add-photo {
 	color: #0073aa;
 	margin: 0 0 .25em;
 	text-decoration: underline;
 }
 
-.wsu-person-add-repeatable-meta:hover {
+.wsu-person-add-repeatable-meta:hover,
+.wsu-person-add-photo:hover {
 	color: #00a0d2;
 }
 
@@ -175,9 +178,104 @@ h2 + .wsu-person-add-degree:after {
 	content: " a degree";
 }
 
+.wsu-person-photo-wrapper .wsu-person-remove {
+	left: 0;
+	position: absolute;
+	top: 0;
+}
+
+.wsu-person-photo-wrapper:hover  .wsu-person-remove {
+	display: block;
+}
+
 /* Photo collection */
-.wsu-person .card figcaption {
-	color: #767676;
+.wsu-person-photo-collection-open {
+	overflow: hidden;
+}
+
+.card .photo img {
+	position: absolute;
+	transition: opacity .2s ease-in-out, z-index .2s ease-in-out;
+	z-index: 1;
+}
+
+.card .photo:hover img {
+	opacity: .25;
+	z-index: 0;
+}
+
+.card .photo figcaption {
+	color: #0073aa;
+	position: relative;
+	text-decoration: underline;
+}
+
+.card .photo figcaption:hover {
+	color: #00a0d2;
+}
+
+.wsu-person-photo-collection-backdrop {
+	background: rgba(0, 0, 0, .5);
+	content: "";
+	height: 0;
+	left: 0;
+	opacity: 0;
+	position: fixed;
+	top: 0;
+	transition: opacity .3s ease-in-out;
+	width: 0;
+	z-index: 100000;
+}
+
+.wsu-person-photo-collection-open .wsu-person-photo-collection-backdrop {
+	height: 100vh;
+	opacity: 1;
+	width: 100vw;
+}
+
+.wsu-person-photo-collection {
+	height: 0;
+	overflow: hidden;
+	position: absolute;
+	text-align: right;
+	transition: height .2s ease-in-out .3s;
+	width: 0;
+}
+
+.wsu-person-photo-collection-open .wsu-person-photo-collection {
+	height: auto;
+	overflow: visible;
+	width: 198px;
+}
+
+.wsu-person-photo-wrapper {
+	box-sizing: border-box;
+	float: left;
+	margin-bottom: 6px;
+	position: relative;
+	width: 96px;
+}
+
+.wsu-person-photo-wrapper:nth-of-type(odd) {
+	margin-left: 3px;
+}
+
+.wsu-person-photo-wrapper:nth-of-type(even) {
+	margin-right: 3px;
+}
+
+.wsu-person-photo-wrapper:first-child {
+	margin: 0 0 6px;
+	width: 198px;
+}
+
+.wsu-person-photo-wrapper img {
+	display: block;
+	width: 100%;
+}
+
+button.wsu-person-add-photo {
+	clear: both;
 }
 
 /* TinyMCE Editors */

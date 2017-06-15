@@ -552,41 +552,83 @@ class WSUWP_People_Post_Type {
 		$office_value = ( $office_alt ) ? $office_alt : $office;
 		$phone_value = ( $phone_alt ) ? $phone_alt : $phone;
 		$address_value = ( $address_alt ) ? $address_alt : $address;
+
+		// Define the URL of the primary photo.
+		$photo_url = false;
+		if ( $photos && is_array( $photos ) ) {
+			$photo_url = wp_get_attachment_image_src( $photos[0] )[0];
+		} elseif ( has_post_thumbnail() ) {
+			$photo_url = get_the_post_thumbnail_url();
+		}
 		?>
-		<div class="wsu-person" data-nid="<?php echo esc_html( $nid ); ?>">
+		<script type="text/template" class="wsu-person-repeatable-meta-template">
+			<span contenteditable="true" class="<%= type %>" data-placeholder="Enter <%= type %> here"><%= value %></span><button type="button" class="wsu-person-remove dashicons dashicons-no">
+					<span class="screen-reader-text">Delete</span>
+			</button>
+			<input type="hidden" data-for="<%= type %>" name="_wsuwp_profile_<%= type %>[]" value="<%= value %>" />
+		</script>
 
-			<script type="text/template" class="wsu-person-repeatable-meta-template">
-				<span contenteditable="true" class="<%= type %>" data-placeholder="Enter <%= type %> here"><%= value %></span><button type="button" class="wsu-person-remove dashicons dashicons-no">
-						<span class="screen-reader-text">Delete</span>
+		<script type="text/template" class="wsu-person-photo-template">
+			<div class="wsu-person-photo-wrapper">
+				<img src="<%= src %>" alt="<?php echo esc_attr( $post->post_title ); ?>" />
+				<button type="button" class="wsu-person-remove dashicons dashicons-no">
+					<span class="screen-reader-text">Delete</span>
 				</button>
-				<input type="hidden" data-for="<%= type %>" name="_wsuwp_profile_<%= type %>[]" value="<%= value %>" />
-			</script>
+				<input type="hidden" name="_wsuwp_profile_photos[]" value="<%= id %>" />
+			</div>
+		</script>
 
-			<input type="hidden" data-for="name" name="post_title" value="<?php echo esc_attr( $post->post_title ); ?>" />
-			<input type="hidden" data-for="email" name="_wsuwp_profile_alt_email" value="<?php echo esc_attr( $email_value ); ?>" />
-			<input type="hidden" data-for="phone" name="_wsuwp_profile_alt_phone" value="<?php echo esc_attr( $phone_value ); ?>" />
-			<input type="hidden" data-for="office" name="_wsuwp_profile_alt_office" value="<?php echo esc_attr( $office_value ); ?>" />
-			<input type="hidden" data-for="address" name="_wsuwp_profile_alt_address" value="<?php echo esc_attr( $address_value ); ?>" />
-			<input type="hidden" data-for="website" name="_wsuwp_profile_website" value="<?php echo esc_attr( $website ); ?>" />
+		<input type="hidden" data-for="name" name="post_title" value="<?php echo esc_attr( $post->post_title ); ?>" />
+		<input type="hidden" data-for="email" name="_wsuwp_profile_alt_email" value="<?php echo esc_attr( $email_value ); ?>" />
+		<input type="hidden" data-for="phone" name="_wsuwp_profile_alt_phone" value="<?php echo esc_attr( $phone_value ); ?>" />
+		<input type="hidden" data-for="office" name="_wsuwp_profile_alt_office" value="<?php echo esc_attr( $office_value ); ?>" />
+		<input type="hidden" data-for="address" name="_wsuwp_profile_alt_address" value="<?php echo esc_attr( $address_value ); ?>" />
+		<input type="hidden" data-for="website" name="_wsuwp_profile_website" value="<?php echo esc_attr( $website ); ?>" />
 
-			<?php if ( $working_titles && is_array( $working_titles ) ) { ?>
-				<?php foreach ( $working_titles as $working_title ) { ?>
-				<input type="hidden" data-for="title" name="_wsuwp_profile_title[]" value="<?php echo esc_attr( $working_title ); ?>" />
-				<?php } ?>
-			<?php } else { ?>
-			<input type="hidden" data-for="title" name="_wsuwp_profile_title[]" value="" />
+		<?php if ( $working_titles && is_array( $working_titles ) ) { ?>
+			<?php foreach ( $working_titles as $working_title ) { ?>
+			<input type="hidden" data-for="title" name="_wsuwp_profile_title[]" value="<?php echo esc_attr( $working_title ); ?>" />
 			<?php } ?>
+		<?php } else { ?>
+		<input type="hidden" data-for="title" name="_wsuwp_profile_title[]" value="" />
+		<?php } ?>
 
-			<?php if ( $degrees && is_array( $degrees ) ) { ?>
-				<?php foreach ( $degrees as $degree ) { ?>
-				<input type="hidden" data-for="degree" name="_wsuwp_profile_degree[]" value="<?php echo esc_attr( $degree ); ?>" />
-				<?php } ?>
+		<?php if ( $degrees && is_array( $degrees ) ) { ?>
+			<?php foreach ( $degrees as $degree ) { ?>
+			<input type="hidden" data-for="degree" name="_wsuwp_profile_degree[]" value="<?php echo esc_attr( $degree ); ?>" />
 			<?php } ?>
+		<?php } ?>
 
-			<?php if ( false === WSUWP_People_Directory::is_main_site() ) { ?>
-			<?php $index_used = get_post_meta( $post->ID, '_use_title', true ); ?>
-			<input type="hidden" class="use-title" name="_use_title" value="<?php echo esc_attr( $index_used ); ?>" />
-			<?php } ?>
+		<?php if ( false === WSUWP_People_Directory::is_main_site() ) { ?>
+		<?php $index_used = get_post_meta( $post->ID, '_use_title', true ); ?>
+		<input type="hidden" class="use-title" name="_use_title" value="<?php echo esc_attr( $index_used ); ?>" />
+		<?php } ?>
+
+		<div class="wsu-person-photo-collection-backdrop wsu-person-photo-collection-close">
+			<div class="wsu-person-photo-collection">
+				<?php
+				if ( $photos && is_array( $photos ) ) {
+					foreach ( $photos as $photo_id ) {
+						?>
+						<div class="wsu-person-photo-wrapper">
+							<img src="<?php echo esc_url( wp_get_attachment_image_src( $photo_id )[0] ); ?>"
+								 alt="<?php echo esc_attr( $post->post_title ); ?>" />
+							<button type="button" class="wsu-person-remove dashicons dashicons-no">
+								<span class="screen-reader-text">Delete</span>
+							</button>
+							<input type="hidden" name="_wsuwp_profile_photos[]" value="<?php echo esc_attr( $photo_id ); ?>" />
+						</div>
+						<?php
+					}
+				}
+				?>
+				<button type="button" class="wsu-person-add-photo">+ Add another photo</button>
+			</div>
+
+		</div>
+
+
+		<div class="wsu-person" data-nid="<?php echo esc_html( $nid ); ?>">
 
 			<div class="card">
 
@@ -606,17 +648,14 @@ class WSUWP_People_Post_Type {
 
 				</header>
 
-				<figure class="photo">
+				<figure class="photo<?php if ( ! $photo_url ) { echo ' wsu-person-add-photo'; } ?>">
 
-					<?php
-					if ( $photos && is_array( $photos ) ) {
-						foreach ( $photos as $photo ) {
-							echo '';
-						}
-					} else {
-						?><figcaption>Add photo(s) here</figcaption><?php
-					}
-					?>
+					<?php if ( $photo_url ) { ?>
+					<img src="<?php echo esc_url( $photo_url ); ?>" alt="<?php echo esc_attr( $post->post_title ); ?>" />
+					<figcaption>Manage photo collection</figcaption>
+					<?php } else { ?>
+					<figcaption>+ Add photo(s)</figcaption>
+					<?php } ?>
 
 				</figure>
 
