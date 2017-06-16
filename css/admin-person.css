@@ -422,6 +422,10 @@ h2 + .wsu-person-add-degree:after {
 	-webkit-font-smoothing: antialiased;
 }
 
+.select2-container--default .select2-selection--multiple .select2-selection__choice__remove:hover:before {
+	color: #c00;
+}
+
 .select2-search--inline {
 	margin: 0;
 	max-width: 100%;

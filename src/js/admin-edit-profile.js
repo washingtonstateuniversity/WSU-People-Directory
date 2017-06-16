@@ -329,6 +329,11 @@ var wsuwp = wsuwp || {};
 		}
 	} );
 
+	// Re-render the Select2 dropdown position when a new selection is made. Hacky.
+	$( ".taxonomy-select2" ).on( "change", function() {
+		$( window ).scroll();
+	} );
+
 	// Create an array of photo IDs already in the collection.
 	wsuwp.existing_photos = function() {
 		return $( "[name='_wsuwp_profile_photos[]']" ).map( function() { return parseInt( $( this ).val() ); } ).get();
