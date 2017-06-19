@@ -1081,6 +1081,10 @@ class WSUWP_People_Post_Type {
 			if ( isset( $_POST[ $key ] ) && isset( $args['sanitize_callback'] ) ) {
 				// Each piece of meta is registered with sanitization.
 				update_post_meta( $post_id, $key, $_POST[ $key ] );
+			} else {
+				if ( '_wsuwp_profile_degree' === $key || '_wsuwp_profile_photos' === $key ) {
+					delete_post_meta( $post_id, $key );
+				}
 			}
 		}
 	}
