@@ -206,7 +206,7 @@ var wsuwp = wsuwp || {};
 				return;
 			}
 
-			// Trap the focus within the photo collection.
+			// Trap Tab key navigation within the photo collection.
 			if ( e.which === 9 ) {
 				var focusable_elements = $photo_collection.find( "button" ),
 					focused_element_index = focusable_elements.index( $( ":focus" ) );
