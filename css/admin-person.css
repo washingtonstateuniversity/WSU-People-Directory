@@ -50,10 +50,21 @@
 }
 
 .card .photo {
+	-webkit-box-align: center;
+	    -ms-flex-align: center;
+	        align-items: center;
+	cursor: pointer;
+	display: -webkit-box;
+	display: -ms-flexbox;
+	display: flex;
 	float: left;
+	height: 198px;
+	-webkit-box-pack: center;
+	    -ms-flex-pack: center;
+	        justify-content: center;
 	margin: 0 16px 16px 0;
-	min-height: 198px;
-	min-width: 198px;
+	position: relative;
+	width: 198px;
 }
 
 .card .contact {
@@ -62,15 +73,14 @@
 	white-space: pre-line;
 }
 
-.contact span {
+.contact span[contenteditable] {
 	display: inline-block;
 	line-height: normal;
 	min-height: 17px;
 }
 
 /* Editable areas */
-[contenteditable="true"],
-[contenteditable="false"] {
+[contenteditable] {
 	display: inline-block;
 	padding-bottom: .25rem;
 	min-width: 1px; /* Gives enough space for the cursor to show up. */
@@ -114,7 +124,8 @@
 }
 
 /* Buttons */
-.card button {
+.card button,
+.wsu-person-photo-collection button {
 	background: none;
 	border: none;
 	cursor: pointer;
@@ -122,17 +133,39 @@
 	padding: 0;
 }
 
-.card .dashicons {
-	font-size: 16px;
-	height: 16px;
-	width: 16px;
-	vertical-align: text-bottom;
+.wsu-person-remove {
+	border-radius: 50%;
+	height: 20px;
+	position: relative;
+	vertical-align: text-top;
+	width: 21px;
 }
 
-.card .wsu-person-remove:hover,
-.card .wsu-person-remove:focus {
-	color: #c00;
+.wsu-person-remove:focus {
+	box-shadow: 0 0 0 1px #5b9dd9, 0 0 2px 1px rgba(30, 140, 190, .8);
 	outline: none;
+}
+
+.wsu-person-remove:before {
+	border-radius: 50%;
+	color: #0073aa;
+	content: "\f153";
+	display: block;
+	font: 400 16px/20px dashicons;
+	height: 20px;
+	line-height: 1.28;
+	text-align: center;
+	speak: none;
+	text-indent: 0;
+	top: 0;
+	position: absolute;
+	width: 20px;
+	-webkit-font-smoothing: antialiased;
+}
+
+.wsu-person-remove:hover:before,
+.wsu-person-remove:focus:before {
+	color: #c00;
 }
 
 .card span:hover ~ .wsu-person-add-repeatable-meta,
@@ -140,19 +173,19 @@
 	display: inline-block;
 }
 
-.wsu-person-select:hover:before,
-.selected .wsu-person-select:before {
-	color: #0073aa;
-}
-
-.wsu-person-add-repeatable-meta {
+.wsu-person-add-repeatable-meta,
+.wsu-person-add-photo {
 	color: #0073aa;
 	margin: 0 0 .25em;
 	text-decoration: underline;
 }
 
-.wsu-person-add-repeatable-meta:hover {
+.wsu-person-add-repeatable-meta:focus,
+.wsu-person-add-repeatable-meta:hover,
+.wsu-person-add-photo:focus,
+.wsu-person-add-photo:hover {
 	color: #00a0d2;
+	outline: none;
 }
 
 /* Button customizations */
@@ -175,9 +208,121 @@ h2 + .wsu-person-add-degree:after {
 	content: " a degree";
 }
 
+.wsu-person-photo-wrapper .wsu-person-remove {
+	left: 0;
+	position: absolute;
+	top: 0;
+}
+
+.wsu-person-photo-wrapper:hover .wsu-person-remove,
+.wsu-person-photo-collection > button {
+	display: inline;
+}
+
+.wsu-person-add-photo {
+	margin: 24px 6px 12px auto;
+}
+
+.wsu-person-add-photo:first-child {
+	margin-top: 228px;
+}
+
 /* Photo collection */
-.wsu-person .card figcaption {
-	color: #767676;
+.wsu-person-photo-collection-open {
+	overflow: hidden;
+}
+
+.card .photo img {
+	left: 0;
+	position: absolute;
+	transition: opacity .2s ease-in-out, z-index .2s ease-in-out;
+	z-index: 1;
+}
+
+.card .photo:hover img {
+	opacity: .25;
+	z-index: 0;
+}
+
+.card .photo figcaption {
+	color: #0073aa;
+	position: relative;
+	text-decoration: underline;
+}
+
+.card .photo figcaption:hover {
+	color: #00a0d2;
+}
+
+.wsu-person-photo-collection-backdrop {
+	background: rgba(0, 0, 0, .5);
+	content: "";
+	height: 0;
+	left: 0;
+	opacity: 0;
+	position: fixed;
+	top: 0;
+	transition: opacity .3s ease-in-out;
+	width: 0;
+	z-index: 100000;
+}
+
+.wsu-person-photo-collection-open .wsu-person-photo-collection-backdrop {
+	height: 100vh;
+	opacity: 1;
+	width: 100vw;
+}
+
+.wsu-person-photo-collection {
+	background: #f3f3f3;
+	box-shadow: inset 0 4px 4px -4px rgba(0, 0, 0, .1);
+	height: 0;
+	overflow: hidden;
+	position: absolute;
+	text-align: right;
+	transition: height .2s ease-in-out .3s;
+	width: 0;
+}
+
+.wsu-person-photo-collection-open .wsu-person-photo-collection {
+	height: auto;
+	margin: -6px;
+	padding: 3px;
+	overflow: visible;
+	width: 204px;
+}
+
+.wsu-person-photo-wrapper {
+	box-sizing: border-box;
+	cursor: move;
+	float: left;
+	height: 96px;
+	margin: 3px;
+	position: relative;
+	width: 96px;
+}
+
+.wsu-person-photo-wrapper:first-child,
+.placeholder:first-child ~ .ui-sortable-helper,
+.ui-sortable-helper:first-child + .placeholder,
+.ui-sortable-helper:first-child + .wsu-person-photo-wrapper:not(.placeholder) {
+	height: 198px;
+	width: 198px;
+}
+
+.wsu-person-photo-wrapper img {
+	display: block;
+	width: 100%;
+}
+
+.wsu-person-photo-collection-toolbar {
+	background: #fff;
+	border-bottom: 1px solid #ddd;
+	box-shadow: 0 -4px 4px -4px rgba(0, 0, 0, .1);
+	box-sizing: border-box;
+	height: 60px;
+	margin: 0 -3px -3px;
+	padding: 15px 16px 0 0;
 }
 
 /* TinyMCE Editors */
@@ -275,6 +420,10 @@ h2 + .wsu-person-add-degree:after {
 	position: absolute;
 	width: 20px;
 	-webkit-font-smoothing: antialiased;
+}
+
+.select2-container--default .select2-selection--multiple .select2-selection__choice__remove:hover:before {
+	color: #c00;
 }
 
 .select2-search--inline {

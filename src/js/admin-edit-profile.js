@@ -9,7 +9,11 @@ var wsuwp = wsuwp || {};
 			$hash = $( "#confirm-ad-hash" ),
 			$confirm = $( "#confirm-ad-data" ),
 			$card = $( ".wsu-person .card" ),
-			repeatable_meta_template = _.template( $( ".wsu-person-repeatable-meta-template" ).html() );
+			$photo_collection = $( ".wsu-person-photo-collection" ),
+			repeatable_meta_template = _.template( $( ".wsu-person-repeatable-meta-template" ).html() ),
+			photo_template = _.template( $( ".wsu-person-photo-template" ).html() ),
+			previous_focus,
+			media_frame;
 
 		// Insert the repeatable meta area buttons.
 		$( ".card header" ).append( "<button type='button' data-type='degree' class='wsu-person-add-repeatable-meta wsu-person-add-degree'>+ Add</button>" );
@@ -175,6 +179,174 @@ var wsuwp = wsuwp || {};
 			$( "[data-for='" + field + "']" ).eq( index ).remove();
 			$( this ).remove();
 		} );
+
+		// Surface photo collection.
+		$card.on( "click", ".photo", function() {
+			if ( $( this ).hasClass( "wsu-person-add-photo" ) ) {
+				return;
+			}
+
+			var position = $( this ).offset();
+			previous_focus = document.activeElement;
+
+			$( window ).scrollTop( 0 );
+			$( "body" ).addClass( "wsu-person-photo-collection-open" );
+
+			$photo_collection.css( {
+				"top": position.top,
+				"left": position.left
+			} );
+
+			$( ".wsu-person-add-photo" ).focus();
+		} );
+
+		// Handle keyboard interactions with the photo collection.
+		/**
+		 * Based on ideas from https://github.com/gdkraus/accessible-modal-dialog.
+		 * The license is as follows:
+		 *
+		 * This license is governed by United States copyright law, and with respect to matters
+		 * of tort, contract, and other causes of action it is governed by North Carolina law,
+		 * without regard to North Carolina choice of law provisions.  The forum for any dispute
+		 * resolution shall be in Wake County, North Carolina.
+		 *
+		 * Redistribution and use in source and binary forms, with or without modification, are
+		 * permitted provided that the following conditions are met:
+		 *
+		 * 1. Redistributions of source code must retain the above copyright notice, this list
+		 * of conditions and the following disclaimer.
+		 *
+		 * 2. Redistributions in binary form must reproduce the above copyright notice, this
+		 * list of conditions and the following disclaimer in the documentation and/or other
+		 * materials provided with the distribution.
+
+		 * 3. The name of the author may not be used to endorse or promote products derived from
+		 * this software without specific prior written permission.
+
+		 * THIS SOFTWARE IS PROVIDED BY THE AUTHOR "AS IS" AND ANY EXPRESS OR IMPLIED
+		 * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+		 * AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE
+		 * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+		 * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+		 * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+		 * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+		 * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+		 * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+		 */
+		$( document ).keydown( function( e ) {
+			if ( !$( "body" ).hasClass( "wsu-person-photo-collection-open" ) ) {
+				return;
+			}
+
+			// Trap Tab key navigation within the photo collection.
+			if ( e.which === 9 ) {
+				var focusable_elements = $photo_collection.find( "button" ),
+					focused_element_index = focusable_elements.index( $( ":focus" ) );
+
+				if ( e.shiftKey && 0 === focused_element_index ) {
+					focusable_elements[ focusable_elements.length - 1 ].focus();
+					e.preventDefault();
+				} else if ( !event.shiftKey && focused_element_index === focusable_elements.length - 1 ) {
+					focusable_elements[ 0 ].focus();
+					e.preventDefault();
+				}
+			}
+
+			// Close the photo collection when the Escape key is pushed.
+			if ( e.which === 27 ) {
+				wsuwp.close_photo_collection();
+			}
+		} );
+
+		// Close photo collection.
+		$( document ).on( "click", ".wsu-person-photo-collection-close", function( e ) {
+			if ( e.target === this ) {
+				wsuwp.close_photo_collection();
+			}
+		} );
+
+		// Add photos to a collection.
+		$( document ).on( "click", ".wsu-person-add-photo", function() {
+			if ( media_frame ) {
+				media_frame.open();
+				return;
+			}
+
+			media_frame = window.wp.media( {
+				title: "Select or Upload Your Photos",
+				multiple: true,
+				library: {
+					type: "image",
+					uploadedTo: window.wsuwp_people_edit_profile.post_id
+				},
+				button: {
+					text: "Use photo(s)"
+				}
+			} );
+
+			media_frame.on( "select", function() {
+				var photos = media_frame.state().get( "selection" );
+
+				$.each( photos.models, function( i, attachment ) {
+					var photo = attachment.toJSON(),
+						has_thumbnail = photo.sizes.hasOwnProperty( "thumbnail" ),
+						url = has_thumbnail ? photo.sizes.thumbnail.url : photo.url,
+						photo_added = false;
+
+					// Only add photos that aren't already in the collection.
+					if ( -1 === $.inArray( photo.id, wsuwp.existing_photos() ) ) {
+						$( "button.wsu-person-add-photo" ).before( photo_template( {
+							src: url,
+							id: photo.id
+						} ) );
+
+						// If this is the first photo added to the profile, add it to the card.
+						if ( !photo_added && $( ".photo" ).hasClass( "wsu-person-add-photo" ) ) {
+							$( ".photo" ).removeClass( "wsu-person-add-photo" )
+								.prepend( "<img src='" + url + "'>" );
+							$( ".photo figcaption" ).text( "Manage photo collection" );
+							photo_added = true;
+						}
+					} else {
+						window.alert( photo.url + " is already in your collection." );
+					}
+				} );
+			} );
+
+			media_frame.open();
+		} );
+
+		// Remove a photo from the collection.
+		$photo_collection.on( "click", ".wsu-person-remove", function() {
+			$( this ).parent( ".wsu-person-photo-wrapper" ).remove();
+		} );
+
+		// Use jQuery UI Sortable to allow reordering of photos.
+		$photo_collection.sortable( {
+			cursor: "move",
+			placeholder: "wsu-person-photo-wrapper placeholder",
+			items: "> .wsu-person-photo-wrapper",
+			start: function( e, ui ) {
+				ui.helper.height( "" ).width( "" );
+			}
+		} );
+
+		// Close the photo collection and update the card photo.
+		wsuwp.close_photo_collection = function() {
+			var $card_photo = $( ".photo img" ),
+				$primary_photo = $( ".wsu-person-photo-wrapper:first-of-type img" );
+
+			if ( $primary_photo.length ) {
+				$card_photo.attr( "src", $primary_photo.attr( "src" ) );
+			} else {
+				$card_photo.remove();
+				$( ".photo" ).addClass( "wsu-person-add-photo" )
+					.find( "figcaption" ).text( "+ Add photo(s)" );
+			}
+
+			$( "body" ).removeClass( "wsu-person-photo-collection-open" );
+			previous_focus.focus();
+		};
 	} );
 
 	// Initialize Select2.
@@ -188,4 +360,14 @@ var wsuwp = wsuwp || {};
 			return data.text;
 		}
 	} );
+
+	// Re-render the Select2 dropdown position when a new selection is made. Hacky.
+	$( ".taxonomy-select2" ).on( "change", function() {
+		$( window ).scroll();
+	} );
+
+	// Create an array of photo IDs already in the collection.
+	wsuwp.existing_photos = function() {
+		return $( "[name='_wsuwp_profile_photos[]']" ).map( function() { return parseInt( $( this ).val() ); } ).get();
+	};
 }( jQuery, window, document, wsuwp ) );
