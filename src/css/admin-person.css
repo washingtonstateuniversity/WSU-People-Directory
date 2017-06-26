@@ -230,6 +230,7 @@ h2 + .wsu-person-add-degree:after {
 	left: 0;
 	position: absolute;
 	transition: opacity .2s ease-in-out, z-index .2s ease-in-out;
+	width: 100%;
 	z-index: 1;
 }
 
