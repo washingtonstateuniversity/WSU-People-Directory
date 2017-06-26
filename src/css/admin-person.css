@@ -349,6 +349,10 @@ h2 + .wsu-person-add-degree:after {
 }
 
 /* Taxonomy metabox */
+#wsuwp-university-taxonomies .select2-container {
+	z-index: 1;
+}
+
 .taxonomy-select2 {
 	display: none;
 }
