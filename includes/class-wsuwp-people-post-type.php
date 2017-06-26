@@ -179,94 +179,107 @@ class WSUWP_People_Post_Type {
 		// Legacy
 		'bio_college' => array(
 			'type' => 'string',
-			'description' => '',
+			'description' => 'College Biography',
 			'sanitize_callback' => 'wp_kses_post',
 			'meta_key' => '_wsuwp_profile_bio_college',
 			'updatable_via_rest' => true,
+			'legacy' => true,
 		),
 		'bio_lab' => array(
 			'type' => 'string',
-			'description' => '',
+			'description' => 'Lab Biography',
 			'sanitize_callback' => 'wp_kses_post',
 			'meta_key' => '_wsuwp_profile_bio_lab',
 			'updatable_via_rest' => true,
+			'legacy' => true,
 		),
 		'bio_department' => array(
 			'type' => 'string',
-			'description' => '',
+			'description' => 'Department Biography',
 			'sanitize_callback' => 'wp_kses_post',
 			'meta_key' => '_wsuwp_profile_bio_dept',
 			'updatable_via_rest' => true,
+			'legacy' => true,
 		),
 		'cv_employment' => array(
 			'type' => 'string',
-			'description' => '',
+			'description' => 'C.V. - Employment',
 			'sanitize_callback' => 'wp_kses_post',
 			'meta_key' => '_wsuwp_profile_employment',
 			'updatable_via_rest' => true,
+			'legacy' => true,
 		),
 		'cv_honors' => array(
 			'type' => 'string',
-			'description' => '',
+			'description' => 'C.V. - Honors',
 			'sanitize_callback' => 'wp_kses_post',
 			'meta_key' => '_wsuwp_profile_honors',
 			'updatable_via_rest' => true,
+			'legacy' => true,
 		),
 		'cv_grants' => array(
 			'type' => 'string',
-			'description' => '',
+			'description' => 'C.V. - Grants',
 			'sanitize_callback' => 'wp_kses_post',
 			'meta_key' => '_wsuwp_profile_grants',
 			'updatable_via_rest' => true,
+			'legacy' => true,
 		),
 		'cv_publications' => array(
 			'type' => 'string',
-			'description' => '',
+			'description' => 'C.V. - Publications',
 			'sanitize_callback' => 'wp_kses_post',
 			'meta_key' => '_wsuwp_profile_publications',
 			'updatable_via_rest' => true,
+			'legacy' => true,
 		),
 		'cv_presentations' => array(
 			'type' => 'string',
-			'description' => '',
+			'description' => 'C.V. - Presentations',
 			'sanitize_callback' => 'wp_kses_post',
 			'meta_key' => '_wsuwp_profile_presentations',
 			'updatable_via_rest' => true,
+			'legacy' => true,
 		),
 		'cv_teaching' => array(
 			'type' => 'string',
-			'description' => '',
+			'description' => 'C.V. - Teaching',
 			'sanitize_callback' => 'wp_kses_post',
 			'meta_key' => '_wsuwp_profile_teaching',
 			'updatable_via_rest' => true,
+			'legacy' => true,
 		),
 		'cv_service' => array(
 			'type' => 'string',
-			'description' => '',
+			'description' => 'C.V. - Service',
 			'sanitize_callback' => 'wp_kses_post',
 			'meta_key' => '_wsuwp_profile_service',
 			'updatable_via_rest' => true,
+			'legacy' => true,
 		),
 		'cv_responsibilities' => array(
 			'type' => 'string',
-			'description' => '',
+			'description' => 'C.V. - Responsibilities',
 			'sanitize_callback' => 'wp_kses_post',
 			'meta_key' => '_wsuwp_profile_responsibilities',
 			'updatable_via_rest' => true,
+			'legacy' => true,
 		),
 		'cv_affiliations' => array(
 			'type' => 'string',
-			'description' => '',
+			'description' => 'C.V. - Affiliations',
 			'sanitize_callback' => 'wp_kses_post',
 			'meta_key' => '_wsuwp_profile_societies',
 			'updatable_via_rest' => true,
+			'legacy' => true,
 		),
 		'cv_experience' => array(
 			'type' => 'string',
-			'description' => '',
+			'description' => 'C.V. - Experience',
 			'sanitize_callback' => 'wp_kses_post',
 			'meta_key' => '_wsuwp_profile_experience',
 			'updatable_via_rest' => true,
+			'legacy' => true,
 		),
 		'cv_attachment' => array(
 			'type' => 'string',
@@ -747,6 +760,34 @@ class WSUWP_People_Post_Type {
 				?>
 			</div>
 			<?php
+		}
+
+		// Legacy inputs - temporary.
+		$legacy_notice = false;
+
+		foreach ( self::$post_meta_keys as $key => $args ) {
+			if ( ! isset( $args['legacy'] ) ) {
+				continue;
+			}
+
+			if ( false === $legacy_notice ) {
+				?><p class="description legacy-notice"><strong>Attention:</strong> the following fields will remain available for a limited amount of time. It is recommended that you move this information into one of the above biography fields.</p><?php
+				$legacy_notice = true;
+			}
+
+			$value = get_post_meta( $post->ID, $args['meta_key'], true );
+
+			if ( $value ) {
+				?>
+				<div id="<?php echo esc_attr( $key );?>" class="wsu-person-bio">
+
+					<h2><?php echo esc_html( $args['description'] ); ?></h2>
+
+					<div class="readonly"><?php echo wp_kses_post( apply_filters( 'the_content', $value ) ); ?></div>
+
+				</div>
+				<?php
+			}
 		}
 		?>
 

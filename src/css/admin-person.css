@@ -343,6 +343,10 @@ h2 + .wsu-person-add-degree:after {
 	padding-bottom: 1em;
 }
 
+.description.legacy-notice {
+	margin-top: 4rem;
+}
+
 /* Taxonomy metabox */
 .taxonomy-select2 {
 	display: none;
