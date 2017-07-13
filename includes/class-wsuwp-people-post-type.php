@@ -763,30 +763,32 @@ class WSUWP_People_Post_Type {
 		}
 
 		// Legacy inputs - temporary.
-		$legacy_notice = false;
+		if ( WSUWP_People_Directory::is_main_site() ) {
+			$legacy_notice = false;
 
-		foreach ( self::$post_meta_keys as $key => $args ) {
-			if ( ! isset( $args['legacy'] ) ) {
-				continue;
-			}
+			foreach ( self::$post_meta_keys as $key => $args ) {
+				if ( ! isset( $args['legacy'] ) ) {
+					continue;
+				}
 
-			if ( false === $legacy_notice ) {
-				?><p class="description legacy-notice"><strong>Attention:</strong> the following fields will remain available for a limited amount of time. It is recommended that you move this information into one of the above biography fields.</p><?php
-				$legacy_notice = true;
-			}
+				if ( false === $legacy_notice ) {
+					?><p class="description legacy-notice"><strong>Attention:</strong> the following fields have been deprecated. It is recommended that the information therein be moved into one of the above biography fields.</p><?php
+					$legacy_notice = true;
+				}
 
-			$value = get_post_meta( $post->ID, $args['meta_key'], true );
+				$value = get_post_meta( $post->ID, $args['meta_key'], true );
 
-			if ( $value ) {
-				?>
-				<div id="<?php echo esc_attr( $key );?>" class="wsu-person-bio">
+				if ( $value ) {
+					?>
+					<div id="<?php echo esc_attr( $key );?>" class="wsu-person-bio">
 
-					<h2><?php echo esc_html( $args['description'] ); ?></h2>
+						<h2><?php echo esc_html( $args['description'] ); ?></h2>
 
-					<div class="readonly"><?php echo wp_kses_post( apply_filters( 'the_content', $value ) ); ?></div>
+						<div class="readonly"><?php echo wp_kses_post( apply_filters( 'the_content', $value ) ); ?></div>
 
-				</div>
-				<?php
+					</div>
+					<?php
+				}
 			}
 		}
 		?>

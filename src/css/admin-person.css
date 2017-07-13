@@ -344,8 +344,14 @@ h2 + .wsu-person-add-degree:after {
 	padding-bottom: 1em;
 }
 
+/* Legacy notice - temporary */
 .description.legacy-notice {
+	font-size: 14px;
 	margin-top: 4rem;
+}
+
+.legacy-notice strong {
+	color: #a90533;
 }
 
 /* Taxonomy metabox */
