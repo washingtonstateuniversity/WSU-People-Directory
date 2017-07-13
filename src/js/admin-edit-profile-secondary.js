@@ -78,6 +78,9 @@ wsuwp.people = wsuwp.people || {};
 		// Populate the primary record id.
 		$( "#_wsuwp_profile_post_id" ).val( data.id );
 
+		// Populate the primary record URL.
+		$( "#_wsuwp_profile_canonical_source" ).val( data.link );
+
 		// Populate card data.
 		$( ".wsu-person .name" ).text( data.title.rendered ).data( "original", data.title.rendered );
 		$( "[data-for='name']" ).val( data.title.rendered );

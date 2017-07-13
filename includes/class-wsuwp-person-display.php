@@ -110,11 +110,27 @@ class WSUWP_Person_Display {
 			return $template;
 		}
 
+		remove_action( 'wp_head', 'rel_canonical' );
+		add_action( 'wp_head', array( $this, 'rel_canonical' ) );
+
 		wp_enqueue_style( 'wsu-people-display', plugin_dir_url( dirname( __FILE__ ) ) . 'css/person.css', array(), WSUWP_People_Directory::$version );
 
 		add_filter( 'the_content', array( $this, 'content' ) );
 
 		return trailingslashit( get_template_directory() ) . 'templates/single.php';
+	}
+
+	/**
+	 * Adds a canonical meta tag.
+	 *
+	 * @since 0.3.2
+	 */
+	public function rel_canonical() {
+		global $post;
+		$source = get_post_meta( $post->ID, '_canonical_source', true );
+		?>
+		<link rel="canonical" href="<?php echo esc_url( $source ); ?>" />
+		<?php
 	}
 
 	/**
