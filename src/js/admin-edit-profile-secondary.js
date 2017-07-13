@@ -1,4 +1,4 @@
-/* global _, existing_photos */
+/* global _ */
 var wsuwp = wsuwp || {};
 wsuwp.people = wsuwp.people || {};
 
@@ -125,19 +125,6 @@ wsuwp.people = wsuwp.people || {};
 
 		wsuwp.people.titles = data.working_titles;
 
-		// Add the `selected` class to titles accordingly.
-		if ( "" !== $( ".use-title" ).val() ) {
-			var titles = $( ".use-title" ).val().split( " " );
-
-			$.each( titles, function( i, value ) {
-				$( ".contact .title" )
-					.eq( value )
-					.addClass( "selected" )
-					.find( ".screen-reader-text" )
-					.text( "Deselect" );
-			} );
-		}
-
 		// Populate degree(s).
 		$.each( data.degree, function( i, value ) {
 			var $field = $( ".contact .degree" )[ i ];
@@ -154,7 +141,7 @@ wsuwp.people = wsuwp.people || {};
 
 		wsuwp.people.degrees = data.degree;
 
-		/* Populate photo collection.
+		// Populate photo collection.
 		if ( data._embedded && data._embedded[ "wp:photos" ] !== 0 ) {
 			$.each( data._embedded[ "wp:photos" ], function( i, photo ) {
 				wsuwp.people.populate_photos( photo );
@@ -165,21 +152,6 @@ wsuwp.people = wsuwp.people || {};
 		if ( data._embedded && data._embedded[ "wp:featuredmedia" ] && data._embedded[ "wp:featuredmedia" ] !== 0 ) {
 			wsuwp.people.populate_photos( data._embedded[ "wp:featuredmedia" ][ 0 ] );
 		}
-
-		// Add the `selected` class to a photo accordingly.
-		if ( "" !== $( ".use-photo" ).val() ) {
-			$( ".wsuwp-profile-photo-wrapper" )
-				.eq( $( ".use-photo" ).val() )
-				.addClass( "selected" )
-				.find( ".wsuwp-profile-photo-select" )
-				.attr( "aria-label", "Deselect" );
-		} else {
-			$( ".wsuwp-profile-photo-wrapper" )
-				.eq( 0 )
-				.addClass( "selected" )
-				.find( ".wsuwp-profile-photo-select" )
-				.attr( "aria-label", "Deselect" );
-		}*/
 
 		// Populate taxonomy data.
 		if ( data._embedded && data._embedded[ "wp:term" ] && data._embedded[ "wp:term" ] !== 0 ) {
@@ -223,26 +195,23 @@ wsuwp.people = wsuwp.people || {};
 	 */
 	wsuwp.people.populate_photos = function( data ) {
 		var $ = jQuery,
-			photo_template = _.template( $( "#photo-template" ).html() ),
+			photo_template = _.template( $( ".wsu-person-photo-template" ).html() ),
 			photo = data.media_details,
 			has_thumbnail = photo.sizes.thumbnail,
-			url = has_thumbnail ? photo.sizes.thumbnail.source_url : data.source_url,
-			width = has_thumbnail ? photo.sizes.thumbnail.width : photo.width,
-			height = has_thumbnail ? photo.sizes.thumbnail.height : photo.height;
+			url = has_thumbnail ? photo.sizes.thumbnail.source_url : data.source_url;
 
 		// Avoid inserting duplicate images.
-		if ( -1 === $.inArray( data.id, existing_photos() ) ) {
-			$( ".wsuwp-profile-photo-collection" ).append( photo_template( {
+		if ( -1 === $.inArray( data.id, wsuwp.existing_photos() ) ) {
+			$( "button.wsu-person-add-photo" ).before( photo_template( {
 				src: url,
-				width: width,
-				height: height,
-				id: data.id,
-				alt: data.alt,
-				url: data.source_url,
-				title: data.title.rendered,
-				full_width: photo.width,
-				full_height: photo.height
+				id: data.id
 			} ) );
+
+			if ( 0 === $( ".wsu-person .photo img" ).length ) {
+				$( ".photo" ).removeClass( "wsu-person-add-photo" )
+					.prepend( "<img src='" + url + "'>" );
+				$( ".photo figcaption" ).text( "Manage photo collection" );
+			}
 		}
 	};
 
@@ -298,24 +267,6 @@ wsuwp.people = wsuwp.people || {};
 				$title.find( ".screen-reader-text" ).text( "Select" );
 			}
 		} );
-
-		// Select a photo for display on the front end.
-		/*$( ".wsuwp-profile-photo-collection" ).on( "click", ".wsuwp-profile-photo-select", function() {
-			var $button = $( this ),
-				$photo = $button.closest( ".wsuwp-profile-photo-wrapper" ),
-				$input = $( ".use-photo" );
-
-			$photo.toggleClass( "selected" ).siblings().removeClass( "selected" );
-
-			if ( $photo.hasClass( "selected" ) ) {
-				$input.val( $( ".wsuwp-profile-photo-wrapper" ).index( $photo ) );
-				$button.attr( "aria-label", "Deselect" );
-				$photo.siblings().removeClass( "selected" ).find( ".wsuwp-profile-photo-select" ).attr( "aria-label", "Select" );
-			} else {
-				$input.val( "" );
-				$button.attr( "aria-label", "Select" );
-			}
-		} );*/
 
 		// Post data to the user's people.wsu.edu profile.
 		$( "#publish" ).on( "click", function() {
