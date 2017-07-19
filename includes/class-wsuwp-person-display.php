@@ -110,8 +110,15 @@ class WSUWP_Person_Display {
 			return $template;
 		}
 
-		remove_action( 'wp_head', 'rel_canonical' );
-		add_action( 'wp_head', array( $this, 'rel_canonical' ) );
+		$photo = get_post_meta( get_the_ID(), '_use_photo', true );
+		$title = get_post_meta( get_the_ID(), '_use_title', true );
+		$bio = get_post_meta( get_the_ID(), '_use_bio', true );
+
+		// Update the canonical tag if the displayed content matches the primary profile.
+		if ( ( ! $photo || 0 === $photo ) && ( ! $bio || 'personal' === $bio ) && ! $title ) {
+			remove_action( 'wp_head', 'rel_canonical' );
+			add_action( 'wp_head', array( $this, 'rel_canonical' ) );
+		}
 
 		wp_enqueue_style( 'wsu-people-display', plugin_dir_url( dirname( __FILE__ ) ) . 'css/person.css', array(), WSUWP_People_Directory::$version );
 
