@@ -126,11 +126,12 @@ class WSUWP_Person_Display {
 	 * @since 0.3.2
 	 */
 	public function rel_canonical() {
-		global $post;
-		$source = get_post_meta( $post->ID, '_canonical_source', true );
-		?>
-		<link rel="canonical" href="<?php echo esc_url( $source ); ?>" />
-		<?php
+		$source = get_post_meta( get_the_ID(), '_canonical_source', true );
+		if ( $source ) {
+			?>
+			<link rel="canonical" href="<?php echo esc_url( $source ); ?>" />
+			<?php
+		}
 	}
 
 	/**
