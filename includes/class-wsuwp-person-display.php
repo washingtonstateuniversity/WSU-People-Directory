@@ -123,7 +123,7 @@ class WSUWP_Person_Display {
 	/**
 	 * Adds a canonical meta tag.
 	 *
-	 * @since 0.3.2
+	 * @since 0.3.1
 	 */
 	public function rel_canonical() {
 		$source = get_post_meta( get_the_ID(), '_canonical_source', true );
