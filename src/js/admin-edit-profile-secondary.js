@@ -68,6 +68,11 @@ wsuwp.people = wsuwp.people || {};
 	 */
 	wsuwp.people.populate_person_from_people_directory = function( data ) {
 		var $ = jQuery,
+			title = ( data.working_titles.length ) ? data.working_titles : [ data.position_title ],
+			email = ( data.email_alt ) ? data.email_alt : data.email,
+			phone = ( data.phone_alt ) ? data.phone_alt : data.phone,
+			office = ( data.office_alt ) ? data.office_alt : data.office,
+			address = ( data.address_alt ) ? data.address_alt : data.address,
 			repeatable_meta_template = _.template( $( ".wsu-person-repeatable-meta-template" ).html() ),
 			$add_title_button = $( ".wsu-person-add-title" ),
 			$add_degree_button = $( ".wsu-person-add-degree" );
@@ -82,17 +87,17 @@ wsuwp.people = wsuwp.people || {};
 		$( ".wsu-person .name" ).text( data.title.rendered ).data( "original", data.title.rendered );
 		$( "[data-for='name']" ).val( data.title.rendered );
 
-		$( ".wsu-person .email" ).text( data.email_alt ).data( "original", data.email_alt );
-		$( "[data-for='email']" ).val( data.email_alt );
+		$( ".wsu-person .email" ).text( email ).data( "original", email );
+		$( "[data-for='email']" ).val( email );
 
-		$( ".wsu-person .phone" ).text( data.phone_alt ).data( "original", data.phone_alt );
-		$( "[data-for='phone']" ).val( data.phone_alt );
+		$( ".wsu-person .phone" ).text( phone ).data( "original", phone );
+		$( "[data-for='phone']" ).val( phone );
 
-		$( ".wsu-person .office" ).text( data.office_alt ).data( "original", data.office_alt );
-		$( "[data-for='office']" ).val( data.office_alt );
+		$( ".wsu-person .office" ).text( office ).data( "original", office );
+		$( "[data-for='office']" ).val( office );
 
-		$( ".wsu-person .address" ).text( data.address_alt ).data( "original", data.address_alt );
-		$( "[data-for='address']" ).val( data.address_alt );
+		$( ".wsu-person .address" ).text( address ).data( "original", address );
+		$( "[data-for='address']" ).val( address );
 
 		$( ".wsu-person .website" ).text( data.website ).data( "original", data.website );
 		$( "[data-for='website']" ).val( data.website );
@@ -116,7 +121,7 @@ wsuwp.people = wsuwp.people || {};
 		wsuwp.people.rest_response_complete = true;
 
 		// Populate title(s).
-		$.each( data.working_titles, function( i, value ) {
+		$.each( title, function( i, value ) {
 			var $field = $( ".contact .title" )[ i ],
 				$display_select = $( "#local-display-title" );
 
