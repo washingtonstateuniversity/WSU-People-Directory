@@ -102,6 +102,13 @@ wsuwp.people = wsuwp.people || {};
 		wsuwp.people.bio_content._wsuwp_profile_bio_unit = data.bio_unit;
 		wsuwp.people.bio_content._wsuwp_profile_bio_university = data.bio_university;
 
+		// Populate biography textareas when Text mode is the default editor state.
+		if ( !window.tinymce.get( "content" ) ) {
+			$( "#content" ).val( data.content.rendered );
+			$( "#_wsuwp_profile_bio_unit" ).val( data.bio_unit );
+			$( "#_wsuwp_profile_bio_university" ).val( data.bio_university );
+		}
+
 		// Populate the read-only biographies.
 		$( "#bio_unit .readonly" ).html( data.bio_unit );
 		$( "#bio_university .readonly" ).html( data.bio_university );
