@@ -842,6 +842,17 @@ class WSUWP_People_Post_Type {
 				'normal'
 			);
 		}
+
+		if ( false === WSUWP_People_Directory::is_main_site() ) {
+			add_meta_box(
+				'wsuwp-profile-local-display',
+				'Display Options',
+				array( $this, 'display_local_display_meta_box' ),
+				self::$post_type_slug,
+				'side',
+				'low'
+			);
+		}
 	}
 
 	/**
@@ -1000,6 +1011,48 @@ class WSUWP_People_Post_Type {
 	}
 
 	/**
+	 * Display a meta box used to adjust the display of a profile.
+	 *
+	 * @since 0.3.2
+	 *
+	 * @param WP_Post $post Post object.
+	 */
+	public function display_local_display_meta_box( $post ) {
+		$photo = get_post_meta( $post->ID, '_use_photo', true );
+		$title = get_post_meta( $post->ID, '_use_title', true );
+		$bio = get_post_meta( $post->ID, '_use_bio', true );
+		?>
+		<p class="description">Select content to display for the profile on this site.</p>
+
+		<p class="post-attributes-label-wrapper">
+			<label class="post-attributes-label">Photo</label>
+		</p>
+		<div id="local-display-photo" data-selected="<?php echo esc_attr( $photo ); ?>"></div>
+
+		<p class="post-attributes-label-wrapper">
+			<label class="post-attributes-label" for="local-display-title">Title</label>
+		</p>
+		<select id="local-display-title"
+				name="_use_title[]"
+				multiple="multiple"
+				size="1"
+				class="widefat"
+				data-selected="<?php echo esc_attr( $title ); ?>">
+		</select>
+
+		<p class="post-attributes-label-wrapper">
+			<label class="post-attributes-label" for="local-display-bio">Biography</label>
+		</p>
+		<select id="local-display-bio" name="_use_bio" class="widefat">
+			<option value="personal"<?php selected( $bio, 'personal' ); ?>>Personal</option>
+			<option value="bio_unit"<?php selected( $bio, 'bio_unit' ); ?>>Unit</option>
+			<option value="bio_university"<?php selected( $bio, 'bio_university' ); ?>>University</option>
+		</select>
+
+		<?php
+	}
+
+	/**
 	 * Sanitizes repeatable text fields.
 	 *
 	 * @since 0.3.0
@@ -1109,7 +1162,8 @@ class WSUWP_People_Post_Type {
 			}
 
 			if ( isset( $_POST['_use_title'] ) && '' !== $_POST['_use_title'] ) {
-				update_post_meta( $post_id, '_use_title', sanitize_text_field( $_POST['_use_title'] ) );
+				$titles = implode( ',', $_POST['_use_title'] );
+				update_post_meta( $post_id, '_use_title', sanitize_text_field( $titles ) );
 			} else {
 				delete_post_meta( $post_id, '_use_title' );
 			}
