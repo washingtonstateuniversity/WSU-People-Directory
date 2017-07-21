@@ -110,7 +110,8 @@ wsuwp.people = wsuwp.people || {};
 
 		// Populate title(s).
 		$.each( data.working_titles, function( i, value ) {
-			var $field = $( ".contact .title" )[ i ];
+			var $field = $( ".contact .title" )[ i ],
+				$display_select = $( "#local-display-title" );
 
 			if ( $field ) {
 				$( $field ).text( value );
@@ -120,6 +121,25 @@ wsuwp.people = wsuwp.people || {};
 					type: $add_title_button.data( "type" ),
 					value: value
 				} ) );
+			}
+
+			// Fill in the display options.
+			$display_select.append( "<option value='" + i + "'>" + value + "</option>" );
+
+			if ( data.working_titles.length - 1 === i ) {
+				var selected = $display_select.data( "selected" ).toString();
+
+				// Set the size of the select box so that all titles are visible without scrolling.
+				$display_select.attr( "size", i + 1 );
+
+				// Set selected titles.
+				if ( 1 === selected.length ) {
+					$display_select.find( "option[value='" + selected + "']" ).prop( "selected", "selected" );
+				} else if ( 2 < selected.length ) {
+					$.each( selected.split( "," ), function( index, value ) {
+						$display_select.find( "option[value='" + value + "']" ).prop( "selected", "selected" );
+					} );
+				}
 			}
 		} );
 
@@ -144,7 +164,7 @@ wsuwp.people = wsuwp.people || {};
 		// Populate photo collection.
 		if ( data._embedded && data._embedded[ "wp:photos" ] !== 0 ) {
 			$.each( data._embedded[ "wp:photos" ], function( i, photo ) {
-				wsuwp.people.populate_photos( photo );
+				wsuwp.people.populate_photos( photo, i );
 			} );
 		}
 
@@ -193,12 +213,14 @@ wsuwp.people = wsuwp.people || {};
 	 *
 	 * @param data
 	 */
-	wsuwp.people.populate_photos = function( data ) {
+	wsuwp.people.populate_photos = function( data, index ) {
 		var $ = jQuery,
 			photo_template = _.template( $( ".wsu-person-photo-template" ).html() ),
 			photo = data.media_details,
 			has_thumbnail = photo.sizes.thumbnail,
-			url = has_thumbnail ? photo.sizes.thumbnail.source_url : data.source_url;
+			url = has_thumbnail ? photo.sizes.thumbnail.source_url : data.source_url,
+			$display_photo = $( "#local-display-photo" ),
+			checked = ( index === $display_photo.data( "selected" ) ) ? " checked='checked'" : "";
 
 		// Avoid inserting duplicate images.
 		if ( -1 === $.inArray( data.id, wsuwp.existing_photos() ) ) {
@@ -212,6 +234,9 @@ wsuwp.people = wsuwp.people || {};
 					.prepend( "<img src='" + url + "'>" );
 				$( ".photo figcaption" ).text( "Manage photo collection" );
 			}
+
+			// Set the display options.
+			$display_photo.append( "<label><input type='radio' name='_use_photo' value='" + index + "'" + checked + "/><img src='" + url + "' /></label>" );
 		}
 	};
 
