@@ -460,3 +460,41 @@ h2 + .wsu-person-add-degree:after {
 .level-2 {
 	padding-left: 2rem;
 }
+
+/* Display options */
+#local-display-photo {
+	overflow: hidden;
+}
+
+#local-display-photo label {
+	box-sizing: border-box;
+	cursor: pointer;
+	float: left;
+	padding: 5px;
+	position: relative;
+	width: 25%;
+}
+
+#local-display-photo input {
+	float: left;
+	height: 0;
+	visibility: hidden;
+}
+
+#local-display-photo img {
+	display: block;
+	width: 100%;
+}
+
+#local-display-photo input:checked:after {
+	border: 5px solid #0073aa;
+	box-sizing: border-box;
+	content: "";
+	height: 100%;
+	left: 0;
+	opacity: 1;
+	position: absolute;
+	top: 0;
+	visibility: visible;
+	width: 100%;
+}
