@@ -768,7 +768,7 @@ class WSUWP_People_Post_Type {
 		}
 
 		// Legacy inputs - temporary.
-		if ( WSUWP_People_Directory::is_main_site() ) {
+		if ( WSUWP_People_Directory::is_main_site() && 'add' !== get_current_screen()->action ) {
 			$legacy_notice = false;
 
 			foreach ( self::$post_meta_keys as $key => $args ) {
@@ -776,14 +776,15 @@ class WSUWP_People_Post_Type {
 					continue;
 				}
 
-				if ( false === $legacy_notice ) {
-					?><p class="description legacy-notice"><strong>Attention:</strong> the following fields have been deprecated. It is recommended that the information therein be moved into one of the above biography fields.</p><?php
-					$legacy_notice = true;
-				}
-
 				$value = get_post_meta( $post->ID, $args['meta_key'], true );
 
 				if ( $value ) {
+
+					if ( false === $legacy_notice ) {
+						?><p class="description legacy-notice"><strong>Attention:</strong> the following fields have been deprecated. It is recommended that the information therein be moved into one of the above biography fields.</p><?php
+						$legacy_notice = true;
+					}
+
 					?>
 					<div id="<?php echo esc_attr( $key );?>" class="wsu-person-bio">
 
