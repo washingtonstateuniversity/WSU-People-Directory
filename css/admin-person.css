@@ -15,7 +15,8 @@
 /* Hide metaboxes until they are needed */
 .wsu-person[data-nid=""],
 .post-new-php #wsuwp-university-taxonomies,
-.post-new-php #wsuwp-profile-listing {
+.post-new-php #wsuwp-profile-listing,
+.post-new-php #wsuwp-profile-local-display {
 	height: 0;
 	opacity: 0;
 	overflow: hidden;
@@ -24,14 +25,11 @@
 
 .wsu-person,
 .post-new-php #wsuwp-university-taxonomies.show,
-.post-new-php #wsuwp-profile-listing.show {
+.post-new-php #wsuwp-profile-listing.show,
+.post-new-php #wsuwp-profile-local-display.show {
 	height: auto;
-	transition: opacity .5s ease-in-out;
-}
-
-.post-new-php #wsuwp-university-taxonomies.show,
-.post-new-php #wsuwp-profile-listing.show {
 	opacity: 1;
+	transition: opacity .5s ease-in-out;
 	visibility: visible;
 }
 
