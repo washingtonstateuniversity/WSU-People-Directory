@@ -1022,7 +1022,7 @@ class WSUWP_People_Post_Type {
 		$title = get_post_meta( $post->ID, '_use_title', true );
 		$bio = get_post_meta( $post->ID, '_use_bio', true );
 		?>
-		<p class="description">Select content to display for the profile on this site.</p>
+		<p class="description">Select content to display for the public view of this profile.</p>
 
 		<p class="post-attributes-label-wrapper">
 			<label class="post-attributes-label">Photo</label>
