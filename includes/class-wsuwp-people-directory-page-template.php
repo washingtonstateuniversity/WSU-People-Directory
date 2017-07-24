@@ -170,9 +170,11 @@ class WSUWP_People_Directory_Page_Template {
 
 		$directory_data = $this->directory_data( $post->ID );
 		?>
-			<p class="wsu-people-directory-options-header">Add People</p>
+		<div class="wsu-people-directory-options add<?php if ( 'raw' === $post->filter ) { echo esc_attr( ' open' ); } ?>">
 
-			<div class="wsu-people-directory-options add">
+			<button type="button" class="wsu-people-directory-options-header">Add People</button>
+
+			<div>
 
 				<p>
 					<label for="wsu-people-import">Organization</label>
@@ -185,11 +187,13 @@ class WSUWP_People_Directory_Page_Template {
 
 			</div>
 
-			<?php if ( 'raw' === $post->filter ) { ?><div class="wsu-people-directory-extra-options"><?php } ?>
+		</div>
 
-			<p class="wsu-people-directory-options-header">Display Options</p>
+		<div class="wsu-people-directory-options display">
 
-			<div class="wsu-people-directory-options display">
+			<button type="button" class="wsu-people-directory-options-header">Display Options</button>
+
+			<div>
 
 				<p>
 					<label for="wsu-people-directory-layout">Layout</label>
@@ -221,9 +225,13 @@ class WSUWP_People_Directory_Page_Template {
 
 			</div>
 
-			<p class="wsu-people-directory-options-header">Interaction Options</p>
+		</div>
 
-			<div class="wsu-people-directory-options interaction">
+		<div class="wsu-people-directory-options interaction">
+
+			<button type="button" class="wsu-people-directory-options-header">Interaction Options</button>
+
+			<div>
 
 				<p>
 					<label for="wsu-people-directory-link">Link to full profiles</label>
@@ -276,75 +284,75 @@ class WSUWP_People_Directory_Page_Template {
 
 			</div>
 
-			<div class="wsu-people-bulk-actions">
+		</div>
 
-				<button type="button" class="button toggle-select-mode">Bulk Select</button>
+		<div class="wsu-people-bulk-actions">
 
-				<button type="button" class="button select-all-people">Select All</button>
+			<button type="button" class="button toggle-select-mode">Bulk Select</button>
 
-				<button type="button" class="button button-primary delete-selected-people" disabled="disabled">Delete Selected</button>
+			<button type="button" class="button select-all-people">Select All</button>
 
+			<button type="button" class="button button-primary delete-selected-people" disabled="disabled">Delete Selected</button>
+
+		</div>
+
+		<div class="wsu-people-admin-wrapper">
+
+			<?php include plugin_dir_path( dirname( __FILE__ ) ) . 'templates/people.php'; ?>
+
+			<div class="wsu-person-controls-tooltip" role="presentation">
+				<div class="wsu-person-controls-tooltip-arrow"></div>
+				<div class="wsu-person-controls-tooltip-inner"></div>
 			</div>
 
-			<?php if ( 'raw' === $post->filter ) { ?></div><?php } ?>
+		</div>
 
-			<div class="wsu-people-admin-wrapper">
+		<script type="text/template" id="wsu-person-template">
 
-				<?php include plugin_dir_path( dirname( __FILE__ ) ) . 'templates/people.php'; ?>
+			<article class="wsu-person<%= has_photo %>" data-nid="<%= nid %>" data-profile-id="<%= id %>">
 
-				<div class="wsu-person-controls-tooltip" role="presentation">
-					<div class="wsu-person-controls-tooltip-arrow"></div>
-					<div class="wsu-person-controls-tooltip-inner"></div>
+				<div class="card">
+
+					<h2 class="name">
+						<a href="<?php echo esc_url( get_permalink( $post->ID ) ); ?><%= slug %>"><%= name %></a>
+					</h2>
+
+					<a class="photo" href="<?php echo esc_url( get_permalink( $post->ID ) ); ?><%= slug %>">
+						<img src="<?php echo esc_url( plugins_url( 'images/placeholder.png', dirname( __FILE__ ) ) ); ?>"
+							 data-photo="<%= photo %>"
+							 alt="<%= name %>" />
+					</a>
+
+					<div class="contact">
+						<div class="title"><%= title %></div>
+						<div class="email"><a href="mailto:<%= email %>"><%= email %></a></div>
+						<div class="phone"><%= phone %></div>
+						<div class="office"><%= office %></div>
+						<div class="address"><%= address %></div>
+						<div class="website"><a href="<%= website %>"><%= website %></a></div>
+					</div>
+
 				</div>
 
-			</div>
+				<div class="about"><%= content %></div>
 
-			<script type="text/template" id="wsu-person-template">
-
-				<article class="wsu-person<%= has_photo %>" data-nid="<%= nid %>" data-profile-id="<%= id %>">
-
-					<div class="card">
-
-						<h2 class="name">
-							<a href="<?php echo esc_url( get_permalink( $post->ID ) ); ?><%= slug %>"><%= name %></a>
-						</h2>
-
-						<a class="photo" href="<?php echo esc_url( get_permalink( $post->ID ) ); ?><%= slug %>">
-							<img src="<?php echo esc_url( plugins_url( 'images/placeholder.png', dirname( __FILE__ ) ) ); ?>"
-								 data-photo="<%= photo %>"
-								 alt="<%= name %>" />
-						</a>
-
-						<div class="contact">
-							<div class="title"><%= title %></div>
-							<div class="email"><a href="mailto:<%= email %>"><%= email %></a></div>
-							<div class="phone"><%= phone %></div>
-							<div class="office"><%= office %></div>
-							<div class="address"><%= address %></div>
-							<div class="website"><a href="<%= website %>"><%= website %></a></div>
-						</div>
-
-					</div>
-
-					<div class="about"><%= content %></div>
-
-					<div class="wsu-person-controls">
-						<button type="button" class="wsu-person-edit" aria-label="Edit">
-							<span class="dashicons dashicons-edit"></span>
-						</button>
-						<button type="button" class="wsu-person-remove" aria-label="Remove">
-							<span class="dashicons dashicons-no"></span>
-						</button>
-					</div>
-
-					<button type="button" class="wsu-person-select button-link check">
-						<span class="media-modal-icon"></span>
-						<span class="screen-reader-text">Deselect</span>
+				<div class="wsu-person-controls">
+					<button type="button" class="wsu-person-edit" aria-label="Edit">
+						<span class="dashicons dashicons-edit"></span>
 					</button>
+					<button type="button" class="wsu-person-remove" aria-label="Remove">
+						<span class="dashicons dashicons-no"></span>
+					</button>
+				</div>
 
-				</article>
+				<button type="button" class="wsu-person-select button-link check">
+					<span class="media-modal-icon"></span>
+					<span class="screen-reader-text">Deselect</span>
+				</button>
 
-			</script>
+			</article>
+
+		</script>
 
 		<?php
 	}

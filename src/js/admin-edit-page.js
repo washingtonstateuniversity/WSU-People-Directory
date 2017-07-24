@@ -5,6 +5,7 @@
 		$editor = $( "#postdivrich" ),
 		$add_people = $( "#wsu-people-import" ),
 		$profile_ids = $( "#directory-page-profile-ids" ),
+		$section_toggle = $( ".wsu-people-directory-options-header" ),
 		$layout_option = $( "#wsu-people-directory-layout" ),
 		$photos_option = $( "#wsu-people-directory-show-photos" ),
 		$about_option = $( "#wsu-people-directory-about" ),
@@ -43,6 +44,20 @@
 			source: organizations,
 			select: function( e, ui ) {
 				make_request( ui );
+			}
+		} );
+
+		// Toggle a section when its header is clicked.
+		$section_toggle.on( "click", function() {
+			var $section = $( this ).closest( ".wsu-people-directory-options" ),
+				$options = $section.children( "div" );
+
+			if ( $section.hasClass( "open" ) ) {
+				$section.removeClass( "open" );
+				$options.slideUp();
+			} else {
+				$section.addClass( "open" );
+				$options.slideDown();
 			}
 		} );
 
@@ -294,8 +309,11 @@
 				create_person( response );
 				load_photos();
 
-				// Display the rest of the directory options now that they're relevant.
-				$( ".wsu-people-directory-extra-options" ).slideDown();
+				// Toggle the "Add People" options closed.
+				$( ".wsu-people-directory-options.add" ).removeClass( "open" ).children( "div" ).hide();
+
+				// Toggle the visibility of the other options.
+				$( ".wsu-people-directory-options, .wsu-people-bulk-actions" ).slideDown();
 			}
 		} );
 	}
