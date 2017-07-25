@@ -86,6 +86,20 @@ class WSUWP_People_Directory {
 	}
 
 	/**
+	 * The default REST route for the main people directory.
+	 *
+	 * @since 0.3.2
+	 *
+	 * @return string
+	 */
+	public static function REST_Route() {
+
+		$default = 'https://people.wsu.edu/wp-json/wp/v2/';
+
+		return apply_filters( 'wsu_people_directory_rest_route', $default );
+	}
+
+	/**
 	 * The REST request URL.
 	 *
 	 * @since 0.3.0

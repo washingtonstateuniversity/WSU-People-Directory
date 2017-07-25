@@ -130,6 +130,7 @@ class WSUWP_People_Directory_Page_Template {
 		wp_enqueue_script( 'wsuwp-people-sync', plugins_url( 'js/admin-people-sync.min.js', dirname( __FILE__ ) ), array( 'jquery' ), WSUWP_People_Directory::$version, true );
 
 		wp_localize_script( 'wsuwp-people-edit-page', 'wsuwp_people_edit_page', array(
+			'rest_route' => WSUWP_People_Directory::REST_route(),
 			'rest_url' => WSUWP_People_Directory::REST_URL(),
 			'ajax_url' => admin_url( 'admin-ajax.php' ),
 			'nonce' => wp_create_nonce( 'person-details' ),
@@ -178,27 +179,27 @@ class WSUWP_People_Directory_Page_Template {
 
 				<p>
 					<label for="wsu-people-import-organization">Organization</label>
-					<input type="text" id="wsu-people-import-organization" value="" />
+					<input type="text" id="wsu-people-import-organization" value="" autocomplete="off" />
 				</p>
 
 				<p>
 					<label for="wsu-people-import-location">Location</label>
-					<input type="text" id="wsu-people-import-location" value="" />
+					<input type="text" id="wsu-people-import-location" value="" autocomplete="off" />
 				</p>
 
 				<p>
 					<label for="wsu-people-import-classification">Classification</label>
-					<input type="text" id="wsu-people-import-classification" value="" />
+					<input type="text" id="wsu-people-import-classification" value="" autocomplete="off" />
 				</p>
 
 				<p>
 					<label for="wsu-people-import-category">Category</label>
-					<input type="text" id="wsu-people-import-category" value="" />
+					<input type="text" id="wsu-people-import-category" value="" autocomplete="off" />
 				</p>
 
 				<p>
 					<label for="wsu-people-import-tag">Tag</label>
-					<input type="text" id="wsu-people-import-tag" value="" />
+					<input type="text" id="wsu-people-import-tag" value="" autocomplete="off" />
 				</p>
 
 				<button type="button" id="wsu-people-import" class="button">Add</button>

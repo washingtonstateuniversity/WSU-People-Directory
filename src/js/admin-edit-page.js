@@ -8,6 +8,8 @@
 		$import_organization = $( "#wsu-people-import-organization" ),
 		$import_location = $( "#wsu-people-import-location" ),
 		$import_category = $( "#wsu-people-import-category" ),
+		$import_classification = $( "#wsu-people-import-classification" ),
+		$import_tag = $( "#wsu-people-import-tag" ),
 		$layout_option = $( "#wsu-people-directory-layout" ),
 		$photos_option = $( "#wsu-people-directory-show-photos" ),
 		$about_option = $( "#wsu-people-directory-about" ),
@@ -55,6 +57,52 @@
 			source: $( "#wsuwp_university_categorychecklist .selectit" ).map( function() { return $( this ).text(); } ).get()
 		} );
 
+		// Use jQuery UI Autocomplete to suggest Classifications.
+		$import_classification.autocomplete( {
+			delay: 500,
+			minLength: 3,
+			source: function( request, response ) {
+				$.ajax( {
+					url: window.wsuwp_people_edit_page.rest_route + "classification",
+					data: {
+						search: request.term,
+						per_page: 50
+					},
+					success: function( data ) {
+						response( $.map( data, function( item ) {
+							return {
+								label: item.name,
+								value: item.slug
+							};
+						} ) );
+					}
+				} );
+			}
+		} );
+
+		// Use jQuery UI Autocomplete to suggest Tags.
+		$import_tag.autocomplete( {
+			delay: 500,
+			minLength: 3,
+			source: function( request, response ) {
+				$.ajax( {
+					url: window.wsuwp_people_edit_page.rest_route + "tags",
+					data: {
+						search: request.term,
+						per_page: 50
+					},
+					success: function( data ) {
+						response( $.map( data, function( item ) {
+							return {
+								label: item.name,
+								value: item.slug
+							};
+						} ) );
+					}
+				} );
+			}
+		} );
+
 		// Get people via REST request.
 		$( "#wsu-people-import" ).on( "click", function() {
 			var data = { per_page: 100 };
@@ -72,6 +120,16 @@
 			// Add the University Category parameter.
 			if ( "" !== $import_category.val() ) {
 				data[ "filter[wsuwp_university_category]" ] = $import_category.val();
+			}
+
+			// Add the Classification parameter.
+			if ( "" !== $import_classification.val() ) {
+				data[ "filter[classification]" ] = $import_classification.val();
+			}
+
+			// Add the Tag parameter.
+			if ( "" !== $import_tag.val() ) {
+				data[ "filter[tag]" ] = $import_tag.val();
 			}
 
 			// Display a loading indicator.
