@@ -177,13 +177,36 @@ class WSUWP_People_Directory_Page_Template {
 			<div>
 
 				<p>
-					<label for="wsu-people-import">Organization</label>
-					<input type="text" id="wsu-people-import" value="" />
-					<input type="hidden"
-						   id="directory-page-profile-ids"
-						   name="_wsu_people_directory_profile_ids"
-						   value="<?php echo esc_attr( $directory_data['ids'] ); ?>" />
+					<label for="wsu-people-import-organization">Organization</label>
+					<input type="text" id="wsu-people-import-organization" value="" />
 				</p>
+
+				<p>
+					<label for="wsu-people-import-location">Location</label>
+					<input type="text" id="wsu-people-import-location" value="" />
+				</p>
+
+				<p>
+					<label for="wsu-people-import-classification">Classification</label>
+					<input type="text" id="wsu-people-import-classification" value="" />
+				</p>
+
+				<p>
+					<label for="wsu-people-import-category">Category</label>
+					<input type="text" id="wsu-people-import-category" value="" />
+				</p>
+
+				<p>
+					<label for="wsu-people-import-tag">Tag</label>
+					<input type="text" id="wsu-people-import-tag" value="" />
+				</p>
+
+				<button type="button" id="wsu-people-import" class="button">Add</button>
+
+				<input type="hidden"
+					   id="directory-page-profile-ids"
+					   name="_wsu_people_directory_profile_ids"
+					   value="<?php echo esc_attr( $directory_data['ids'] ); ?>" />
 
 			</div>
 
