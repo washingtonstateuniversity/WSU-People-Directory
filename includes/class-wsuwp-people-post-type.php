@@ -383,7 +383,7 @@ class WSUWP_People_Post_Type {
 			'taxonomies' => array(
 				'post_tag',
 			),
-			'rewrite' => false,
+			'rewrite' => apply_filters( 'wsuwp_people_default_rewrite_slug', false ),
 		);
 
 		register_post_type( self::$post_type_slug, $args );
