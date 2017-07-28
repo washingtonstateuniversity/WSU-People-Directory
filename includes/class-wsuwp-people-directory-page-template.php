@@ -587,7 +587,7 @@ class WSUWP_People_Directory_Page_Template {
 					$sanitized_titles[] = absint( $title );
 				}
 			}
-			$meta['title'] = implode( ' ', $sanitized_titles );
+			$meta['title'] = implode( ',', $sanitized_titles );
 		}
 
 		if ( isset( $_POST['photo'] ) ) {
