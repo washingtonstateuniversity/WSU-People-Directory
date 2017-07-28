@@ -587,7 +587,7 @@ class WSUWP_People_Directory_Page_Template {
 					$sanitized_titles[] = absint( $title );
 				}
 			}
-			$meta['title'] = implode( ' ', $sanitized_titles );
+			$meta['title'] = implode( ',', $sanitized_titles );
 		}
 
 		if ( isset( $_POST['photo'] ) ) {
@@ -773,6 +773,10 @@ class WSUWP_People_Directory_Page_Template {
 	public function template_include( $template ) {
 		$post = get_post();
 
+		if ( ! $post ) {
+			return $template;
+		}
+
 		if ( key( self::$template ) !== get_page_template_slug( $post->ID ) ) {
 			return $template;
 		}
@@ -825,6 +829,10 @@ class WSUWP_People_Directory_Page_Template {
 	 */
 	public function person_lightbox_template() {
 		$post = get_post();
+
+		if ( ! $post ) {
+			return;
+		}
 
 		if ( 'lightbox' !== get_post_meta( $post->ID, '_wsu_people_directory_profile', true ) ) {
 			return;

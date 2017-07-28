@@ -9,8 +9,7 @@
 	} );
 
 	// Opens a profile in a modal.
-	var lightbox_template = _.template( $( "#wsu-person-lightbox-template" ).html() ),
-		focused_before_modal;
+	var focused_before_modal;
 
 	$( ".lightbox" ).on( "click", ".name a, .card figure a", function( e ) {
 		e.preventDefault();
@@ -30,7 +29,8 @@
 				about = response.content.rendered,
 				photo_index = $person.data( "photo" ),
 				title_index = $person.data( "title" ),
-				about_index = $person.data( "about" );
+				about_index = $person.data( "about" ),
+				lightbox_template = _.template( $( "#wsu-person-lightbox-template" ).html() );
 
 			// Grabs the locally set photo, taking care to avoid any undefined properties.
 			if ( photo_index && response.photos[ photo_index ] ) {
