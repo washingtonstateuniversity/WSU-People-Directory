@@ -55,7 +55,7 @@
 
 			<div class="person-titles choose multiple">
 
-				<?php $set_titles = explode( ' ', $display['directory_view']['title'] ); ?>
+				<?php $set_titles = ( isset( $display['directory_view']['title'] ) ) ? explode( ' ', $display['directory_view']['title'] ) : false; ?>
 				<div data-index="ad"<?php if ( isset( $display['directory_view']['title'] ) && in_array( 'ad', $set_titles, true ) ) { echo ' class="selected"'; } ?>>
 					<span class="content"><?php echo esc_html( $person->position_title ); ?></span>
 					<button type="button" class="wsu-person-select button-link check">
