@@ -620,6 +620,11 @@ class WSUWP_People_Post_Type {
 		<div class="wsu-person-photo-collection-backdrop wsu-person-photo-collection-close">
 			<div class="wsu-person-photo-collection">
 				<?php
+				// Add the featured image to the photos array.
+				if ( has_post_thumbnail() ) {
+					$photos[] = get_post_thumbnail_id();
+				}
+
 				if ( $photos && is_array( $photos ) ) {
 					foreach ( $photos as $photo_id ) {
 						?>
