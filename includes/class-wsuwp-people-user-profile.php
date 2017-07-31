@@ -33,6 +33,7 @@ class WSUWP_People_User_Profile {
 		add_action( 'admin_init', array( $this, 'biography_filter' ) );
 		add_action( 'show_user_profile', array( $this, 'biography_editor' ) );
 		add_action( 'edit_user_profile', array( $this, 'biography_editor' ) );
+		add_filter( 'wp_editor_settings', array( $this, 'filter_default_editor_settings' ), 10, 2 );
 	}
 
 	/**
@@ -51,11 +52,13 @@ class WSUWP_People_User_Profile {
 
 		wp_enqueue_style( 'wsuwp-people-user-profile', plugins_url( 'css/admin-user-profile.css', dirname( __FILE__ ) ), array(), WSUWP_People_Directory::$version );
 		wp_enqueue_script( 'wsuwp-people-user-profile', plugins_url( 'js/admin-user-profile.min.js', dirname( __FILE__ ) ), array( 'jquery' ), WSUWP_People_Directory::$version, true );
-		wp_localize_script( 'wsuwp-people-user-profile', 'wsupeople', array(
-			'rest_url' => WSUWP_People_Directory::REST_URL(),
-			'nid' => get_userdata( $user_id )->user_login,
-			'nonce' => WSUWP_People_Directory::create_rest_nonce(),
-			'uid' => wp_get_current_user()->ID,
+		wp_localize_script( 'wsuwp-people-user-profile', 'wsuwp', array(
+			'people' => array(
+				'rest_url' => WSUWP_People_Directory::REST_URL(),
+				'nid' => get_userdata( $user_id )->user_login,
+				'nonce' => WSUWP_People_Directory::create_rest_nonce(),
+				'uid' => wp_get_current_user()->ID,
+			),
 		) );
 	}
 
@@ -88,10 +91,36 @@ class WSUWP_People_User_Profile {
 					);
 					wp_editor( $description, 'description', $settings );
 					?>
-					<input type="hidden" name="wsuwp_person_id" value="" />
 				</td>
 			</tr>
 		</table>
 		<?php
+	}
+
+	/**
+	 * Adds an init callback to the tinyMCE editor to help mitigate race conditions
+	 * when populating with data from the user's people.wsu.edu profile.
+	 *
+	 * @since 0.3.3
+	 *
+	 * @param array $settings
+	 * @param string $editor_id
+	 *
+	 * @return array
+	 */
+	public function filter_default_editor_settings( $settings, $editor_id ) {
+		if ( ! in_array( get_current_screen()->id, array( 'profile', 'user-edit' ), true ) ) {
+			return $settings;
+		}
+
+		if ( isset( $settings['tinymce'] ) && is_array( $settings['tinymce'] ) ) {
+			$settings['tinymce']['init_instance_callback'] = 'wsuwp.people.populate_editor';
+		} else {
+			$settings['tinymce'] = array(
+				'init_instance_callback' => 'wsuwp.people.populate_editor',
+			);
+		}
+
+		return $settings;
 	}
 }
