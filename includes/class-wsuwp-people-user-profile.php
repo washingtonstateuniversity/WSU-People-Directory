@@ -50,6 +50,10 @@ class WSUWP_People_User_Profile {
 
 		global $user_id;
 
+		if ( 'nid' !== get_user_meta( $user_id, '_wsuwp_sso_user_type', true ) ) {
+			return;
+		}
+
 		wp_enqueue_style( 'wsuwp-people-user-profile', plugins_url( 'css/admin-user-profile.css', dirname( __FILE__ ) ), array(), WSUWP_People_Directory::$version );
 		wp_enqueue_script( 'wsuwp-people-user-profile', plugins_url( 'js/admin-user-profile.min.js', dirname( __FILE__ ) ), array( 'jquery' ), WSUWP_People_Directory::$version, true );
 		wp_localize_script( 'wsuwp-people-user-profile', 'wsuwp', array(
@@ -78,6 +82,10 @@ class WSUWP_People_User_Profile {
 	 * @param object $user
 	 */
 	public function biography_editor( $user ) {
+		if ( 'nid' !== get_user_meta( $user->ID, '_wsuwp_sso_user_type', true ) ) {
+			return;
+		}
+
 		wp_nonce_field( 'save-wsuwp-person-data', '_wsuwp_people_user_nonce' );
 		?>
 		<table class="form-table wsuwp-people-bio-wrap">
