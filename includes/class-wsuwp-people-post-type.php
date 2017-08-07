@@ -383,7 +383,7 @@ class WSUWP_People_Post_Type {
 			'taxonomies' => array(
 				'post_tag',
 			),
-			'rewrite' => false,
+			'rewrite' => apply_filters( 'wsuwp_people_default_rewrite_slug', false ),
 		);
 
 		register_post_type( self::$post_type_slug, $args );
@@ -620,6 +620,11 @@ class WSUWP_People_Post_Type {
 		<div class="wsu-person-photo-collection-backdrop wsu-person-photo-collection-close">
 			<div class="wsu-person-photo-collection">
 				<?php
+				// Add the featured image to the photos array.
+				if ( has_post_thumbnail() ) {
+					$photos[] = get_post_thumbnail_id();
+				}
+
 				if ( $photos && is_array( $photos ) ) {
 					foreach ( $photos as $photo_id ) {
 						?>
@@ -763,7 +768,7 @@ class WSUWP_People_Post_Type {
 		}
 
 		// Legacy inputs - temporary.
-		if ( WSUWP_People_Directory::is_main_site() ) {
+		if ( WSUWP_People_Directory::is_main_site() && 'add' !== get_current_screen()->action ) {
 			$legacy_notice = false;
 
 			foreach ( self::$post_meta_keys as $key => $args ) {
@@ -771,14 +776,15 @@ class WSUWP_People_Post_Type {
 					continue;
 				}
 
-				if ( false === $legacy_notice ) {
-					?><p class="description legacy-notice"><strong>Attention:</strong> the following fields have been deprecated. It is recommended that the information therein be moved into one of the above biography fields.</p><?php
-					$legacy_notice = true;
-				}
-
 				$value = get_post_meta( $post->ID, $args['meta_key'], true );
 
 				if ( $value ) {
+
+					if ( false === $legacy_notice ) {
+						?><p class="description legacy-notice"><strong>Attention:</strong> the following fields have been deprecated. It is recommended that the information therein be moved into one of the above biography fields.</p><?php
+						$legacy_notice = true;
+					}
+
 					?>
 					<div id="<?php echo esc_attr( $key );?>" class="wsu-person-bio">
 
@@ -835,6 +841,17 @@ class WSUWP_People_Post_Type {
 				array( $this, 'display_listing_meta_box' ),
 				self::$post_type_slug,
 				'normal'
+			);
+		}
+
+		if ( false === WSUWP_People_Directory::is_main_site() ) {
+			add_meta_box(
+				'wsuwp-profile-local-display',
+				'Display Options',
+				array( $this, 'display_local_display_meta_box' ),
+				self::$post_type_slug,
+				'side',
+				'low'
 			);
 		}
 	}
@@ -1000,6 +1017,48 @@ class WSUWP_People_Post_Type {
 	}
 
 	/**
+	 * Display a meta box used to adjust the display of a profile.
+	 *
+	 * @since 0.3.2
+	 *
+	 * @param WP_Post $post Post object.
+	 */
+	public function display_local_display_meta_box( $post ) {
+		$photo = get_post_meta( $post->ID, '_use_photo', true );
+		$title = get_post_meta( $post->ID, '_use_title', true );
+		$bio = get_post_meta( $post->ID, '_use_bio', true );
+		?>
+		<p class="description">Select content to display for the public view of this profile.</p>
+
+		<p class="post-attributes-label-wrapper">
+			<label class="post-attributes-label">Photo</label>
+		</p>
+		<div id="local-display-photo" data-selected="<?php echo esc_attr( $photo ); ?>"></div>
+
+		<p class="post-attributes-label-wrapper">
+			<label class="post-attributes-label" for="local-display-title">Title</label>
+		</p>
+		<select id="local-display-title"
+				name="_use_title[]"
+				multiple="multiple"
+				size="1"
+				class="widefat"
+				data-selected="<?php echo esc_attr( $title ); ?>">
+		</select>
+
+		<p class="post-attributes-label-wrapper">
+			<label class="post-attributes-label" for="local-display-bio">Biography</label>
+		</p>
+		<select id="local-display-bio" name="_use_bio" class="widefat">
+			<option value="personal"<?php selected( $bio, 'personal' ); ?>>Personal</option>
+			<option value="bio_unit"<?php selected( $bio, 'bio_unit' ); ?>>Unit</option>
+			<option value="bio_university"<?php selected( $bio, 'bio_university' ); ?>>University</option>
+		</select>
+
+		<?php
+	}
+
+	/**
 	 * Sanitizes repeatable text fields.
 	 *
 	 * @since 0.3.0
@@ -1113,7 +1172,8 @@ class WSUWP_People_Post_Type {
 			}
 
 			if ( isset( $_POST['_use_title'] ) && '' !== $_POST['_use_title'] ) {
-				update_post_meta( $post_id, '_use_title', sanitize_text_field( $_POST['_use_title'] ) );
+				$titles = implode( ',', $_POST['_use_title'] );
+				update_post_meta( $post_id, '_use_title', sanitize_text_field( $titles ) );
 			} else {
 				delete_post_meta( $post_id, '_use_title' );
 			}

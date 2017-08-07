@@ -14,7 +14,7 @@ class WSUWP_People_Directory {
 	 *
 	 * @var string
 	 */
-	public static $version = '0.3.0';
+	public static $version = '0.3.2';
 
 	/**
 	 * Maintain and return the one instance. Initiate hooks when called the first time.
@@ -83,6 +83,20 @@ class WSUWP_People_Directory {
 	 */
 	public static function is_main_site() {
 		return apply_filters( 'wsuwp_people_is_main_site', false );
+	}
+
+	/**
+	 * The default REST route for the main people directory.
+	 *
+	 * @since 0.3.2
+	 *
+	 * @return string
+	 */
+	public static function REST_Route() {
+
+		$default = 'https://people.wsu.edu/wp-json/wp/v2/';
+
+		return apply_filters( 'wsu_people_directory_rest_route', $default );
 	}
 
 	/**

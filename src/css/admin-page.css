@@ -1,20 +1,48 @@
 #wsuwp-people-directory-configuration,
 #wsuwp-people-directory-configuration .delete-selected-people,
 #wsuwp-people-directory-configuration .select-all-people,
-.wsu-people-directory-extra-options {
+.post-new-php .wsu-people-directory-options,
+.wsu-people-directory-options > div,
+.post-new-php .wsu-people-bulk-actions {
 	display: none;
 }
 
-.wsu-people-directory-options-header {
-	font-weight: 700;
+.post-new-php .wsu-people-directory-options.add,
+.post-new-php .wsu-people-directory-options.add > div {
+	display: block;
 }
 
 .wsu-people-directory-options {
-	padding: 0 0 0 1em;
+	padding-bottom: 1em;
 }
 
-.wsu-people-directory-extra-options .wsu-people-directory-options-header:first-child {
-	margin-top: 0;
+.wsu-people-directory-options-header {
+	background: none;
+	border: none;
+	color: #444;
+	cursor: pointer;
+	display: block;
+	font-weight: 600;
+	line-height: 1.4;
+	margin-top: 10px;
+	padding: 0;
+}
+
+.wsu-people-directory-options-header:focus {
+	box-shadow: 0 0 0 1px #5b9dd9, 0 0 2px 1px rgba(30, 140, 190, .8);
+	outline: none;
+}
+
+.wsu-people-directory-options .wsu-people-directory-options-header:after {
+	content: " +";
+}
+
+.wsu-people-directory-options.open .wsu-people-directory-options-header:after {
+	content: " -";
+}
+
+.wsu-people-directory-options > div {
+	padding: 0 0 0 2em;
 }
 
 .wsu-people-bulk-actions {
@@ -23,6 +51,10 @@
 
 .wsu-people-admin-wrapper {
 	position: relative;
+}
+
+.table .wsu-people {
+	border-bottom: none;
 }
 
 .wsu-people .spinner {

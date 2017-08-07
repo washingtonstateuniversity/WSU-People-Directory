@@ -83,6 +83,7 @@ var wsuwp = wsuwp || {};
 
 					$( "#wsuwp-university-taxonomies" ).addClass( "show" );
 					$( "#wsuwp-profile-listing" ).addClass( "show" );
+					$( "#wsuwp-profile-local-display" ).addClass( "show" );
 				} else {
 					window.alert( response.data );
 					return;

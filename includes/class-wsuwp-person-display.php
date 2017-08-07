@@ -274,7 +274,7 @@ class WSUWP_Person_Display {
 
 		// Set up what to display for the title.
 		if ( isset( $options['title'] ) && '' !== $options['title'] ) {
-			$title_indexes = explode( ' ', $options['title'] );
+			$title_indexes = explode( ',', $options['title'] );
 			$use_titles = array();
 
 			foreach ( $title_indexes as $index ) {

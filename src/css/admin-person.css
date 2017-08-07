@@ -15,7 +15,8 @@
 /* Hide metaboxes until they are needed */
 .wsu-person[data-nid=""],
 .post-new-php #wsuwp-university-taxonomies,
-.post-new-php #wsuwp-profile-listing {
+.post-new-php #wsuwp-profile-listing,
+.post-new-php #wsuwp-profile-local-display {
 	height: 0;
 	opacity: 0;
 	overflow: hidden;
@@ -24,14 +25,11 @@
 
 .wsu-person,
 .post-new-php #wsuwp-university-taxonomies.show,
-.post-new-php #wsuwp-profile-listing.show {
+.post-new-php #wsuwp-profile-listing.show,
+.post-new-php #wsuwp-profile-local-display.show {
 	height: auto;
-	transition: opacity .5s ease-in-out;
-}
-
-.post-new-php #wsuwp-university-taxonomies.show,
-.post-new-php #wsuwp-profile-listing.show {
 	opacity: 1;
+	transition: opacity .5s ease-in-out;
 	visibility: visible;
 }
 
@@ -54,9 +52,9 @@
 	cursor: pointer;
 	display: flex;
 	float: left;
-	height: 198px;
 	justify-content: center;
 	margin: 0 16px 16px 0;
+	min-height: 198px;
 	position: relative;
 	width: 198px;
 }
@@ -227,8 +225,6 @@ h2 + .wsu-person-add-degree:after {
 }
 
 .card .photo img {
-	left: 0;
-	position: absolute;
 	transition: opacity .2s ease-in-out, z-index .2s ease-in-out;
 	width: 100%;
 	z-index: 1;
@@ -247,6 +243,10 @@ h2 + .wsu-person-add-degree:after {
 
 .card .photo figcaption:hover {
 	color: #00a0d2;
+}
+
+.card .photo img + figcaption {
+	position: absolute;
 }
 
 .wsu-person-photo-collection-backdrop {
@@ -302,6 +302,7 @@ h2 + .wsu-person-add-degree:after {
 .ui-sortable-helper:first-child + .placeholder,
 .ui-sortable-helper:first-child + .wsu-person-photo-wrapper:not(.placeholder) {
 	height: 198px;
+	overflow: hidden;
 	width: 198px;
 }
 
@@ -456,4 +457,42 @@ h2 + .wsu-person-add-degree:after {
 
 .level-2 {
 	padding-left: 2rem;
+}
+
+/* Display options */
+#local-display-photo {
+	overflow: hidden;
+}
+
+#local-display-photo label {
+	box-sizing: border-box;
+	cursor: pointer;
+	float: left;
+	padding: 5px;
+	position: relative;
+	width: 25%;
+}
+
+#local-display-photo input {
+	float: left;
+	height: 0;
+	visibility: hidden;
+}
+
+#local-display-photo img {
+	display: block;
+	width: 100%;
+}
+
+#local-display-photo input:checked:after {
+	border: 5px solid #0073aa;
+	box-sizing: border-box;
+	content: "";
+	height: 100%;
+	left: 0;
+	opacity: 1;
+	position: absolute;
+	top: 0;
+	visibility: visible;
+	width: 100%;
 }
