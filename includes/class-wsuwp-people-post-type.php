@@ -884,8 +884,13 @@ class WSUWP_People_Post_Type {
 					<input type="text" id="_wsuwp_profile_ad_nid" name="_wsuwp_profile_ad_nid" value="<?php echo esc_attr( $nid ); ?>" class="widefat" <?php echo esc_attr( $readonly ); ?> />
 
 				<?php if ( false === WSUWP_People_Directory::is_main_site() ) { ?>
-					<?php $record_id = get_post_meta( $post->ID, '_wsuwp_profile_post_id', true ); ?>
+					<?php
+					$record_id = get_post_meta( $post->ID, '_wsuwp_profile_post_id', true );
+					$source = get_post_meta( $post->ID, '_canonical_source', true );
+					?>
 					<input type="hidden" id="_wsuwp_profile_post_id" name="_wsuwp_profile_post_id" value="<?php echo esc_attr( $record_id ); ?>" />
+
+					<input type="hidden" id="_wsuwp_profile_canonical_source" name="_canonical_source" value="<?php echo esc_url( $source ); ?>" />
 				<?php } ?>
 
 				<div class="load-ad-container">
@@ -1154,6 +1159,10 @@ class WSUWP_People_Post_Type {
 		if ( false === WSUWP_People_Directory::is_main_site() ) {
 			if ( isset( $_POST['_wsuwp_profile_post_id'] ) && '' !== $_POST['_wsuwp_profile_post_id'] ) {
 				update_post_meta( $post_id, '_wsuwp_profile_post_id', absint( $_POST['_wsuwp_profile_post_id'] ) );
+			}
+
+			if ( isset( $_POST['_canonical_source'] ) && '' !== $_POST['_canonical_source'] ) {
+				update_post_meta( $post_id, '_canonical_source', esc_url_raw( $_POST['_canonical_source'] ) );
 			}
 
 			if ( isset( $_POST['_use_photo'] ) && '' !== $_POST['_use_photo'] ) {

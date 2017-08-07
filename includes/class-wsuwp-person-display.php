@@ -110,11 +110,35 @@ class WSUWP_Person_Display {
 			return $template;
 		}
 
+		$photo = get_post_meta( get_the_ID(), '_use_photo', true );
+		$title = get_post_meta( get_the_ID(), '_use_title', true );
+		$bio = get_post_meta( get_the_ID(), '_use_bio', true );
+
+		// Update the canonical tag if the displayed content matches the primary profile.
+		if ( ( ! $photo || 0 === $photo ) && ( ! $bio || 'personal' === $bio ) && ! $title ) {
+			remove_action( 'wp_head', 'rel_canonical' );
+			add_action( 'wp_head', array( $this, 'rel_canonical' ) );
+		}
+
 		wp_enqueue_style( 'wsu-people-display', plugin_dir_url( dirname( __FILE__ ) ) . 'css/person.css', array(), WSUWP_People_Directory::$version );
 
 		add_filter( 'the_content', array( $this, 'content' ) );
 
 		return trailingslashit( get_template_directory() ) . 'templates/single.php';
+	}
+
+	/**
+	 * Adds a canonical meta tag.
+	 *
+	 * @since 0.3.1
+	 */
+	public function rel_canonical() {
+		$source = get_post_meta( get_the_ID(), '_canonical_source', true );
+		if ( $source ) {
+			?>
+			<link rel="canonical" href="<?php echo esc_url( $source ); ?>" />
+			<?php
+		}
 	}
 
 	/**
