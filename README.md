@@ -50,119 +50,134 @@ Here is an raw overview of the properties attached to each object:
 
 ```
 {
-"id": 21,
-"date": "2015-07-10T09:47:50",
-"date_gmt": "2015-07-10T16:47:50",
-"guid": {
-  "rendered": "https://people.wsu.edu/?post_type=wsuwp_people_profile&#038;p=21"
-},
-"modified": "2015-11-23T16:49:52",
-"modified_gmt": "2015-11-24T00:49:52",
-"slug": "jeremy-felt",
-"type": "wsuwp_people_profile",
-"link": "https://people.wsu.edu/profile/jeremy-felt/",
-"title": {
-  "rendered": "Jeremy Felt"
-},
-"content": {
-  "rendered": "<p>This is my official biography text.</p>\n"
-},
-"author": 1,
-"featured_image": 32,
-"first_name": "Jeremy",
-"last_name": "Felt",
-"position_title": "SR WORDPRESS ENGR, UCOMM",
-"office": "INFO TECH 2008",
-"address": "P O BOX 641227",
-"phone": "509-335-5301",
-"phone_ext": "",
-"email": "jeremy.felt@wsu.edu",
-"office_alt": "ITB 2008 Howdy",
-"phone_alt": "",
-"email_alt": "",
-"website": "",
-"bio_college": "<p>Testing out my college level biography</p>\n",
-"bio_lab": "<p>Testing out my lab level biography</p>\n",
-"bio_department": "<p>Testing out my department level biography</p>\n",
-"cv_employment": "<p>Testing employment</p>\n",
-"cv_honors": "<p>Testing honors and awards</p>\n",
-"cv_grants": "<p>Testing grants, contracts</p>\n",
-"cv_publications": "<p>Testing publications</p>\n",
-"cv_presentations": "<p>Testing presentations</p>\n",
-"cv_teaching": "<p>Testing instruction</p>\n",
-"cv_service": "<p>Testing professional service</p>\n",
-"cv_responsibilities": "<p>Testing responsibilities</p>\n",
-"cv_affiliations": "<p>Testing affiliations</p>\n",
-"cv_experience": "<p>Testing prof development</p>\n",
-"working_titles": [],
-"degrees": [],
-"cv_attachment": "",
-"profile_photo": "",
-"_links": {
-  "self": [
-	{
-	  "href": "http://dev.people.wsu.edu/wp-json/wp/v2/people/21"
-	}
+  "id":20,
+  "date":"2015-07-24T12:16:22",
+  "date_gmt":"2015-07-24T19:16:22",
+  "guid":{
+    "rendered":"http:\/\/people.wsu.edu\/?post_type=wsuwp_people_profile&#038;p=20"
+  },
+  "modified":"2017-08-07T13:13:26",
+  "modified_gmt":"2017-08-07T20:13:26",
+  "slug":"phillip-cable",
+  "status":"publish",
+  "type":"wsuwp_people_profile",
+  "link":"https:\/\/people.wsu.edu\/profile\/phillip-cable\/",
+  "title":{
+    "rendered":"Phillip Cable"
+  },
+  "content":{
+    "rendered":"<p>This is my personal biography<\/p>\n",
+    "protected":false
+  },
+  "template":"",
+  "tags":[],
+  "university_category":[],
+  "location":[
+    2
   ],
-  "collection": [
-	{
-	  "href": "http://dev.people.wsu.edu/wp-json/wp/v2/people"
-	}
+  "organization":[
+    390
   ],
-  "author": [
-	{
-	  "embeddable": true,
-	  "href": "http://dev.people.wsu.edu/wp-json/wp/v2/users/1"
-	}
+  "classification":[
+    409
   ],
-  "version-history": [
-	{
-	  "href": "http://dev.people.wsu.edu/wp-json/wp/v2/people/21/revisions"
-	}
+  "nid":"pcable",
+  "first_name":"Phillip",
+  "last_name":"Cable",
+  "position_title":"WORDPRESS DEVELOPER",
+  "office":"ITB 2021",
+  "address":"PO BOX 641227",
+  "phone":"509-335-0383",
+  "phone_ext":"",
+  "email":"pcable@wsu.edu",
+  "office_alt":"",
+  "phone_alt":"",
+  "email_alt":"",
+  "address_alt":"",
+  "website":"",
+  "degree":[],
+  "working_titles":[
+    "Web Developer"
   ],
-  "http://api.w.org/featuredmedia": [
-	{
-	  "embeddable": true,
-	  "href": "http://dev.people.wsu.edu/wp-json/wp/v2/media/32"
-	}
-  ],
-  "http://api.w.org/attachment": [
-	{
-	  "href": "http://dev.people.wsu.edu/wp-json/wp/v2/media?post_parent=21"
-	}
-  ],
-  "http://api.w.org/term": [
-	{
-	  "taxonomy": "post_tag",
-	  "embeddable": true,
-	  "href": "http://dev.people.wsu.edu/wp-json/wp/v2/people/21/terms/tag"
-	},
-	{
-	  "taxonomy": "wsuwp_university_category",
-	  "embeddable": true,
-	  "href": "http://dev.people.wsu.edu/wp-json/wp/v2/people/21/terms/wsuwp_university_category"
-	},
-	{
-	  "taxonomy": "wsuwp_university_location",
-	  "embeddable": true,
-	  "href": "http://dev.people.wsu.edu/wp-json/wp/v2/people/21/terms/wsuwp_university_location"
-	},
-	{
-	  "taxonomy": "wsuwp_university_org",
-	  "embeddable": true,
-	  "href": "http://dev.people.wsu.edu/wp-json/wp/v2/people/21/terms/wsuwp_university_org"
-	},
-	{
-	  "taxonomy": "appointment",
-	  "embeddable": true,
-	  "href": "http://dev.people.wsu.edu/wp-json/wp/v2/people/21/terms/appointment"
-	},
-	{
-	  "taxonomy": "classification",
-	  "embeddable": true,
-	  "href": "http://dev.people.wsu.edu/wp-json/wp/v2/people/21/terms/classification"
-	}
-  ]
-}
+  "bio_unit":"<p>This is my unit biography.<\/p>",
+  "bio_university":"<p>This is my university biography.<\/p>",
+  "photos":[],
+  "listed_on":[],
+  "bio_college":"",
+  "bio_lab":"",
+  "bio_department":"",
+  "cv_employment":"",
+  "cv_honors":"",
+  "cv_grants":"",
+  "cv_publications":"",
+  "cv_presentations":"",
+  "cv_teaching":"",
+  "cv_service":"",
+  "cv_responsibilities":"",
+  "cv_affiliations":"",
+  "cv_experience":"",
+  "cv_attachment":false,
+  "profile_photo":"",
+  "_links":{
+    "self":[
+      {
+        "href":"https:\/\/people.wsu.edu\/wp-json\/wp\/v2\/people\/20"
+      }
+    ],
+    "collection":[
+      {
+        "href":"https:\/\/people.wsu.edu\/wp-json\/wp\/v2\/people"
+      }
+    ],
+    "about":[
+      {
+        "href":"https:\/\/people.wsu.edu\/wp-json\/wp\/v2\/types\/wsuwp_people_profile"
+      }
+    ],
+    "version-history":[
+      {
+        "href":"https:\/\/people.wsu.edu\/wp-json\/wp\/v2\/people\/20\/revisions"
+      }
+    ],
+    "wp:attachment":[
+      {
+        "href":"https:\/\/people.wsu.edu\/wp-json\/wp\/v2\/media?parent=20"
+      }
+    ],
+    "wp:term":[
+      {
+        "taxonomy":"post_tag",
+        "embeddable":true,
+        "href":"https:\/\/people.wsu.edu\/wp-json\/wp\/v2\/tags?post=20"
+      },
+      {
+        "taxonomy":"wsuwp_university_category",
+        "embeddable":true,
+        "href":"https:\/\/people.wsu.edu\/wp-json\/wp\/v2\/university_category?post=20"
+      },
+      {
+        "taxonomy":"wsuwp_university_location",
+        "embeddable":true,
+        "href":"https:\/\/people.wsu.edu\/wp-json\/wp\/v2\/location?post=20"
+      },
+      {
+        "taxonomy":"wsuwp_university_org",
+        "embeddable":true,
+        "href":"https:\/\/people.wsu.edu\/wp-json\/wp\/v2\/organization?post=20"
+      },
+      {
+        "taxonomy":"classification",
+        "embeddable":true,
+        "href":"https:\/\/people.wsu.edu\/wp-json\/wp\/v2\/classification?post=20"
+      }
+    ],
+    "curies":[
+      {
+        "name":"wp",
+        "href":"https:\/\/api.w.org\/{rel}",
+        "templated":true
+      }
+    ]
+  }
 }
 ```
