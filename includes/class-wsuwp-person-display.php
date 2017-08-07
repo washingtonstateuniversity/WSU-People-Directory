@@ -124,7 +124,7 @@ class WSUWP_Person_Display {
 
 		add_filter( 'the_content', array( $this, 'content' ) );
 
-		return trailingslashit( get_template_directory() ) . 'templates/single.php';
+		return trailingslashit( get_template_directory() ) . 'single.php';
 	}
 
 	/**
