@@ -328,6 +328,8 @@
 	height: 50px;
 	position: absolute;
 	right: 0;
+	text-align: center;
+	text-decoration: none;
 	top: 0;
 	transition: color .1s ease-in-out, background .1s ease-in-out;
 	width: 50px;
