@@ -241,22 +241,21 @@ class WSUWP_Person_Display {
 					$card_classes .= ' unit-' . sanitize_title( $unit );
 				}
 
+				// Add an attribute containing the post ID of the primary profile record.
+				$card_attributes .= ' data-profile-id="' . $person->id . '"';
+
 				// Add attributes to be leveraged for opening this profile in a modal.
-				if ( 'lightbox' === $options['link']['profile'] ) {
-					$card_attributes .= ' data-profile-id="' . $person->id . '"';
+				if ( 'lightbox' === $options['link']['profile'] && ! is_admin() ) {
+					if ( $single_display_photo ) {
+						$card_attributes .= ' data-photo="' . $single_display_photo . '"';
+					}
 
-					if ( ! is_admin() ) {
-						if ( $single_display_photo ) {
-							$card_attributes .= ' data-photo="' . $single_display_photo . '"';
-						}
+					if ( $single_display_title ) {
+						$card_attributes .= ' data-title="' . $single_display_title . '"';
+					}
 
-						if ( $single_display_title ) {
-							$card_attributes .= ' data-title="' . $single_display_title . '"';
-						}
-
-						if ( $single_display_bio ) {
-							$card_attributes .= ' data-about="' . $single_display_bio . '"';
-						}
+					if ( $single_display_bio ) {
+						$card_attributes .= ' data-about="' . $single_display_bio . '"';
 					}
 				}
 
@@ -336,6 +335,7 @@ class WSUWP_Person_Display {
 			'header' => ( isset( $options['header'] ) ) ? true : false,
 			'link' => $link,
 			'directory_view' => ( isset( $options['directory_view'] ) ) ? $directory_display : false,
+			'directory_view_options' => plugin_dir_path( dirname( __FILE__ ) ) . 'templates/admin-person-options.php',
 		);
 
 		return $data;
