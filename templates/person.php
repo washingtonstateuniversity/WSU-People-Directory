@@ -64,7 +64,7 @@
 
 	<?php
 	if ( is_admin() && false !== $display['directory_view'] ) {
-		include plugin_dir_path( dirname( __FILE__ ) ) . 'templates/admin-person-options.php';
+		include $display['directory_view_options'];
 	}
 	?>
 
