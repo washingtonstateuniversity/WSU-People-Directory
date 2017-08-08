@@ -14,7 +14,7 @@ class WSUWP_People_Directory {
 	 *
 	 * @var string
 	 */
-	public static $version = '0.3.2';
+	public static $version = '0.3.3';
 
 	/**
 	 * Maintain and return the one instance. Initiate hooks when called the first time.
@@ -47,13 +47,13 @@ class WSUWP_People_Directory {
 
 		add_action( 'init', array( $this, 'add_global_cache_groups' ), 9 );
 
-		if ( true === WSUWP_People_Directory::is_main_site() ) {
+		if ( true === self::is_main_site() ) {
 			require_once( dirname( __FILE__ ) . '/class-wsuwp-people-rest-api.php' );
 
 			add_action( 'init', 'WSUWP_People_REST_API' );
 		}
 
-		if ( false === WSUWP_People_Directory::is_main_site() ) {
+		if ( false === self::is_main_site() ) {
 			require_once( dirname( __FILE__ ) . '/class-wsuwp-people-directory-page-template.php' );
 			require_once( dirname( __FILE__ ) . '/class-wsuwp-person-display.php' );
 			require_once( dirname( __FILE__ ) . '/class-wsuwp-person-card-shortcode.php' );
