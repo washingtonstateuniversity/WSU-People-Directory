@@ -323,6 +323,7 @@ class WSUWP_Person_Display {
 			'card_classes' => $card_classes,
 			'card_attributes' => $card_attributes,
 			'name' => $person->title->rendered,
+			'degrees' => $person->degree,
 			'title' => $title,
 			'email' => ( ! empty( $person->email_alt ) ) ? $person->email_alt : $person->email,
 			'phone' => ( ! empty( $person->phone_alt ) ) ? $person->phone_alt : $ad_phone,
