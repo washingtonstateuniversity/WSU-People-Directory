@@ -750,7 +750,7 @@ class WSUWP_People_Post_Type {
 			}
 
 			?>
-			<div id="<?php echo esc_attr( $key );?>" class="wsu-person-bio">
+			<div id="<?php echo esc_attr( $key ); ?>" class="wsu-person-bio">
 
 				<h2><?php echo esc_html( $args['description'] ); ?></h2>
 
@@ -786,7 +786,7 @@ class WSUWP_People_Post_Type {
 					}
 
 					?>
-					<div id="<?php echo esc_attr( $key );?>" class="wsu-person-bio">
+					<div id="<?php echo esc_attr( $key ); ?>" class="wsu-person-bio">
 
 						<h2><?php echo esc_html( $args['description'] ); ?></h2>
 

@@ -161,7 +161,7 @@ class WSUWP_Person_Display {
 			'about' => get_post_meta( $local_record_id, '_use_bio', true ),
 		);
 
-		$display = WSUWP_Person_Display::get_data( $person, $display_options );
+		$display = self::get_data( $person, $display_options );
 
 		ob_start();
 
