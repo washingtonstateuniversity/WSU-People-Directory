@@ -1,5 +1,3 @@
-var Promise = require( "es6-promise" ).polyfill();
-
 module.exports = function( grunt ) {
     grunt.initConfig( {
         pkg: grunt.file.readJSON( "package.json" ),
