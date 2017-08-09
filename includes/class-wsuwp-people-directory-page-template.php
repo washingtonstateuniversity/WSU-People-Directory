@@ -447,7 +447,9 @@ class WSUWP_People_Directory_Page_Template {
 		}
 
 		// Set a flag to flush rewrite rules.
-		set_transient( 'wsuwp_people_directory_flush_rewrites', true );
+		if ( false === apply_filters( 'wsuwp_people_default_rewrite_slug', false ) ) {
+			set_transient( 'wsuwp_people_directory_flush_rewrites', true );
+		}
 
 		// Update associated people data.
 		if ( ! isset( $_POST['_wsu_people_directory_profile_ids'] ) ) {

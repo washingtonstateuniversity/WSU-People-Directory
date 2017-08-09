@@ -29,8 +29,11 @@ class WSUWP_Person_Display {
 	 * @since 0.3.0
 	 */
 	public function setup_hooks() {
-		add_action( 'init', array( $this, 'rewrite_rules' ), 11 );
-		add_filter( 'post_type_link', array( $this, 'person_permalink' ), 10, 2 );
+		if ( false === apply_filters( 'wsuwp_people_default_rewrite_slug', false ) ) {
+			add_action( 'init', array( $this, 'rewrite_rules' ), 11 );
+			add_filter( 'post_type_link', array( $this, 'person_permalink' ), 10, 2 );
+		}
+
 		add_filter( 'template_include', array( $this, 'template_include' ) );
 	}
 
@@ -49,7 +52,7 @@ class WSUWP_Person_Display {
 		if ( $pages ) {
 			foreach ( $pages as $page ) {
 				add_rewrite_rule(
-					'^' . $page->post_name . '/([^/]*)/?',
+					'^' . get_page_uri( $page->ID ) . '/([^/]*)/?',
 					'index.php?' . WSUWP_People_Post_Type::$post_type_slug . '=$matches[1]',
 					'top'
 				);
@@ -212,7 +215,9 @@ class WSUWP_Person_Display {
 				$single_display_photo = get_post_meta( $local_record_id, '_use_photo', true );
 				$single_display_bio = get_post_meta( $local_record_id, '_use_bio', true );
 
-				if ( 'if_bio' === $options['link']['when'] && '' !== $about || 'yes' === $options['link']['when'] ) {
+				if ( false !== apply_filters( 'wsuwp_people_default_rewrite_slug', false ) ) {
+					$options['link_url'] = get_the_permalink( $local_record[0]->ID );
+				} elseif ( 'if_bio' === $options['link']['when'] && '' !== $about || 'yes' === $options['link']['when'] ) {
 					$options['link_url'] = trailingslashit( $options['link']['base_url'] . $local_record[0]->post_name );
 				}
 
