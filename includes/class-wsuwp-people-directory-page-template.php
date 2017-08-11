@@ -677,85 +677,44 @@ class WSUWP_People_Directory_Page_Template {
 	 */
 	public function directory_data( $post_id ) {
 		$ids = get_post_meta( $post_id, '_wsu_people_directory_profile_ids', true );
-		$people_array = array();
-
 		$filters = get_post_meta( $post_id, '_wsu_people_directory_filters', true );
-		$locations = array();
-		$units = array();
-
-		// Loop through the local records in their display order and add an `include`
-		// parameter to the request URL for each one, then leverage `orderby=include`
-		// to retrieve the primary records in the desired order. Silly, but effective.
-		if ( $ids ) {
-			$id_array = explode( ' ', $ids );
-
-			$people_query_args = array(
-				'post_type' => WSUWP_People_Post_Type::$post_type_slug,
-				'posts_per_page' => count( $id_array ),
-				'meta_key' => "_order_on_page_{$post_id}",
-				'orderby' => 'meta_value_num',
-				'order' => 'asc',
-				'meta_query' => array(
-					array(
-						'key' => '_on_page',
-						'value' => $post_id,
-					),
-				),
-			);
-
-			$people = new WP_Query( $people_query_args );
-
-			if ( $people->have_posts() ) {
-				$request_url = add_query_arg( array(
-					'per_page' => count( $id_array ),
-					'orderby' => 'include',
-				), WSUWP_People_Directory::REST_URL() );
-
-				while ( $people->have_posts() ) {
-					$people->the_post();
-					$profile_id = get_post_meta( get_the_ID(), '_wsuwp_profile_post_id', true );
-					$request_url = add_query_arg( 'include[]', $profile_id, $request_url );
-
-					if ( is_array( $filters ) ) {
-						$get_terms_args = array(
-							'fields' => 'names',
-						);
-
-						if ( in_array( 'location', $filters, true ) ) {
-							$profile_locations = wp_get_post_terms( get_the_ID(), 'wsuwp_university_location', $get_terms_args );
-							$locations = array_merge( $locations, $profile_locations );
-						}
-
-						if ( in_array( 'unit', $filters, true ) ) {
-							$profile_units = wp_get_post_terms( get_the_ID(), 'wsuwp_university_org', $get_terms_args );
-							$units = array_merge( $units, $profile_units );
-						}
-					}
-				}
-				wp_reset_postdata();
-
-				$response = wp_remote_get( $request_url );
-
-				if ( ! is_wp_error( $response ) ) {
-					$data = wp_remote_retrieve_body( $response );
-
-					if ( ! empty( $data ) ) {
-						$people = json_decode( $data );
-
-						if ( ! empty( $people ) ) {
-							$people_array = $people;
-						}
-					}
-				}
-			}
-		}
-
 		$layout = get_post_meta( $post_id, '_wsu_people_directory_layout', true );
 		$show_photos = get_post_meta( $post_id, '_wsu_people_directory_show_photos', true );
 		$open_profiles_as = get_post_meta( $post_id, '_wsu_people_directory_profile', true );
 		$wrapper_classes = 'wsu-people-wrapper';
 		$wrapper_classes .= ( $layout ) ? ' ' . esc_attr( $layout ) : ' table';
 		$theme_template = WSUWP_Person_Display::theme_has_template();
+		$elements = array(
+			'people' => array(),
+			'locations' => array(),
+			'units' => array(),
+		);
+
+		// Loop through the local records in their display order and add an `include`
+		// parameter to the request URL for each one, then leverage `orderby=include`
+		// to retrieve the primary records in the desired order. Silly, but effective.
+		if ( $ids ) {
+			$id_array = explode( ' ', $ids );
+			$count = count( $id_array );
+
+			if ( 100 >= $count ) {
+				$elements = $this->get_people( $post_id, $id_array, $count, $filters, 0 );
+			} else {
+				$groups = array_chunk( $id_array, 100 );
+				$offset = 0;
+
+				foreach ( $groups as $group ) {
+					$count = count( $group );
+					$chunk = $this->get_people( $post_id, $group, $count, $filters, $offset );
+
+					$elements['people'] = array_merge( $elements['people'], $chunk['people'] );
+					$elements['locations'] = array_merge( $elements['locations'], $chunk['locations'] );
+					$elements['units'] = array_merge( $elements['units'], $chunk['units'] );
+
+					$offset = $offset + $count;
+				}
+			}
+		}
 
 		if ( 'yes' === $show_photos ) {
 			$wrapper_classes .= ' photos';
@@ -769,12 +728,12 @@ class WSUWP_People_Directory_Page_Template {
 			'wrapper_classes' => $wrapper_classes,
 			'ids' => $ids,
 			'layout' => $layout,
-			'people' => $people_array,
+			'people' => $elements['people'],
 			'filters' => array(
 				'options' => $filters,
 				'template' => plugin_dir_path( dirname( __FILE__ ) ) . 'templates/filters.php',
-				'location' => array_unique( $locations ),
-				'unit' => array_unique( $units ),
+				'location' => array_unique( $elements['locations'] ),
+				'unit' => array_unique( $elements['units'] ),
 			),
 			'person_card_template' => ( $theme_template ) ? $theme_template : plugin_dir_path( dirname( __FILE__ ) ) . 'templates/person.php',
 			'profile_display_options' => array(
@@ -793,6 +752,92 @@ class WSUWP_People_Directory_Page_Template {
 		);
 
 		return $data;
+	}
+
+	/**
+	 * Return a group of people
+	 *
+	 * @since 0.3.4
+	 *
+	 * @param int   $post_id
+	 * @param array $id_array
+	 * @param int   $per_page
+	 * @param mixed $filters
+	 *
+	 * @return array
+	 */
+	public function get_people( $post_id, $id_array, $per_page, $filters, $offset ) {
+		$elements = array(
+			'people' => array(),
+			'locations' => array(),
+			'units' => array(),
+		);
+
+		$people_query_args = array(
+			'post_type' => WSUWP_People_Post_Type::$post_type_slug,
+			'posts_per_page' => count( $id_array ),
+			'meta_key' => "_order_on_page_{$post_id}",
+			'orderby' => 'meta_value_num',
+			'order' => 'asc',
+			'meta_query' => array(
+				array(
+					'key' => '_on_page',
+					'value' => $post_id,
+				),
+			),
+		);
+
+		if ( 0 !== $offset ) {
+			$people_query_args['offset'] = $offset;
+		}
+
+		$people = new WP_Query( $people_query_args );
+
+		if ( $people->have_posts() ) {
+			$request_url = add_query_arg( array(
+				'per_page' => $per_page,
+				'orderby' => 'include',
+			), WSUWP_People_Directory::REST_URL() );
+
+			while ( $people->have_posts() ) {
+				$people->the_post();
+				$profile_id = get_post_meta( get_the_ID(), '_wsuwp_profile_post_id', true );
+				$request_url = add_query_arg( 'include[]', $profile_id, $request_url );
+
+				if ( is_array( $filters ) ) {
+					$get_terms_args = array(
+						'fields' => 'names',
+					);
+
+					if ( in_array( 'location', $filters, true ) ) {
+						$profile_locations = wp_get_post_terms( get_the_ID(), 'wsuwp_university_location', $get_terms_args );
+						$elements['locations'] = array_unique( array_merge( $elements['locations'], $profile_locations ) );
+					}
+
+					if ( in_array( 'unit', $filters, true ) ) {
+						$profile_units = wp_get_post_terms( get_the_ID(), 'wsuwp_university_org', $get_terms_args );
+						$elements['units'] = array_unique( array_merge( $elements['units'], $profile_units ) );
+					}
+				}
+			}
+			wp_reset_postdata();
+
+			$response = wp_remote_get( $request_url );
+
+			if ( ! is_wp_error( $response ) ) {
+				$data = wp_remote_retrieve_body( $response );
+
+				if ( ! empty( $data ) ) {
+					$people = json_decode( $data );
+
+					if ( ! empty( $people ) ) {
+						$elements['people'] = $people;
+					}
+				}
+			}
+		}
+
+		return $elements;
 	}
 
 	/**
