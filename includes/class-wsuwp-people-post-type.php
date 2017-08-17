@@ -1100,7 +1100,8 @@ class WSUWP_People_Post_Type {
 		$sanitized_photos = array();
 
 		foreach ( $photos as $index => $photo_id ) {
-			if ( is_numeric( $photo_id ) ) {
+			// The attachment must have a numeric ID and still exist in order to be added.
+			if ( is_numeric( $photo_id ) && is_string( get_post_status( $photo_id ) ) ) {
 				$sanitized_photos[] = absint( $photo_id );
 			}
 		}
