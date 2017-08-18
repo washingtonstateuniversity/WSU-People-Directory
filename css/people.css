@@ -111,7 +111,13 @@ input[type="search"]::-webkit-search-decoration {
 }
 
 .wsu-people-filter-terms input[type="checkbox"] {
-	display: none;
+	clip: rect(1px, 1px, 1px, 1px);
+	-webkit-clip-path: polygon(0 0, 0 0, 0 0, 0 0);
+	        clip-path: polygon(0 0, 0 0, 0 0, 0 0);
+	height: 1px;
+	overflow: hidden;
+	position: absolute;
+	width: 1px;
 }
 
 .wsu-people-filter-terms span {
@@ -123,6 +129,7 @@ input[type="search"]::-webkit-search-decoration {
 	padding: .3rem 1rem;
 }
 
+.wsu-people-filter-terms :focus + span,
 .wsu-people-filter-terms span:hover {
 	background: #464e54;
 }
