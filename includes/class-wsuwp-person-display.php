@@ -298,10 +298,10 @@ class WSUWP_Person_Display {
 		if ( isset( $options['photo'] ) && 'no' === $options['photo'] ) {
 			$photo = false;
 		} else {
-			if ( isset( $options['use_photo'] ) && '' !== $options['use_photo'] && $person->photos[ $options['use_photo'] ] ) {
+			$collection = (array) $person->photos;
+			$photo = ( $collection && isset( $collection[0] ) ) ? $collection[0]->thumbnail : false;
+			if ( isset( $options['use_photo'] ) && '' !== $options['use_photo'] && isset( $collection[ $options['use_photo'] ] ) ) {
 				$photo = $person->photos[ $options['use_photo'] ]->thumbnail;
-			} else {
-				$photo = ( $person->photos && $person->photos[0] ) ? $person->photos[0]->thumbnail : false;
 			}
 		}
 
