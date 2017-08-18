@@ -3,7 +3,10 @@ input[type="search"]::-webkit-search-decoration {
 	display: none;
 }
 
-.wsu-people-filters .search input {
+.wsu-people-filters .search input,
+.wsu-people-filter-label,
+.wsu-people-filter-label:hover,
+.wsu-people-filter-label:focus {
 	background: #fff;
 	border-radius: 1px;
 	border: 1px solid #585858;
@@ -12,17 +15,20 @@ input[type="search"]::-webkit-search-decoration {
 	font-family: "Open Sans", "Lucida Sans", "Lucida Grande", "Lucida Sans Unicode", sans-serif;
 	font-size: 1em;
 	height: 2rem;
-	line-height: 20px;
+	line-height: 2rem;
 	margin: 0;
-	padding: .5rem 1rem;
+	padding: 0 1rem;
 	width: 100%;
 	-webkit-appearance: none;
 	   -moz-appearance: none;
 	        appearance: none;
 }
 
-.wsu-people-filters .search input:focus {
+.wsu-people-filters .search input:focus,
+.wsu-people-filter-label:focus {
+	border-color: #820c23;
 	color: #820c23;
+	outline: none;
 }
 
 .wsu-people-filters .search input::-webkit-input-placeholder {
@@ -56,30 +62,18 @@ input[type="search"]::-webkit-search-decoration {
 }
 
 /* Filters */
-.wsu-people-filter-label,
-.wsu-people-filter-label:hover,
-.wsu-people-filter-label:focus {
-	background: #fff;
-	border: 1px solid #585858;
-	border-radius: 0;
-	box-sizing: border-box;
-	color: #585858;
-	cursor: pointer;
-	font-size: 14px;
+.wsu-people-filter-label {
 	font-style: italic;
-	height: 2rem;
-	line-height: 2rem;
-	outline: none;
 	padding: 0 2rem 0 1rem;
 	position: relative;
 	text-align: left;
-	width: 100%;
 }
 
 .wsu-people-filter-label:after {
 	content: "\002b";
 	display: block;
 	font-style: normal;
+	height: 100%;
 	position: absolute;
 	right: 1rem;
 	text-align: right;
