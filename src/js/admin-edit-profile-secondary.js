@@ -179,7 +179,9 @@ wsuwp.people = wsuwp.people || {};
 		// Populate photo collection.
 		if ( data._embedded && data._embedded[ "wp:photos" ] !== 0 ) {
 			$.each( data._embedded[ "wp:photos" ], function( i, photo ) {
-				wsuwp.people.populate_photos( photo, i );
+				if ( "id" in photo ) {
+					wsuwp.people.populate_photos( photo, i );
+				}
 			} );
 		}
 
@@ -232,8 +234,7 @@ wsuwp.people = wsuwp.people || {};
 		var $ = jQuery,
 			photo_template = _.template( $( ".wsu-person-photo-template" ).html() ),
 			photo = data.media_details,
-			has_thumbnail = photo.sizes.thumbnail,
-			url = has_thumbnail ? photo.sizes.thumbnail.source_url : data.source_url,
+			url = photo.sizes ? photo.sizes.thumbnail.source_url : data.source_url,
 			$display_photo = $( "#local-display-photo" ),
 			checked = ( index === $display_photo.data( "selected" ) ) ? " checked='checked'" : "";
 
