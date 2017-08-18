@@ -6,9 +6,9 @@ input[type="search"]::-webkit-search-decoration {
 .wsu-people-filters .search input {
 	background: #fff;
 	border-radius: 1px;
-	border: 1px solid #5e6a71;
+	border: 1px solid #585858;
 	box-sizing: border-box;
-	color: #8d959a;
+	color: #585858;
 	font-family: "Open Sans", "Lucida Sans", "Lucida Grande", "Lucida Sans Unicode", sans-serif;
 	font-size: 1em;
 	height: 2rem;
@@ -17,23 +17,23 @@ input[type="search"]::-webkit-search-decoration {
 	padding: .5rem 1rem;
 	width: 100%;
 	-webkit-appearance: none;
-	-moz-appearance: none;
-	appearance: none;
+	   -moz-appearance: none;
+	        appearance: none;
 }
 
 .wsu-people-filters .search input:focus {
-	color: #981e32;
+	color: #820c23;
 }
 
 .wsu-people-filters .search input::-webkit-input-placeholder {
-	color: #8d959a;
+	color: #585858;
 	font-family: "Open Sans", "Lucida Sans", "Lucida Grande", "Lucida Sans Unicode", sans-serif;
 	font-size: 14px;
 	font-style: italic;
 }
 
 .wsu-people-filters .search input::-moz-placeholder {
-	color: #8d959a;
+	color: #585858;
 	font-family: "Open Sans", "Lucida Sans", "Lucida Grande", "Lucida Sans Unicode", sans-serif;
 	font-size: 14px;
 	font-style: italic;
@@ -41,14 +41,14 @@ input[type="search"]::-webkit-search-decoration {
 }
 
 .wsu-people-filters .search input:-ms-input-placeholder {
-	color: #8d959a;
+	color: #585858;
 	font-family: "Open Sans", "Lucida Sans", "Lucida Grande", "Lucida Sans Unicode", sans-serif;
 	font-size: 14px;
 	font-style: italic;
 }
 
 .wsu-people-filters .search input:-moz-placeholder {
-	color: #8d959a;
+	color: #585858;
 	font-family: "Open Sans", "Lucida Sans", "Lucida Grande", "Lucida Sans Unicode", sans-serif;
 	font-size: 14px;
 	font-style: italic;
@@ -60,10 +60,10 @@ input[type="search"]::-webkit-search-decoration {
 .wsu-people-filter-label:hover,
 .wsu-people-filter-label:focus {
 	background: #fff;
-	border: 1px solid #5e6a71;
+	border: 1px solid #585858;
 	border-radius: 0;
 	box-sizing: border-box;
-	color: #8d959a;
+	color: #585858;
 	cursor: pointer;
 	font-size: 14px;
 	font-style: italic;
@@ -96,7 +96,7 @@ input[type="search"]::-webkit-search-decoration {
 }
 
 .wsu-people-filter-terms {
-	background: #5e6a71;
+	background: #585858;
 	display: none;
 	list-style: none;
 	padding: 0;
@@ -131,16 +131,16 @@ input[type="search"]::-webkit-search-decoration {
 
 .wsu-people-filter-terms :focus + span,
 .wsu-people-filter-terms span:hover {
-	background: #464e54;
+	background: #404040;
 }
 
 .wsu-people-filter-terms :checked + span {
 	font-weight: 700;
-	background: #981e32;
+	background: #820c23;
 }
 
 .wsu-people-filter-terms :checked + span:hover {
-	background: #c60c30;
+	background: #a60f2d;
 }
 
 /* Table layout */
@@ -364,7 +364,7 @@ input[type="search"]::-webkit-search-decoration {
 }
 
 button.wsu-people-lightbox-close {
-	background: #981e32;
+	background: #820c23;
 	border: none;
 	border-radius: 0;
 	color: #fff;
