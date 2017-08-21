@@ -89,6 +89,8 @@ class WSUWP_People_Directory_Page_Template {
 		add_action( 'admin_enqueue_scripts', array( $this, 'admin_enqueue_scripts' ) );
 		add_action( 'add_meta_boxes_page', array( $this, 'add_meta_boxes' ) );
 		add_action( 'save_post_page', array( $this, 'save_post' ), 10, 2 );
+		add_action( 'wsuwp_people_add_or_update_profiles', array( $this, 'add_or_update_profiles' ), 10, 2 );
+		add_action( 'wsuwp_people_remove_profile_from_page', array( $this, 'remove_profile_from_page' ), 10, 2 );
 		add_action( 'wp_ajax_person_details', array( $this, 'person_details' ) );
 
 		add_filter( 'theme_page_templates', array( $this, 'add_directory_template' ) );
@@ -457,12 +459,29 @@ class WSUWP_People_Directory_Page_Template {
 		}
 
 		// Stop here if the order of people hasn't changed.
-		//if ( $previous_ids === $_POST['_wsu_people_directory_profile_ids'] ) {
-		//	return;
-		//}
+		/*if ( $previous_ids === $_POST['_wsu_people_directory_profile_ids'] ) {
+			return;
+		}*/
 
-		// Save order data of the associated people.
-		$ids = explode( ' ', $_POST['_wsu_people_directory_profile_ids'] );
+		$scheduled_event_args = array(
+			$_POST['_wsu_people_directory_profile_ids'],
+			$post_id,
+		);
+
+		wp_schedule_single_event( time(), 'wsuwp_people_add_or_update_profiles', $scheduled_event_args );
+		wp_schedule_single_event( time(), 'wsuwp_people_remove_profile_from_page', $scheduled_event_args );
+	}
+
+	/**
+	 * Add or update profiles associated with a directory page.
+	 *
+	 * @since 0.3.5
+	 *
+	 * @param array $ids     The IDs for the primary profile records.
+	 * @param int   $post_id The directory page ID.
+	 */
+	public function add_or_update_profiles( $profile_ids, $post_id ) {
+		$ids = explode( ' ', $profile_ids );
 
 		foreach ( $ids as $index => $id ) {
 			$person_query_args = array(
@@ -479,7 +498,6 @@ class WSUWP_People_Directory_Page_Template {
 				foreach ( $people as $person ) {
 					$on_page = get_post_meta( $person, '_on_page', true );
 					$order_on_page = get_post_meta( $person, "_order_on_page_{$post_id}", true );
-
 					if ( $index !== $order_on_page && $post_id !== $on_page ) {
 						update_post_meta( $person, '_on_page', $post_id );
 						update_post_meta( $person, "_order_on_page_{$post_id}", $index );
@@ -501,8 +519,19 @@ class WSUWP_People_Directory_Page_Template {
 				}
 			}
 		}
+	}
 
-		// Delete order data for people removed from this page.
+	/**
+	 * Remove the meta associating a profile with a page.
+	 *
+	 * @since 0.3.5
+	 *
+	 * @param array $ids     The IDs for the primary profile records.
+	 * @param int   $post_id The directory page ID.
+	 */
+	public function remove_profile_from_page( $profile_ids, $post_id ) {
+		$ids = explode( ' ', $profile_ids );
+
 		$removed_people_query_args = array(
 			'post_type' => WSUWP_People_Post_Type::$post_type_slug,
 			'posts_per_page' => -1,
