@@ -622,10 +622,15 @@ class WSUWP_People_Directory_Page_Template {
 				"_order_on_page_{$page_id}" => absint( $order ),
 			),
 			'tags_input' => $tags,
-			'tax_input' => $taxonomy_data,
 		);
 
-		wp_insert_post( $person_data );
+		$new_post_id = wp_insert_post( $person_data );
+
+		if ( ! is_wp_error( $new_post_id ) ) {
+			foreach ( $taxonomy_data as $tax => $terms ) {
+				wp_set_object_terms( $new_post_id, $terms, $tax );
+			}
+		}
 	}
 
 	/**
