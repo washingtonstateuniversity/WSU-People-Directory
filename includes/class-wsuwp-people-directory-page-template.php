@@ -448,20 +448,20 @@ class WSUWP_People_Directory_Page_Template {
 			}
 		}
 
-		// Set a flag to flush rewrite rules.
-		if ( false === apply_filters( 'wsuwp_people_default_rewrite_slug', false ) ) {
-			set_transient( 'wsuwp_people_directory_flush_rewrites', true );
-		}
-
 		// Update associated people data.
 		if ( ! isset( $_POST['_wsu_people_directory_profile_ids'] ) ) {
 			return;
 		}
 
 		// Stop here if the order of people hasn't changed.
-		/*if ( $previous_ids === $_POST['_wsu_people_directory_profile_ids'] ) {
+		if ( $previous_ids === $_POST['_wsu_people_directory_profile_ids'] ) {
 			return;
-		}*/
+		}
+
+		// Set a flag to flush rewrite rules.
+		if ( false === apply_filters( 'wsuwp_people_default_rewrite_slug', false ) ) {
+			set_transient( 'wsuwp_people_directory_flush_rewrites', true );
+		}
 
 		$scheduled_event_args = array(
 			$_POST['_wsu_people_directory_profile_ids'],
