@@ -372,7 +372,7 @@ class WSUWP_People_REST_API {
 	}
 
 	/**
-	 * Return the value of a post meta field sanitized against a whitelist with the provided method.
+	 * Return an array of term names and slugs keyed by taxonomy name.
 	 *
 	 * @since 0.3.0
 	 *
