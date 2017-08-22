@@ -569,7 +569,12 @@ class WSUWP_People_Post_Type {
 		// Define the URL of the primary photo.
 		$photo_url = false;
 		if ( $photos && is_array( $photos ) ) {
-			$photo_url = wp_get_attachment_image_src( $photos[0] )[0];
+			foreach ( $photos as $i => $photo_id ) {
+				if ( is_string( get_post_status( $photo_id ) ) ) {
+					$photo_url = wp_get_attachment_image_src( $photos[ $i ] )[0];
+					break;
+				}
+			}
 		} elseif ( has_post_thumbnail() ) {
 			$photo_url = get_the_post_thumbnail_url();
 		}
@@ -627,6 +632,7 @@ class WSUWP_People_Post_Type {
 
 				if ( $photos && is_array( $photos ) ) {
 					foreach ( $photos as $photo_id ) {
+						if ( is_string( get_post_status( $photo_id ) ) ) {
 						?>
 						<div class="wsu-person-photo-wrapper">
 							<img src="<?php echo esc_url( wp_get_attachment_image_src( $photo_id )[0] ); ?>"
@@ -637,6 +643,7 @@ class WSUWP_People_Post_Type {
 							<input type="hidden" name="_wsuwp_profile_photos[]" value="<?php echo esc_attr( $photo_id ); ?>" />
 						</div>
 						<?php
+						}
 					}
 				}
 				?>
@@ -1100,7 +1107,8 @@ class WSUWP_People_Post_Type {
 		$sanitized_photos = array();
 
 		foreach ( $photos as $index => $photo_id ) {
-			if ( is_numeric( $photo_id ) ) {
+			// The attachment must have a numeric ID and still exist in order to be added.
+			if ( is_numeric( $photo_id ) && is_string( get_post_status( $photo_id ) ) ) {
 				$sanitized_photos[] = absint( $photo_id );
 			}
 		}
