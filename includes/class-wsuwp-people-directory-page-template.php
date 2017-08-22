@@ -562,12 +562,7 @@ class WSUWP_People_Directory_Page_Template {
 	 *                     False if person is not available.
 	 */
 	public static function get_rest_data( $id ) {
-		$request_url = add_query_arg(
-			array(
-				'_embed' => true,
-			),
-			trailingslashit( WSUWP_People_Directory::REST_URL() ) . $id
-		);
+		$request_url = trailingslashit( WSUWP_People_Directory::REST_URL() ) . $id;
 
 		$response = wp_remote_get( $request_url );
 
@@ -594,18 +589,13 @@ class WSUWP_People_Directory_Page_Template {
 		$tags = array();
 		$taxonomy_data = array();
 
-		foreach ( $person->_embedded->{'wp:term'} as $taxonomy ) {
-			if ( ! $taxonomy ) {
-				continue;
-			}
-
-			foreach ( $taxonomy as $term ) {
-				if ( 'post_tag' === $term->taxonomy ) {
+		foreach ( $person->taxonomy_terms as $taxonomy => $terms ) {
+			foreach ( $terms as $term ) {
+				if ( 'post_tag' === $taxonomy ) {
 					$tags[] = $term->slug;
 				} else {
-					// Slugs and names don't seem to work, so find the equivalent local term ID.
-					$local_term = get_term_by( 'slug', $term->slug, $term->taxonomy );
-					$taxonomy_data[ $term->taxonomy ][] = $local_term->term_id;
+					$local_term = get_term_by( 'slug', $term->slug, $taxonomy );
+					$taxonomy_data[ $taxonomy ][] = $local_term->term_id;
 				}
 			}
 		}
