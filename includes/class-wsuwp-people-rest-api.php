@@ -380,7 +380,7 @@ class WSUWP_People_REST_API {
 	 * @param string          $field_name Name of the field being retrieved.
 	 * @param WP_Rest_Request $request    The full current REST request.
 	 *
-	 * @return mixed Meta data associated with the post and field name.
+	 * @return mixed Taxonomy data associated with the post.
 	 */
 	public function get_api_taxonomy_data( $object, $field_name, $request ) {
 		if ( 'taxonomy_terms' !== $field_name ) {
