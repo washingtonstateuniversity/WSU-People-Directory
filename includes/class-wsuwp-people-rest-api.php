@@ -177,6 +177,10 @@ class WSUWP_People_REST_API {
 
 			register_rest_field( WSUWP_People_Post_Type::$post_type_slug, $field_name, $args );
 		}
+
+		register_rest_field( WSUWP_People_Post_Type::$post_type_slug, 'taxonomy_terms', array(
+			'get_callback' => array( $this, 'get_api_taxonomy_data' ),
+		) );
 	}
 
 	/**
@@ -365,6 +369,40 @@ class WSUWP_People_REST_API {
 		}
 
 		return $response;
+	}
+
+	/**
+	 * Return the value of a post meta field sanitized against a whitelist with the provided method.
+	 *
+	 * @since 0.3.0
+	 *
+	 * @param array           $object     The current post being processed.
+	 * @param string          $field_name Name of the field being retrieved.
+	 * @param WP_Rest_Request $request    The full current REST request.
+	 *
+	 * @return mixed Meta data associated with the post and field name.
+	 */
+	public function get_api_taxonomy_data( $object, $field_name, $request ) {
+		if ( 'taxonomy_terms' !== $field_name ) {
+			return null;
+		}
+
+		$taxonomies = get_object_taxonomies( WSUWP_People_Post_Type::$post_type_slug );
+
+		foreach ( $taxonomies as $taxonomy ) {
+			$terms = get_the_terms( $object['id'], $taxonomy );
+
+			if ( is_array( $terms ) ) {
+				foreach ( $terms as $term ) {
+					$data[ $taxonomy ][] = array(
+						'name' => $term->name,
+						'slug' => $term->slug,
+					);
+				}
+			}
+		}
+
+		return $data;
 	}
 
 	/**
