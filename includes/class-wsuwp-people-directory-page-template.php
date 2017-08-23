@@ -700,13 +700,6 @@ class WSUWP_People_Directory_Page_Template {
 	 * @return array
 	 */
 	public function directory_data( $post_id ) {
-		$cache_key = md5( get_the_modified_date( 'Y-m-d H:i:s' ) );
-		$cached_data = wp_cache_get( $cache_key, 'directory_page_data' );
-
-		if ( $cached_data ) {
-			return $cached_data;
-		}
-
 		$ids = get_post_meta( $post_id, '_wsu_people_directory_profile_ids', true );
 		$filters = get_post_meta( $post_id, '_wsu_people_directory_filters', true );
 		$layout = get_post_meta( $post_id, '_wsu_people_directory_layout', true );
@@ -725,25 +718,34 @@ class WSUWP_People_Directory_Page_Template {
 		// parameter to the request URL for each one, then leverage `orderby=include`
 		// to retrieve the primary records in the desired order. Silly, but effective.
 		if ( $ids ) {
-			$id_array = explode( ' ', $ids );
-			$count = count( $id_array );
+			$cache_key = md5( get_the_modified_date( 'Y-m-d H:i:s' ) );
+			$cached_elements = wp_cache_get( $cache_key, 'directory_page_elements' );
 
-			if ( 100 >= $count ) {
-				$elements = $this->get_people( $post_id, $id_array, $count, $filters, 0 );
+			if ( $cached_elements ) {
+				$elements = $cached_elements;
 			} else {
-				$groups = array_chunk( $id_array, 100 );
-				$offset = 0;
+				$id_array = explode( ' ', $ids );
+				$count = count( $id_array );
 
-				foreach ( $groups as $group ) {
-					$count = count( $group );
-					$chunk = $this->get_people( $post_id, $group, $count, $filters, $offset );
+				if ( 100 >= $count ) {
+					$elements = $this->get_people( $post_id, $id_array, $count, $filters, 0 );
+				} else {
+					$groups = array_chunk( $id_array, 100 );
+					$offset = 0;
 
-					$elements['people'] = array_merge( $elements['people'], $chunk['people'] );
-					$elements['locations'] = array_merge( $elements['locations'], $chunk['locations'] );
-					$elements['units'] = array_merge( $elements['units'], $chunk['units'] );
+					foreach ( $groups as $group ) {
+						$count = count( $group );
+						$chunk = $this->get_people( $post_id, $group, $count, $filters, $offset );
 
-					$offset = $offset + $count;
+						$elements['people'] = array_merge( $elements['people'], $chunk['people'] );
+						$elements['locations'] = array_merge( $elements['locations'], $chunk['locations'] );
+						$elements['units'] = array_merge( $elements['units'], $chunk['units'] );
+
+						$offset = $offset + $count;
+					}
 				}
+
+				wp_cache_set( $cache_key, $elements, 'directory_page_elements', 3600 );
 			}
 		}
 
@@ -782,13 +784,11 @@ class WSUWP_People_Directory_Page_Template {
 			),
 		);
 
-		wp_cache_set( $cache_key, $data, 'directory_page_data', 3600 );
-
 		return $data;
 	}
 
 	/**
-	 * Return a group of people
+	 * Return a group of people.
 	 *
 	 * @since 0.3.4
 	 *
