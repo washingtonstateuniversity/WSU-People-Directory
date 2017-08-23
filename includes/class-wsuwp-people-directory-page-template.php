@@ -700,6 +700,13 @@ class WSUWP_People_Directory_Page_Template {
 	 * @return array
 	 */
 	public function directory_data( $post_id ) {
+		$cache_key = md5( get_the_modified_date( 'Y-m-d H:i:s' ) );
+		$cached_data = wp_cache_get( $cache_key, 'directory_page_data' );
+
+		if ( $cached_data ) {
+			return $cached_data;
+		}
+
 		$ids = get_post_meta( $post_id, '_wsu_people_directory_profile_ids', true );
 		$filters = get_post_meta( $post_id, '_wsu_people_directory_filters', true );
 		$layout = get_post_meta( $post_id, '_wsu_people_directory_layout', true );
@@ -774,6 +781,8 @@ class WSUWP_People_Directory_Page_Template {
 				'lazy_load_photos' => true,
 			),
 		);
+
+		wp_cache_set( $cache_key, $data, 'directory_page_data', 3600 );
 
 		return $data;
 	}
