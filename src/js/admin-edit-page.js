@@ -398,6 +398,36 @@
 		} );
 	} );
 
+	// Indicated that profiles are still being created.
+	if ( $( ".wsu-people-admin-wrapper" ).hasClass( "loading" ) ) {
+		$people.prepend( "<p class='description importing-profiles'>Importing profiles, please wait.<span class='spinner'></span><p>" );
+
+		check_inserted_profiles();
+	}
+
+	// Checks if all the profiles for a directory page have been inserted,
+	// and loads them once they're all available.
+	function check_inserted_profiles() {
+		$.ajax( {
+			url: window.wsuwp_people_edit_page.ajax_url,
+			data: {
+				action: "check_inserted_profiles",
+				nonce: window.wsuwp_people_edit_page.nonce,
+				page: window.wsuwp_people_edit_page.page_id
+			}
+		} ).done( function( response ) {
+			if ( "false" === response ) {
+				setTimeout( check_inserted_profiles, 6000 );
+			} else {
+				$( ".wsu-people-admin-wrapper" ).removeClass( "loading" );
+				$( ".importing-profiles" ).remove();
+
+				create_person( JSON.parse( response ) );
+				load_photos();
+			}
+		} );
+	}
+
 	// Load photos asynchronously.
 	function load_photos() {
 		$( ".has-photo .photo img" ).each( function() {
@@ -434,6 +464,7 @@
 		response.sort( sort_response );
 		create_person( response );
 		load_photos();
+		update_id_list();
 
 		// Toggle the "Add People" options closed.
 		$( ".wsu-people-directory-options.add" ).removeClass( "open" ).children( "div" ).hide();

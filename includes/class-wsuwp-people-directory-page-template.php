@@ -92,6 +92,7 @@ class WSUWP_People_Directory_Page_Template {
 		add_action( 'wsuwp_people_add_or_update_profiles', array( $this, 'add_or_update_profiles' ), 10, 2 );
 		add_action( 'wsuwp_people_remove_profile_from_page', array( $this, 'remove_profile_from_page' ), 10, 2 );
 		add_action( 'wp_ajax_person_details', array( $this, 'person_details' ) );
+		add_action( 'wp_ajax_check_inserted_profiles', array( $this, 'check_inserted_profiles' ) );
 
 		add_filter( 'theme_page_templates', array( $this, 'add_directory_template' ) );
 		add_filter( 'template_include', array( $this, 'template_include' ) );
@@ -660,6 +661,46 @@ class WSUWP_People_Directory_Page_Template {
 		if ( ! empty( $meta ) ) {
 			update_post_meta( $post_id, "_display_on_page_{$page_id}", $meta );
 		}
+
+		exit();
+	}
+
+	/**
+	 * Provides the profiles for a directory page after they've all been inserted.
+	 *
+	 * @since 0.3.5
+	 */
+	public function check_inserted_profiles() {
+		check_ajax_referer( 'person-details', 'nonce' );
+
+		$post_id = absint( $_GET['page'] );
+		$ids = get_post_meta( $post_id, '_wsu_people_directory_profile_ids', true );
+		$id_array = explode( ' ', $ids );
+		$id_count = count( $id_array );
+		$people = false;
+
+		$people_query_args = array(
+			'post_type' => WSUWP_People_Post_Type::$post_type_slug,
+			'posts_per_page' => $id_count,
+			'meta_key' => "_order_on_page_{$post_id}",
+			'orderby' => 'meta_value_num',
+			'order' => 'asc',
+			'meta_query' => array(
+				array(
+					'key' => '_on_page',
+					'value' => $post_id,
+				),
+			),
+		);
+
+		$people_query = new WP_Query( $people_query_args );
+
+		if ( $id_count === $people_query->post_count ) {
+			$directory_data = $this->directory_data( $post_id );
+			$people = $directory_data['people'];
+		}
+
+		echo wp_json_encode( $people );
 
 		exit();
 	}
