@@ -322,7 +322,7 @@ class WSUWP_People_Directory_Page_Template {
 
 		</div>
 
-		<div class="wsu-people-admin-wrapper">
+		<div class="wsu-people-admin-wrapper<?php if ( $directory_data['loading'] ) { ?> loading<?php } ?>">
 
 			<?php include plugin_dir_path( dirname( __FILE__ ) ) . 'templates/people.php'; ?>
 
@@ -713,6 +713,7 @@ class WSUWP_People_Directory_Page_Template {
 			'locations' => array(),
 			'units' => array(),
 		);
+		$loading = false;
 
 		// Loop through the local records in their display order and add an `include`
 		// parameter to the request URL for each one, then leverage `orderby=include`
@@ -734,18 +735,25 @@ class WSUWP_People_Directory_Page_Template {
 					$offset = 0;
 
 					foreach ( $groups as $group ) {
-						$count = count( $group );
-						$chunk = $this->get_people( $post_id, $group, $count, $filters, $offset );
+						$group_count = count( $group );
+						$chunk = $this->get_people( $post_id, $group, $group_count, $filters, $offset );
 
 						$elements['people'] = array_merge( $elements['people'], $chunk['people'] );
 						$elements['locations'] = array_merge( $elements['locations'], $chunk['locations'] );
 						$elements['units'] = array_merge( $elements['units'], $chunk['units'] );
 
-						$offset = $offset + $count;
+						$offset = $offset + $group_count;
 					}
 				}
 
-				wp_cache_set( $cache_key, $elements, 'directory_page_elements', 3600 );
+				// Give a notification if profiles are still being loaded.
+				// Otherwise, cache the people data for this page.
+				if ( count( $elements['people'] ) !== $count ) {
+					$loading = true;
+					$elements['people'] = array();
+				} else {
+					wp_cache_set( $cache_key, $elements, 'directory_page_elements', 3600 );
+				}
 			}
 		}
 
@@ -782,6 +790,7 @@ class WSUWP_People_Directory_Page_Template {
 				'header' => true,
 				'lazy_load_photos' => true,
 			),
+			'loading' => $loading,
 		);
 
 		return $data;
