@@ -12,28 +12,10 @@
 
 	<div class="card">
 
-		<?php if ( $display['header'] ) { ?>
-		<h2 class="name">
-			<?php if ( $display['link'] ) { ?><a href="<?php echo esc_url( $display['link'] ); ?>"><?php } ?>
-			<?php echo esc_html( $display['name'] ); ?>
-			<?php if ( $display['link'] ) { ?></a><?php } ?>
-		</h2>
-		<?php } ?>
-
 		<?php if ( $display['photo'] ) { ?>
 		<figure class="photo">
-			<?php if ( $display['link'] ) { ?><a href="<?php echo esc_url( $display['link'] ); ?>"><?php } ?>
-
-			<?php if ( $display['directory_view'] ) { ?>
-				<img src="<?php echo esc_url( plugins_url( 'images/placeholder.png', dirname( __FILE__ ) ) ); ?>"
-					 data-photo="<?php echo esc_url( $display['photo'] ); ?>"
-					 alt="<?php echo esc_html( $display['name'] ); ?>" />
-			<?php } else { ?>
-				<img src="<?php echo esc_url( $display['photo'] ); ?>"
-					 alt="<?php echo esc_html( $display['name'] ); ?>" />
-			<?php } ?>
-
-			<?php if ( $display['link'] ) { ?></a><?php } ?>
+			<img src="<?php echo esc_url( $display['photo'] ); ?>"
+				 alt="<?php echo esc_html( $display['name'] ); ?>" />
 		</figure>
 		<?php } ?>
 
@@ -61,11 +43,5 @@
 		<?php echo wp_kses_post( apply_filters( 'the_content', $display['about'] ) ); ?>
 	</div>
 	<?php } ?>
-
-	<?php
-	if ( is_admin() && false !== $display['directory_view'] ) {
-		include $display['directory_view_options'];
-	}
-	?>
 
 </article>
