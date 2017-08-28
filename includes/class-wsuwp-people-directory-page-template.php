@@ -821,9 +821,8 @@ class WSUWP_People_Directory_Page_Template {
 				'location' => array_unique( $elements['locations'] ),
 				'unit' => array_unique( $elements['units'] ),
 			),
-			'person_card_template' => ( $theme_template ) ? $theme_template : plugin_dir_path( dirname( __FILE__ ) ) . 'templates/person.php',
+			'person_card_template' => ( $theme_template ) ? $theme_template : plugin_dir_path( dirname( __FILE__ ) ) . 'templates/person-listing.php',
 			'profile_display_options' => array(
-				'directory_view' => true,
 				'about' => get_post_meta( $post_id, '_wsu_people_directory_about', true ),
 				'link' => array(
 					'when' => get_post_meta( $post_id, '_wsu_people_directory_link', true ),
@@ -832,8 +831,6 @@ class WSUWP_People_Directory_Page_Template {
 				),
 				'photo' => $show_photos,
 				'page_id' => $post_id,
-				'header' => true,
-				'lazy_load_photos' => true,
 			),
 			'loading' => $loading,
 		);

@@ -19,7 +19,7 @@
 
 		<?php
 		foreach ( $directory_data['people'] as $person ) {
-			$display = WSUWP_Person_Display::get_data( $person, $directory_data['profile_display_options'] );
+			$display = WSUWP_Person_Display::get_listing_data( $person, $directory_data['profile_display_options'] );
 			include $directory_data['person_card_template'];
 		}
 		?>

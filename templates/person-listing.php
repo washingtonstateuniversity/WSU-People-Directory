@@ -22,14 +22,20 @@
 		<figure class="photo">
 			<?php if ( $display['link'] ) { ?><a href="<?php echo esc_url( $display['link'] ); ?>"><?php } ?>
 			<img src="<?php echo esc_url( plugins_url( 'images/placeholder.png', dirname( __FILE__ ) ) ); ?>"
-				 data-photo="<?php echo esc_url( $display['photo'] ); ?>"
+				 data-photo="<?php echo esc_url( $display['photo']->thumbnail ); ?>"
 				 alt="<?php echo esc_html( $display['name'] ); ?>" />
 			<?php if ( $display['link'] ) { ?></a><?php } ?>
 		</figure>
 		<?php } ?>
 
 		<div class="contact">
-			<span class="title"><?php echo wp_kses_post( $display['title'] ); ?></span>
+			<?php
+			if ( $display['titles'] ) {
+				foreach ( $display['titles'] as $title ) {
+				?><span class="title"><?php echo esc_html( $title ); ?></span><?php
+				}
+			}
+			?>
 			<span class="email"><a href="mailto:<?php echo esc_attr( $display['email'] ); ?>">
 				<?php echo esc_html( $display['email'] ); ?></a>
 			</span>
@@ -54,7 +60,7 @@
 	<?php } ?>
 
 	<?php
-	if ( is_admin() && false !== $display['directory_view'] ) {
+	if ( is_admin() ) {
 		include $display['directory_view_options'];
 	}
 	?>
