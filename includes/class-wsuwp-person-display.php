@@ -181,168 +181,268 @@ class WSUWP_Person_Display {
 	}
 
 	/**
-	 * Returns a set of data for displaying a person.
+	 * Returns profile data from people.wsu.edu.
+	 *
+	 * @since 0.3.0
+	 *
+	 * @param object $person
+	 *
+	 * @return array
+	 */
+	public static function get_wsu_person( $person ) {
+		$data = array(
+			'post_id' => $person->id,
+			'nid' => $person->nid,
+			'first_name' => $person->first_name,
+			'last_name' => $person->last_name,
+			'name' => $person->title->rendered,
+			'ad_title' => $person->position_title,
+			'ad_office' => $person->office,
+			'ad_address' => $person->address,
+			'ad_phone' => $person->phone,
+			'ad_phone_extension' => $person->phone_ext,
+			'ad_email' => $person->email,
+			'titles' => $person->working_titles,
+			'office' => $person->office_alt,
+			'address' => $person->address_alt,
+			'phone' => $person->phone_alt,
+			'email' => $person->email_alt,
+			'degrees' => $person->degree,
+			'website' => $person->website,
+			'photos' => $person->photos,
+			'listed_on' => $person->listed_on,
+			'bio_personal' => $person->content->rendered,
+			'bio_unit' => $person->bio_unit,
+			'bio_university' => $person->bio_university,
+		);
+
+		return $data;
+	}
+
+	/**
+	 * Returns profile data with any local variations.
+	 *
+	 * @since 0.3.0
 	 *
 	 * @param object $person
 	 * @param array  $options
 	 *
-	 * @since 0.3.0
-	 *
 	 * @return array
 	 */
 	public static function get_data( $person, $options = array() ) {
-		$card_classes = 'wsu-person';
-		$card_attributes = '';
-		$ad_phone = ( ! empty( $person->phone_ext ) ) ? $person->phone . ' ext ' . $person->phone_ext : $person->phone;
-		$local_record_id = false;
+		$primary_data = self::get_wsu_person( $person );
 
-		// Default "about" content (personal biography).
-		$about = $person->content->rendered;
+		$local_post = get_posts( array(
+			'post_type' => WSUWP_People_Post_Type::$post_type_slug,
+			'posts_per_page' => 1,
+			'meta_key' => '_wsuwp_profile_post_id',
+			'meta_value' => $primary_data['post_id'],
+		) );
 
-		// Set up any directory-specific content.
-		if ( isset( $options['directory_view'] ) ) {
-			$local_record = get_posts( array(
-				'post_type' => WSUWP_People_Post_Type::$post_type_slug,
-				'posts_per_page' => 1,
-				'meta_key' => '_wsuwp_profile_post_id',
-				'meta_value' => $person->id,
-			) );
-
-			if ( $local_record ) {
-				$local_record_id = $local_record[0]->ID;
-				$directory_display = get_post_meta( $local_record_id, "_display_on_page_{$options['page_id']}", true );
-				$single_display_title = get_post_meta( $local_record_id, '_use_title', true );
-				$single_display_photo = get_post_meta( $local_record_id, '_use_photo', true );
-				$single_display_bio = get_post_meta( $local_record_id, '_use_bio', true );
-
-				if ( false !== apply_filters( 'wsuwp_people_default_rewrite_slug', false ) ) {
-					$options['link_url'] = get_the_permalink( $local_record[0]->ID );
-				} elseif ( 'if_bio' === $options['link']['when'] && '' !== $about || 'yes' === $options['link']['when'] ) {
-					$options['link_url'] = trailingslashit( $options['link']['base_url'] . $local_record[0]->post_name );
-				}
-
-				$options['title'] = ( isset( $directory_display['title'] ) ) ? $directory_display['title'] : $single_display_title;
-				$options['use_photo'] = ( isset( $directory_display['photo'] ) ) ? $directory_display['photo'] : $single_display_photo;
-
-				// If the "about" option is set individually for this profile, use that instead of the global setting.
-				if ( isset( $directory_display['about'] ) ) {
-					$options['about'] = $directory_display['about'];
-				}
-
-				// Add classes for taxonomy terms (leveraged by filters).
-				$get_terms_args = array(
-					'fields' => 'names',
-				);
-
-				$locations = wp_get_post_terms( $local_record_id, 'wsuwp_university_location', $get_terms_args );
-
-				foreach ( $locations as $location ) {
-					$card_classes .= ' location-' . sanitize_title( $location );
-				}
-
-				$units = wp_get_post_terms( $local_record_id, 'wsuwp_university_org', $get_terms_args );
-
-				foreach ( $units as $unit ) {
-					$card_classes .= ' unit-' . sanitize_title( $unit );
-				}
-
-				// Add an attribute containing the post ID of the primary profile record.
-				$card_attributes .= ' data-profile-id="' . $person->id . '"';
-
-				// Add attributes to be leveraged for opening this profile in a modal.
-				if ( 'lightbox' === $options['link']['profile'] && ! is_admin() ) {
-					if ( $single_display_photo ) {
-						$card_attributes .= ' data-photo="' . $single_display_photo . '"';
-					}
-
-					if ( $single_display_title ) {
-						$card_attributes .= ' data-title="' . $single_display_title . '"';
-					}
-
-					if ( $single_display_bio ) {
-						$card_attributes .= ' data-about="' . $single_display_bio . '"';
-					}
-				}
-
-				if ( is_admin() ) {
-					$card_attributes .= ' data-nid="' . $person->nid . '"';
-					$card_attributes .= ' data-post-id="' . $local_record_id . '"';
-					$card_attributes .= ' data-listed="' . implode( ' ', $person->listed_on ) . '"';
-					$card_attributes .= ' aria-checked="false"';
-				}
-			}
+		// Retrieve local content display options.
+		if ( $local_post ) {
+			$local_post_id = $local_post[0]->ID;
+			$display_title = get_post_meta( $local_post_id, '_use_title', true );
+			$display_photo = get_post_meta( $local_post_id, '_use_photo', true );
+			$display_bio = get_post_meta( $local_post_id, '_use_bio', true );
 		}
 
-		// Set up link URL.
-		$link = ( isset( $options['link_url'] ) ) ? $options['link_url'] : false;
+		// Set up contact information.
+		$office = ( ! empty( $primary_data['office'] ) ) ? $primary_data['office'] : $primary_data['ad_office'];
+		$address = ( ! empty( $primary_data['address'] ) ) ? $primary_data['address'] : $primary_data['ad_address'];
+		$ad_phone = ( ! empty( $primary_data['ad_phone_extension'] ) ) ? $primary_data['ad_phone'] . ' ext ' . $primary_data['ad_phone_extension'] : $primary_data['ad_phone'];
+		$phone = ( ! empty( $primary_data['phone'] ) ) ? $primary_data['phone'] : $ad_phone;
+		$email = ( ! empty( $primary_data['email'] ) ) ? $primary_data['email'] : $primary_data['ad_email'];
 
-		// Set up what to display for the title.
-		if ( isset( $options['title'] ) && '' !== $options['title'] ) {
-			$title_indexes = explode( ',', $options['title'] );
-			$use_titles = array();
+		// Set up titles.
+		$titles = ( ! empty( $primary_data['titles'] ) ) ? $primary_data['titles'] : array( $primary_data['ad_title'] );
+
+		if ( ! empty( $display_title ) ) {
+			$title_indexes = explode( ',', $display_title );
+			$titles = array();
 
 			foreach ( $title_indexes as $index ) {
-				if ( 'ad' === $index ) {
-					$use_titles[] = $person->position_title;
-				} elseif ( isset( $person->working_titles[ $index ] ) ) {
-					$use_titles[] = $person->working_titles[ $index ];
+				if ( ! empty( $primary_data['titles'][ $index ] ) ) {
+					$titles[] = $primary_data['titles'][ $index ];
 				}
 			}
-
-			$title = implode( '<br />', $use_titles );
-		} else {
-			$title = ( ! empty( $person->working_titles ) ) ? implode( '<br />', $person->working_titles ) : $person->position_title;
 		}
 
 		// Set up the photo.
-		if ( isset( $options['photo'] ) && 'no' === $options['photo'] ) {
-			$photo = false;
-		} else {
-			$collection = (array) $person->photos;
-			$photo = ( $collection && isset( $collection[0] ) ) ? $collection[0]->thumbnail : false;
-			if ( isset( $options['use_photo'] ) && '' !== $options['use_photo'] && isset( $collection[ $options['use_photo'] ] ) ) {
-				$photo = $person->photos[ $options['use_photo'] ]->thumbnail;
-			}
+		$photo = ( isset( $primary_data['photos'][0] ) ) ? $primary_data['photos'][0] : false;
+
+		if ( ! empty( $display_photo ) && isset( $primary_data['photos'][ $display_photo ] ) ) {
+			$photo = $primary_data['photos'][ $display_photo ];
 		}
 
-		// Adds the "has-photo" class to the card container.
-		if ( $photo ) {
-			$card_classes .= ( ! empty( $person->photos ) ) ? ' has-photo' : '';
-		}
+		// Set up the biography.
+		$bio = $primary_data['bio_personal'];
 
-		// Set up what to display for the "about" content.
-		if ( isset( $options['about'] ) && 'personal' !== $options['about'] && '' !== $options['about'] ) {
-			if ( 'tags' === $options['about'] ) {
-				$tags = wp_get_post_tags( $local_record_id, array(
-					'fields' => 'names',
-				) );
-				$about = implode( ', ', $tags );
-			} elseif ( 'none' === $options['about'] ) {
-				$about = false;
-			} else {
-				$about = $person->$options['about'];
-			}
+		if ( $display_bio && 'personal' !== $display_bio ) {
+			$bio = $primary_data[ $display_bio ];
 		}
 
 		$data = array(
-			'card_classes' => $card_classes,
-			'card_attributes' => $card_attributes,
-			'name' => $person->title->rendered,
-			'degrees' => $person->degree,
-			'title' => $title,
-			'email' => ( ! empty( $person->email_alt ) ) ? $person->email_alt : $person->email,
-			'phone' => ( ! empty( $person->phone_alt ) ) ? $person->phone_alt : $ad_phone,
-			'office' => ( ! empty( $person->office_alt ) ) ? $person->office_alt : $person->office,
-			'address' => $person->address,
-			'website' => $person->website,
+			'primary_id' => $primary_data['post_id'],
+			'nid' => $primary_data['nid'],
+			'name' => $primary_data['name'],
+			'titles' => $titles,
+			'office' => $office,
+			'address' => $address,
+			'phone' => $phone,
+			'email' => $email,
+			'degrees' => $primary_data['degrees'],
+			'website' => $primary_data['website'],
 			'photo' => $photo,
-			'about' => $about,
-			'local_record_id' => $local_record_id,
-			'header' => ( isset( $options['header'] ) ) ? true : false,
-			'link' => $link,
-			'directory_view' => ( isset( $options['directory_view'] ) ) ? $directory_display : false,
-			'directory_view_options' => plugin_dir_path( dirname( __FILE__ ) ) . 'templates/admin-person-options.php',
+			'about' => $bio,
 		);
+
+		// Retrieve directory page-specific content display options.
+		if ( ! empty( $options['page_id'] ) && $local_post ) {
+			$data = array(
+				'primary_data' => $primary_data,
+				'single_view_data' => $data,
+				'local_post' => $local_post[0],
+			);
+		}
+
+		return $data;
+	}
+
+	/**
+	 * Returns profile data with any directory page-specific variations.
+	 *
+	 * @since
+	 *
+	 * @param object $person
+	 * @param array  $options
+	 *
+	 * @return array
+	 */
+	public static function get_listing_data( $person, $options ) {
+		$profile = self::get_data( $person, $options );
+		$primary_data = $profile['primary_data'];
+		$data = $profile['single_view_data'];
+		$local_post = $profile['local_post'];
+		$local_post_id = $local_post->ID;
+
+		// Set up card classes.
+		$card_classes = 'wsu-person';
+
+		// Add a class for each taxonomy term.
+		$taxonomies = get_object_taxonomies( WSUWP_People_Post_Type::$post_type_slug );
+		$taxonomy_data = array();
+
+		foreach ( $taxonomies as $taxonomy ) {
+			$prefix = array_pop( explode( '_', $taxonomy ) );
+			$terms = wp_get_post_terms( $local_post_id, $taxonomy, array(
+				'fields' => 'names',
+			) );
+
+			foreach ( $terms as $term ) {
+				$card_classes .= ' ' . $prefix . '-' . sanitize_title( $term );
+			}
+		}
+
+		// Set up card attributes, starting with the post ID of the primary record.
+		$card_attributes = ' data-profile-id="' . $data['primary_id'] . '"';
+		$card_attributes .= ' data-nid="' . $person->nid . '"';
+
+		// Add attributes to be leveraged for opening this profile in a modal.
+		if ( 'lightbox' === $options['link']['profile'] && ! is_admin() ) {
+			if ( ! empty( $data['titles'] ) ) {
+				$card_attributes .= ' data-title="' . implode( '|', $data['titles'] ) . '"';
+			}
+
+			if ( ! empty( $data['photo'] ) ) {
+				$card_attributes .= ' data-photo="' . esc_url( $data['photo']->thumbnail ) . '"';
+			}
+
+			if ( ! empty( $data['about'] ) ) {
+				$card_attributes .= ' data-about="' . esc_html( $data['about'] ) . '"';
+			}
+		}
+
+		// Add attributes to be leveraged when editing the directory page.
+		if ( is_admin() ) {
+			$card_attributes .= ' data-post-id="' . $local_post_id . '"';
+			$card_attributes .= ' data-listed="' . implode( ' ', $primary_data['listed_on'] ) . '"';
+			$card_attributes .= ' aria-checked="false"';
+		}
+
+		// Set up the link URL.
+		if ( false !== apply_filters( 'wsuwp_people_default_rewrite_slug', false ) ) {
+			$link = get_the_permalink( $local_post_id );
+		} elseif ( 'if_bio' === $options['link']['when'] && '' !== $data['about'] || 'yes' === $options['link']['when'] ) {
+			$link = trailingslashit( $options['link']['base_url'] . $local_post->post_name );
+		}
+
+		// Set up directory page-specific content display options.
+		$directory_display = get_post_meta( $local_post_id, "_display_on_page_{$options['page_id']}", true );
+
+		// Title(s).
+		if ( ! empty( $directory_display['title'] ) ) {
+			$title_indexes = explode( ',', $directory_display['title'] );
+			$titles = array();
+
+			foreach ( $title_indexes as $index ) {
+				$titles[] = $primary_data['titles'][ $index ];
+			}
+
+			$data['titles'] = $titles;
+		}
+
+		// Photo.
+		if ( ! empty( $directory_display['photo'] ) && isset( $primary_data['photos'][ $directory_display['photo'] ] ) ) {
+			$data['photo'] = $primary_data['photos'][ $directory_display['photo'] ];
+		}
+
+		// Photo display can be set for the entire page.
+		if ( isset( $options['photo'] ) && 'no' === $options['photo'] ) {
+			$data['photo'] = false;
+		}
+
+		// Add a "has-photo" class if appropriate.
+		if ( $data['photo'] ) {
+			$card_classes .= ' has-photo';
+		}
+
+		// The "Bio/About" display can be set for the entire page.
+		if ( ! empty( $options['about'] ) && 'personal' !== $options['about'] ) {
+			if ( 'tags' === $options['about'] ) {
+				$tags = wp_get_post_tags( $local_post_id, array(
+					'fields' => 'names',
+				) );
+				$data['about'] = implode( ', ', $tags );
+			} elseif ( 'none' === $options['about'] ) {
+				$data['about'] = false;
+			} else {
+				$data['about'] = $primary_data[ $options['about'] ];
+			}
+		}
+
+		// The "Bio/About" display can also be individually set.
+		// (It shouldn't override the page setting for "None", though.)
+		if ( ! empty( $directory_display['about'] ) && 'none' !== $options['about'] ) {
+			if ( 'tags' === $directory_display['about'] ) {
+				$tags = wp_get_post_tags( $local_post_id, array(
+					'fields' => 'names',
+				) );
+				$data['about'] = implode( ', ', $tags );
+			} else {
+				$data['about'] = $primary_data[ $directory_display['about'] ];
+			}
+		}
+
+		$data['local_id'] = ( isset( $local_post_id ) ) ? $local_post_id : false;
+		$data['card_classes'] = $card_classes;
+		$data['card_attributes'] = $card_attributes;
+		$data['link'] = ( ! empty( $link ) ) ? $link : false;
+
+		if ( is_admin() ) {
+			$data['directory_view_options'] = plugin_dir_path( dirname( __FILE__ ) ) . 'templates/admin-person-options.php';
+			$data['directory_view'] = ( $directory_display ) ? $directory_display : false;
+		}
 
 		return $data;
 	}
