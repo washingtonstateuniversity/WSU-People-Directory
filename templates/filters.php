@@ -17,11 +17,12 @@
 
 	<?php foreach ( $directory_data['filters']['options'] as $option ) { ?>
 	<?php if ( 'search' === $option ) { continue; } ?>
+	<?php $label = ( 'org' === $option ) ? 'unit' : $option; ?>
 	<div class="wsu-people-filter <?php echo esc_attr( $option ); ?>">
 		<button type="button"
 				class="wsu-people-filter-label"
 				aria-controls="wsu-people-<?php echo esc_attr( $option ); ?>"
-				aria-expanded="false">Filter by <?php echo esc_html( $option ); ?></button>
+				aria-expanded="false">Filter by <?php echo esc_html( $label ); ?></button>
 		<ul class="wsu-people-filter-terms" id="wsu-people-<?php echo esc_attr( $option ); ?>">
 			<?php foreach ( $directory_data['filters'][ $option ] as $i => $term ) { ?>
 			<li>
