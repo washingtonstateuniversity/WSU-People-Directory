@@ -41,16 +41,16 @@
 
 			// Grabs the locally set title.
 			if ( title_index && response.working_titles.length ) {
-				if ( String( title_index ).indexOf( " " ) > 0 ) {
+				if ( String( title_index ).indexOf( "," ) > 0 ) {
 					var titles = [];
 
-					$.each( title_index.split( " " ), function( i ) {
+					$.each( title_index.split( "," ), function( key, i ) {
 						if ( response.working_titles[ i ] ) {
-							titles.push( response.working_titles[ i ] );
+							titles.push( "<div class='title'>" + response.working_titles[ i ] + "</div>" );
 						}
 					} );
 
-					title = titles.join( "<br />" );
+					title = titles.join( "" );
 				} else if ( response.working_titles[ title_index ] ) {
 					title = response.working_titles[ title_index ];
 				}
@@ -59,7 +59,7 @@
 			}
 
 			// Grabs the locally set "about" content.
-			if ( about_index && "" !== response[ about_index ] ) {
+			if ( about_index && "" !== response[ about_index ] && "personal" !== about_index ) {
 				about = response[ about_index ];
 			}
 

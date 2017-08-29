@@ -1030,7 +1030,7 @@ class WSUWP_People_Directory_Page_Template {
 						<% } %>
 
 						<div class="contact">
-							<div class="title"><%= title %></div>
+							<%= title %>
 							<div class="email"><a href="mailto:<%= email %>"><%= email %></a></div>
 							<div class="phone"><%= phone %></div>
 							<div class="office"><%= office %></div>

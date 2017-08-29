@@ -351,15 +351,15 @@ class WSUWP_Person_Display {
 		// Add attributes to be leveraged for opening this profile in a modal.
 		if ( 'lightbox' === $options['link']['profile'] && ! is_admin() ) {
 			if ( ! empty( $data['titles'] ) ) {
-				$card_attributes .= ' data-title="' . implode( '|', $data['titles'] ) . '"';
+				$card_attributes .= ' data-title="' . get_post_meta( $local_post_id, '_use_title', true ) . '"';
 			}
 
 			if ( ! empty( $data['photo'] ) ) {
-				$card_attributes .= ' data-photo="' . esc_url( $data['photo']->thumbnail ) . '"';
+				$card_attributes .= ' data-photo="' . get_post_meta( $local_post_id, '_use_photo', true ) . '"';
 			}
 
 			if ( ! empty( $data['about'] ) ) {
-				$card_attributes .= ' data-about="' . esc_html( $data['about'] ) . '"';
+				$card_attributes .= ' data-about="' . get_post_meta( $local_post_id, '_use_bio', true ) . '"';
 			}
 		}
 
