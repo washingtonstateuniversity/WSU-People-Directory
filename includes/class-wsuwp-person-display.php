@@ -278,7 +278,7 @@ class WSUWP_Person_Display {
 		// Set up the biography.
 		$bio = $primary_data['bio_personal'];
 
-		if ( $display_bio && 'personal' !== $display_bio ) {
+		if ( ! empty( $display_bio ) && 'personal' !== $display_bio ) {
 			$bio = $primary_data[ $display_bio ];
 		}
 
