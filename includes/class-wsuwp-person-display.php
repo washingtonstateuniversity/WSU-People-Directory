@@ -183,9 +183,9 @@ class WSUWP_Person_Display {
 	/**
 	 * Returns profile data from people.wsu.edu.
 	 *
-	 * @since 0.3.0
+	 * @since 0.3.5
 	 *
-	 * @param object $person
+	 * @param object $person Person object from JSON response.
 	 *
 	 * @return array
 	 */
@@ -224,8 +224,8 @@ class WSUWP_Person_Display {
 	 *
 	 * @since 0.3.0
 	 *
-	 * @param object $person
-	 * @param array  $options
+	 * @param object $person  Person object from JSON response.
+	 * @param array  $options Directory page options.
 	 *
 	 * @return array
 	 */
@@ -312,10 +312,10 @@ class WSUWP_Person_Display {
 	/**
 	 * Returns profile data with any directory page-specific variations.
 	 *
-	 * @since
+	 * @since 0.3.5
 	 *
-	 * @param object $person
-	 * @param array  $options
+	 * @param object $person  Person object from JSON response.
+	 * @param array  $options Directory page options.
 	 *
 	 * @return array
 	 */
