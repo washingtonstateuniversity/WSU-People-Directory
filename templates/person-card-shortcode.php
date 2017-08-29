@@ -8,28 +8,32 @@
  * @var object $person
  */
 ?>
-<aside class="<?php echo esc_attr( $display['card_classes'] ); ?>"<?php echo wp_kses_post( $display['card_attributes'] ); ?>>
+<aside class="wsu-person card-shortcode">
 
 	<div class="card">
 
 		<header class="name">
-			<?php if ( $display['link'] ) { ?><a href="<?php echo esc_url( $display['link'] ); ?>"><?php } ?>
+			<?php if ( ! empty( $display['link'] ) ) { ?><a href="<?php echo esc_url( $display['link'] ); ?>"><?php } ?>
 			<?php echo esc_html( $display['name'] ); ?>
-			<?php if ( $display['link'] ) { ?></a><?php } ?>
+			<?php if ( ! empty( $display['link'] ) ) { ?></a><?php } ?>
 		</header>
 
 		<?php if ( $display['photo'] ) { ?>
 		<figure class="photo">
-			<?php if ( $display['link'] ) { ?><a href="<?php echo esc_url( $display['link'] ); ?>"><?php } ?>
-
-			<img src="<?php echo esc_url( $display['photo'] ); ?>" alt="<?php echo esc_html( $display['name'] ); ?>" />
-
-			<?php if ( $display['link'] ) { ?></a><?php } ?>
+			<?php if ( ! empty( $display['link'] ) ) { ?><a href="<?php echo esc_url( $display['link'] ); ?>"><?php } ?>
+			<img src="<?php echo esc_url( $display['photo']->thumbnail ); ?>" alt="<?php echo esc_html( $display['name'] ); ?>" />
+			<?php if ( ! empty( $display['link'] ) ) { ?></a><?php } ?>
 		</figure>
 		<?php } ?>
 
 		<div class="contact">
-			<span class="title"><?php echo wp_kses_post( $display['title'] ); ?></span>
+			<?php
+			if ( $display['titles'] ) {
+				foreach ( $display['titles'] as $title ) {
+				?><span class="title"><?php echo esc_html( $title ); ?></span><?php
+				}
+			}
+			?>
 			<span class="email"><a href="mailto:<?php echo esc_attr( $display['email'] ); ?>">
 				<?php echo esc_html( $display['email'] ); ?></a>
 			</span>
