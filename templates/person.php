@@ -35,7 +35,7 @@
 		<?php } ?>
 		<?php if ( ! empty( $display['website'] ) ) { ?>
 		<span class="website">
-			<a href="<?php echo esc_url( $display['website'] ); ?>">Website</a>
+			<a href="<?php echo esc_url( $display['website'] ); ?>"><?php echo esc_url( $display['website'] ); ?></a>
 		</span>
 		<?php } ?>
 	</div>
