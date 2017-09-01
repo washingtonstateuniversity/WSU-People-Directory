@@ -464,8 +464,12 @@ class WSUWP_People_Directory_Page_Template {
 			set_transient( 'wsuwp_people_directory_flush_rewrites', true );
 		}
 
+		// Sanitize the profile IDs associated with the page.
+		$id_array = explode( ' ', $_POST['_wsu_people_directory_profile_ids'] );
+		$sanitized_ids = implode( ' ', array_map( 'absint', $id_array ) );
+
 		$scheduled_event_args = array(
-			$_POST['_wsu_people_directory_profile_ids'],
+			$sanitized_ids,
 			$post_id,
 		);
 
