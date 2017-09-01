@@ -21,7 +21,9 @@
 		$people = $( ".wsu-people" ),
 		$person_modal = $( ".person-modal" ),
 		$tooltip = $( ".wsu-person-controls-tooltip" ),
-		$person_template = _.template( $( "#wsu-person-template" ).html() );
+		$person_template = _.template( $( "#wsu-person-template" ).html() ),
+		imported_nids = [],
+		imported_ids = [];
 
 	$( document ).ready( function() {
 
@@ -139,21 +141,26 @@
 			$.ajax( {
 				url: window.wsuwp_people_edit_page.rest_url,
 				data: data
-			} ).done( function( response ) {
+			} ).done( function( response, status, headers ) {
+				var pages = parseInt( headers.getResponseHeader( "x-wp-totalpages" ) );
 
-				// Remove the loading indicator.
-				$people.find( ".spinner" ).remove();
+				// If the query returns fewer than 100 profiles, load them up now.
+				if ( pages === 1 ) {
+					load_profiles( response );
 
-				if ( response.length !== 0 ) {
-					response.sort( sort_response );
-					create_person( response );
-					load_photos();
+				// Otherwise, build on to the array of profiles
+				// so we can sort the entire set alphabetically.
+				} else if ( pages > 1 ) {
+					var profiles = response,
+						i = 1;
 
-					// Toggle the "Add People" options closed.
-					$( ".wsu-people-directory-options.add" ).removeClass( "open" ).children( "div" ).hide();
+					// Request the remaining pages of the query.
+					while ( i < pages ) {
+						i++;
+						data.page = i;
 
-					// Toggle the visibility of the other options.
-					$( ".wsu-people-directory-options, .wsu-people-bulk-actions" ).slideDown();
+						request_next_page( data, profiles, i, pages );
+					}
 				}
 			} );
 		} );
@@ -391,11 +398,79 @@
 		} );
 	} );
 
+	// Indicated that profiles are still being created.
+	if ( $( ".wsu-people-admin-wrapper" ).hasClass( "loading" ) ) {
+		$people.prepend( "<p class='description importing-profiles'>Importing profiles, please wait.<span class='spinner'></span><p>" );
+
+		check_inserted_profiles();
+	}
+
+	// Checks if all the profiles for a directory page have been inserted,
+	// and loads them once they're all available.
+	function check_inserted_profiles() {
+		$.ajax( {
+			url: window.wsuwp_people_edit_page.ajax_url,
+			data: {
+				action: "check_inserted_profiles",
+				nonce: window.wsuwp_people_edit_page.nonce,
+				page: window.wsuwp_people_edit_page.page_id
+			}
+		} ).done( function( response ) {
+			if ( "false" === response ) {
+				setTimeout( check_inserted_profiles, 6000 );
+			} else {
+				$( ".wsu-people-admin-wrapper" ).removeClass( "loading" );
+				$( ".importing-profiles" ).remove();
+
+				create_person( JSON.parse( response ) );
+				load_photos();
+			}
+		} );
+	}
+
 	// Load photos asynchronously.
 	function load_photos() {
 		$( ".has-photo .photo img" ).each( function() {
 			$( this ).attr( "src", $( this ).data( "photo" ) );
 		} );
+	}
+
+	// Get the next page when more than 100 profiles are being requested.
+	function request_next_page( data, profiles, i, pages ) {
+		$.ajax( {
+			url: window.wsuwp_people_edit_page.rest_url,
+			data: data
+		} ).done( function( response ) {
+
+			// Add the results of this request to the previous one(s).
+			// (`reduceRight` is allegedly one of the fastest ways to do this.)
+			profiles = response.reduceRight( function( a, b ) {
+				a.unshift( b );
+				return a;
+			}, profiles );
+
+			// If this is the last time through the loop,
+			// pass the built array along to the next step.
+			if ( i === pages ) {
+				load_profiles( profiles );
+			}
+		} );
+	}
+
+	// Sort and populate the profiles.
+	function load_profiles( response ) {
+		$people.find( ".spinner" ).remove();
+
+		response.sort( sort_response );
+		create_person( response );
+		load_photos();
+		update_id_list();
+
+		// Toggle the "Add People" options closed.
+		$( ".wsu-people-directory-options.add" ).removeClass( "open" ).children( "div" ).hide();
+
+		// Toggle the visibility of the other options.
+		$( ".wsu-people-directory-options, .wsu-people-bulk-actions" ).slideDown();
 	}
 
 	// Sort the retrieved people alphabetically by last name.
@@ -412,10 +487,14 @@
 	// Add a person retrieved from the REST request to the list.
 	function create_person( person ) {
 		$.each( person, function( i, data ) {
-			var listed_ids = $people.find( ".wsu-person" ).map( function() { return $( this ).data( "profile-id" ); } ).get();
 
-			// Don't add the person if they're already listed.
-			if ( -1 !== $.inArray( data.id, listed_ids ) ) {
+			// Only add profiles that have a NID.
+			if ( "" === data.nid ) {
+				return;
+			}
+
+			// Don't add the profile if it's already listed.
+			if ( -1 !== $.inArray( data.id, imported_ids ) || -1 !== $.inArray( data.nid, imported_nids ) ) {
 				return;
 			}
 
@@ -438,6 +517,9 @@
 				website: data.website,
 				content: data.content.rendered
 			} ) );
+
+			imported_nids.push( data.nid );
+			imported_ids.push( data.id );
 		} );
 	}
 
