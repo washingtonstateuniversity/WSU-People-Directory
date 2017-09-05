@@ -952,7 +952,11 @@ class WSUWP_People_Post_Type {
 	}
 
 	/**
+	 * Displays a meta box for selecting taxonomy terms.
 	 *
+	 * @since 0.3.0
+	 *
+	 * @param WP_Post $post
 	 */
 	public function display_taxonomies_meta_box( $post ) {
 		// Reversed because that seems to better match the order of importance.
