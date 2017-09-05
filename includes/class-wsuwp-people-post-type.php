@@ -752,6 +752,10 @@ class WSUWP_People_Post_Type {
 		</div><!--bio_personal-->
 		<?php
 
+		$user = wp_get_current_user();
+		$profile_owner = in_array( 'wsuwp_people_profile_owner', (array) $user->roles, true );
+		$global_admin = wsuwp_is_global_admin( $user->data->ID );
+
 		foreach ( self::$post_meta_keys as $key => $args ) {
 			if ( ! isset( $args['render_as_wp_editor'] ) ) {
 				continue;
@@ -764,8 +768,11 @@ class WSUWP_People_Post_Type {
 
 				<?php
 				$value = get_post_meta( $post->ID, $args['meta_key'], true );
+				$unit_bio = '_wsuwp_profile_bio_unit' === $args['meta_key'];
+				$university_bio = '_wsuwp_profile_bio_university' === $args['meta_key'];
 
-				if ( '_wsuwp_profile_bio_university' === $args['meta_key'] && ! current_user_can( 'create_sites' ) ) {
+				if ( ( WSUWP_People_Directory::is_main_site() && $profile_owner && $unit_bio ) ||
+					 ( $university_bio && ! $global_admin ) ) {
 					echo '<div class="readonly">' . wp_kses_post( apply_filters( 'the_content', $value ) ) . '</div>';
 				} else {
 					wp_editor( $value, $args['meta_key'] );
