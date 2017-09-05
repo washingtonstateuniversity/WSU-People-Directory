@@ -382,6 +382,7 @@ class WSUWP_People_Post_Type {
 			),
 			'taxonomies' => array(
 				'post_tag',
+				'category',
 			),
 			'rewrite' => apply_filters( 'wsuwp_people_default_rewrite_slug', false ),
 		);
@@ -825,6 +826,7 @@ class WSUWP_People_Post_Type {
 		remove_meta_box( 'wsuwp_university_locationdiv', self::$post_type_slug, 'side' );
 		remove_meta_box( 'tagsdiv-post_tag', self::$post_type_slug, 'side' );
 		remove_meta_box( 'classificationdiv', self::$post_type_slug, 'side' );
+		remove_meta_box( 'categorydiv', self::$post_type_slug, 'side' );
 
 		$box_title = ( 'auto-draft' === $post->post_status ) ? 'Create Profile' : 'Update Profile';
 
@@ -833,8 +835,8 @@ class WSUWP_People_Post_Type {
 		if ( taxonomy_exists( 'wsuwp_university_category' ) && taxonomy_exists( 'wsuwp_university_location' ) && taxonomy_exists( 'wsuwp_university_org' ) ) {
 			add_meta_box(
 				'wsuwp-university-taxonomies',
-				'University Taxonomies',
-				array( $this, 'display_university_taxonomies_meta_box' ),
+				'Taxonomies',
+				array( $this, 'display_taxonomies_meta_box' ),
 				self::$post_type_slug,
 				'side',
 				'low'
@@ -950,9 +952,13 @@ class WSUWP_People_Post_Type {
 	}
 
 	/**
+	 * Displays a meta box for selecting taxonomy terms.
 	 *
+	 * @since 0.3.0
+	 *
+	 * @param WP_Post $post
 	 */
-	public function display_university_taxonomies_meta_box( $post ) {
+	public function display_taxonomies_meta_box( $post ) {
 		// Reversed because that seems to better match the order of importance.
 		$taxonomies = array_reverse( get_post_taxonomies( $post ) );
 
@@ -963,7 +969,6 @@ class WSUWP_People_Post_Type {
 			) );
 
 			$name = get_taxonomy( $taxonomy )->labels->name;
-			$name = str_replace( 'University ', '', $name );
 			?>
 
 			<p class="post-attributes-label-wrapper">
