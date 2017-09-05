@@ -382,6 +382,7 @@ class WSUWP_People_Post_Type {
 			),
 			'taxonomies' => array(
 				'post_tag',
+				'category',
 			),
 			'rewrite' => apply_filters( 'wsuwp_people_default_rewrite_slug', false ),
 		);
