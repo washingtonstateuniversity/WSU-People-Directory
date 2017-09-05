@@ -826,6 +826,7 @@ class WSUWP_People_Post_Type {
 		remove_meta_box( 'wsuwp_university_locationdiv', self::$post_type_slug, 'side' );
 		remove_meta_box( 'tagsdiv-post_tag', self::$post_type_slug, 'side' );
 		remove_meta_box( 'classificationdiv', self::$post_type_slug, 'side' );
+		remove_meta_box( 'categorydiv', self::$post_type_slug, 'side' );
 
 		$box_title = ( 'auto-draft' === $post->post_status ) ? 'Create Profile' : 'Update Profile';
 
