@@ -835,8 +835,8 @@ class WSUWP_People_Post_Type {
 		if ( taxonomy_exists( 'wsuwp_university_category' ) && taxonomy_exists( 'wsuwp_university_location' ) && taxonomy_exists( 'wsuwp_university_org' ) ) {
 			add_meta_box(
 				'wsuwp-university-taxonomies',
-				'University Taxonomies',
-				array( $this, 'display_university_taxonomies_meta_box' ),
+				'Taxonomies',
+				array( $this, 'display_taxonomies_meta_box' ),
 				self::$post_type_slug,
 				'side',
 				'low'
@@ -954,7 +954,7 @@ class WSUWP_People_Post_Type {
 	/**
 	 *
 	 */
-	public function display_university_taxonomies_meta_box( $post ) {
+	public function display_taxonomies_meta_box( $post ) {
 		// Reversed because that seems to better match the order of importance.
 		$taxonomies = array_reverse( get_post_taxonomies( $post ) );
 
@@ -965,7 +965,6 @@ class WSUWP_People_Post_Type {
 			) );
 
 			$name = get_taxonomy( $taxonomy )->labels->name;
-			$name = str_replace( 'University ', '', $name );
 			?>
 
 			<p class="post-attributes-label-wrapper">
