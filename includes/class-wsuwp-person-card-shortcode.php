@@ -35,6 +35,17 @@ class WSUWP_Person_Card_Shortcode {
 	}
 
 	/**
+	 * Check if a theme is providing its own template.
+	 *
+	 * @since 0.3.0
+	 *
+	 * @return string Path to the template file.
+	 */
+	public function theme_has_template() {
+		return locate_template( 'wsu-people/person-card-shortcode.php' );
+	}
+
+	/**
 	 * Displays a person's card.
 	 *
 	 * @since 0.3.0
@@ -70,7 +81,7 @@ class WSUWP_Person_Card_Shortcode {
 			return '';
 		}
 
-		$template = ( WSUWP_Person_Display::theme_has_template() ) ? WSUWP_Person_Display::theme_has_template() : plugin_dir_path( dirname( __FILE__ ) ) . 'templates/person.php';
+		$template = ( $this->theme_has_template() ) ? $this->theme_has_template() : plugin_dir_path( dirname( __FILE__ ) ) . 'templates/person-card-shortcode.php';
 
 		$display_options = array(
 			'header' => true,

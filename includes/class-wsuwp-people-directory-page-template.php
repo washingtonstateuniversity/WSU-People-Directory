@@ -302,8 +302,8 @@ class WSUWP_People_Directory_Page_Template {
 						<label>
 							<input type="checkbox"
 								   name="_wsu_people_directory_filters[]"
-								   value="unit"
-									<?php if ( is_array( $directory_data['filters']['options'] ) && in_array( 'unit', $directory_data['filters']['options'], true ) ) { echo 'checked="checked"'; } ?>>
+								   value="org"
+									<?php if ( is_array( $directory_data['filters']['options'] ) && in_array( 'org', $directory_data['filters']['options'], true ) ) { echo 'checked="checked"'; } ?>>
 							Unit
 						</label>
 					</li>
@@ -399,7 +399,7 @@ class WSUWP_People_Directory_Page_Template {
 		}
 
 		$sanitized_values = array();
-		$accepted_values = array( 'search', 'location', 'unit' );
+		$accepted_values = array( 'search', 'location', 'org' );
 
 		foreach ( $values as $index => $value ) {
 			if ( in_array( $value, $accepted_values, true ) ) {
@@ -731,8 +731,19 @@ class WSUWP_People_Directory_Page_Template {
 	 *
 	 * @return string Path to the template file.
 	 */
-	public function theme_has_template() {
+	public function theme_has_directory_template() {
 		return locate_template( 'wsu-people/people.php' );
+	}
+
+	/**
+	 * Check if a theme is providing its own profile listing template.
+	 *
+	 * @since 0.3.5
+	 *
+	 * @return string Path to the template file.
+	 */
+	public function theme_has_listing_template() {
+		return locate_template( 'wsu-people/person-listing.php' );
 	}
 
 	/**
@@ -752,11 +763,11 @@ class WSUWP_People_Directory_Page_Template {
 		$open_profiles_as = get_post_meta( $post_id, '_wsu_people_directory_profile', true );
 		$wrapper_classes = 'wsu-people-wrapper';
 		$wrapper_classes .= ( $layout ) ? ' ' . esc_attr( $layout ) : ' table';
-		$theme_template = WSUWP_Person_Display::theme_has_template();
+		$theme_template = $this->theme_has_listing_template();
 		$elements = array(
 			'people' => array(),
 			'locations' => array(),
-			'units' => array(),
+			'orgs' => array(),
 		);
 		$loading = false;
 
@@ -785,7 +796,7 @@ class WSUWP_People_Directory_Page_Template {
 
 						$elements['people'] = array_merge( $elements['people'], $chunk['people'] );
 						$elements['locations'] = array_merge( $elements['locations'], $chunk['locations'] );
-						$elements['units'] = array_merge( $elements['units'], $chunk['units'] );
+						$elements['orgs'] = array_merge( $elements['orgs'], $chunk['orgs'] );
 
 						$offset = $offset + $group_count;
 					}
@@ -819,11 +830,10 @@ class WSUWP_People_Directory_Page_Template {
 				'options' => $filters,
 				'template' => plugin_dir_path( dirname( __FILE__ ) ) . 'templates/filters.php',
 				'location' => array_unique( $elements['locations'] ),
-				'unit' => array_unique( $elements['units'] ),
+				'org' => array_unique( $elements['orgs'] ),
 			),
-			'person_card_template' => ( $theme_template ) ? $theme_template : plugin_dir_path( dirname( __FILE__ ) ) . 'templates/person.php',
+			'person_card_template' => ( $theme_template ) ? $theme_template : plugin_dir_path( dirname( __FILE__ ) ) . 'templates/person-listing.php',
 			'profile_display_options' => array(
-				'directory_view' => true,
 				'about' => get_post_meta( $post_id, '_wsu_people_directory_about', true ),
 				'link' => array(
 					'when' => get_post_meta( $post_id, '_wsu_people_directory_link', true ),
@@ -832,8 +842,6 @@ class WSUWP_People_Directory_Page_Template {
 				),
 				'photo' => $show_photos,
 				'page_id' => $post_id,
-				'header' => true,
-				'lazy_load_photos' => true,
 			),
 			'loading' => $loading,
 		);
@@ -857,7 +865,7 @@ class WSUWP_People_Directory_Page_Template {
 		$elements = array(
 			'people' => array(),
 			'locations' => array(),
-			'units' => array(),
+			'orgs' => array(),
 		);
 
 		$people_query_args = array(
@@ -901,9 +909,9 @@ class WSUWP_People_Directory_Page_Template {
 						$elements['locations'] = array_unique( array_merge( $elements['locations'], $profile_locations ) );
 					}
 
-					if ( in_array( 'unit', $filters, true ) ) {
-						$profile_units = wp_get_post_terms( get_the_ID(), 'wsuwp_university_org', $get_terms_args );
-						$elements['units'] = array_unique( array_merge( $elements['units'], $profile_units ) );
+					if ( in_array( 'org', $filters, true ) ) {
+						$profile_orgs = wp_get_post_terms( get_the_ID(), 'wsuwp_university_org', $get_terms_args );
+						$elements['orgs'] = array_unique( array_merge( $elements['orgs'], $profile_orgs ) );
 					}
 				}
 			}
@@ -977,8 +985,8 @@ class WSUWP_People_Directory_Page_Template {
 		ob_start();
 
 		// If a theme has a directory template, use it.
-		if ( $this->theme_has_template() ) {
-			include $this->theme_has_template();
+		if ( $this->theme_has_directory_template() ) {
+			include $this->theme_has_directory_template();
 		} else {
 			include plugin_dir_path( dirname( __FILE__ ) ) . 'templates/people.php';
 		}
@@ -1022,7 +1030,7 @@ class WSUWP_People_Directory_Page_Template {
 						<% } %>
 
 						<div class="contact">
-							<div class="title"><%= title %></div>
+							<%= title %>
 							<div class="email"><a href="mailto:<%= email %>"><%= email %></a></div>
 							<div class="phone"><%= phone %></div>
 							<div class="office"><%= office %></div>

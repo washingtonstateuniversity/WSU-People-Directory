@@ -1,29 +1,59 @@
-.wsu-person .card {
+.wsuwp_people_profile .source,
+.single-wsuwp_people_profile .pager,
+.single-wsuwp_people_profile .article-footer {
+	display: none;
+}
+
+.wsuwp_people_profile * {
+	margin: 0;
+}
+
+.wsuwp_people_profile .card {
 	display: -webkit-box;
 	display: -ms-flexbox;
 	display: flex;
-	margin-bottom: 2rem;
+	-ms-flex-wrap: wrap;
+	    flex-wrap: wrap;
 }
 
-.wsu-person .photo {
+.wsuwp_people_profile header {
+	width: 100%;
+	margin-bottom: 1rem;
+}
+
+.wsuwp_people_profile .photo {
 	display: block;
 	width: 198px;
 }
 
-.wsu-person .photo img {
+.wsuwp_people_profile .photo img {
 	display: block;
 	max-width: 100%;
 	width: 100%;
 }
 
-.wsu-person .contact {
-	padding-left: 2rem;
+.wsuwp_people_profile .photo + .contact {
+	margin: 1.5rem 0 0;
 }
 
-.wsu-person .contact span {
+.wsuwp_people_profile .contact span {
 	display: block;
 }
 
-.wsu-person .about {
-	clear: both;
+.wsuwp_people_profile .website {
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.wsuwp_people_profile .about {
+	margin-top: 2rem;
+}
+
+@media screen and (min-width: 480px) {
+
+	.wsuwp_people_profile .photo + .contact {
+		margin: 0 0 0 1.5rem;
+		width: calc(100% - 198px - 1.5rem);
+	}
+
 }

@@ -118,7 +118,7 @@
 				<?php } ?>
 
 				<?php
-				$tags = wp_get_post_tags( $display['local_record_id'], array(
+				$tags = wp_get_post_tags( $display['local_id'], array(
 					'fields' => 'names',
 				) );
 				?>
