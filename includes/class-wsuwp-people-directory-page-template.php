@@ -686,9 +686,6 @@ class WSUWP_People_Directory_Page_Template {
 		$people_query_args = array(
 			'post_type' => WSUWP_People_Post_Type::$post_type_slug,
 			'posts_per_page' => $id_count,
-			'meta_key' => "_order_on_page_{$post_id}",
-			'orderby' => 'meta_value_num',
-			'order' => 'asc',
 			'meta_query' => array(
 				array(
 					'key' => '_on_page',
