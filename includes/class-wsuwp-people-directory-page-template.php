@@ -733,14 +733,18 @@ class WSUWP_People_Directory_Page_Template {
 	}
 
 	/**
-	 * Check if a theme is providing its own profile listing template.
+	 * Returns the path to the profile listing template.
 	 *
 	 * @since 0.3.5
 	 *
 	 * @return string Path to the template file.
 	 */
-	public function theme_has_listing_template() {
-		return locate_template( 'wsu-people/person-listing.php' );
+	public function profile_listing_template() {
+		if ( locate_template( 'wsu-people/person-listing.php' ) ) {
+			return locate_template( 'wsu-people/person-listing.php' );
+		}
+
+		return plugin_dir_path( dirname( __FILE__ ) ) . 'templates/person-listing.php';
 	}
 
 	/**
@@ -758,9 +762,20 @@ class WSUWP_People_Directory_Page_Template {
 		$layout = get_post_meta( $post_id, '_wsu_people_directory_layout', true );
 		$show_photos = get_post_meta( $post_id, '_wsu_people_directory_show_photos', true );
 		$open_profiles_as = get_post_meta( $post_id, '_wsu_people_directory_profile', true );
+
+		// Set up the wrapper classes.
 		$wrapper_classes = 'wsu-people-wrapper';
 		$wrapper_classes .= ( $layout ) ? ' ' . esc_attr( $layout ) : ' table';
-		$theme_template = $this->theme_has_listing_template();
+
+		if ( 'yes' === $show_photos ) {
+			$wrapper_classes .= ' photos';
+		}
+
+		if ( 'lightbox' === $open_profiles_as ) {
+			$wrapper_classes .= ' lightbox';
+		}
+
+		// Set up the page content.
 		$elements = array(
 			'people' => array(),
 			'locations' => array(),
@@ -809,14 +824,7 @@ class WSUWP_People_Directory_Page_Template {
 			}
 		}
 
-		if ( 'yes' === $show_photos ) {
-			$wrapper_classes .= ' photos';
-		}
-
-		if ( 'lightbox' === $open_profiles_as ) {
-			$wrapper_classes .= ' lightbox';
-		}
-
+		// Assemble the data used for displaying the page.
 		$data = array(
 			'wrapper_classes' => $wrapper_classes,
 			'ids' => $ids,
@@ -828,7 +836,7 @@ class WSUWP_People_Directory_Page_Template {
 				'location' => $elements['locations'],
 				'org' => $elements['orgs'],
 			),
-			'person_card_template' => ( $theme_template ) ? $theme_template : plugin_dir_path( dirname( __FILE__ ) ) . 'templates/person-listing.php',
+			'person_card_template' => $this->profile_listing_template(),
 			'profile_display_options' => array(
 				'about' => get_post_meta( $post_id, '_wsu_people_directory_about', true ),
 				'link' => array(
