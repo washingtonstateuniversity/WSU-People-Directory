@@ -120,12 +120,13 @@ class WSUWP_People_Directory_Page_Template {
 	 * @param string $hook_suffix The current admin page.
 	 */
 	public function admin_enqueue_scripts( $hook_suffix ) {
-		global $post;
 		$screen = get_current_screen();
 
 		if ( 'page' !== $screen->post_type || ! in_array( $hook_suffix, array( 'post.php', 'post-new.php' ), true ) ) {
 			return;
 		}
+
+		global $post;
 
 		wp_enqueue_style( 'wsuwp-people-display', plugins_url( 'css/people.css', dirname( __FILE__ ) ), array(), WSUWP_People_Directory::$version );
 		wp_enqueue_style( 'wsuwp-people-admin', plugins_url( 'css/admin-page.css', dirname( __FILE__ ) ), array(), WSUWP_People_Directory::$version );
@@ -144,6 +145,25 @@ class WSUWP_People_Directory_Page_Template {
 			'uid' => wp_get_current_user()->ID,
 			'site_url' => get_home_url(),
 		) );
+
+		$template = get_post_meta( $post->ID, '_wp_page_template', true );
+
+		if ( $template && 'templates/people.php' === $template ) {
+			add_filter( 'admin_body_class', array( $this, 'add_body_class' ) );
+		}
+	}
+
+	/**
+	 * Add a body class if the page is using the people directory template.
+	 *
+	 * @since 0.3.6
+	 *
+	 * @return string
+	 */
+	public function add_body_class( $classes ) {
+		$classes .= ' wsuwp-people-directory-template ';
+
+		return $classes;
 	}
 
 	/**
