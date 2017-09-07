@@ -722,22 +722,30 @@ class WSUWP_People_Directory_Page_Template {
 	}
 
 	/**
-	 * Check if a theme is providing its own directory template.
+	 * Returns the path to the directory template.
+	 *
+	 * Allows themes to provide an override.
 	 *
 	 * @since 0.3.0
 	 *
-	 * @return string Path to the template file.
+	 * @return string Path to the directory template file.
 	 */
-	public function theme_has_directory_template() {
-		return locate_template( 'wsu-people/people.php' );
+	public function directory_template() {
+		if ( locate_template( 'wsu-people/people.php' ) ) {
+			return locate_template( 'wsu-people/people.php' );
+		}
+
+		return plugin_dir_path( dirname( __FILE__ ) ) . 'templates/people.php';
 	}
 
 	/**
 	 * Returns the path to the profile listing template.
 	 *
+	 * Allows themes to provide an override.
+	 *
 	 * @since 0.3.5
 	 *
-	 * @return string Path to the template file.
+	 * @return string Path to the profile listing template file.
 	 */
 	public function profile_listing_template() {
 		if ( locate_template( 'wsu-people/person-listing.php' ) ) {
@@ -1007,12 +1015,7 @@ class WSUWP_People_Directory_Page_Template {
 
 		ob_start();
 
-		// If a theme has a directory template, use it.
-		if ( $this->theme_has_directory_template() ) {
-			include $this->theme_has_directory_template();
-		} else {
-			include plugin_dir_path( dirname( __FILE__ ) ) . 'templates/people.php';
-		}
+		include $this->directory_template();
 
 		$content = ob_get_clean();
 
