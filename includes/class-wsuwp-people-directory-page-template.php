@@ -521,11 +521,8 @@ class WSUWP_People_Directory_Page_Template {
 
 			if ( $people ) {
 				foreach ( $people as $person ) {
-					$on_page = get_post_meta( $person, '_on_page', true );
-					$order_on_page = get_post_meta( $person, "_order_on_page_{$post_id}", true );
-					if ( $index !== $order_on_page && $post_id !== $on_page ) {
+					if ( get_post_meta( $person, '_on_page', true ) !== $post_id ) {
 						update_post_meta( $person, '_on_page', $post_id );
-						update_post_meta( $person, "_order_on_page_{$post_id}", $index );
 					}
 				}
 			} else {
@@ -571,7 +568,6 @@ class WSUWP_People_Directory_Page_Template {
 		if ( $removed_people ) {
 			foreach ( $removed_people as $person ) {
 				delete_post_meta( $person, '_on_page', $post_id );
-				delete_post_meta( $person, "_order_on_page_{$post_id}" );
 			}
 		}
 	}
@@ -634,7 +630,6 @@ class WSUWP_People_Directory_Page_Template {
 				'_wsuwp_profile_post_id' => $person->id,
 				'_wsuwp_profile_ad_nid' => $person->nid,
 				'_on_page' => $page_id,
-				"_order_on_page_{$page_id}" => absint( $order ),
 			),
 			'tags_input' => $tags,
 		);
@@ -882,7 +877,8 @@ class WSUWP_People_Directory_Page_Template {
 	}
 
 	/**
-	 * Return the filter terms for a directory page.
+	 * Return number of local profiles and, if needed,
+	 * the terms for populating filters on a directory page.
 	 *
 	 * @since 0.3.6
 	 *
