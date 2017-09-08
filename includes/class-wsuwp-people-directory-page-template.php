@@ -837,8 +837,10 @@ class WSUWP_People_Directory_Page_Template {
 				// If the number of IDs doesn't match the number of local profiles,
 				// they're probably still being inserted, so set a flag to display
 				// a notification telling the user as much.
+				// This also checks that the number of profiles returned by the REST
+				// request matches the number of IDs.
 				// Otherwise, cache the more expensive content for this page.
-				if ( $local_people_data['count'] !== $count ) {
+				if ( $local_people_data['count'] !== $count || count( $elements['people'] ) !== $count ) {
 					$loading = true;
 					$elements['people'] = array();
 				} else {
