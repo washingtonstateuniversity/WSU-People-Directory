@@ -807,7 +807,7 @@ class WSUWP_People_Directory_Page_Template {
 		$loading = false;
 
 		if ( $ids ) {
-			$cache_key = get_the_modified_date( 'Y-m-d H:i:s' );
+			$cache_key = md5( get_the_modified_date( 'Y-m-d H:i:s' ) );
 			$cached_elements = wp_cache_get( $cache_key, 'directory_page_elements' );
 
 			if ( $cached_elements ) {
