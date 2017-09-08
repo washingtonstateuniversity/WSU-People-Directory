@@ -942,7 +942,7 @@ class WSUWP_People_Directory_Page_Template {
 	/**
 	 * Return a group of people.
 	 *
-	 * @since 0.3.4
+	 * @since 0.3.5
 	 *
 	 * @param int $post_id
 	 * @param int $per_page
