@@ -120,12 +120,13 @@ class WSUWP_People_Directory_Page_Template {
 	 * @param string $hook_suffix The current admin page.
 	 */
 	public function admin_enqueue_scripts( $hook_suffix ) {
-		global $post;
 		$screen = get_current_screen();
 
 		if ( 'page' !== $screen->post_type || ! in_array( $hook_suffix, array( 'post.php', 'post-new.php' ), true ) ) {
 			return;
 		}
+
+		global $post;
 
 		wp_enqueue_style( 'wsuwp-people-display', plugins_url( 'css/people.css', dirname( __FILE__ ) ), array(), WSUWP_People_Directory::$version );
 		wp_enqueue_style( 'wsuwp-people-admin', plugins_url( 'css/admin-page.css', dirname( __FILE__ ) ), array(), WSUWP_People_Directory::$version );
@@ -144,6 +145,25 @@ class WSUWP_People_Directory_Page_Template {
 			'uid' => wp_get_current_user()->ID,
 			'site_url' => get_home_url(),
 		) );
+
+		$template = get_post_meta( $post->ID, '_wp_page_template', true );
+
+		if ( $template && 'templates/people.php' === $template ) {
+			add_filter( 'admin_body_class', array( $this, 'add_body_class' ) );
+		}
+	}
+
+	/**
+	 * Add a body class if the page is using the people directory template.
+	 *
+	 * @since 0.3.6
+	 *
+	 * @return string
+	 */
+	public function add_body_class( $classes ) {
+		$classes .= ' wsuwp-people-directory-template ';
+
+		return $classes;
 	}
 
 	/**
@@ -501,11 +521,8 @@ class WSUWP_People_Directory_Page_Template {
 
 			if ( $people ) {
 				foreach ( $people as $person ) {
-					$on_page = get_post_meta( $person, '_on_page', true );
-					$order_on_page = get_post_meta( $person, "_order_on_page_{$post_id}", true );
-					if ( $index !== $order_on_page && $post_id !== $on_page ) {
+					if ( get_post_meta( $person, '_on_page', true ) !== $post_id ) {
 						update_post_meta( $person, '_on_page', $post_id );
-						update_post_meta( $person, "_order_on_page_{$post_id}", $index );
 					}
 				}
 			} else {
@@ -551,7 +568,6 @@ class WSUWP_People_Directory_Page_Template {
 		if ( $removed_people ) {
 			foreach ( $removed_people as $person ) {
 				delete_post_meta( $person, '_on_page', $post_id );
-				delete_post_meta( $person, "_order_on_page_{$post_id}" );
 			}
 		}
 	}
@@ -614,7 +630,6 @@ class WSUWP_People_Directory_Page_Template {
 				'_wsuwp_profile_post_id' => $person->id,
 				'_wsuwp_profile_ad_nid' => $person->nid,
 				'_on_page' => $page_id,
-				"_order_on_page_{$page_id}" => absint( $order ),
 			),
 			'tags_input' => $tags,
 		);
@@ -686,9 +701,6 @@ class WSUWP_People_Directory_Page_Template {
 		$people_query_args = array(
 			'post_type' => WSUWP_People_Post_Type::$post_type_slug,
 			'posts_per_page' => $id_count,
-			'meta_key' => "_order_on_page_{$post_id}",
-			'orderby' => 'meta_value_num',
-			'order' => 'asc',
 			'meta_query' => array(
 				array(
 					'key' => '_on_page',
@@ -725,25 +737,37 @@ class WSUWP_People_Directory_Page_Template {
 	}
 
 	/**
-	 * Check if a theme is providing its own directory template.
+	 * Returns the path to the directory template.
+	 *
+	 * Allows themes to provide an override.
 	 *
 	 * @since 0.3.0
 	 *
-	 * @return string Path to the template file.
+	 * @return string Path to the directory template file.
 	 */
-	public function theme_has_directory_template() {
-		return locate_template( 'wsu-people/people.php' );
+	public function directory_template() {
+		if ( locate_template( 'wsu-people/people.php' ) ) {
+			return locate_template( 'wsu-people/people.php' );
+		}
+
+		return plugin_dir_path( dirname( __FILE__ ) ) . 'templates/people.php';
 	}
 
 	/**
-	 * Check if a theme is providing its own profile listing template.
+	 * Returns the path to the profile listing template.
+	 *
+	 * Allows themes to provide an override.
 	 *
 	 * @since 0.3.5
 	 *
-	 * @return string Path to the template file.
+	 * @return string Path to the profile listing template file.
 	 */
-	public function theme_has_listing_template() {
-		return locate_template( 'wsu-people/person-listing.php' );
+	public function profile_listing_template() {
+		if ( locate_template( 'wsu-people/person-listing.php' ) ) {
+			return locate_template( 'wsu-people/person-listing.php' );
+		}
+
+		return plugin_dir_path( dirname( __FILE__ ) ) . 'templates/person-listing.php';
 	}
 
 	/**
@@ -761,9 +785,20 @@ class WSUWP_People_Directory_Page_Template {
 		$layout = get_post_meta( $post_id, '_wsu_people_directory_layout', true );
 		$show_photos = get_post_meta( $post_id, '_wsu_people_directory_show_photos', true );
 		$open_profiles_as = get_post_meta( $post_id, '_wsu_people_directory_profile', true );
+
+		// Set up the wrapper classes.
 		$wrapper_classes = 'wsu-people-wrapper';
 		$wrapper_classes .= ( $layout ) ? ' ' . esc_attr( $layout ) : ' table';
-		$theme_template = $this->theme_has_listing_template();
+
+		if ( 'yes' === $show_photos ) {
+			$wrapper_classes .= ' photos';
+		}
+
+		if ( 'lightbox' === $open_profiles_as ) {
+			$wrapper_classes .= ' lightbox';
+		}
+
+		// Set up the page content.
 		$elements = array(
 			'people' => array(),
 			'locations' => array(),
@@ -771,9 +806,6 @@ class WSUWP_People_Directory_Page_Template {
 		);
 		$loading = false;
 
-		// Loop through the local records in their display order and add an `include`
-		// parameter to the request URL for each one, then leverage `orderby=include`
-		// to retrieve the primary records in the desired order. Silly, but effective.
 		if ( $ids ) {
 			$cache_key = md5( get_the_modified_date( 'Y-m-d H:i:s' ) );
 			$cached_elements = wp_cache_get( $cache_key, 'directory_page_elements' );
@@ -784,27 +816,31 @@ class WSUWP_People_Directory_Page_Template {
 				$id_array = explode( ' ', $ids );
 				$count = count( $id_array );
 
+				// Get post count and taxonomy terms from the local people records.
+				$local_people_data = $this->get_local_people( $post_id, $count, $filters );
+				$elements['locations'] = $local_people_data['locations'];
+				$elements['orgs'] = $local_people_data['orgs'];
+
+				// Get the people via REST request from the primary site.
 				if ( 100 >= $count ) {
-					$elements = $this->get_people( $post_id, $id_array, $count, $filters, 0 );
+					$elements['people'] = $this->get_people( $id_array, $count );
 				} else {
-					$groups = array_chunk( $id_array, 100 );
-					$offset = 0;
+					$id_groups = array_chunk( $id_array, 100 );
 
-					foreach ( $groups as $group ) {
-						$group_count = count( $group );
-						$chunk = $this->get_people( $post_id, $group, $group_count, $filters, $offset );
-
-						$elements['people'] = array_merge( $elements['people'], $chunk['people'] );
-						$elements['locations'] = array_merge( $elements['locations'], $chunk['locations'] );
-						$elements['orgs'] = array_merge( $elements['orgs'], $chunk['orgs'] );
-
-						$offset = $offset + $group_count;
+					foreach ( $id_groups as $id_group ) {
+						$id_group_count = count( $id_group );
+						$people_group = $this->get_people( $id_group, $id_group_count );
+						$elements['people'] = array_merge( $elements['people'], $people_group );
 					}
 				}
 
-				// Give a notification if profiles are still being loaded.
-				// Otherwise, cache the people data for this page.
-				if ( count( $elements['people'] ) !== $count ) {
+				// If the number of IDs doesn't match the number of local profiles,
+				// they're probably still being inserted, so set a flag to display
+				// a notification telling the user as much.
+				// This also checks that the number of profiles returned by the REST
+				// request matches the number of IDs.
+				// Otherwise, cache the more expensive content for this page.
+				if ( $local_people_data['count'] !== $count || count( $elements['people'] ) !== $count ) {
 					$loading = true;
 					$elements['people'] = array();
 				} else {
@@ -813,14 +849,7 @@ class WSUWP_People_Directory_Page_Template {
 			}
 		}
 
-		if ( 'yes' === $show_photos ) {
-			$wrapper_classes .= ' photos';
-		}
-
-		if ( 'lightbox' === $open_profiles_as ) {
-			$wrapper_classes .= ' lightbox';
-		}
-
+		// Assemble the data used for displaying the page.
 		$data = array(
 			'wrapper_classes' => $wrapper_classes,
 			'ids' => $ids,
@@ -829,10 +858,10 @@ class WSUWP_People_Directory_Page_Template {
 			'filters' => array(
 				'options' => $filters,
 				'template' => plugin_dir_path( dirname( __FILE__ ) ) . 'templates/filters.php',
-				'location' => array_unique( $elements['locations'] ),
-				'org' => array_unique( $elements['orgs'] ),
+				'location' => $elements['locations'],
+				'org' => $elements['orgs'],
 			),
-			'person_card_template' => ( $theme_template ) ? $theme_template : plugin_dir_path( dirname( __FILE__ ) ) . 'templates/person-listing.php',
+			'person_card_template' => $this->profile_listing_template(),
 			'profile_display_options' => array(
 				'about' => get_post_meta( $post_id, '_wsu_people_directory_about', true ),
 				'link' => array(
@@ -850,30 +879,27 @@ class WSUWP_People_Directory_Page_Template {
 	}
 
 	/**
-	 * Return a group of people.
+	 * Return number of local profiles and, if needed,
+	 * the terms for populating filters on a directory page.
 	 *
-	 * @since 0.3.4
+	 * @since 0.3.6
 	 *
 	 * @param int   $post_id
-	 * @param array $id_array
-	 * @param int   $per_page
-	 * @param mixed $filters
+	 * @param int   $count
+	 * @param array $filters
 	 *
 	 * @return array
 	 */
-	public function get_people( $post_id, $id_array, $per_page, $filters, $offset ) {
-		$elements = array(
-			'people' => array(),
+	public function get_local_people( $post_id, $count, $filters ) {
+		$local_data = array(
+			'count' => 0,
 			'locations' => array(),
 			'orgs' => array(),
 		);
 
 		$people_query_args = array(
 			'post_type' => WSUWP_People_Post_Type::$post_type_slug,
-			'posts_per_page' => count( $id_array ),
-			'meta_key' => "_order_on_page_{$post_id}",
-			'orderby' => 'meta_value_num',
-			'order' => 'asc',
+			'posts_per_page' => $count,
 			'meta_query' => array(
 				array(
 					'key' => '_on_page',
@@ -882,57 +908,80 @@ class WSUWP_People_Directory_Page_Template {
 			),
 		);
 
-		if ( 0 !== $offset ) {
-			$people_query_args['offset'] = $offset;
-		}
-
 		$people = new WP_Query( $people_query_args );
 
-		if ( $people->have_posts() ) {
-			$request_url = add_query_arg( array(
-				'per_page' => $per_page,
-				'orderby' => 'include',
-			), WSUWP_People_Directory::REST_URL() );
+		$local_data['count'] = $people->post_count;
 
+		// Stop here if there no taxonomy filters are being displayed.
+		if ( ! $filters || empty( array_diff( $filters, array( 'search' ) ) ) ) {
+			return $local_data;
+		}
+
+		if ( $people->have_posts() ) {
 			while ( $people->have_posts() ) {
 				$people->the_post();
-				$profile_id = get_post_meta( get_the_ID(), '_wsuwp_profile_post_id', true );
-				$request_url = add_query_arg( 'include[]', $profile_id, $request_url );
+				$get_terms_args = array(
+					'fields' => 'names',
+				);
 
-				if ( is_array( $filters ) ) {
-					$get_terms_args = array(
-						'fields' => 'names',
-					);
+				if ( in_array( 'location', $filters, true ) ) {
+					$locations = wp_get_post_terms( get_the_ID(), 'wsuwp_university_location', $get_terms_args );
 
-					if ( in_array( 'location', $filters, true ) ) {
-						$profile_locations = wp_get_post_terms( get_the_ID(), 'wsuwp_university_location', $get_terms_args );
-						$elements['locations'] = array_unique( array_merge( $elements['locations'], $profile_locations ) );
-					}
+					$local_data['locations'] = array_unique( array_merge( $local_data['locations'], $locations ) );
+				}
 
-					if ( in_array( 'org', $filters, true ) ) {
-						$profile_orgs = wp_get_post_terms( get_the_ID(), 'wsuwp_university_org', $get_terms_args );
-						$elements['orgs'] = array_unique( array_merge( $elements['orgs'], $profile_orgs ) );
-					}
+				if ( in_array( 'org', $filters, true ) ) {
+					$orgs = wp_get_post_terms( get_the_ID(), 'wsuwp_university_org', $get_terms_args );
+					$local_data['orgs'] = array_unique( array_merge( $local_data['orgs'], $orgs ) );
 				}
 			}
 			wp_reset_postdata();
-
-			$response = wp_remote_get( $request_url );
-
-			if ( ! is_wp_error( $response ) ) {
-				$data = wp_remote_retrieve_body( $response );
-
-				if ( ! empty( $data ) ) {
-					$people = json_decode( $data );
-
-					if ( ! empty( $people ) ) {
-						$elements['people'] = $people;
-					}
-				}
-			}
 		}
 
-		return $elements;
+		return $local_data;
+	}
+
+	/**
+	 * Return a group of people.
+	 *
+	 * @since 0.3.5
+	 *
+	 * @param int $post_id
+	 * @param int $per_page
+	 *
+	 * @return array
+	 */
+	public function get_people( $id_array, $per_page ) {
+		$query_args = array(
+			'per_page' => $per_page,
+			'orderby' => 'include',
+		);
+
+		$request_url = add_query_arg( $query_args, WSUWP_People_Directory::REST_URL() );
+
+		foreach ( $id_array as $id ) {
+			$request_url = add_query_arg( 'include[]', absint( $id ), $request_url );
+		}
+
+		$response = wp_remote_get( $request_url );
+
+		if ( is_wp_error( $response ) ) {
+			return array();
+		}
+
+		$data = wp_remote_retrieve_body( $response );
+
+		if ( empty( $data ) ) {
+			return array();
+		}
+
+		$people = json_decode( $data );
+
+		if ( empty( $people ) ) {
+			return array();
+		}
+
+		return $people;
 	}
 
 	/**
@@ -984,12 +1033,7 @@ class WSUWP_People_Directory_Page_Template {
 
 		ob_start();
 
-		// If a theme has a directory template, use it.
-		if ( $this->theme_has_directory_template() ) {
-			include $this->theme_has_directory_template();
-		} else {
-			include plugin_dir_path( dirname( __FILE__ ) ) . 'templates/people.php';
-		}
+		include $this->directory_template();
 
 		$content = ob_get_clean();
 

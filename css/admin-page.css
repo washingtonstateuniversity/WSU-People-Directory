@@ -3,12 +3,14 @@
 #wsuwp-people-directory-configuration .select-all-people,
 .post-new-php .wsu-people-directory-options,
 .wsu-people-directory-options > div,
-.post-new-php .wsu-people-bulk-actions {
+.post-new-php .wsu-people-bulk-actions,
+.wsuwp-people-directory-template #postdivrich {
 	display: none;
 }
 
 .post-new-php .wsu-people-directory-options.add,
-.post-new-php .wsu-people-directory-options.add > div {
+.post-new-php .wsu-people-directory-options.add > div,
+.wsuwp-people-directory-template #wsuwp-people-directory-configuration {
 	display: block;
 }
 
@@ -72,6 +74,7 @@
 .wsu-people-filter-label {
 	font-size: 14px;
 	margin: 0;
+	pointer-events: none;
 }
 
 .wsu-person {
