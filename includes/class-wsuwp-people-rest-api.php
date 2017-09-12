@@ -9,6 +9,20 @@ class WSUWP_People_REST_API {
 	private static $instance;
 
 	/**
+	 * A list of post meta keys to include in a REST API response from secondary sites.
+	 *
+	 * @since 0.3.8
+	 *
+	 * @var array
+	 */
+	public $secondary_post_meta_keys = array(
+		'primary_profile_id' => '_wsuwp_profile_post_id',
+		'display_photo' => '_use_photo',
+		'display_title' => '_use_title',
+		'display_bio' => '_use_bio',
+	);
+
+	/**
 	 * Maintain and return the one instance. Initiate hooks when called the first time.
 	 *
 	 * @since 0.3.0
@@ -43,6 +57,10 @@ class WSUWP_People_REST_API {
 		add_action( 'init', array( $this, 'register_wsu_nid_query_var' ) );
 		add_filter( 'rest_' . WSUWP_People_Post_Type::$post_type_slug . '_query', array( $this, 'rest_query_vars' ), 10, 2 );
 		add_action( 'pre_get_posts', array( $this, 'handle_wsu_nid_query_var' ) );
+
+		if ( false === WSUWP_People_Directory::is_main_site() ) {
+			add_action( 'rest_api_init', array( $this, 'register_secondary_api_fields' ) );
+		}
 	}
 
 	/**
@@ -470,5 +488,38 @@ class WSUWP_People_REST_API {
 			$query->set( 'meta_key', '_wsuwp_profile_ad_nid' );
 			$query->set( 'meta_value', sanitize_text_field( $query->query['wsu_nid'] ) );
 		}
+	}
+
+	/**
+	 * Register secondary custom meta fields attached to a REST API response containing people data.
+	 *
+	 * @since 0.3.8
+	 */
+	public function register_secondary_api_fields() {
+		$args = array(
+			'get_callback' => array( $this, 'get_secondary_api_meta_data' ),
+		);
+
+		foreach ( $this->secondary_post_meta_keys as $rest_key => $field_name ) {
+			register_rest_field( WSUWP_People_Post_Type::$post_type_slug, $rest_key, $args );
+		}
+	}
+
+	/**
+	 * Return the value of a post meta field sanitized against a whitelist with the provided method.
+	 *
+	 * @since 0.3.8
+	 *
+	 * @param array  $object   The current post being processed.
+	 * @param string $rest_key Name of the field being retrieved.
+	 *
+	 * @return mixed Meta data associated with the post and field name.
+	 */
+	public function get_secondary_api_meta_data( $object, $rest_key ) {
+		if ( ! array_key_exists( $rest_key, $this->secondary_post_meta_keys ) ) {
+			return '';
+		}
+
+		return esc_html( get_post_meta( $object['id'], $this->secondary_post_meta_keys[ $rest_key ], true ) );
 	}
 }
