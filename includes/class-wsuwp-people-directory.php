@@ -14,7 +14,7 @@ class WSUWP_People_Directory {
 	 *
 	 * @var string
 	 */
-	public static $version = '0.3.6';
+	public static $version = '0.3.7';
 
 	/**
 	 * Maintain and return the one instance. Initiate hooks when called the first time.
