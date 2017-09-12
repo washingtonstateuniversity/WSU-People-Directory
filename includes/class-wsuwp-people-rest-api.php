@@ -387,6 +387,8 @@ class WSUWP_People_REST_API {
 			return null;
 		}
 
+		$data = array();
+
 		$taxonomies = get_object_taxonomies( WSUWP_People_Post_Type::$post_type_slug );
 
 		foreach ( $taxonomies as $taxonomy ) {
