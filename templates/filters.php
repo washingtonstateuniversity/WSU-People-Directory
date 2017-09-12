@@ -9,20 +9,30 @@
 
 	<?php if ( in_array( 'search', $directory_data['filters']['options'], true ) ) { ?>
 	<div class="wsu-people-filter search">
-		<label><span class="screen-reader-text">Start typing to search</span>
-			<input type="search" value="" placeholder="Type to search" autocomplete="off">
+		<label>
+			<span class="screen-reader-text">Start typing to search</span>
+			<input type="search"
+				   value=""
+				   placeholder="<?php echo esc_html( apply_filters( 'wsuwp_people_search_filter_label', 'Type to search' ) ); ?>"
+				   autocomplete="off" />
 		</span>
 	</div>
 	<?php } ?>
 
 	<?php foreach ( $directory_data['filters']['options'] as $option ) { ?>
-	<?php if ( 'search' === $option ) { continue; } ?>
-	<?php $label = ( 'org' === $option ) ? 'unit' : $option; ?>
+	<?php
+	if ( 'search' === $option ) {
+		continue;
+	}
+
+	$label = ( 'org' === $option ) ? 'unit' : $option;
+	$label = apply_filters( "wsuwp_people_{$option}_filter_label", 'Filter by ' . $label );
+	?>
 	<div class="wsu-people-filter <?php echo esc_attr( $option ); ?>">
 		<button type="button"
 				class="wsu-people-filter-label"
 				aria-controls="wsu-people-<?php echo esc_attr( $option ); ?>"
-				aria-expanded="false">Filter by <?php echo esc_html( $label ); ?></button>
+				aria-expanded="false"><?php echo esc_html( $label ); ?></button>
 		<ul class="wsu-people-filter-terms" id="wsu-people-<?php echo esc_attr( $option ); ?>">
 			<?php foreach ( $directory_data['filters'][ $option ] as $i => $term ) { ?>
 			<li>
