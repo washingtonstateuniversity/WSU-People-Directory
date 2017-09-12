@@ -13,7 +13,7 @@
 			<span class="screen-reader-text">Start typing to search</span>
 			<input type="search"
 				   value=""
-				   placeholder="<?php echo esc_html( apply_filters( 'wsuwp_people_search_filter_label', 'Type to search' ) ); ?>"
+				   placeholder="<?php echo esc_attr( apply_filters( 'wsuwp_people_search_filter_label', 'Type to search' ) ); ?>"
 				   autocomplete="off" />
 		</span>
 	</div>
