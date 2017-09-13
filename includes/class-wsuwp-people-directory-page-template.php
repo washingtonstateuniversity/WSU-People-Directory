@@ -1004,14 +1004,16 @@ class WSUWP_People_Directory_Page_Template {
 			return $template;
 		}
 
-		// Enqueue styles and scripts if appropriate.
+		// Enqueue styles if appropriate.
 		if ( 'custom' !== get_post_meta( $post->ID, '_wsu_people_directory_layout', true ) ) {
 			wp_enqueue_style( 'wsu-people', plugin_dir_url( dirname( __FILE__ ) ) . 'css/people.css', array(), WSUWP_People_Directory::$version );
-			wp_enqueue_script( 'wsu-people', plugin_dir_url( dirname( __FILE__ ) ) . 'js/people.min.js', array( 'jquery', 'underscore' ), WSUWP_People_Directory::$version, true );
+		}
 
-			if ( 'lightbox' === get_post_meta( $post->ID, '_wsu_people_directory_profile', true ) ) {
-				wp_localize_script( 'wsu-people', 'wsu_people_rest_url', trailingslashit( WSUWP_People_Directory::REST_URL() ) );
-			}
+		// Enqueue scripts.
+		wp_enqueue_script( 'wsu-people', plugin_dir_url( dirname( __FILE__ ) ) . 'js/people.min.js', array( 'jquery', 'underscore' ), WSUWP_People_Directory::$version, true );
+
+		if ( 'lightbox' === get_post_meta( $post->ID, '_wsu_people_directory_profile', true ) ) {
+			wp_localize_script( 'wsu-people', 'wsu_people_rest_url', trailingslashit( WSUWP_People_Directory::REST_URL() ) );
 		}
 
 		add_filter( 'the_content', array( $this, 'directory_content' ) );
