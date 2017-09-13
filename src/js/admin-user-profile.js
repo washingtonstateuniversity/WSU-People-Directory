@@ -100,7 +100,7 @@ wsuwp.people = wsuwp.people || {};
 
 	/**
 	 * Posts data to the user's main profile.
-	 */
+	 * Commenting this out for now.
 	$( "#submit" ).on( "click", function() {
 		if ( false === wsuwp.people.profile_id ) {
 			return;
@@ -137,5 +137,5 @@ wsuwp.people = wsuwp.people || {};
 			},
 			data: data
 		} );
-	} );
+	} ); */
 }( jQuery, window, wsuwp ) );
