@@ -440,11 +440,8 @@ class WSUWP_People_Post_Type {
 				'request_from' => ( WSUWP_People_Directory::is_main_site() ) ? 'ad' : 'rest',
 			);
 
-			wp_enqueue_style( 'select2', 'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.min.css' );
-			wp_enqueue_script( 'select2', 'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js', array( 'jquery' ) );
-
 			wp_enqueue_style( 'wsuwp-people-edit-profile', plugins_url( 'css/admin-person.css', dirname( __FILE__ ) ), array(), WSUWP_People_Directory::$version );
-			wp_enqueue_script( 'wsuwp-people-edit-profile', plugins_url( 'js/admin-edit-profile.min.js', dirname( __FILE__ ) ), array( 'underscore', 'select2', 'jquery-ui-sortable' ), WSUWP_People_Directory::$version, true );
+			wp_enqueue_script( 'wsuwp-people-edit-profile', plugins_url( 'js/admin-edit-profile.min.js', dirname( __FILE__ ) ), array( 'underscore', 'jquery-ui-sortable' ), WSUWP_People_Directory::$version, true );
 			wp_localize_script( 'wsuwp-people-edit-profile', 'wsuwp_people_edit_profile', $profile_vars );
 
 			// Disable autosaving on spoke sites.
@@ -828,27 +825,10 @@ class WSUWP_People_Post_Type {
 	 */
 	public function person_meta_boxes( $post ) {
 		remove_meta_box( 'submitdiv', self::$post_type_slug, 'side' );
-		remove_meta_box( 'wsuwp_university_orgdiv', self::$post_type_slug, 'side' );
-		remove_meta_box( 'wsuwp_university_categorydiv', self::$post_type_slug, 'side' );
-		remove_meta_box( 'wsuwp_university_locationdiv', self::$post_type_slug, 'side' );
-		remove_meta_box( 'tagsdiv-post_tag', self::$post_type_slug, 'side' );
-		remove_meta_box( 'classificationdiv', self::$post_type_slug, 'side' );
-		remove_meta_box( 'categorydiv', self::$post_type_slug, 'side' );
 
 		$box_title = ( 'auto-draft' === $post->post_status ) ? 'Create Profile' : 'Update Profile';
 
 		add_meta_box( 'submitdiv', $box_title, array( $this, 'publish_meta_box' ), self::$post_type_slug, 'side', 'high' );
-
-		if ( taxonomy_exists( 'wsuwp_university_category' ) && taxonomy_exists( 'wsuwp_university_location' ) && taxonomy_exists( 'wsuwp_university_org' ) ) {
-			add_meta_box(
-				'wsuwp-university-taxonomies',
-				'Taxonomies',
-				array( $this, 'display_taxonomies_meta_box' ),
-				self::$post_type_slug,
-				'side',
-				'low'
-			);
-		}
 
 		if ( true === WSUWP_People_Directory::is_main_site() ) {
 			add_meta_box(
@@ -956,62 +936,6 @@ class WSUWP_People_Post_Type {
 		</div>
 
 	<?php
-	}
-
-	/**
-	 * Displays a meta box for selecting taxonomy terms.
-	 *
-	 * @since 0.3.0
-	 *
-	 * @param WP_Post $post
-	 */
-	public function display_taxonomies_meta_box( $post ) {
-		// Reversed because that seems to better match the order of importance.
-		$taxonomies = array_reverse( get_post_taxonomies( $post ) );
-
-		foreach ( $taxonomies as $taxonomy ) {
-			$terms = get_terms( array(
-				'hide_empty' => false,
-				'taxonomy' => $taxonomy,
-			) );
-
-			$name = get_taxonomy( $taxonomy )->labels->name;
-			?>
-
-			<p class="post-attributes-label-wrapper">
-				<label class="post-attributes-label" for="<?php echo esc_attr( $taxonomy ); ?>"><?php echo esc_html( $name ); ?></label>
-			</p>
-
-			<?php
-			$dropdown_args = array(
-				'class' => 'taxonomy-select2',
-				'echo' => false,
-				'hide_empty' => false,
-				'hierarchical' => true,
-				'id' => $taxonomy,
-				'name' => 'tax_input[' . $taxonomy . '][]',
-				'taxonomy' => $taxonomy,
-			);
-
-			if ( 'post_tag' === $taxonomy ) {
-				$dropdown_args['value_field'] = 'name';
-			}
-
-			$dropdown = wp_dropdown_categories( $dropdown_args );
-			$dropdown = str_replace( '<select', '<select multiple="multiple" style="width: 100%"', $dropdown );
-			$dropdown = str_replace( '&nbsp;', '', $dropdown );
-
-			$selected_terms = get_the_terms( $post->ID, $taxonomy );
-
-			if ( $selected_terms && ! is_wp_error( $selected_terms ) ) {
-				foreach ( $selected_terms as $term ) {
-					$value = ( 'post_tag' === $taxonomy ) ? $term->name : $term->term_id;
-					$dropdown = str_replace( 'value="' . $value . '"', 'value="' . $value . '" selected="selected"', $dropdown );
-				}
-			}
-
-			echo $dropdown; // @codingStandardsIgnoreLine
-		}
 	}
 
 	/**
