@@ -328,6 +328,8 @@ class WSUWP_People_Post_Type {
 		add_action( 'edit_form_after_editor', array( $this, 'edit_form_after_editor' ) );
 
 		add_action( 'add_meta_boxes_' . self::$post_type_slug, array( $this, 'person_meta_boxes' ) );
+		add_filter( 'wsuwp_taxonomy_metabox_post_types', array( $this, 'taxonomy_meta_box' ) );
+		add_filter( 'wsuwp_taxonomy_metabox_disable_new_term_adding', array( $this, 'disable_new_classifications' ) );
 
 		add_filter( 'wp_insert_post_data', array( $this, 'wp_insert_post_data' ) );
 		add_action( 'save_post_' . self::$post_type_slug, array( $this, 'save_post' ) );
@@ -936,6 +938,33 @@ class WSUWP_People_Post_Type {
 		</div>
 
 	<?php
+	}
+
+	/**
+	 * Displays a meta box for selecting taxonomy terms.
+	 *
+	 * @since 0.3.9
+	 *
+	 * @param array $post_types Post types and their associated taxonomies.
+	 */
+	public function taxonomy_meta_box( $post_types ) {
+		// Reversed because that seems to better match the order of importance.
+		$post_types[ self::$post_type_slug ] = array_reverse( get_object_taxonomies( self::$post_type_slug ) );
+
+		return $post_types;
+	}
+
+	/**
+	 * Disables the interface for adding new terms to the Classifications taxonomy.
+	 *
+	 * @since 0.3.9
+	 *
+	 * @param array $taxonomies Taxonomies for which to disable the interface for adding new terms.
+	 */
+	public function disable_new_classifications( $taxonomies ) {
+		$taxonomies[] = WSUWP_People_Classification_Taxonomy::$taxonomy_slug;
+
+		return $taxonomies;
 	}
 
 	/**
