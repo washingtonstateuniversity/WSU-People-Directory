@@ -350,23 +350,6 @@ var wsuwp = wsuwp || {};
 		};
 	} );
 
-	// Initialize Select2.
-	$( ".taxonomy-select2" ).select2( {
-		placeholder: "+ Add",
-		closeOnSelect: false,
-		templateResult: function( data, container ) {
-			if ( data.element ) {
-				$( container ).addClass( $( data.element ).attr( "class" ) );
-			}
-			return data.text;
-		}
-	} );
-
-	// Re-render the Select2 dropdown position when a new selection is made. Hacky.
-	$( ".taxonomy-select2" ).on( "change", function() {
-		$( window ).scroll();
-	} );
-
 	// Create an array of photo IDs already in the collection.
 	wsuwp.existing_photos = function() {
 		return $( "[name='_wsuwp_profile_photos[]']" ).map( function() { return parseInt( $( this ).val() ); } ).get();
