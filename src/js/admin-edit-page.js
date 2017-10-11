@@ -44,66 +44,45 @@
 			}
 		} );
 
+		// Provide Autocompete options for retrieving results from people.wsu.edu.
+		function autocomplete_options( taxonomy ) {
+			return {
+				delay: 500,
+				minLength: 3,
+				source: function( request, response ) {
+					$.ajax( {
+						url: window.wsuwp_people_edit_page.rest_route + taxonomy,
+						data: {
+							search: request.term,
+							per_page: 50
+						},
+						success: function( data ) {
+							response( $.map( data, function( item ) {
+								return {
+									label: item.name,
+									value: item.slug
+								};
+							} ) );
+						}
+					} );
+				}
+			};
+		}
+
 		// Use jQuery UI Autocomplete to suggest University Organizations.
-		$import_organization.autocomplete( {
-			source: $( "#wsuwp_university_orgchecklist .selectit" ).map( function() { return $( this ).text(); } ).get()
-		} );
+		$import_organization.autocomplete( autocomplete_options( "organization" ) );
 
 		// Use jQuery UI Autocomplete to suggest University Locations.
-		$import_location.autocomplete( {
-			source: $( "#wsuwp_university_locationchecklist .selectit" ).map( function() { return $( this ).text(); } ).get()
-		} );
+		$import_location.autocomplete( autocomplete_options( "location" ) );
 
 		// Use jQuery UI Autocomplete to suggest University Categories.
-		$import_category.autocomplete( {
-			source: $( "#wsuwp_university_categorychecklist .selectit" ).map( function() { return $( this ).text(); } ).get()
-		} );
+		$import_category.autocomplete( autocomplete_options( "university_category" ) );
 
 		// Use jQuery UI Autocomplete to suggest Classifications.
-		$import_classification.autocomplete( {
-			delay: 500,
-			minLength: 3,
-			source: function( request, response ) {
-				$.ajax( {
-					url: window.wsuwp_people_edit_page.rest_route + "classification",
-					data: {
-						search: request.term,
-						per_page: 50
-					},
-					success: function( data ) {
-						response( $.map( data, function( item ) {
-							return {
-								label: item.name,
-								value: item.slug
-							};
-						} ) );
-					}
-				} );
-			}
-		} );
+		$import_classification.autocomplete( autocomplete_options( "classification" ) );
 
 		// Use jQuery UI Autocomplete to suggest Tags.
-		$import_tag.autocomplete( {
-			delay: 500,
-			minLength: 3,
-			source: function( request, response ) {
-				$.ajax( {
-					url: window.wsuwp_people_edit_page.rest_route + "tags",
-					data: {
-						search: request.term,
-						per_page: 50
-					},
-					success: function( data ) {
-						response( $.map( data, function( item ) {
-							return {
-								label: item.name,
-								value: item.slug
-							};
-						} ) );
-					}
-				} );
-			}
-		} );
+		$import_tag.autocomplete( autocomplete_options( "tags" ) );
 
 		// Get people via REST request.
 		$( "#wsu-people-import" ).on( "click", function() {
