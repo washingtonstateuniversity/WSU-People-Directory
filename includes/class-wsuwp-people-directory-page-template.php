@@ -211,6 +211,11 @@ class WSUWP_People_Directory_Page_Template {
 				</p>
 
 				<p>
+					<label for="wsu-people-import-wsu-category">University Category</label>
+					<input type="text" id="wsu-people-import-wsu-category" value="" autocomplete="off" />
+				</p>
+
+				<p>
 					<label for="wsu-people-import-classification">Classification</label>
 					<input type="text" id="wsu-people-import-classification" value="" autocomplete="off" />
 				</p>

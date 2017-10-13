@@ -5,10 +5,11 @@
 		$editor = $( "#postdivrich" ),
 		$profile_ids = $( "#directory-page-profile-ids" ),
 		$section_toggle = $( ".wsu-people-directory-options-header" ),
-		$import_organization = $( "#wsu-people-import-organization" ),
-		$import_location = $( "#wsu-people-import-location" ),
-		$import_category = $( "#wsu-people-import-category" ),
+		$import_u_organization = $( "#wsu-people-import-organization" ),
+		$import_u_location = $( "#wsu-people-import-location" ),
+		$import_u_category = $( "#wsu-people-import-wsu-category" ),
 		$import_classification = $( "#wsu-people-import-classification" ),
+		$import_category = $( "#wsu-people-import-category" ),
 		$import_tag = $( "#wsu-people-import-tag" ),
 		$layout_option = $( "#wsu-people-directory-layout" ),
 		$photos_option = $( "#wsu-people-directory-show-photos" ),
@@ -44,89 +45,77 @@
 			}
 		} );
 
+		// Provide Autocompete options for retrieving results from people.wsu.edu.
+		function autocomplete_options( taxonomy ) {
+			return {
+				delay: 500,
+				minLength: 3,
+				source: function( request, response ) {
+					$.ajax( {
+						url: window.wsuwp_people_edit_page.rest_route + taxonomy,
+						data: {
+							search: request.term,
+							per_page: 50
+						},
+						success: function( data ) {
+							response( $.map( data, function( item ) {
+								return {
+									label: item.name,
+									value: item.slug
+								};
+							} ) );
+						}
+					} );
+				}
+			};
+		}
+
 		// Use jQuery UI Autocomplete to suggest University Organizations.
-		$import_organization.autocomplete( {
-			source: $( "#wsuwp_university_orgchecklist .selectit" ).map( function() { return $( this ).text(); } ).get()
-		} );
+		$import_u_organization.autocomplete( autocomplete_options( "organization" ) );
 
 		// Use jQuery UI Autocomplete to suggest University Locations.
-		$import_location.autocomplete( {
-			source: $( "#wsuwp_university_locationchecklist .selectit" ).map( function() { return $( this ).text(); } ).get()
-		} );
+		$import_u_location.autocomplete( autocomplete_options( "location" ) );
 
 		// Use jQuery UI Autocomplete to suggest University Categories.
-		$import_category.autocomplete( {
-			source: $( "#wsuwp_university_categorychecklist .selectit" ).map( function() { return $( this ).text(); } ).get()
-		} );
+		$import_u_category.autocomplete( autocomplete_options( "university_category" ) );
 
 		// Use jQuery UI Autocomplete to suggest Classifications.
-		$import_classification.autocomplete( {
-			delay: 500,
-			minLength: 3,
-			source: function( request, response ) {
-				$.ajax( {
-					url: window.wsuwp_people_edit_page.rest_route + "classification",
-					data: {
-						search: request.term,
-						per_page: 50
-					},
-					success: function( data ) {
-						response( $.map( data, function( item ) {
-							return {
-								label: item.name,
-								value: item.slug
-							};
-						} ) );
-					}
-				} );
-			}
-		} );
+		$import_classification.autocomplete( autocomplete_options( "classification" ) );
+
+		// Use jQuery UI Autocomplete to suggest Categories.
+		$import_category.autocomplete( autocomplete_options( "categories" ) );
 
 		// Use jQuery UI Autocomplete to suggest Tags.
-		$import_tag.autocomplete( {
-			delay: 500,
-			minLength: 3,
-			source: function( request, response ) {
-				$.ajax( {
-					url: window.wsuwp_people_edit_page.rest_route + "tags",
-					data: {
-						search: request.term,
-						per_page: 50
-					},
-					success: function( data ) {
-						response( $.map( data, function( item ) {
-							return {
-								label: item.name,
-								value: item.slug
-							};
-						} ) );
-					}
-				} );
-			}
-		} );
+		$import_tag.autocomplete( autocomplete_options( "tags" ) );
 
 		// Get people via REST request.
 		$( "#wsu-people-import" ).on( "click", function() {
 			var data = { per_page: 100 };
 
 			// Add the University Organization parameter.
-			if ( "" !== $import_organization.val() ) {
-				data[ "filter[wsuwp_university_org]" ] = $import_organization.val();
+			if ( "" !== $import_u_organization.val() ) {
+				data[ "filter[wsuwp_university_org]" ] = $import_u_organization.val();
 			}
 
 			// Add the University Location parameter.
-			if ( "" !== $import_location.val() ) {
-				data[ "filter[wsuwp_university_location]" ] = $import_location.val();
+			if ( "" !== $import_u_location.val() ) {
+				data[ "filter[wsuwp_university_location]" ] = $import_u_location.val();
 			}
 
 			// Add the University Category parameter.
-			if ( "" !== $import_category.val() ) {
-				data[ "filter[wsuwp_university_category]" ] = $import_category.val();
+			if ( "" !== $import_u_category.val() ) {
+				data[ "filter[wsuwp_university_category]" ] = $import_u_category.val();
 			}
 
 			// Add the Classification parameter.
 			if ( "" !== $import_classification.val() ) {
 				data[ "filter[classification]" ] = $import_classification.val();
+			}
+
+			// Add the Category parameters.
+			if ( "" !== $import_category.val() ) {
+				data[ "filter[taxonomy]" ] = "category";
+				data[ "filter[term]" ] = $import_category.val();
 			}
 
 			// Add the Tag parameter.
