@@ -1216,7 +1216,7 @@ class WSUWP_People_Post_Type {
 	private function get_organization_person_data( $nid ) {
 		$person_data = apply_filters( 'wsuwp_people_get_organization_person_data', false, $nid );
 
-		if ( empty( $person_data ) ) {
+		if ( empty( array_filter( $person_data ) ) ) {
 			return array();
 		}
 
@@ -1257,19 +1257,15 @@ class WSUWP_People_Post_Type {
 			wp_send_json_error( 'Invalid or empty Network ID' );
 		}
 
-		// If this isn't a manual refresh, make sure the profile doesn't already exist.
-		if ( 'false' === $_POST['is_refresh'] ) {
+		$nid_query = new WP_Query( array(
+			'meta_key' => '_wsuwp_profile_ad_nid',
+			'meta_value' => $nid,
+			'post_type' => self::$post_type_slug,
+			'posts_per_page' => -1,
+		) );
 
-			$nid_query = new WP_Query( array(
-				'meta_key' => '_wsuwp_profile_ad_nid',
-				'meta_value' => $nid,
-				'post_type' => self::$post_type_slug,
-				'posts_per_page' => -1,
-			) );
-
-			if ( 0 < $nid_query->found_posts ) {
-				wp_send_json_error( 'A profile for this person already exists' );
-			}
+		if ( 0 < $nid_query->found_posts ) {
+			wp_send_json_error( "A profile for $nid already exists." );
 		}
 
 		$return_data = false;

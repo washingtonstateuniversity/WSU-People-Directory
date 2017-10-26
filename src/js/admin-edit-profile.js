@@ -43,8 +43,7 @@ var wsuwp = wsuwp || {};
 				"action": "wsu_people_get_data_by_nid",
 				"_ajax_nonce": window.wsuwp_people_edit_profile.nid_nonce,
 				"network_id": $nid.val(),
-				"request_from": window.wsuwp_people_edit_profile.request_from,
-				"is_refresh": ( $( e.target ).is( "#refresh-ad-data" ) ) ? "true" : "false"
+				"request_from": window.wsuwp_people_edit_profile.request_from
 			};
 
 			$.post( window.ajaxurl, data, function( response ) {
