@@ -1216,7 +1216,7 @@ class WSUWP_People_Post_Type {
 	private function get_organization_person_data( $nid ) {
 		$person_data = apply_filters( 'wsuwp_people_get_organization_person_data', false, $nid );
 
-		if ( empty( $person_data ) ) {
+		if ( empty( array_filter( $person_data ) ) ) {
 			return array();
 		}
 
