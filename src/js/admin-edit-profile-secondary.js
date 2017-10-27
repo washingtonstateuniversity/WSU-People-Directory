@@ -191,16 +191,12 @@ wsuwp.people = wsuwp.people || {};
 		}
 
 		// Populate taxonomy data.
-		if ( data._embedded && data._embedded[ "wp:term" ] && data._embedded[ "wp:term" ] !== 0 ) {
-			$.each( data._embedded[ "wp:term" ], function( i, taxonomy ) {
-				if ( taxonomy ) {
-					$.each( taxonomy, function( i, term ) {
-						if ( "post_tag" === term.taxonomy ) {
-							$( "#post_tag" ).val( term.name ).trigger( "change" );
-						} else {
-							$( "#" + term.taxonomy ).find( "option:contains(" + term.name + ")" ).attr( "selected", "selected" );
-							$( "#" + term.taxonomy ).trigger( "change" );
-						}
+		if ( data.taxonomy_terms ) {
+			$.each( data.taxonomy_terms, function( taxonomy, terms ) {
+				if ( terms ) {
+					$.each( terms, function( i, term ) {
+						$( "#" + taxonomy + "-select" ).find( "option:contains(" + term.name + ")" ).attr( "selected", "selected" );
+						$( "#" + taxonomy + "-select" ).trigger( "change" );
 					} );
 				}
 			} );
