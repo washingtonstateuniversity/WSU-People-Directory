@@ -37,6 +37,18 @@ wsuwp.people = wsuwp.people || {};
 	};
 
 	/**
+	 * Contains a list of a person's taxonomy terms.
+	 */
+	wsuwp.people.taxonomy_terms = {
+		"category": [],
+		"classification": [],
+		"post_tag": [],
+		"wsuwp_university_category": [],
+		"wsuwp_university_location": [],
+		"wsuwp_university_org": []
+	};
+
+	/**
 	 * Populate biography editors with existing data from the REST API
 	 * after that data has been received.
 	 *
@@ -194,10 +206,16 @@ wsuwp.people = wsuwp.people || {};
 		if ( data.taxonomy_terms ) {
 			$.each( data.taxonomy_terms, function( taxonomy, terms ) {
 				if ( terms ) {
+					var original_terms = [];
+
 					$.each( terms, function( i, term ) {
 						$( "#" + taxonomy + "-select" ).find( "option:contains(" + term.name + ")" ).attr( "selected", "selected" );
 						$( "#" + taxonomy + "-select" ).trigger( "change" );
+
+						original_terms.push( term.name );
 					} );
+
+					wsuwp.people.taxonomy_terms[ taxonomy ] = original_terms;
 				}
 			} );
 		}
