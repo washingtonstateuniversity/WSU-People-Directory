@@ -7,6 +7,9 @@
 	-->
 	<arg value="sv"/>
 
+	<!-- Use a more colorful output -->
+	<arg name="colors" />
+
 	<!-- Check only PHP files -->
 	<arg name="extensions" value="php"/>
 
@@ -19,16 +22,19 @@
 		<!-- Rules from the WSUWP Plugin Skeleton repository -->
 		<exclude name="WordPress.NamingConventions.ValidFunctionName" />
 		<exclude name="WordPress.Files.FileName" />
+		<exclude name="WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned" />
 		<exclude name="Squiz.PHP.EmbeddedPhp.NoSemicolon" />
 		<exclude name="Squiz.PHP.EmbeddedPhp.ContentBeforeEnd" />
 		<exclude name="Squiz.PHP.EmbeddedPhp.ContentBeforeOpen" />
 		<exclude name="Squiz.PHP.EmbeddedPhp.ContentAfterOpen" />
 		<exclude name="Squiz.PHP.EmbeddedPhp.ContentAfterEnd" />
+		<exclude name="Generic.Formatting.MultipleStatementAlignment.NotSameWarning" />
 
 		<!-- Rules custom to the People Directory -->
 		<exclude name="Squiz.ControlStructures.ControlSignature.NewlineAfterOpenBrace" />
 		<exclude name="Generic.PHP.DisallowAlternativePHPTags.MaybeASPShortOpenTagFound" />
 		<exclude name="Generic.PHP.DisallowAlternativePHPTags.MaybeASPOpenTagFound" />
 		<exclude name="Squiz.Commenting.LongConditionClosingComment" />
+		<exclude name="WordPress.WhiteSpace.PrecisionAlignment.Found" />
 	</rule>
 </ruleset>
