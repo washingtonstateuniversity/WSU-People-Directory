@@ -92,7 +92,7 @@ class WSUWP_Person_Card_Shortcode {
 
 		ob_start();
 
-		require_once( $template );
+		require_once $template;
 
 		$content = ob_get_clean();
 
