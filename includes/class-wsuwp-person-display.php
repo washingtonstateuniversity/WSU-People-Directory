@@ -405,6 +405,7 @@ class WSUWP_Person_Display {
 		// Add a "has-photo" class if appropriate.
 		if ( $data['photo'] ) {
 			$card_classes .= ' has-photo';
+			$data['photo_size'] = $options['photo'];
 		}
 
 		// The "Bio/About" display can be set for the entire page.

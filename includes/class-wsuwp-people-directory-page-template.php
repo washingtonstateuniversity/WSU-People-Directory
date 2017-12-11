@@ -53,7 +53,7 @@ class WSUWP_People_Directory_Page_Template {
 			'sanitize_callback' => 'sanitize_text_field',
 		),
 		'_wsu_people_directory_show_photos' => array(
-			'type' => 'boolean',
+			'type' => 'string',
 			'description' => 'Whether to show photos on this people listing',
 			'sanitize_callback' => 'sanitize_text_field',
 		),
@@ -259,8 +259,10 @@ class WSUWP_People_Directory_Page_Template {
 				<p>
 					<label for="wsu-people-directory-show-photos">Show photos</label>
 					<select id="wsu-people-directory-show-photos" name="_wsu_people_directory_show_photos">
-						<option value="yes"<?php selected( 'yes', $directory_data['profile_display_options']['photo'] ); ?>>Yes</option>
-						<option value="no"<?php selected( 'no', $directory_data['profile_display_options']['photo'] ); ?>>No</option>
+						<option value="thumbnail"<?php selected( 'thumbnail', $directory_data['profile_display_options']['photo'] ); ?>>Thumbnail</option>
+						<option value="medium"<?php selected( 'medium', $directory_data['profile_display_options']['photo'] ); ?>>Medium</option>
+						<option value="large"<?php selected( 'large', $directory_data['profile_display_options']['photo'] ); ?>>Large</option>
+						<option value="no"<?php selected( 'no', $directory_data['profile_display_options']['photo'] ); ?>>None</option>
 					</select>
 				</p>
 
@@ -795,7 +797,7 @@ class WSUWP_People_Directory_Page_Template {
 		$wrapper_classes = 'wsu-people-wrapper';
 		$wrapper_classes .= ( $layout ) ? ' ' . esc_attr( $layout ) : ' table';
 
-		if ( 'yes' === $show_photos ) {
+		if ( 'no' !== $show_photos ) {
 			$wrapper_classes .= ' photos';
 		}
 
