@@ -343,9 +343,7 @@ wsuwp.people = wsuwp.people || {};
 				classifications = $( "#classification-select option:selected" ).map( function() { return this.text; } ).get(),
 				organizations = $( "#wsuwp_university_org-select option:selected" ).map( function() { return this.text; } ).get(),
 				locations = $( "#wsuwp_university_location-select option:selected" ).map( function() { return this.text; } ).get(),
-				u_categories = $( "#wsuwp_university_category-select option:selected" ).map( function() { return this.text; } ).get(),
-				tags = $( "#post_tag-select option:selected" ).map( function() { return this.text; } ).get(),
-				categories = $( "#category-select" ).map( function() { return this.text; } ).get();
+				u_categories = $( "#wsuwp_university_category-select option:selected" ).map( function() { return this.text; } ).get();
 
 			// Only add changed values to the data array.
 			if ( name.text() !== name.data( "original" ) ) {
@@ -414,14 +412,6 @@ wsuwp.people = wsuwp.people || {};
 
 			if ( !wsuwp.people.terms_match( wsuwp.people.taxonomy_terms.wsuwp_university_category, u_categories ) ) {
 				data.taxonomy_terms.wsuwp_university_category = u_categories;
-			}
-
-			if ( !wsuwp.people.terms_match( wsuwp.people.taxonomy_terms.post_tag, tags ) ) {
-				data.taxonomy_terms.post_tag = tags;
-			}
-
-			if ( !wsuwp.people.terms_match( wsuwp.people.taxonomy_terms.category, categories ) ) {
-				data.taxonomy_terms.category = categories;
 			}
 
 			// Only push data if values have changed.
