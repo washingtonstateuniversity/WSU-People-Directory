@@ -276,7 +276,7 @@ wsuwp.people = wsuwp.people || {};
 		var $nid = $( "#_wsuwp_profile_ad_nid" ),
 			post_id = $( "#_wsuwp_profile_post_id" ).val();
 
-		// Make a REST request to for profile data from people.wsu.edu.
+		// Make a REST request for profile data from people.wsu.edu.
 		if ( window.wsuwp_people_edit_profile_secondary.load_data ) {
 			$.ajax( {
 				url: window.wsuwp_people_edit_profile_secondary.rest_url,
