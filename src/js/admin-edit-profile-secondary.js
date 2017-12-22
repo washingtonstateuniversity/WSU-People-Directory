@@ -42,9 +42,7 @@ wsuwp.people = wsuwp.people || {};
 	 * @type {{taxonomy: [array]}}
 	 */
 	wsuwp.people.taxonomy_terms = {
-		"category": [],
 		"classification": [],
-		"post_tag": [],
 		"wsuwp_university_category": [],
 		"wsuwp_university_location": [],
 		"wsuwp_university_org": []

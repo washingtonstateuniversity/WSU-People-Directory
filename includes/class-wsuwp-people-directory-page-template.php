@@ -619,11 +619,11 @@ class WSUWP_People_Directory_Page_Template {
 
 		foreach ( $person->taxonomy_terms as $taxonomy => $terms ) {
 			foreach ( $terms as $term ) {
-				if ( 'post_tag' === $taxonomy ) {
-					$tags[] = $term->slug;
-				} else {
+				if ( 'post_tag' !== $taxonomy && 'category' !== $taxonomy ) {
 					$local_term = get_term_by( 'slug', $term->slug, $taxonomy );
-					$taxonomy_data[ $taxonomy ][] = $local_term->term_id;
+					if ( $local_term ) {
+						$taxonomy_data[ $taxonomy ][] = $local_term->term_id;
+					}
 				}
 			}
 		}
