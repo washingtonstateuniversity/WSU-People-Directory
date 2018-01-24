@@ -576,6 +576,7 @@ class WSUWP_People_Post_Type {
 				}
 			}
 		} elseif ( has_post_thumbnail() ) {
+			$photos = array(); // An array is expected further down.
 			$photo_url = get_the_post_thumbnail_url();
 		}
 		?>
