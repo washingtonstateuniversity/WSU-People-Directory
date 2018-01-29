@@ -406,6 +406,14 @@ class WSUWP_Person_Display {
 		if ( $data['photo'] ) {
 			$card_classes .= ' has-photo';
 			$data['photo_size'] = $options['photo'];
+
+			if ( 'large' === $options['photo'] ) {
+				$data['photo_url'] = $data['photo']->large;
+			} elseif ( 'medium' === $options['photo'] ) {
+				$data['photo_url'] = $data['photo']->medium;
+			} else {
+				$data['photo_url'] = $data['photo']->thumbnail;
+			}
 		}
 
 		// The "Bio/About" display can be set for the entire page.
