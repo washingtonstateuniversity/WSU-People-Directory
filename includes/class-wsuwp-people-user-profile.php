@@ -117,6 +117,10 @@ class WSUWP_People_User_Profile {
 	 * @return array
 	 */
 	public function filter_default_editor_settings( $settings, $editor_id ) {
+		if ( ! is_admin() ) {
+			return $settings;
+		}
+
 		if ( ! in_array( get_current_screen()->id, array( 'profile', 'user-edit' ), true ) ) {
 			return $settings;
 		}

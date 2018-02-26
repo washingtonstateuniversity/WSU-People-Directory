@@ -470,6 +470,10 @@ class WSUWP_People_Post_Type {
 	 * @param array $to_load Contains boolean values whether TinyMCE and Quicktags are being loaded.
 	 */
 	public function admin_enqueue_secondary_scripts( $to_load ) {
+		if ( ! is_admin() ) {
+			return;
+		}
+
 		$screen = get_current_screen();
 
 		if ( self::$post_type_slug !== $screen->post_type ) {
@@ -508,6 +512,10 @@ class WSUWP_People_Post_Type {
 	 * @return array
 	 */
 	public function filter_default_editor_settings( $settings, $editor_id ) {
+		if ( ! is_admin() ) {
+			return $settings;
+		}
+
 		if ( 'wsuwp_people_profile' !== get_current_screen()->id ) {
 			return $settings;
 		}
