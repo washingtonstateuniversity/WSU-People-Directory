@@ -811,6 +811,11 @@ class WSUWP_People_Post_Type {
 					?>
 					<div id="<?php echo esc_attr( $key ); ?>" class="wsu-person-bio">
 
+						<button type="button"
+								class="legacy-meta-delete"
+								data-name="<?php echo esc_attr( $args['description'] ); ?>"
+								data-metakey="<?php echo esc_attr( $args['meta_key'] ); ?>">Delete this field</button>
+
 						<h2><?php echo esc_html( $args['description'] ); ?></h2>
 
 						<div class="readonly"><?php echo wp_kses_post( apply_filters( 'the_content', $value ) ); ?></div>
