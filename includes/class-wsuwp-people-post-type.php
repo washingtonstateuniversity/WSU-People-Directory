@@ -283,10 +283,11 @@ class WSUWP_People_Post_Type {
 		),
 		'cv_attachment' => array(
 			'type' => 'string',
-			'description' => '',
+			'description' => 'C.V. - Upload',
 			'sanitize_callback' => 'attachment',
 			'meta_key' => '_wsuwp_profile_cv',
 			'updatable_via_rest' => true,
+			'legacy' => true,
 		),
 		'profile_photo' => array(
 			'type' => 'string',
@@ -820,7 +821,15 @@ class WSUWP_People_Post_Type {
 
 						<h2><?php echo esc_html( $args['description'] ); ?></h2>
 
-						<div class="readonly"><?php echo wp_kses_post( apply_filters( 'the_content', $value ) ); ?></div>
+						<div class="readonly"><?php
+						if ( 'cv_attachment' === $key ) {
+							$cv_attachment_url = wp_get_attachment_url( $value );
+							echo '<a href="' . esc_url( $cv_attachment_url ) . '">' . esc_url( $cv_attachment_url ) . '</a>';
+						} else {
+							echo wp_kses_post( apply_filters( 'the_content', $value ) );
+						}
+
+						?></div>
 
 					</div>
 					<?php
