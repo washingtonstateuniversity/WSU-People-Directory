@@ -341,6 +341,8 @@ class WSUWP_People_Post_Type {
 
 		add_filter( 'manage_taxonomies_for_' . self::$post_type_slug . '_columns', array( $this, 'manage_people_taxonomy_columns' ) );
 
+		add_filter( 'wp_ajax_wsu_people_delete_legacy_meta', array( $this, 'ajax_delete_legacy_meta' ) );
+
 		if ( false === WSUWP_People_Directory::is_main_site() ) {
 			add_action( 'wp_enqueue_editor', array( $this, 'admin_enqueue_secondary_scripts' ) );
 			add_filter( 'wp_editor_settings', array( $this, 'filter_default_editor_settings' ), 10, 2 );
@@ -1470,5 +1472,25 @@ class WSUWP_People_Post_Type {
 		}
 
 		exit();
+	}
+
+	/**
+	 * Removes legacy meta data.
+	 *
+	 * @since 0.3.0
+	 */
+	public function ajax_delete_legacy_meta() {
+		check_ajax_referer( 'wsu-people-nid-lookup' );
+
+		$post_id = absint( $_POST['post_id'] );
+		$meta_key = sanitize_text_field( $_POST['meta_key'] );
+
+		if ( empty( $post_id ) || empty( $meta_key ) ) {
+			wp_send_json_error( 'Invalid or empty Network ID' );
+		}
+
+		delete_post_meta( $post_id, $meta_key );
+
+		wp_send_json_success();
 	}
 }
