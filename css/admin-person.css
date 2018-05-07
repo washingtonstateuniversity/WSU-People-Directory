@@ -361,6 +361,51 @@ h2 + .wsu-person-add-degree:after {
 	color: #a90533;
 }
 
+/* Legacy meta delete button */
+.legacy-meta-delete {
+	background: none;
+	border: none;
+	cursor: pointer;
+	display: inline-block;
+	height: 24px;
+	margin: 0;
+	overflow: hidden;
+	position: relative;
+	text-indent: 24px;
+	white-space: nowrap;
+	width: 24px;
+}
+
+.legacy-meta-delete:before {
+	border-radius: 50%;
+	color: #0073aa;
+	content: "\f153";
+	display: block;
+	font: 400 16px/20px dashicons;
+	height: 20px;
+	left: 2px;
+	line-height: 1.28;
+	text-align: center;
+	speak: none;
+	text-indent: 0;
+	top: 2px;
+	position: absolute;
+	width: 20px;
+	-webkit-font-smoothing: antialiased;
+}
+
+.legacy-meta-delete:hover:before {
+	color: #c00;
+}
+
+.legacy-meta-delete + h2 {
+	display: inline-block;
+}
+
+.legacy-meta-delete + h2 + .readonly {
+	margin-top: 8px;
+}
+
 /* Display options */
 #local-display-photo {
 	overflow: hidden;
