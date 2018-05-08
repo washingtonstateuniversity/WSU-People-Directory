@@ -283,10 +283,11 @@ class WSUWP_People_Post_Type {
 		),
 		'cv_attachment' => array(
 			'type' => 'string',
-			'description' => '',
+			'description' => 'C.V. - Upload',
 			'sanitize_callback' => 'attachment',
 			'meta_key' => '_wsuwp_profile_cv',
 			'updatable_via_rest' => true,
+			'legacy' => true,
 		),
 		'profile_photo' => array(
 			'type' => 'string',
@@ -340,6 +341,8 @@ class WSUWP_People_Post_Type {
 		add_filter( 'wp_post_revision_meta_keys', array( $this, 'add_meta_keys_to_revision' ) );
 
 		add_filter( 'manage_taxonomies_for_' . self::$post_type_slug . '_columns', array( $this, 'manage_people_taxonomy_columns' ) );
+
+		add_filter( 'wp_ajax_wsu_people_delete_legacy_meta', array( $this, 'ajax_delete_legacy_meta' ) );
 
 		if ( false === WSUWP_People_Directory::is_main_site() ) {
 			add_action( 'wp_enqueue_editor', array( $this, 'admin_enqueue_secondary_scripts' ) );
@@ -811,9 +814,22 @@ class WSUWP_People_Post_Type {
 					?>
 					<div id="<?php echo esc_attr( $key ); ?>" class="wsu-person-bio">
 
+						<button type="button"
+								class="legacy-meta-delete"
+								data-name="<?php echo esc_attr( $args['description'] ); ?>"
+								data-metakey="<?php echo esc_attr( $args['meta_key'] ); ?>">Delete this field</button>
+
 						<h2><?php echo esc_html( $args['description'] ); ?></h2>
 
-						<div class="readonly"><?php echo wp_kses_post( apply_filters( 'the_content', $value ) ); ?></div>
+						<div class="readonly"><?php
+						if ( 'cv_attachment' === $key ) {
+							$cv_attachment_url = wp_get_attachment_url( $value );
+							echo '<a href="' . esc_url( $cv_attachment_url ) . '">' . esc_url( $cv_attachment_url ) . '</a>';
+						} else {
+							echo wp_kses_post( apply_filters( 'the_content', $value ) );
+						}
+
+						?></div>
 
 					</div>
 					<?php
@@ -1465,5 +1481,25 @@ class WSUWP_People_Post_Type {
 		}
 
 		exit();
+	}
+
+	/**
+	 * Removes legacy meta data.
+	 *
+	 * @since 0.3.0
+	 */
+	public function ajax_delete_legacy_meta() {
+		check_ajax_referer( 'wsu-people-nid-lookup' );
+
+		$post_id = absint( $_POST['post_id'] );
+		$meta_key = sanitize_text_field( $_POST['meta_key'] );
+
+		if ( empty( $post_id ) || empty( $meta_key ) ) {
+			wp_send_json_error( 'Invalid or empty Network ID' );
+		}
+
+		delete_post_meta( $post_id, $meta_key );
+
+		wp_send_json_success();
 	}
 }

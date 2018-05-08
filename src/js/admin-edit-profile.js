@@ -353,4 +353,28 @@ var wsuwp = wsuwp || {};
 	wsuwp.existing_photos = function() {
 		return $( "[name='_wsuwp_profile_photos[]']" ).map( function() { return parseInt( $( this ).val() ); } ).get();
 	};
+
+	// Allow deletion of legacy meta.
+	$( ".legacy-meta-delete" ).click( function() {
+		var meta_name = $( this ).data( "name" ),
+			meta_key = $( this ).data( "metakey" ),
+			$field = $( this ).closest( ".wsu-person-bio" );
+
+		window.confirm( "This will permanently delete your " + meta_name + " data." );
+
+		var data = {
+			"action": "wsu_people_delete_legacy_meta",
+			"_ajax_nonce": window.wsuwp_people_edit_profile.nid_nonce,
+			"post_id": $( "#post_ID" ).val(),
+			"meta_key": meta_key
+		};
+
+		$.post( window.ajaxurl, data, function( response ) {
+			if ( response.success ) {
+				$field.fadeOut( 300, function() {
+					$( this ).remove();
+				} );
+			}
+		} );
+	} );
 }( jQuery, window, document, wsuwp ) );
