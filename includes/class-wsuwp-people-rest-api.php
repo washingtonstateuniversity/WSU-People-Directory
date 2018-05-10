@@ -56,6 +56,7 @@ class WSUWP_People_REST_API {
 
 		add_action( 'init', array( $this, 'register_wsu_nid_query_var' ) );
 		add_filter( 'rest_' . WSUWP_People_Post_Type::$post_type_slug . '_query', array( $this, 'rest_query_vars' ), 10, 2 );
+		add_filter( 'rest_' . WSUWP_People_Post_Type::$post_type_slug . '_collection_params', array( $this, 'rest_collection_params' ) );
 		add_action( 'pre_get_posts', array( $this, 'handle_wsu_nid_query_var' ) );
 
 		if ( false === WSUWP_People_Directory::is_main_site() ) {
@@ -473,6 +474,21 @@ class WSUWP_People_REST_API {
 		$valid_vars['wsu_nid'] = $request->get_param( 'wsu_nid' );
 
 		return $valid_vars;
+	}
+
+	/**
+	 * Increases the per page maximum for request responses to 200.
+	 *
+	 * @since 0.3.14
+	 *
+	 * @param array $query_params JSON Schema-formatted collection parameters.
+	 *
+	 * @return array
+	 */
+	public function rest_collection_params( $query_params ) {
+		$query_params['per_page']['maximum'] = 200;
+
+		return $query_params;
 	}
 
 	/**
