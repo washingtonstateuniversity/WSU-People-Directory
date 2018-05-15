@@ -209,7 +209,7 @@ wsuwp.people = wsuwp.people || {};
 					var original_terms = [];
 
 					$.each( terms, function( i, term ) {
-						$( "#" + taxonomy + "-select" ).find( "option:contains(" + term.name + ")" ).attr( "selected", "selected" );
+						$( "#" + taxonomy + "-select option" ).filter( function() { return $( this ).text() === term.name; } ).attr( "selected", "selected" );
 						$( "#" + taxonomy + "-select" ).trigger( "change" );
 
 						original_terms.push( term.name );
