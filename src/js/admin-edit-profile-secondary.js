@@ -289,40 +289,6 @@ wsuwp.people = wsuwp.people || {};
 			} );
 		}
 
-		// Select a bio for display on the front end.
-		$( ".wsuwp-profile-about-tabs" ).on( "click", ".select", function() {
-			var $tab = $( this ).closest( "li" ),
-				$input = $( ".use-bio" );
-
-			$tab.toggleClass( "selected" );
-
-			if ( $tab.hasClass( "selected" ) ) {
-				$input.val( $tab.data( "bio" ) );
-				$tab.find( ".screen-reader-text" ).text( "Deselect" );
-				$tab.siblings().removeClass( "selected" ).find( ".screen-reader-text" ).text( "Select" );
-			} else {
-				$input.val( "" );
-				$tab.find( ".screen-reader-text" ).text( "Select" );
-			}
-		} );
-
-		// Select a title for display on the front end.
-		$( ".wsu-person-title" ).on( "click", ".wsu-person-select", function() {
-			var $title = $( this ).closest( ".wsu-person-repeatable-meta-entry" );
-
-			$title.toggleClass( "selected" );
-
-			var selected_titles = $( ".wsu-person-title .selected" ).map( function() { return $( this ).index(); } ).get();
-
-			$( ".use-title" ).val( selected_titles.join( " " ) );
-
-			if ( $title.hasClass( "selected" ) ) {
-				$title.find( ".screen-reader-text" ).text( "Deselect" );
-			} else {
-				$title.find( ".screen-reader-text" ).text( "Select" );
-			}
-		} );
-
 		// Post data to the user's people.wsu.edu profile.
 		$( "#publish" ).on( "click", function( e ) {
 			e.preventDefault();
