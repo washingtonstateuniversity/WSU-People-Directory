@@ -290,8 +290,7 @@ wsuwp.people = wsuwp.people || {};
 		}
 
 		// Post data to the user's people.wsu.edu profile.
-		$( "#publish" ).on( "click", function( e ) {
-			e.preventDefault();
+		$( "#publish" ).on( "click", function() {
 			var data = {},
 				name = $( ".wsu-person .name" ),
 				email = $( ".wsu-person .email" ),
