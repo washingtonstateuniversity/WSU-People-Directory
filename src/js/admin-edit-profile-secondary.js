@@ -205,6 +205,12 @@ wsuwp.people = wsuwp.people || {};
 		// Populate taxonomy data.
 		if ( data.taxonomy_terms ) {
 			$.each( data.taxonomy_terms, function( taxonomy, terms ) {
+
+				// Categories and tags are skipped for now to avoid term contamination.
+				if ( "category" === taxonomy || "post_tag" === taxonomy ) {
+					return;
+				}
+
 				if ( terms ) {
 					var original_terms = [];
 
