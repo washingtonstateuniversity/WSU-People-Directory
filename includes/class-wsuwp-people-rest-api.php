@@ -199,6 +199,15 @@ class WSUWP_People_REST_API {
 
 		register_rest_field( WSUWP_People_Post_Type::$post_type_slug, 'taxonomy_terms', array(
 			'get_callback' => array( $this, 'get_api_taxonomy_data' ),
+			'update_callback' => array( $this, 'update_api_taxonomy_data' ),
+			'schema' => array(
+				'description' => 'Taxonomy terms associated with the profile',
+				'type' => 'object',
+				'context' => array( 'view', 'edit' ),
+				'items' => array(
+					'type' => 'array',
+				),
+			),
 		) );
 	}
 
@@ -424,6 +433,52 @@ class WSUWP_People_REST_API {
 		}
 
 		return $data;
+	}
+
+	/**
+	 * Update the taxonomy terms associated with a post.
+	 *
+	 * @since 0.3.15
+	 *
+	 * @param mixed  $value      The updated taxonomy data.
+	 * @param object $object     The object from the response.
+	 * @param string $field_name Name of the current field.
+	 *
+	 * @return mixed
+	 */
+	public function update_api_taxonomy_data( $value, $object, $field_name ) {
+		if ( ! $field_name && ! $value ) {
+			return;
+		}
+
+		if ( 'taxonomy_terms' !== $field_name ) {
+			return;
+		}
+
+		foreach ( $value as $taxonomy => $terms ) {
+			// Categories and tags are ignored for now to avoid term contamination.
+			if ( 'category' === $taxonomy || 'post_tag' === $taxonomy ) {
+				continue;
+			}
+
+			if ( array( 'wsuwp_people_empty_terms' ) === $terms ) {
+				$new_terms = '';
+			} else {
+				$new_terms = array();
+
+				foreach ( $terms as $term_name ) {
+					$term = get_term_by( 'name', sanitize_text_field( $term_name ), $taxonomy );
+
+					if ( $term ) {
+						$new_terms[] = absint( $term->term_id );
+					}
+				}
+			}
+
+			wp_set_object_terms( $object->ID, $new_terms, $taxonomy );
+		}
+
+		return '';
 	}
 
 	/**

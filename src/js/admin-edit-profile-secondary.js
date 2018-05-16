@@ -37,6 +37,18 @@ wsuwp.people = wsuwp.people || {};
 	};
 
 	/**
+	 * Contains a list of a person's taxonomy terms.
+	 *
+	 * @type {{taxonomy: [array]}}
+	 */
+	wsuwp.people.taxonomy_terms = {
+		"classification": [],
+		"wsuwp_university_category": [],
+		"wsuwp_university_location": [],
+		"wsuwp_university_org": []
+	};
+
+	/**
 	 * Populate biography editors with existing data from the REST API
 	 * after that data has been received.
 	 *
@@ -191,17 +203,25 @@ wsuwp.people = wsuwp.people || {};
 		}
 
 		// Populate taxonomy data.
-		if ( data._embedded && data._embedded[ "wp:term" ] && data._embedded[ "wp:term" ] !== 0 ) {
-			$.each( data._embedded[ "wp:term" ], function( i, taxonomy ) {
-				if ( taxonomy ) {
-					$.each( taxonomy, function( i, term ) {
-						if ( "post_tag" === term.taxonomy ) {
-							$( "#post_tag" ).val( term.name ).trigger( "change" );
-						} else {
-							$( "#" + term.taxonomy ).find( "option:contains(" + term.name + ")" ).attr( "selected", "selected" );
-							$( "#" + term.taxonomy ).trigger( "change" );
-						}
+		if ( data.taxonomy_terms ) {
+			$.each( data.taxonomy_terms, function( taxonomy, terms ) {
+
+				// Categories and tags are skipped for now to avoid term contamination.
+				if ( "category" === taxonomy || "post_tag" === taxonomy ) {
+					return;
+				}
+
+				if ( terms ) {
+					var original_terms = [];
+
+					$.each( terms, function( i, term ) {
+						$( "#" + taxonomy + "-select option" ).filter( function() { return $( this ).text() === term.name; } ).attr( "selected", "selected" );
+						$( "#" + taxonomy + "-select" ).trigger( "change" );
+
+						original_terms.push( term.name );
 					} );
+
+					wsuwp.people.taxonomy_terms[ taxonomy ] = original_terms;
 				}
 			} );
 		}
@@ -260,7 +280,7 @@ wsuwp.people = wsuwp.people || {};
 		var $nid = $( "#_wsuwp_profile_ad_nid" ),
 			post_id = $( "#_wsuwp_profile_post_id" ).val();
 
-		// Make a REST request to for profile data from people.wsu.edu.
+		// Make a REST request for profile data from people.wsu.edu.
 		if ( window.wsuwp_people_edit_profile_secondary.load_data ) {
 			$.ajax( {
 				url: window.wsuwp_people_edit_profile_secondary.rest_url,
@@ -275,40 +295,6 @@ wsuwp.people = wsuwp.people || {};
 			} );
 		}
 
-		// Select a bio for display on the front end.
-		$( ".wsuwp-profile-about-tabs" ).on( "click", ".select", function() {
-			var $tab = $( this ).closest( "li" ),
-				$input = $( ".use-bio" );
-
-			$tab.toggleClass( "selected" );
-
-			if ( $tab.hasClass( "selected" ) ) {
-				$input.val( $tab.data( "bio" ) );
-				$tab.find( ".screen-reader-text" ).text( "Deselect" );
-				$tab.siblings().removeClass( "selected" ).find( ".screen-reader-text" ).text( "Select" );
-			} else {
-				$input.val( "" );
-				$tab.find( ".screen-reader-text" ).text( "Select" );
-			}
-		} );
-
-		// Select a title for display on the front end.
-		$( ".wsu-person-title" ).on( "click", ".wsu-person-select", function() {
-			var $title = $( this ).closest( ".wsu-person-repeatable-meta-entry" );
-
-			$title.toggleClass( "selected" );
-
-			var selected_titles = $( ".wsu-person-title .selected" ).map( function() { return $( this ).index(); } ).get();
-
-			$( ".use-title" ).val( selected_titles.join( " " ) );
-
-			if ( $title.hasClass( "selected" ) ) {
-				$title.find( ".screen-reader-text" ).text( "Deselect" );
-			} else {
-				$title.find( ".screen-reader-text" ).text( "Select" );
-			}
-		} );
-
 		// Post data to the user's people.wsu.edu profile.
 		$( "#publish" ).on( "click", function() {
 			var data = {},
@@ -322,7 +308,11 @@ wsuwp.people = wsuwp.people || {};
 				degrees = $( ".wsu-person .degree" ),
 				personal_bio = window.tinymce.get( "content" ),
 				unit_bio = window.tinymce.get( "_wsuwp_profile_bio_unit" ),
-				university_bio = window.tinymce.get( "_wsuwp_profile_bio_university" );
+				university_bio = window.tinymce.get( "_wsuwp_profile_bio_university" ),
+				classifications = $( "#classification-select option:selected" ).map( function() { return this.text; } ).get(),
+				organizations = $( "#wsuwp_university_org-select option:selected" ).map( function() { return this.text; } ).get(),
+				locations = $( "#wsuwp_university_location-select option:selected" ).map( function() { return this.text; } ).get(),
+				u_categories = $( "#wsuwp_university_category-select option:selected" ).map( function() { return this.text; } ).get();
 
 			// Only add changed values to the data array.
 			if ( name.text() !== name.data( "original" ) ) {
@@ -375,6 +365,24 @@ wsuwp.people = wsuwp.people || {};
 				data.bio_university = university_bio.getContent();
 			}
 
+			data.taxonomy_terms = {};
+
+			if ( !wsuwp.people.terms_match( wsuwp.people.taxonomy_terms.classification, classifications ) ) {
+				data.taxonomy_terms.classification = ( 0 === classifications.length ) ? [ "wsuwp_people_empty_terms" ] : classifications;
+			}
+
+			if ( !wsuwp.people.terms_match( wsuwp.people.taxonomy_terms.wsuwp_university_org, organizations ) ) {
+				data.taxonomy_terms.wsuwp_university_org = ( 0 === organizations.length ) ? [ "wsuwp_people_empty_terms" ] : organizations;
+			}
+
+			if ( !wsuwp.people.terms_match( wsuwp.people.taxonomy_terms.wsuwp_university_location, locations ) ) {
+				data.taxonomy_terms.wsuwp_university_location = ( 0 === locations.length ) ? [ "wsuwp_people_empty_terms" ] : locations;
+			}
+
+			if ( !wsuwp.people.terms_match( wsuwp.people.taxonomy_terms.wsuwp_university_category, u_categories ) ) {
+				data.taxonomy_terms.wsuwp_university_category = ( 0 === u_categories.length ) ? [ "wsuwp_people_empty_terms" ] : u_categories;
+			}
+
 			// Only push data if values have changed.
 			if ( !$.isEmptyObject( data ) ) {
 				$.ajax( {
@@ -388,6 +396,10 @@ wsuwp.people = wsuwp.people || {};
 				} );
 			}
 		} );
+
+		wsuwp.people.terms_match = function( original, current ) {
+			return JSON.stringify( original.sort() ) === JSON.stringify( current.sort() );
+		};
 
 	} );
 }( jQuery, window, document, wsuwp ) );
