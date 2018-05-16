@@ -461,13 +461,17 @@ class WSUWP_People_REST_API {
 				continue;
 			}
 
-			$new_terms = array();
+			if ( array( 'wsuwp_people_empty_terms' ) === $terms ) {
+				$new_terms = '';
+			} else {
+				$new_terms = array();
 
-			foreach ( $terms as $term_name ) {
-				$term = get_term_by( 'name', sanitize_text_field( $term_name ), $taxonomy );
+				foreach ( $terms as $term_name ) {
+					$term = get_term_by( 'name', sanitize_text_field( $term_name ), $taxonomy );
 
-				if ( $term ) {
-					$new_terms[] = absint( $term->term_id );
+					if ( $term ) {
+						$new_terms[] = absint( $term->term_id );
+					}
 				}
 			}
 

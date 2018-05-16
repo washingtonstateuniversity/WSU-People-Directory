@@ -362,19 +362,19 @@ wsuwp.people = wsuwp.people || {};
 			data.taxonomy_terms = {};
 
 			if ( !wsuwp.people.terms_match( wsuwp.people.taxonomy_terms.classification, classifications ) ) {
-				data.taxonomy_terms.classification = classifications;
+				data.taxonomy_terms.classification = ( 0 === classifications.length ) ? [ "wsuwp_people_empty_terms" ] : classifications;
 			}
 
 			if ( !wsuwp.people.terms_match( wsuwp.people.taxonomy_terms.wsuwp_university_org, organizations ) ) {
-				data.taxonomy_terms.wsuwp_university_org = organizations;
+				data.taxonomy_terms.wsuwp_university_org = ( 0 === organizations.length ) ? [ "wsuwp_people_empty_terms" ] : organizations;
 			}
 
 			if ( !wsuwp.people.terms_match( wsuwp.people.taxonomy_terms.wsuwp_university_location, locations ) ) {
-				data.taxonomy_terms.wsuwp_university_location = locations;
+				data.taxonomy_terms.wsuwp_university_location = ( 0 === locations.length ) ? [ "wsuwp_people_empty_terms" ] : locations;
 			}
 
 			if ( !wsuwp.people.terms_match( wsuwp.people.taxonomy_terms.wsuwp_university_category, u_categories ) ) {
-				data.taxonomy_terms.wsuwp_university_category = u_categories;
+				data.taxonomy_terms.wsuwp_university_category = ( 0 === u_categories.length ) ? [ "wsuwp_people_empty_terms" ] : u_categories;
 			}
 
 			// Only push data if values have changed.
