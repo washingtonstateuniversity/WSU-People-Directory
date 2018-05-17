@@ -48,17 +48,14 @@
 }
 
 .card .photo {
-	-webkit-box-align: center;
-	    -ms-flex-align: center;
-	        align-items: center;
+	-ms-flex-align: center;
+	    align-items: center;
 	cursor: pointer;
-	display: -webkit-box;
 	display: -ms-flexbox;
 	display: flex;
 	float: left;
-	-webkit-box-pack: center;
-	    -ms-flex-pack: center;
-	        justify-content: center;
+	-ms-flex-pack: center;
+	    justify-content: center;
 	margin: 0 16px 16px 0;
 	min-height: 198px;
 	position: relative;
