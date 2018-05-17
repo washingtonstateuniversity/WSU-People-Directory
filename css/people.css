@@ -78,15 +78,12 @@ input[type="search"]::-webkit-search-decoration {
 	right: 1rem;
 	text-align: right;
 	top: 0;
-	transition: -webkit-transform .25s;
 	transition: transform .25s;
-	transition: transform .25s, -webkit-transform .25s;
 }
 
 .wsu-people-filter-label[aria-expanded="true"]:after {
-	-webkit-transform: rotate(-45deg);
-	    -ms-transform: rotate(-45deg);
-	        transform: rotate(-45deg);
+	-ms-transform: rotate(-45deg);
+	    transform: rotate(-45deg);
 }
 
 .wsu-people-filter-terms {
@@ -139,7 +136,6 @@ input[type="search"]::-webkit-search-decoration {
 
 /* Table layout */
 .table .wsu-people-filters {
-	display: -webkit-box;
 	display: -ms-flexbox;
 	display: flex;
 	margin: 0 -.5rem 1rem;
@@ -157,7 +153,6 @@ input[type="search"]::-webkit-search-decoration {
 
 .table .wsu-person {
 	border-top: 1px solid #ddd;
-	display: -webkit-box;
 	display: -ms-flexbox;
 	display: flex;
 }
@@ -215,9 +210,8 @@ input[type="search"]::-webkit-search-decoration {
 }
 
 .table .about {
-	-webkit-box-flex: 1;
-	    -ms-flex: 1 0 0px;
-	        flex: 1 0 0;
+	-ms-flex: 1 0 0px;
+	    flex: 1 0 0;
 }
 
 @media only screen and ( max-width: 693px ) {
@@ -251,7 +245,6 @@ input[type="search"]::-webkit-search-decoration {
 
 /* Grid layout */
 .grid .wsu-people {
-	display: -webkit-box;
 	display: -ms-flexbox;
 	display: flex;
 	-ms-flex-wrap: wrap;
@@ -273,7 +266,6 @@ input[type="search"]::-webkit-search-decoration {
 }
 
 .grid .card {
-	display: -webkit-box;
 	display: -ms-flexbox;
 	display: flex;
 	-ms-flex-wrap: wrap;
@@ -283,9 +275,8 @@ input[type="search"]::-webkit-search-decoration {
 
 .grid .photo {
 	margin: -1rem -1rem 1rem -1rem;
-	-webkit-box-ordinal-group: 0;
-	    -ms-flex-order: -1;
-	        order: -1;
+	-ms-flex-order: -1;
+	    order: -1;
 	padding: 2rem 1rem 100%;
 	position: relative;
 	width: 100%;
