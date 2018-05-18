@@ -90,6 +90,8 @@ class WSUWP_People_Classification_Taxonomy {
 	/**
 	 * Check the current version of the taxonomy schema on every admin page load.
 	 * If it is out of date, fire a single wp-cron event to process the changes.
+	 *
+	 * @since 0.3.15
 	 */
 	public function check_schema() {
 		if ( get_option( 'wsu_people_classificatons_schema', false ) !== self::$taxonomy_schema_version ) {
@@ -99,6 +101,8 @@ class WSUWP_People_Classification_Taxonomy {
 
 	/**
 	 * Update the taxonomy schema and version.
+	 *
+	 * @since 0.3.15
 	 */
 	public function update_schema() {
 		$this->load_terms( self::$taxonomy_slug );
@@ -109,6 +113,8 @@ class WSUWP_People_Classification_Taxonomy {
 	/**
 	 * Compare the existing schema version on taxonomy page loads
 	 * and run the update process if a mismatch is present.
+	 *
+	 * @since 0.3.15
 	 */
 	public function compare_schema() {
 		if ( get_current_screen()->taxonomy !== self::$taxonomy_slug ) {
@@ -122,6 +128,8 @@ class WSUWP_People_Classification_Taxonomy {
 
 	/**
 	 * Maintain an array of current classifications.
+	 *
+	 * @since 0.3.15
 	 *
 	 * @return array Current classifications.
 	 */
@@ -141,6 +149,8 @@ class WSUWP_People_Classification_Taxonomy {
 
 	/**
 	 * Ensure all of the pre-configured terms for the taxonomy are loaded.
+	 *
+	 * @since 0.3.15
 	 *
 	 * @param string $taxonomy Taxonomy being loaded.
 	 */
@@ -178,6 +188,8 @@ class WSUWP_People_Classification_Taxonomy {
 	/**
 	 * Prevent new terms being created for the classifications taxonomy.
 	 *
+	 * @since 0.3.15
+	 *
 	 * @param string $term     Term being added.
 	 * @param string $taxonomy Taxonomy of the term being added.
 	 *
@@ -194,6 +206,8 @@ class WSUWP_People_Classification_Taxonomy {
 	/**
 	 * Clear all cache for a given taxonomy.
 	 *
+	 * @since 0.3.15
+	 *
 	 * @param string $taxonomy A taxonomy slug.
 	 */
 	private function clear_taxonomy_cache( $taxonomy ) {
@@ -204,6 +218,8 @@ class WSUWP_People_Classification_Taxonomy {
 
 	/**
 	 * Display custom output for the classifications dashboard page.
+	 *
+	 * @since 0.3.15
 	 */
 	public function display_terms() {
 		if ( get_current_screen()->taxonomy !== self::$taxonomy_slug ) {
@@ -270,6 +286,8 @@ class WSUWP_People_Classification_Taxonomy {
 	 * Sets the active parent menu item for the classifications dashboard page.
 	 * (Using the `load-edit-tags.php` hook prevents the default handling.)
 	 *
+	 * @since 0.3.15
+	 *
 	 * @param string $parent_file The parent file.
 	 *
 	 * @return string
@@ -287,6 +305,8 @@ class WSUWP_People_Classification_Taxonomy {
 	/**
 	 * Sets the active menu item for the classifications dashboard page.
 	 * (Using the `load-edit-tags.php` hook prevents the default handling.)
+	 *
+	 * @since 0.3.15
 	 *
 	 * @param string $submenu_file The submenu file.
 	 * @param string $parent_file  The parent file.
@@ -306,6 +326,8 @@ class WSUWP_People_Classification_Taxonomy {
 	/**
 	 * Filters the title tag content for the classifications dashboard page.
 	 * (Using the `load-edit-tags.php` hook prevents the default handling.)
+	 *
+	 * @since 0.3.15
 	 *
 	 * @param string $admin_title The page title, with extra context added.
 	 * @param string $title  The original page title.
