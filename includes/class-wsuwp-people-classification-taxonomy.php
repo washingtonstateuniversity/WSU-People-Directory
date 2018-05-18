@@ -51,6 +51,10 @@ class WSUWP_People_Classification_Taxonomy {
 		add_action( 'load-edit-tags.php', array( $this, 'compare_schema' ), 10 );
 		add_action( 'wsu_people_classifications_update_schema', array( $this, 'update_schema' ) );
 		add_filter( 'pre_insert_term', array( $this, 'prevent_term_creation' ), 10, 2 );
+		add_action( 'load-edit-tags.php', array( $this, 'display_terms' ), 11 );
+		add_filter( 'parent_file', array( $this, 'parent_file' ) );
+		add_filter( 'submenu_file', array( $this, 'submenu_file' ), 10, 2 );
+		add_filter( 'admin_title', array( $this, 'admin_title' ), 10, 2 );
 	}
 
 	/**
@@ -196,5 +200,125 @@ class WSUWP_People_Classification_Taxonomy {
 		wp_cache_delete( 'all_ids', $taxonomy );
 		wp_cache_delete( 'get', $taxonomy );
 		_get_term_hierarchy( $taxonomy );
+	}
+
+	/**
+	 * Display custom output for the classifications dashboard page.
+	 */
+	public function display_terms() {
+		if ( get_current_screen()->taxonomy !== self::$taxonomy_slug ) {
+			return;
+		}
+
+		$taxonomy = get_taxonomy( self::$taxonomy_slug );
+
+		require_once ABSPATH . 'wp-admin/admin-header.php';
+
+		?>
+		<div class="wrap nosubsub">
+
+			<h2><?php echo esc_html( $taxonomy->labels->name ); ?></h2>
+
+			<table class="wp-list-table widefat striped">
+				<thead>
+					<tr>
+						<th scope="col">Name</th>
+						<th scope="col">Slug</th>
+						<th scope="col">Count</th>
+					</tr>
+				</thead>
+				<tbody>
+				<?php
+				$terms = get_terms( self::$taxonomy_slug, array(
+					'hide_empty' => false,
+					'parent' => '0',
+				) );
+
+				foreach ( $terms as $term ) {
+					$edit_link = add_query_arg( array(
+						self::$taxonomy_slug => $term->slug,
+						'post_type' => WSUWP_People_Post_Type::$post_type_slug,
+					), get_admin_url( null, 'edit.php' ) );
+					?>
+					<tr>
+						<td><strong><?php echo esc_html( $term->name ); ?></strong></td>
+						<td><?php echo esc_html( $term->slug ); ?></td>
+						<td><a href="<?php echo esc_url( $edit_link ); ?>"><?php echo esc_html( $term->count ); ?></a></td>
+					</tr>
+					<?php
+				}
+				?>
+				</tbody>
+				<tfoot>
+					<tr>
+						<th scope="col">Name</th>
+						<th scope="col">Slug</th>
+						<th scope="col">Count</th>
+					</tr>
+				</tfoot>
+			</table>
+
+		</div>
+
+		<?php
+		include ABSPATH . 'wp-admin/admin-footer.php';
+
+		die();
+	}
+
+	/**
+	 * Sets the active parent menu item for the classifications dashboard page.
+	 * (Using the `load-edit-tags.php` hook prevents the default handling.)
+	 *
+	 * @param string $parent_file The parent file.
+	 *
+	 * @return string
+	 */
+	public function parent_file( $parent_file ) {
+		if ( get_current_screen()->id !== 'edit-' . self::$taxonomy_slug ) {
+			return $parent_file;
+		}
+
+		$parent_file .= 'edit.php?post_type=' . WSUWP_People_Post_Type::$post_type_slug;
+
+		return $parent_file;
+	}
+
+	/**
+	 * Sets the active menu item for the classifications dashboard page.
+	 * (Using the `load-edit-tags.php` hook prevents the default handling.)
+	 *
+	 * @param string $submenu_file The submenu file.
+	 * @param string $parent_file  The parent file.
+	 *
+	 * @return string
+	 */
+	public function submenu_file( $submenu_file, $parent_file ) {
+		if ( get_current_screen()->id !== 'edit-' . self::$taxonomy_slug ) {
+			return $submenu_file;
+		}
+
+		$submenu_file = 'edit-tags.php?taxonomy=' . self::$taxonomy_slug . '&amp;post_type=' . WSUWP_People_Post_Type::$post_type_slug;
+
+		return $submenu_file;
+	}
+
+	/**
+	 * Filters the title tag content for the classifications dashboard page.
+	 * (Using the `load-edit-tags.php` hook prevents the default handling.)
+	 *
+	 * @param string $admin_title The page title, with extra context added.
+	 * @param string $title  The original page title.
+	 *
+	 * @return string
+	 */
+	public function admin_title( $admin_title, $title ) {
+		if ( get_current_screen()->id !== 'edit-' . self::$taxonomy_slug ) {
+			return $admin_title;
+		}
+
+		$admin_title = 'Classifications ' . $admin_title;
+
+		return $admin_title;
 	}
 }
