@@ -919,7 +919,7 @@ class WSUWP_People_Directory_Page_Template {
 
 		$local_data['count'] = $people->post_count;
 
-		// Stop here if there no taxonomy filters are being displayed.
+		// Stop here if no taxonomy filters are being displayed.
 		if ( ! $filters || empty( array_diff( $filters, array( 'search' ) ) ) ) {
 			return $local_data;
 		}
