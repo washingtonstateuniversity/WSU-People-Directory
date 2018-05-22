@@ -100,7 +100,7 @@ class WSUWP_People_REST_API {
 		}
 
 		// Only perform custom authentication on the people endpoint.
-		if ( 0 !== strpos( $wp->request, 'wp-json/wp/v2/people' ) ) {
+		if ( 0 !== strpos( $wp->request, 'wp-json/wp/v2/people' ) && 0 !== strpos( $wp->request, 'wp-json/wsuwp-people/v1' ) ) {
 			return null;
 		}
 
