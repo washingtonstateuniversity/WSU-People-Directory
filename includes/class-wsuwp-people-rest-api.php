@@ -62,6 +62,8 @@ class WSUWP_People_REST_API {
 		if ( false === WSUWP_People_Directory::is_main_site() ) {
 			add_action( 'rest_api_init', array( $this, 'register_secondary_api_fields' ) );
 		}
+
+		add_action( 'rest_api_init', array( $this, 'profile_propagation' ) );
 	}
 
 	/**
@@ -592,5 +594,77 @@ class WSUWP_People_REST_API {
 		}
 
 		return esc_html( get_post_meta( $object['id'], $this->secondary_post_meta_keys[ $rest_key ], true ) );
+	}
+
+	/**
+	 * Registers a REST route for updating the `listed_on` meta for multiple
+	 * profiles in a single call.
+	 *
+	 * @since 0.3.15
+	 */
+	public function profile_propagation() {
+		register_rest_route( 'wsuwp-people/v1', '/sync', array(
+			'methods' => WP_REST_Server::READABLE,
+			'callback' => array( $this, 'update_primary_profile_listing_data' ),
+			'args' => array(
+				'ids' => array(
+					'validate_callback' => function( $param, $request, $key ) {
+						return is_array( $param );
+					},
+					'sanitize_callback' => function( $param, $request, $key ) {
+						return array_map( 'absint', $param );
+					},
+				),
+				'site_url' => array(
+					'validate_callback' => function( $param, $request, $key ) {
+						return $param;
+					},
+					'sanitize_callback' => function( $param, $request, $key ) {
+						return esc_url_raw( $param );
+					},
+				),
+			),
+		) );
+	}
+
+	/**
+	 * Updates the `listed_on` meta for each post passed in the `ids` parameter.
+	 *
+	 * @since 0.3.15
+	 *
+	 * @param WP_REST_Request $request Full data about the request.
+	 *
+	 * @return WP_Error|WP_REST_Request
+	 */
+	public function update_primary_profile_listing_data( $request ) {
+		$post_ids = $request->get_param( 'ids' );
+		$site_url = $request->get_param( 'site_url' );
+
+		if ( ! $post_ids || ! $site_url ) {
+			return new WP_Error( 'invalid_parameters', __( 'Invalid or empty parameters' ), array(
+				'status' => 403,
+			) );
+		}
+
+		$data = array();
+
+		foreach ( $post_ids as $post_id ) {
+			$listings = get_post_meta( $post_id, '_wsuwp_profile_listed_on', true );
+
+			if ( $listings ) {
+				if ( ! in_array( $site_url, $listings, true ) ) {
+					$listings[] = $site_url;
+					$update = update_post_meta( $post_id, '_wsuwp_profile_listed_on', $listings );
+				} else {
+					$update = 'no update required';
+				}
+			} else {
+				$update = update_post_meta( $post_id, '_wsuwp_profile_listed_on', array( $site_url ) );
+			}
+
+			$data[ $post_id ] = $update;
+		}
+
+		return new WP_REST_Response( $data, 200 );
 	}
 }

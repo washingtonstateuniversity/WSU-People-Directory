@@ -141,6 +141,7 @@ class WSUWP_People_Directory_Page_Template {
 			'page_id' => $post->ID,
 		) );
 		wp_localize_script( 'wsuwp-people-sync', 'wsupeoplesync', array(
+			'endpoint' => WSUWP_People_Directory::API_Path() . 'wsuwp-people/v1/sync',
 			'nonce' => WSUWP_People_Directory::create_rest_nonce(),
 			'uid' => wp_get_current_user()->ID,
 			'site_url' => get_home_url(),
