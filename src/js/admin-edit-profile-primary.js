@@ -19,6 +19,13 @@
 
 		// Post data to secondary instances of the profile.
 		$( "#publish" ).on( "click", function() {
+			var instances = $( "#wsuwp-profile-listing a" );
+
+			// Bail if there are no other instances of this profile to update.
+			if ( instances.length === 0 ) {
+				return;
+			}
+
 			var data = {},
 				classifications = get_selected( "#classification-select" ),
 				organizations = get_selected( "#wsuwp_university_org-select" ),
@@ -43,13 +50,6 @@
 
 			// Bail if there are no term changes.
 			if ( $.isEmptyObject( data ) ) {
-				return;
-			}
-
-			var	instances = $( "#wsuwp-profile-listing a" );
-
-			// Bail if there are no other instances of this profile to update.
-			if ( $.isEmptyObject( instances ) ) {
 				return;
 			}
 
