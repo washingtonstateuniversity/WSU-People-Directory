@@ -715,8 +715,13 @@ class WSUWP_People_REST_API {
 
 		if ( $posts ) {
 			$update_terms = $this->update_api_taxonomy_data( $taxonomy_terms, $posts[0], 'taxonomy_terms' );
+
 			if ( '' === $update_terms ) {
 				return new WP_REST_Response( 'Profile instance successfully updated', 200 );
+			} else {
+				return new WP_Error( 'update_unsuccessful', __( 'Update unsuccessful' ), array(
+					'status' => 403,
+				) );
 			}
 		} else {
 			return new WP_Error( 'no_post_found', __( 'No profile found' ), array(
