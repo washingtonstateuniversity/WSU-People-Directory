@@ -527,4 +527,20 @@
 			$( "body" ).removeClass( "person-modal-open" );
 		} );
 	}
+
+	// Update the `listed on` data of the primary profiles.
+	$( "#publish" ).click( function() {
+		$.ajax( {
+			url: window.wsupeoplesync.endpoint,
+			method: "POST",
+			beforeSend: function( xhr ) {
+				xhr.setRequestHeader( "X-WP-Nonce", window.wsupeoplesync.nonce );
+				xhr.setRequestHeader( "X-WSUWP-UID", window.wsupeoplesync.uid );
+			},
+			data: {
+				"site_url": window.wsupeoplesync.site_url,
+				"ids": $( "#directory-page-profile-ids" ).val().split( " " )
+			}
+		} );
+	} );
 }( jQuery, window, document ) );

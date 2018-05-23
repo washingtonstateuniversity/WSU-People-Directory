@@ -62,6 +62,8 @@ class WSUWP_People_REST_API {
 		if ( false === WSUWP_People_Directory::is_main_site() ) {
 			add_action( 'rest_api_init', array( $this, 'register_secondary_api_fields' ) );
 		}
+
+		add_action( 'rest_api_init', array( $this, 'profile_propagation' ) );
 	}
 
 	/**
@@ -98,7 +100,7 @@ class WSUWP_People_REST_API {
 		}
 
 		// Only perform custom authentication on the people endpoint.
-		if ( 0 !== strpos( $wp->request, 'wp-json/wp/v2/people' ) ) {
+		if ( 0 !== strpos( $wp->request, 'wp-json/wp/v2/people' ) && 0 !== strpos( $wp->request, 'wp-json/wsuwp-people/v1' ) ) {
 			return null;
 		}
 
@@ -592,5 +594,139 @@ class WSUWP_People_REST_API {
 		}
 
 		return esc_html( get_post_meta( $object['id'], $this->secondary_post_meta_keys[ $rest_key ], true ) );
+	}
+
+	/**
+	 * Registers a REST route for updating the `listed_on` meta for multiple
+	 * profiles in a single call.
+	 *
+	 * @since 0.3.15
+	 */
+	public function profile_propagation() {
+		register_rest_route( 'wsuwp-people/v1', '/sync', array(
+			'methods' => WP_REST_Server::EDITABLE,
+			'callback' => array( $this, 'update_primary_profile_listing_data' ),
+			'args' => array(
+				'ids' => array(
+					'validate_callback' => function( $param, $request, $key ) {
+						return is_array( $param );
+					},
+					'sanitize_callback' => function( $param, $request, $key ) {
+						return array_map( 'absint', $param );
+					},
+				),
+				'site_url' => array(
+					'validate_callback' => function( $param, $request, $key ) {
+						return $param;
+					},
+					'sanitize_callback' => function( $param, $request, $key ) {
+						return esc_url_raw( $param );
+					},
+				),
+			),
+		) );
+
+		register_rest_route( 'wsuwp-people/v1', '/sync/(?P<nid>[\w.]+)', array(
+			'methods' => WP_REST_Server::EDITABLE,
+			'callback' => array( $this, 'update_profile_terms' ),
+			'args' => array(
+				'nid' => array(
+					'validate_callback' => function( $param, $request, $key ) {
+						return sanitize_text_field( $param );
+					},
+					'sanitize_callback' => function( $param, $request, $key ) {
+						return sanitize_text_field( $param );
+					},
+				),
+			),
+		) );
+	}
+
+	/**
+	 * Updates the `listed_on` meta for each post passed in the `ids` parameter.
+	 *
+	 * @since 0.3.15
+	 *
+	 * @param WP_REST_Request $request Full data about the request.
+	 *
+	 * @return WP_Error|WP_REST_Request
+	 */
+	public function update_primary_profile_listing_data( $request ) {
+		$post_ids = $request->get_param( 'ids' );
+		$site_url = $request->get_param( 'site_url' );
+
+		if ( ! $post_ids || ! $site_url ) {
+			return new WP_Error( 'invalid_parameters', __( 'Invalid or empty parameters' ), array(
+				'status' => 403,
+			) );
+		}
+
+		$data = array();
+
+		foreach ( $post_ids as $post_id ) {
+			$listings = get_post_meta( $post_id, '_wsuwp_profile_listed_on', true );
+
+			if ( $listings ) {
+				if ( ! in_array( $site_url, $listings, true ) ) {
+					$listings[] = $site_url;
+					$update = update_post_meta( $post_id, '_wsuwp_profile_listed_on', $listings );
+				} else {
+					$update = 'no update required';
+				}
+			} else {
+				$update = update_post_meta( $post_id, '_wsuwp_profile_listed_on', array( $site_url ) );
+			}
+
+			$data[ $post_id ] = $update;
+		}
+
+		return new WP_REST_Response( $data, 200 );
+	}
+
+	/**
+	 * Updates the terms for each instance of the profile across the system.
+	 *
+	 * @since 0.3.15
+	 *
+	 * @param WP_REST_Request $request Full data about the request.
+	 *
+	 * @return WP_Error|WP_REST_Request
+	 */
+	public function update_profile_terms( $request ) {
+		$nid = $request->get_param( 'nid' );
+		$taxonomy_terms = $request->get_param( 'taxonomy_terms' );
+
+		if ( ! $nid ) {
+			return new WP_Error( 'invalid_network_id', __( 'Invalid or empty network id' ), array(
+				'status' => 403,
+			) );
+		}
+
+		$posts = get_posts( array(
+			'post_type' => WSUWP_People_Post_Type::$post_type_slug,
+			'meta_query' => array(
+				array(
+					'key' => '_wsuwp_profile_ad_nid',
+					'value' => $nid,
+					'compare' => '=',
+				),
+			),
+		) );
+
+		if ( $posts ) {
+			$update_terms = $this->update_api_taxonomy_data( $taxonomy_terms, $posts[0], 'taxonomy_terms' );
+
+			if ( '' === $update_terms ) {
+				return new WP_REST_Response( 'Profile instance successfully updated', 200 );
+			} else {
+				return new WP_Error( 'update_unsuccessful', __( 'Update unsuccessful' ), array(
+					'status' => 403,
+				) );
+			}
+		} else {
+			return new WP_Error( 'no_post_found', __( 'No profile found' ), array(
+				'status' => 403,
+			) );
+		}
 	}
 }

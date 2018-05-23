@@ -14,33 +14,11 @@ module.exports = function( grunt ) {
                     } )
                 ]
             },
-            admin_page: {
-                src: "src/css/admin-page.css",
-                dest: "css/admin-page.css"
-            },
-            admin_people: {
-                src: "src/css/admin-people.css",
-                dest: "css/admin-people.css"
-            },
-            admin_person: {
-                src: "src/css/admin-person.css",
-                dest: "css/admin-person.css"
-            },
-            admin_user_profile: {
-                src: "src/css/admin-user-profile.css",
-                dest: "css/admin-user-profile.css"
-            },
-            frontend_card_shortcode: {
-                src: "src/css/person-card.css",
-                dest: "css/person-card.css"
-            },
-            frontend_people: {
-                src: "src/css/people.css",
-                dest: "css/people.css"
-            },
-            frontend_person: {
-                src: "src/css/person.css",
-                dest: "css/person.css"
+            dist: {
+                cwd: "src/css/",
+                src: "*.css",
+                dest: "css/",
+                expand: true
             }
         },
 
@@ -98,37 +76,14 @@ module.exports = function( grunt ) {
         },
 
         uglify: {
-            admin_card_shortcode: {
-                src: "src/js/admin-card-shortcode.js",
-                dest: "js/admin-card-shortcode.min.js"
-            },
-            admin_edit_profile: {
-                src: "src/js/admin-edit-profile.js",
-                dest: "js/admin-edit-profile.min.js"
-            },
-            admin_edit_profile_secondary: {
-                src: "src/js/admin-edit-profile-secondary.js",
-                dest: "js/admin-edit-profile-secondary.min.js"
-            },
-            admin_edit_page: {
-                src: "src/js/admin-edit-page.js",
-                dest: "js/admin-edit-page.min.js"
-            },
-            admin_people: {
-                src: "src/js/admin-people.js",
-                dest: "js/admin-people.min.js"
-            },
-            admin_people_sync: {
-                src: "src/js/admin-people-sync.js",
-                dest: "js/admin-people-sync.min.js"
-            },
-            admin_user_profile: {
-                src: "src/js/admin-user-profile.js",
-                dest: "js/admin-user-profile.min.js"
-            },
-            frontend_people: {
-                src: "src/js/people.js",
-                dest: "js/people.min.js"
+            dist: {
+                files: [ {
+                    expand: true,
+                    cwd: "src/js/",
+                    src: "*.js",
+                    dest: "js",
+                    ext: ".min.js"
+                } ]
             }
         },
 

@@ -453,6 +453,15 @@ class WSUWP_People_Post_Type {
 			if ( false === WSUWP_People_Directory::is_main_site() ) {
 				wp_dequeue_script( 'autosave' );
 			}
+
+			if ( true === WSUWP_People_Directory::is_main_site() ) {
+				wp_enqueue_script( 'wsuwp-people-edit-profile-primary', plugins_url( 'js/admin-edit-profile-primary.min.js', dirname( __FILE__ ) ), array( 'jquery' ), WSUWP_People_Directory::$version, true );
+
+				wp_localize_script( 'wsuwp-people-edit-profile-primary', 'wsupeoplesync', array(
+					'nonce' => WSUWP_People_Directory::create_rest_nonce(),
+					'uid' => wp_get_current_user()->ID,
+				) );
+			}
 		}
 
 		// Enqueue All Profiles list table scripts and styles.

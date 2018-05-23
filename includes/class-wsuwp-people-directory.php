@@ -82,6 +82,20 @@ class WSUWP_People_Directory {
 	}
 
 	/**
+	 * The default API path for the primary directory.
+	 *
+	 * @since 0.3.15
+	 *
+	 * @return string
+	 */
+	public static function API_Path() {
+
+		$default = 'https://people.wsu.edu/wp-json/';
+
+		return apply_filters( 'wsu_people_directory_primary_api_path', $default );
+	}
+
+	/**
 	 * The default REST route for the main people directory.
 	 *
 	 * @since 0.3.2
