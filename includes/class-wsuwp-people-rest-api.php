@@ -604,7 +604,7 @@ class WSUWP_People_REST_API {
 	 */
 	public function profile_propagation() {
 		register_rest_route( 'wsuwp-people/v1', '/sync', array(
-			'methods' => WP_REST_Server::READABLE,
+			'methods' => WP_REST_Server::EDITABLE,
 			'callback' => array( $this, 'update_primary_profile_listing_data' ),
 			'args' => array(
 				'ids' => array(

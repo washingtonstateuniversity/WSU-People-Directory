@@ -532,7 +532,7 @@
 	$( "#publish" ).click( function() {
 		$.ajax( {
 			url: window.wsupeoplesync.endpoint,
-			method: "GET",
+			method: "POST",
 			beforeSend: function( xhr ) {
 				xhr.setRequestHeader( "X-WP-Nonce", window.wsupeoplesync.nonce );
 				xhr.setRequestHeader( "X-WSUWP-UID", window.wsupeoplesync.uid );
@@ -541,6 +541,6 @@
 				"site_url": window.wsupeoplesync.site_url,
 				"ids": $( "#directory-page-profile-ids" ).val().split( " " )
 			}
-		 } );
+		} );
 	} );
 }( jQuery, window, document ) );
