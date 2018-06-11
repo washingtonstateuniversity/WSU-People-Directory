@@ -20,30 +20,30 @@
 	<?php } ?>
 
 	<?php foreach ( $directory_data['filters']['options'] as $option ) { ?>
-	<?php
-	if ( 'search' === $option ) {
-		continue;
-	}
+		<?php
+		if ( 'search' === $option ) {
+			continue;
+		}
 
-	$label = ( 'org' === $option ) ? 'unit' : $option;
-	$label = apply_filters( "wsuwp_people_{$option}_filter_label", 'Filter by ' . $label );
-	?>
-	<div class="wsu-people-filter <?php echo esc_attr( $option ); ?>">
-		<button type="button"
-				class="wsu-people-filter-label"
-				aria-controls="wsu-people-<?php echo esc_attr( $option ); ?>"
-				aria-expanded="false"><?php echo esc_html( $label ); ?></button>
-		<ul class="wsu-people-filter-terms" id="wsu-people-<?php echo esc_attr( $option ); ?>">
-			<?php foreach ( $directory_data['filters'][ $option ] as $i => $term ) { ?>
-			<li>
-				<label>
-					<input type="checkbox" value="<?php echo esc_attr( $option ); ?>-<?php echo esc_attr( sanitize_title( $term ) ); ?>">
-					<span><?php echo esc_attr( $term ); ?></span>
-				</label>
-			</li>
-			<?php } ?>
-		</ul>
-	</div>
+		$label = ( 'org' === $option ) ? 'unit' : $option;
+		$label = apply_filters( "wsuwp_people_{$option}_filter_label", 'Filter by ' . $label );
+		?>
+		<div class="wsu-people-filter <?php echo esc_attr( $option ); ?>">
+			<button type="button"
+					class="wsu-people-filter-label"
+					aria-controls="wsu-people-<?php echo esc_attr( $option ); ?>"
+					aria-expanded="false"><?php echo esc_html( $label ); ?></button>
+			<ul class="wsu-people-filter-terms" id="wsu-people-<?php echo esc_attr( $option ); ?>">
+				<?php foreach ( $directory_data['filters'][ $option ] as $i => $term ) { ?>
+				<li>
+					<label>
+						<input type="checkbox" value="<?php echo esc_attr( $option ); ?>-<?php echo esc_attr( sanitize_title( $term ) ); ?>">
+						<span><?php echo esc_attr( $term ); ?></span>
+					</label>
+				</li>
+				<?php } ?>
+			</ul>
+		</div>
 	<?php } ?>
 
 </div>
