@@ -629,7 +629,7 @@ class WSUWP_People_Post_Type {
 			<input type="hidden" data-for="title" name="_wsuwp_profile_title[]" value="<?php echo esc_attr( $working_title ); ?>" />
 			<?php } ?>
 		<?php } else { ?>
-		<input type="hidden" data-for="title" name="_wsuwp_profile_title[]" value="" />
+			<input type="hidden" data-for="title" name="_wsuwp_profile_title[]" value="" />
 		<?php } ?>
 
 		<?php if ( $degrees && is_array( $degrees ) ) { ?>
@@ -639,8 +639,8 @@ class WSUWP_People_Post_Type {
 		<?php } ?>
 
 		<?php if ( false === WSUWP_People_Directory::is_main_site() ) { ?>
-		<?php $index_used = get_post_meta( $post->ID, '_use_title', true ); ?>
-		<input type="hidden" class="use-title" name="_use_title" value="<?php echo esc_attr( $index_used ); ?>" />
+			<?php $index_used = get_post_meta( $post->ID, '_use_title', true ); ?>
+			<input type="hidden" class="use-title" name="_use_title" value="<?php echo esc_attr( $index_used ); ?>" />
 		<?php } ?>
 
 		<div class="wsu-person-photo-collection-backdrop wsu-person-photo-collection-close">
@@ -654,16 +654,16 @@ class WSUWP_People_Post_Type {
 				if ( $photos && is_array( $photos ) ) {
 					foreach ( $photos as $photo_id ) {
 						if ( is_string( get_post_status( $photo_id ) ) ) {
-						?>
-						<div class="wsu-person-photo-wrapper">
-							<img src="<?php echo esc_url( wp_get_attachment_image_src( $photo_id )[0] ); ?>"
-								 alt="<?php echo esc_attr( $post->post_title ); ?>" />
-							<button type="button" class="wsu-person-remove">
-								<span class="screen-reader-text">Delete</span>
-							</button>
-							<input type="hidden" name="_wsuwp_profile_photos[]" value="<?php echo esc_attr( $photo_id ); ?>" />
-						</div>
-						<?php
+							?>
+							<div class="wsu-person-photo-wrapper">
+								<img src="<?php echo esc_url( wp_get_attachment_image_src( $photo_id )[0] ); ?>"
+									alt="<?php echo esc_attr( $post->post_title ); ?>" />
+								<button type="button" class="wsu-person-remove">
+									<span class="screen-reader-text">Delete</span>
+								</button>
+								<input type="hidden" name="_wsuwp_profile_photos[]" value="<?php echo esc_attr( $photo_id ); ?>" />
+							</div>
+							<?php
 						}
 					}
 				}
@@ -961,17 +961,18 @@ class WSUWP_People_Post_Type {
 						<input name="original_publish" type="hidden" id="original_publish"
 							   value="<?php esc_attr_e( 'Publish' ); ?>"/>
 						<?php submit_button( __( 'Publish' ), 'primary button-large profile-hide-button', 'publish', false );
-					} else { ?>
+					} else {
+						?>
 						<input name="original_publish" type="hidden" id="original_publish" value="<?php esc_attr_e( 'Update' ); ?>" />
 						<input name="save" type="submit" class="button button-primary button-large" id="publish" value="<?php esc_attr_e( 'Update' ); ?>" />
-					<?php
+						<?php
 					} ?>
 				</div>
 				<div class="clear"></div>
 			</div>
 		</div>
 
-	<?php
+		<?php
 	}
 
 	/**
@@ -1459,20 +1460,20 @@ class WSUWP_People_Post_Type {
 		}
 
 		if ( 'use_bio' === $column_name ) {
-		?>
-		<fieldset class="inline-edit-col-right inline-edit-book">
-			<div class="inline-edit-col column-use-bio">
-				<label class="inline-edit-group">
-					<span class="title">Biography to display</span>
-					<select name="_use_bio">
-						<option value="personal">Personal</option>
-						<option value="bio_unit">Unit</option>
-						<option value="bio_university">University</option>
-					</select>
-				</label>
-			</div>
-		</fieldset>
-		<?php
+			?>
+			<fieldset class="inline-edit-col-right inline-edit-book">
+				<div class="inline-edit-col column-use-bio">
+					<label class="inline-edit-group">
+						<span class="title">Biography to display</span>
+						<select name="_use_bio">
+							<option value="personal">Personal</option>
+							<option value="bio_unit">Unit</option>
+							<option value="bio_university">University</option>
+						</select>
+					</label>
+				</div>
+			</fieldset>
+			<?php
 		}
 	}
 

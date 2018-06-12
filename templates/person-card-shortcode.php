@@ -30,7 +30,7 @@
 			<?php
 			if ( $display['titles'] ) {
 				foreach ( $display['titles'] as $title ) {
-				?><span class="title"><?php echo esc_html( $title ); ?></span><?php
+					?><span class="title"><?php echo esc_html( $title ); ?></span><?php
 				}
 			}
 			?>
