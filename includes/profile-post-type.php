@@ -311,7 +311,7 @@ function admin_enqueue_scripts( $hook_suffix ) {
 			'request_from' => ( is_primary_directory() ) ? 'ad' : 'rest',
 		);
 
-		wp_enqueue_style( 'wsuwp-people-edit-profile', plugins_url( 'css/admin-person.css', dirname( __FILE__ ) ), array(), plugin_version() );
+		wp_enqueue_style( 'wsuwp-people-edit-profile', plugins_url( 'css/admin-edit-profile.css', dirname( __FILE__ ) ), array(), plugin_version() );
 		wp_enqueue_script( 'wsuwp-people-edit-profile', plugins_url( 'js/admin-edit-profile.min.js', dirname( __FILE__ ) ), array( 'underscore', 'jquery-ui-sortable' ), plugin_version(), true );
 		wp_localize_script( 'wsuwp-people-edit-profile', 'wsuwp_people_edit_profile', $profile_vars );
 
@@ -332,8 +332,8 @@ function admin_enqueue_scripts( $hook_suffix ) {
 
 	// Enqueue assets for the All Profiles page on secondary sites.
 	if ( 'edit.php' === $hook_suffix && false === is_primary_directory() ) {
-		wp_enqueue_style( 'wsuwp-people-admin', plugins_url( 'css/admin-people.css', dirname( __FILE__ ) ), array(), plugin_version() );
-		wp_enqueue_script( 'wsuwp-people-admin', plugins_url( 'js/admin-people.min.js', dirname( __FILE__ ) ), array( 'jquery' ), plugin_version() );
+		wp_enqueue_style( 'wsuwp-people-admin', plugins_url( 'css/admin-profiles-list-table.css', dirname( __FILE__ ) ), array(), plugin_version() );
+		wp_enqueue_script( 'wsuwp-people-admin', plugins_url( 'js/admin-profiles-list-table.min.js', dirname( __FILE__ ) ), array( 'jquery' ), plugin_version() );
 		wp_localize_script( 'wsuwp-people-admin', 'wsupeople', array(
 			'nonce' => wp_create_nonce( 'person-meta' ),
 		) );

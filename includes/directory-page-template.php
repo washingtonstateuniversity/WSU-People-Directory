@@ -133,7 +133,7 @@ function admin_enqueue_scripts( $hook_suffix ) {
 	global $post;
 
 	wp_enqueue_style( 'wsuwp-people-display', plugins_url( 'css/people.css', dirname( __FILE__ ) ), array(), plugin_version() );
-	wp_enqueue_style( 'wsuwp-people-admin', plugins_url( 'css/admin-page.css', dirname( __FILE__ ) ), array(), plugin_version() );
+	wp_enqueue_style( 'wsuwp-people-admin', plugins_url( 'css/admin-edit-page.css', dirname( __FILE__ ) ), array(), plugin_version() );
 	wp_enqueue_script( 'wsuwp-people-edit-page', plugins_url( 'js/admin-edit-page.min.js', dirname( __FILE__ ) ), array( 'jquery', 'underscore', 'jquery-ui-autocomplete', 'jquery-ui-sortable' ), plugin_version(), true );
 	wp_enqueue_script( 'wsuwp-people-sync', plugins_url( 'js/admin-people-sync.min.js', dirname( __FILE__ ) ), array( 'jquery' ), plugin_version(), true );
 
