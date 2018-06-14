@@ -43,7 +43,6 @@ add_action( 'rest_api_init', __NAMESPACE__ . '\\custom_access_control_headers' )
 add_action( 'rest_api_init', __NAMESPACE__ . '\\register_api_fields' );
 
 add_filter( 'rest_prepare_' . profile_post_type_slug(), __NAMESPACE__ . '\\photos_api_field', 10, 2 );
-add_action( 'init', __NAMESPACE__ . '\\show_university_taxonomies_in_rest', 12 );
 
 add_action( 'init', __NAMESPACE__ . '\\register_wsu_nid_query_var' );
 add_filter( 'rest_' . profile_post_type_slug() . '_query', __NAMESPACE__ . '\\rest_query_vars', 10, 2 );
@@ -462,30 +461,6 @@ function update_api_taxonomy_data( $value, $object, $field_name ) {
 	}
 
 	return '';
-}
-
-/**
- * Exposes the University taxonomies in the REST API.
- *
- * @since 0.3.0
- */
-function show_university_taxonomies_in_rest() {
-	global $wp_taxonomies;
-
-	if ( taxonomy_exists( 'wsuwp_university_category' ) ) {
-		$wp_taxonomies['wsuwp_university_category']->show_in_rest = true;
-		$wp_taxonomies['wsuwp_university_category']->rest_base = 'university_category';
-	}
-
-	if ( taxonomy_exists( 'wsuwp_university_location' ) ) {
-		$wp_taxonomies['wsuwp_university_location']->show_in_rest = true;
-		$wp_taxonomies['wsuwp_university_location']->rest_base = 'location';
-	}
-
-	if ( taxonomy_exists( 'wsuwp_university_org' ) ) {
-		$wp_taxonomies['wsuwp_university_org']->show_in_rest = true;
-		$wp_taxonomies['wsuwp_university_org']->rest_base = 'organization';
-	}
 }
 
 /**

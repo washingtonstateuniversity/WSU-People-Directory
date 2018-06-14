@@ -3,7 +3,6 @@
 namespace WSUWP\People_Directory;
 
 require_once __DIR__ . '/profile-post-type.php';
-require_once __DIR__ . '/classification-taxonomy.php';
 require_once __DIR__ . '/rest-api.php';
 require_once __DIR__ . '/user-profile.php';
 
