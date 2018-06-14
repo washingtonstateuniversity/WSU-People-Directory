@@ -3,7 +3,7 @@ module.exports = function( grunt ) {
         pkg: grunt.file.readJSON( "package.json" ),
 
         stylelint: {
-            src: [ "src/css/*.css" ]
+            src: [ "css/src/*.css" ]
         },
 
         postcss: {
@@ -15,7 +15,7 @@ module.exports = function( grunt ) {
                 ]
             },
             dist: {
-                cwd: "src/css/",
+                cwd: "css/src/",
                 src: "*.css",
                 dest: "css/",
                 expand: true
@@ -34,7 +34,7 @@ module.exports = function( grunt ) {
 
         jscs: {
             scripts: {
-                src: [ "Gruntfile.js", "src/js/*.js" ],
+                src: [ "Gruntfile.js", "js/src/*.js" ],
                 options: {
                     preset: "jquery",
                     requireCamelCaseOrUpperCaseIdentifiers: false, // We rely on name_name too much to change them all.
@@ -57,7 +57,7 @@ module.exports = function( grunt ) {
                 }
             },
             people_scripts: {
-                src: [ "src/js/*.js" ],
+                src: [ "js/src/*.js" ],
                 options: {
                     bitwise: true,
                     curly: true,
@@ -79,7 +79,7 @@ module.exports = function( grunt ) {
             dist: {
                 files: [ {
                     expand: true,
-                    cwd: "src/js/",
+                    cwd: "js/src/",
                     src: "*.js",
                     dest: "js",
                     ext: ".min.js"
@@ -89,7 +89,7 @@ module.exports = function( grunt ) {
 
         watch: {
             styles: {
-                files: [ "src/css/*.css", "src/js/*.js" ],
+                files: [ "css/src/*.css", "js/src/*.js" ],
                 tasks: [ "default" ],
                 option: {
                     livereload: 8000
