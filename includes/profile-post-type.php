@@ -191,134 +191,15 @@ function meta_keys() {
 			'meta_key' => '_wsuwp_profile_listed_on',
 			'updatable_via_rest' => true,
 		),
-		// Legacy
-		'bio_college' => array(
-			'type' => 'string',
-			'description' => 'College Biography',
-			'sanitize_callback' => 'wp_kses_post',
-			'meta_key' => '_wsuwp_profile_bio_college',
-			'updatable_via_rest' => true,
-			'legacy' => true,
-		),
-		'bio_lab' => array(
-			'type' => 'string',
-			'description' => 'Lab Biography',
-			'sanitize_callback' => 'wp_kses_post',
-			'meta_key' => '_wsuwp_profile_bio_lab',
-			'updatable_via_rest' => true,
-			'legacy' => true,
-		),
-		'bio_department' => array(
-			'type' => 'string',
-			'description' => 'Department Biography',
-			'sanitize_callback' => 'wp_kses_post',
-			'meta_key' => '_wsuwp_profile_bio_dept',
-			'updatable_via_rest' => true,
-			'legacy' => true,
-		),
-		'cv_employment' => array(
-			'type' => 'string',
-			'description' => 'C.V. - Employment',
-			'sanitize_callback' => 'wp_kses_post',
-			'meta_key' => '_wsuwp_profile_employment',
-			'updatable_via_rest' => true,
-			'legacy' => true,
-		),
-		'cv_honors' => array(
-			'type' => 'string',
-			'description' => 'C.V. - Honors',
-			'sanitize_callback' => 'wp_kses_post',
-			'meta_key' => '_wsuwp_profile_honors',
-			'updatable_via_rest' => true,
-			'legacy' => true,
-		),
-		'cv_grants' => array(
-			'type' => 'string',
-			'description' => 'C.V. - Grants',
-			'sanitize_callback' => 'wp_kses_post',
-			'meta_key' => '_wsuwp_profile_grants',
-			'updatable_via_rest' => true,
-			'legacy' => true,
-		),
-		'cv_publications' => array(
-			'type' => 'string',
-			'description' => 'C.V. - Publications',
-			'sanitize_callback' => 'wp_kses_post',
-			'meta_key' => '_wsuwp_profile_publications',
-			'updatable_via_rest' => true,
-			'legacy' => true,
-		),
-		'cv_presentations' => array(
-			'type' => 'string',
-			'description' => 'C.V. - Presentations',
-			'sanitize_callback' => 'wp_kses_post',
-			'meta_key' => '_wsuwp_profile_presentations',
-			'updatable_via_rest' => true,
-			'legacy' => true,
-		),
-		'cv_teaching' => array(
-			'type' => 'string',
-			'description' => 'C.V. - Teaching',
-			'sanitize_callback' => 'wp_kses_post',
-			'meta_key' => '_wsuwp_profile_teaching',
-			'updatable_via_rest' => true,
-			'legacy' => true,
-		),
-		'cv_service' => array(
-			'type' => 'string',
-			'description' => 'C.V. - Service',
-			'sanitize_callback' => 'wp_kses_post',
-			'meta_key' => '_wsuwp_profile_service',
-			'updatable_via_rest' => true,
-			'legacy' => true,
-		),
-		'cv_responsibilities' => array(
-			'type' => 'string',
-			'description' => 'C.V. - Responsibilities',
-			'sanitize_callback' => 'wp_kses_post',
-			'meta_key' => '_wsuwp_profile_responsibilities',
-			'updatable_via_rest' => true,
-			'legacy' => true,
-		),
-		'cv_affiliations' => array(
-			'type' => 'string',
-			'description' => 'C.V. - Affiliations',
-			'sanitize_callback' => 'wp_kses_post',
-			'meta_key' => '_wsuwp_profile_societies',
-			'updatable_via_rest' => true,
-			'legacy' => true,
-		),
-		'cv_experience' => array(
-			'type' => 'string',
-			'description' => 'C.V. - Experience',
-			'sanitize_callback' => 'wp_kses_post',
-			'meta_key' => '_wsuwp_profile_experience',
-			'updatable_via_rest' => true,
-			'legacy' => true,
-		),
-		'cv_attachment' => array(
-			'type' => 'string',
-			'description' => 'C.V. - Upload',
-			'sanitize_callback' => 'attachment',
-			'meta_key' => '_wsuwp_profile_cv',
-			'updatable_via_rest' => true,
-			'legacy' => true,
-		),
-		'profile_photo' => array(
-			'type' => 'string',
-			'description' => '',
-			'sanitize_callback' => 'attachment',
-			'meta_key' => '',
-			'updatable_via_rest' => true,
-		),
 	);
+
+	$meta_keys = apply_filters( 'wsuwp_people_profile_meta_keys', $meta_keys );
 
 	return $meta_keys;
 }
 
 add_action( 'init', __NAMESPACE__ . '\\register_post_type', 11 );
 add_action( 'init', __NAMESPACE__ . '\\register_meta', 11 );
-add_action( 'init', __NAMESPACE__ . '\\register_taxonomies_for_people', 12 );
 
 add_action( 'admin_enqueue_scripts', __NAMESPACE__ . '\\admin_enqueue_scripts' );
 
@@ -326,7 +207,6 @@ add_action( 'edit_form_after_title', __NAMESPACE__ . '\\edit_form_after_title' )
 add_action( 'edit_form_after_editor', __NAMESPACE__ . '\\edit_form_after_editor' );
 
 add_action( 'add_meta_boxes_' . slug(), __NAMESPACE__ . '\\profile_meta_boxes' );
-add_filter( 'wsuwp_taxonomy_metabox_post_types', __NAMESPACE__ . '\\taxonomy_meta_box' );
 
 add_action( 'save_post_' . slug(), __NAMESPACE__ . '\\save_post' );
 
@@ -335,12 +215,8 @@ add_action( 'wp_ajax_wsu_people_confirm_nid_data', __NAMESPACE__ . '\\ajax_confi
 
 add_filter( 'wp_post_revision_meta_keys', __NAMESPACE__ . '\\add_meta_keys_to_revision' );
 
-add_filter( 'manage_taxonomies_for_' . slug() . '_columns', __NAMESPACE__ . '\\manage_people_taxonomy_columns' );
-
-add_filter( 'wp_ajax_wsu_people_delete_legacy_meta', __NAMESPACE__ . '\\ajax_delete_legacy_meta' );
-
 if ( false === is_primary_directory() ) {
-	add_action( 'wp_enqueue_editor', __NAMESPACE__ . '\\admin_enqueue_secondary_scripts' );
+	add_action( 'wp_enqueue_editor', __NAMESPACE__ . '\\wp_enqueue_editor' );
 	add_filter( 'wp_editor_settings', __NAMESPACE__ . '\\filter_default_editor_settings', 10, 2 );
 
 	add_filter( 'wp_insert_post_data', __NAMESPACE__ . '\\wp_insert_post_data' );
@@ -412,17 +288,6 @@ function register_meta() {
 }
 
 /**
- * Adds support for WSU University Taxonomies to the profile post type.
- *
- * @since 0.1.0
- */
-function register_taxonomies_for_people() {
-	register_taxonomy_for_object_type( 'wsuwp_university_category', slug() );
-	register_taxonomy_for_object_type( 'wsuwp_university_location', slug() );
-	register_taxonomy_for_object_type( 'wsuwp_university_org', slug() );
-}
-
-/**
  * Enqueues the assets used for profile post type admin pages.
  *
  * @since 0.1.0
@@ -450,7 +315,7 @@ function admin_enqueue_scripts( $hook_suffix ) {
 		wp_enqueue_script( 'wsuwp-people-edit-profile', plugins_url( 'js/admin-edit-profile.min.js', dirname( __FILE__ ) ), array( 'underscore', 'jquery-ui-sortable' ), plugin_version(), true );
 		wp_localize_script( 'wsuwp-people-edit-profile', 'wsuwp_people_edit_profile', $profile_vars );
 
-		// Disable autosaving on spoke sites.
+		// Disable autosaving on secondary sites.
 		if ( false === is_primary_directory() ) {
 			wp_dequeue_script( 'autosave' );
 		}
@@ -458,7 +323,6 @@ function admin_enqueue_scripts( $hook_suffix ) {
 		// Enqueue assets for the Edit and Add New Profile pages on the primary directory.
 		if ( true === is_primary_directory() ) {
 			wp_enqueue_script( 'wsuwp-people-edit-profile-primary', plugins_url( 'js/admin-edit-profile-primary.min.js', dirname( __FILE__ ) ), array( 'jquery' ), plugin_version(), true );
-
 			wp_localize_script( 'wsuwp-people-edit-profile-primary', 'wsupeoplesync', array(
 				'nonce' => \WSUWP\People_Directory\create_rest_nonce(),
 				'uid' => wp_get_current_user()->ID,
@@ -466,7 +330,7 @@ function admin_enqueue_scripts( $hook_suffix ) {
 		}
 	}
 
-	// Enqueue assets for the All Profiles page on spoke sites.
+	// Enqueue assets for the All Profiles page on secondary sites.
 	if ( 'edit.php' === $hook_suffix && false === is_primary_directory() ) {
 		wp_enqueue_style( 'wsuwp-people-admin', plugins_url( 'css/admin-people.css', dirname( __FILE__ ) ), array(), plugin_version() );
 		wp_enqueue_script( 'wsuwp-people-admin', plugins_url( 'js/admin-people.min.js', dirname( __FILE__ ) ), array( 'jquery' ), plugin_version() );
@@ -569,11 +433,6 @@ function edit_form_after_title( $post ) {
 		<?php foreach ( $degrees as $degree ) { ?>
 		<input type="hidden" data-for="degree" name="_wsuwp_profile_degree[]" value="<?php echo esc_attr( $degree ); ?>" />
 		<?php } ?>
-	<?php } ?>
-
-	<?php if ( false === is_primary_directory() ) { ?>
-		<?php $index_used = get_post_meta( $post->ID, '_use_title', true ); ?>
-		<input type="hidden" class="use-title" name="_use_title" value="<?php echo esc_attr( $index_used ); ?>" />
 	<?php } ?>
 
 	<div class="wsu-person-photo-collection-backdrop wsu-person-photo-collection-close">
@@ -701,86 +560,43 @@ function edit_form_after_editor( $post ) {
 	}
 
 	?>
-	</div><!--bio_personal-->
-	<?php
-
-	$user = wp_get_current_user();
-	$profile_owner = in_array( 'wsuwp_people_profile_owner', (array) $user->roles, true );
-	$global_admin = wsuwp_is_global_admin( $user->data->ID );
-
-	foreach ( meta_keys() as $key => $args ) {
-		if ( ! isset( $args['render_as_wp_editor'] ) ) {
-			continue;
-		}
-
-		?>
-		<div id="<?php echo esc_attr( $key ); ?>" class="wsu-person-bio">
-
-			<h2><?php echo esc_html( $args['description'] ); ?></h2>
-
+			</div><!--bio_personal-->
 			<?php
-			$value = get_post_meta( $post->ID, $args['meta_key'], true );
-			$unit_bio = '_wsuwp_profile_bio_unit' === $args['meta_key'];
-			$university_bio = '_wsuwp_profile_bio_university' === $args['meta_key'];
 
-			if ( ( is_primary_directory() && $profile_owner && $unit_bio ) ||
-					( $university_bio && ! $global_admin ) ) {
-				echo '<div class="readonly">' . wp_kses_post( apply_filters( 'the_content', $value ) ) . '</div>';
-			} else {
-				wp_editor( $value, $args['meta_key'] );
-			}
-			?>
-		</div>
-		<?php
-	}
+			$user = wp_get_current_user();
+			$profile_owner = in_array( 'wsuwp_people_profile_owner', (array) $user->roles, true );
+			$global_admin = wsuwp_is_global_admin( $user->data->ID );
 
-	// Legacy inputs - temporary.
-	if ( is_primary_directory() && 'add' !== get_current_screen()->action ) {
-		$legacy_notice = false;
-
-		foreach ( meta_keys() as $key => $args ) {
-			if ( ! isset( $args['legacy'] ) ) {
-				continue;
-			}
-
-			$value = get_post_meta( $post->ID, $args['meta_key'], true );
-
-			if ( $value ) {
-
-				if ( false === $legacy_notice ) {
-					?><p class="description legacy-notice"><strong>Attention:</strong> the following fields have been deprecated. It is recommended that the information therein be moved into one of the above biography fields.</p><?php
-					$legacy_notice = true;
+			foreach ( meta_keys() as $key => $args ) {
+				if ( ! isset( $args['render_as_wp_editor'] ) ) {
+					continue;
 				}
 
 				?>
 				<div id="<?php echo esc_attr( $key ); ?>" class="wsu-person-bio">
 
-					<button type="button"
-							class="legacy-meta-delete"
-							data-name="<?php echo esc_attr( $args['description'] ); ?>"
-							data-metakey="<?php echo esc_attr( $args['meta_key'] ); ?>">Delete this field</button>
-
 					<h2><?php echo esc_html( $args['description'] ); ?></h2>
 
-					<div class="readonly"><?php
-					if ( 'cv_attachment' === $key ) {
-						$cv_attachment_url = wp_get_attachment_url( $value );
-						echo '<a href="' . esc_url( $cv_attachment_url ) . '">' . esc_url( $cv_attachment_url ) . '</a>';
+					<?php
+					$value = get_post_meta( $post->ID, $args['meta_key'], true );
+					$unit_bio = '_wsuwp_profile_bio_unit' === $args['meta_key'];
+					$university_bio = '_wsuwp_profile_bio_university' === $args['meta_key'];
+
+					if ( ( is_primary_directory() && $profile_owner && $unit_bio ) ||
+							( $university_bio && ! $global_admin ) ) {
+						echo '<div class="readonly">' . wp_kses_post( apply_filters( 'the_content', $value ) ) . '</div>';
 					} else {
-						echo wp_kses_post( apply_filters( 'the_content', $value ) );
+						wp_editor( $value, $args['meta_key'] );
 					}
-
-					?></div>
-
+					?>
 				</div>
 				<?php
 			}
-		}
-	}
-	?>
+			?>
 
-	</div><!--wsuwp-person-about-->
-	</div><!--wsuwp-person-->
+		</div><!--.about-->
+
+	</div><!--.wsu-person-->
 	<?php
 }
 
@@ -799,11 +615,11 @@ function profile_meta_boxes( $post ) {
 	add_meta_box( 'submitdiv', $box_title, __NAMESPACE__ . '\\publish_meta_box', slug(), 'side', 'high' );
 
 	if ( true === is_primary_directory() ) {
-		add_meta_box( 'wsuwp-profile-listing', 'Listed On', __NAMESPACE__ . '\\display_listing_meta_box', slug(), 'normal' );
+		add_meta_box( 'wsuwp-profile-listing', 'Listed On', __NAMESPACE__ . '\\listing_meta_box', slug(), 'normal' );
 	}
 
 	if ( false === is_primary_directory() ) {
-		add_meta_box( 'wsuwp-profile-local-display', 'Display Options', __NAMESPACE__ . '\\display_local_display_meta_box', slug(), 'side', 'low' );
+		add_meta_box( 'wsuwp-profile-local-display', 'Display Options', __NAMESPACE__ . '\\local_display_meta_box', slug(), 'side', 'low' );
 	}
 }
 
@@ -895,29 +711,13 @@ function publish_meta_box( $post ) {
 }
 
 /**
- * Displays a meta box for selecting taxonomy terms.
- *
- * @since 0.3.9
- *
- * @param array $post_types Post types and their associated taxonomies.
- *
- * @return array Post types and their associated taxonomies.
- */
-function taxonomy_meta_box( $post_types ) {
-	// Reversed because that seems to better match the order of importance.
-	$post_types[ slug() ] = array_reverse( get_object_taxonomies( slug() ) );
-
-	return $post_types;
-}
-
-/**
  * Displays a meta box used to show which sites a profile is listed on.
  *
  * @since 0.3.0
  *
  * @param WP_Post $post Post object.
  */
-function display_listing_meta_box( $post ) {
+function listing_meta_box( $post ) {
 	$listings = get_post_meta( $post->ID, '_wsuwp_profile_listed_on', true );
 
 	if ( $listings ) {
@@ -932,13 +732,13 @@ function display_listing_meta_box( $post ) {
 }
 
 /**
- * Displays a meta box used to adjust the display of a profile.
+ * Displays a meta box used to adjust the display of a profile on a secondary site.
  *
  * @since 0.3.2
  *
  * @param WP_Post $post Post object.
  */
-function display_local_display_meta_box( $post ) {
+function local_display_meta_box( $post ) {
 	$photo = get_post_meta( $post->ID, '_use_photo', true );
 	$title = get_post_meta( $post->ID, '_use_title', true );
 	$bio = get_post_meta( $post->ID, '_use_bio', true );
@@ -1042,15 +842,6 @@ function save_post( $post_id ) {
 
 	if ( ! current_user_can( 'edit_post', $post_id ) ) {
 		return;
-	}
-
-	// Make sure taxonomy terms are properly removed when none are selected.
-	$taxonomies = get_post_taxonomies( $post_id );
-
-	foreach ( $taxonomies as $taxonomy ) {
-		if ( ! isset( $_POST['tax_input'][ $taxonomy ] ) ) {
-			wp_set_object_terms( $post_id, '', $taxonomy );
-		}
 	}
 
 	// Store only select meta if this is not the primary directory.
@@ -1275,49 +1066,13 @@ function add_meta_keys_to_revision( $keys ) {
 }
 
 /**
- * Modifies taxonomy columns on the "All Profiles" screen.
- *
- * @since 0.1.0
- *
- * @param array $columns Default columns on the "All Profiles" screen.
- *
- * @return array
- */
-function manage_people_taxonomy_columns( $columns ) {
-	$columns[] = 'wsuwp_university_org';
-	$columns[] = 'wsuwp_university_location';
-
-	return $columns;
-}
-
-/**
- * Handles legacy meta data removal.
- *
- * @since 0.3.0
- */
-function ajax_delete_legacy_meta() {
-	check_ajax_referer( 'wsu-people-nid-lookup' );
-
-	$post_id = absint( $_POST['post_id'] );
-	$meta_key = sanitize_text_field( $_POST['meta_key'] );
-
-	if ( empty( $post_id ) || empty( $meta_key ) ) {
-		wp_send_json_error( 'Invalid or empty Network ID' );
-	}
-
-	delete_post_meta( $post_id, $meta_key );
-
-	wp_send_json_success();
-}
-
-/**
- * Enqueues the assets used for profile post type admin pages on secondary sites.
+ * Enqueues editor assets for the Edit and Add New Profile pages on secondary sites.
  *
  * @since 0.3.0
  *
  * @param array $to_load Contains boolean values whether TinyMCE and Quicktags are being loaded.
  */
-function admin_enqueue_secondary_scripts( $to_load ) {
+function wp_enqueue_editor( $to_load ) {
 	if ( ! is_admin() ) {
 		return;
 	}
@@ -1352,7 +1107,7 @@ function admin_enqueue_secondary_scripts( $to_load ) {
  * profile page. This will help mitigate race conditions when populating
  * with data from the main site via REST API.
  *
- * @since 1.0.0
+ * @since 0.3.0
  *
  * @param array $settings
  * @param string $editor_id
@@ -1389,7 +1144,7 @@ function filter_default_editor_settings( $settings, $editor_id ) {
  * @return array
  */
 function wp_insert_post_data( $data ) {
-	if ( false === is_primary_directory() && slug() === $data['post_type'] ) {
+	if ( slug() === $data['post_type'] ) {
 		$data['post_content'] = '';
 		$data['post_content_filtered'] = '';
 	}
