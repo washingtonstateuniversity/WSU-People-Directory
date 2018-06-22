@@ -9,7 +9,6 @@ require_once __DIR__ . '/user-profile.php';
 if ( false === is_primary() ) {
 	require_once __DIR__ . '/directory-page-template.php';
 	require_once __DIR__ . '/profile-display.php';
-	require_once __DIR__ . '/person-card-shortcode.php';
 }
 
 /**
