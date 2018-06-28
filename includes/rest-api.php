@@ -212,7 +212,7 @@ function get_api_meta_data( $object, $field_name, $request ) {
 		return esc_html( get_post_meta( $object['id'], profile_post_type_meta_keys()[ $field_name ]['meta_key'], true ) );
 	}
 
-	if ( 'WSUWP_People_Post_Type::sanitize_repeatable_text_fields' === profile_post_type_meta_keys()[ $field_name ]['sanitize_callback'] ) {
+	if ( 'WSUWP\People_Directory\Profile_Post_Type\sanitize_repeatable_text_fields' === profile_post_type_meta_keys()[ $field_name ]['sanitize_callback'] ) {
 		$data = get_post_meta( $object['id'], profile_post_type_meta_keys()[ $field_name ]['meta_key'], true );
 		if ( is_array( $data ) ) {
 			$data = array_map( 'esc_html', $data );
@@ -305,7 +305,7 @@ function update_api_meta_data( $value, $object, $field_name ) {
 		return update_post_meta( $object->ID, profile_post_type_meta_keys()[ $field_name ]['meta_key'], $value );
 	}
 
-	if ( 'WSUWP_People_Post_Type::sanitize_repeatable_text_fields' === profile_post_type_meta_keys()[ $field_name ]['sanitize_callback'] ) {
+	if ( 'WSUWP\People_Directory\Profile_Post_Type\sanitize_repeatable_text_fields' === profile_post_type_meta_keys()[ $field_name ]['sanitize_callback'] ) {
 
 		if ( is_array( $value ) ) {
 			$value = ( 'listed_on' === $field_name ) ? array_map( 'esc_url_raw', $value ) : array_map( 'sanitize_text_field', $value );
