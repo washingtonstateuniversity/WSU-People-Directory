@@ -42,8 +42,6 @@ add_filter( 'rest_authentication_errors', __NAMESPACE__ . '\\rest_verify_authent
 add_action( 'rest_api_init', __NAMESPACE__ . '\\custom_access_control_headers' );
 add_action( 'rest_api_init', __NAMESPACE__ . '\\register_api_fields' );
 
-add_filter( 'rest_prepare_' . profile_post_type_slug(), __NAMESPACE__ . '\\photos_api_field', 10, 2 );
-
 add_action( 'init', __NAMESPACE__ . '\\register_wsu_nid_query_var' );
 add_filter( 'rest_' . profile_post_type_slug() . '_query', __NAMESPACE__ . '\\rest_query_vars', 10, 2 );
 add_action( 'pre_get_posts', __NAMESPACE__ . '\\handle_wsu_nid_query_var' );
@@ -230,30 +228,8 @@ function get_api_meta_data( $object, $field_name, $request ) {
 	if ( 'wp_kses_post' === profile_post_type_meta_keys()[ $field_name ]['sanitize_callback'] ) {
 		$data = get_post_meta( $object['id'], profile_post_type_meta_keys()[ $field_name ]['meta_key'], true );
 		$data = trim( apply_filters( 'the_content', $data ) );
+
 		return wp_kses_post( $data );
-	}
-
-	if ( 'cv_attachment' === $field_name ) {
-		$cv_id = get_post_meta( $object['id'], profile_post_type_meta_keys()[ $field_name ]['meta_key'], true );
-		$cv_url = wp_get_attachment_url( $cv_id );
-
-		if ( $cv_url ) {
-			return esc_url( $cv_url );
-		} else {
-			return false;
-		}
-	}
-
-	if ( 'profile_photo' === $field_name ) {
-		$thumbnail_id = get_post_thumbnail_id( $object['id'] );
-		if ( $thumbnail_id ) {
-			$thumbnail = wp_get_attachment_image_src( $thumbnail_id );
-			if ( $thumbnail ) {
-				return esc_url( $thumbnail[0] );
-			} else {
-				return false;
-			}
-		}
 	}
 
 	if ( 'photos' === $field_name ) {
@@ -302,6 +278,7 @@ function update_api_meta_data( $value, $object, $field_name ) {
 
 	if ( 'sanitize_text_field' === profile_post_type_meta_keys()[ $field_name ]['sanitize_callback'] ) {
 		$value = sanitize_text_field( $value );
+
 		return update_post_meta( $object->ID, profile_post_type_meta_keys()[ $field_name ]['meta_key'], $value );
 	}
 
@@ -318,12 +295,14 @@ function update_api_meta_data( $value, $object, $field_name ) {
 
 	if ( 'esc_url_raw' === profile_post_type_meta_keys()[ $field_name ]['sanitize_callback'] ) {
 		$value = esc_url_raw( $value );
+
 		return update_post_meta( $object->ID, profile_post_type_meta_keys()[ $field_name ]['meta_key'], $value );
 	}
 
 	if ( 'wp_kses_post' === profile_post_type_meta_keys()[ $field_name ]['sanitize_callback'] ) {
 		$value = trim( apply_filters( 'the_content', $value ) );
 		$value = wp_kses_post( $value );
+
 		return update_post_meta( $object->ID, profile_post_type_meta_keys()[ $field_name ]['meta_key'], $value );
 	}
 
@@ -351,34 +330,6 @@ function rest_field_schema( $args ) {
 	}
 
 	return $schema;
-}
-
-/**
- * Adds links for attached photos to the REST API response.
- *
- * @since 0.3.0
- *
- * @param WP_REST_Response $response The current REST response object.
- * @param WP_Post          $post     The current WP_Post object.
- *
- * @return WP_REST_Response
- */
-function photos_api_field( $response, $post ) {
-	$photos = get_post_meta( $post->ID, '_wsuwp_profile_photos', true );
-
-	if ( $photos ) {
-		foreach ( $photos as $photo_id ) {
-			$response->add_link(
-				'https://api.w.org/photos',
-				esc_url( rest_url( '/wp/v2/media/' . $photo_id ) ),
-				array(
-					'embeddable' => true,
-				)
-			);
-		}
-	}
-
-	return $response;
 }
 
 /**
