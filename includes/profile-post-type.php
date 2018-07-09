@@ -319,15 +319,6 @@ function admin_enqueue_scripts( $hook_suffix ) {
 		if ( false === is_primary_directory() ) {
 			wp_dequeue_script( 'autosave' );
 		}
-
-		// Enqueue assets for the Edit and Add New Profile pages on the primary directory.
-		if ( true === is_primary_directory() ) {
-			wp_enqueue_script( 'wsuwp-people-edit-profile-primary', plugins_url( 'js/admin-edit-profile-primary.min.js', dirname( __FILE__ ) ), array( 'jquery' ), plugin_version(), true );
-			wp_localize_script( 'wsuwp-people-edit-profile-primary', 'wsupeoplesync', array(
-				'nonce' => \WSUWP\People_Directory\create_rest_nonce(),
-				'uid' => wp_get_current_user()->ID,
-			) );
-		}
 	}
 
 	// Enqueue assets for the All Profiles page on secondary sites.
