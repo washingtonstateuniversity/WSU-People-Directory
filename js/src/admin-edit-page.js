@@ -531,14 +531,14 @@
 	// Update the `listed on` data of the primary profiles.
 	$( "#publish" ).click( function() {
 		$.ajax( {
-			url: window.wsupeoplesync.endpoint,
+			url: window.wsuwp_people_edit_page.sync_endpoint,
 			method: "POST",
 			beforeSend: function( xhr ) {
-				xhr.setRequestHeader( "X-WP-Nonce", window.wsupeoplesync.nonce );
-				xhr.setRequestHeader( "X-WSUWP-UID", window.wsupeoplesync.uid );
+				xhr.setRequestHeader( "X-WP-Nonce", window.wsuwp_people_edit_page.sync_nonce );
+				xhr.setRequestHeader( "X-WSUWP-UID", window.wsuwp_people_edit_page.sync_uid );
 			},
 			data: {
-				"site_url": window.wsupeoplesync.site_url,
+				"site_url": window.wsuwp_people_edit_page.sync_site_url,
 				"ids": $( "#directory-page-profile-ids" ).val().split( " " )
 			}
 		} );

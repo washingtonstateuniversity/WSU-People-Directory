@@ -142,12 +142,10 @@ function admin_enqueue_scripts( $hook_suffix ) {
 		'ajax_url' => admin_url( 'admin-ajax.php' ),
 		'nonce' => wp_create_nonce( 'person-details' ),
 		'page_id' => $post->ID,
-	) );
-	wp_localize_script( 'wsuwp-people-sync', 'wsupeoplesync', array(
-		'endpoint' => primary_directory_api_path() . 'wsuwp-people/v1/sync',
-		'nonce' => \WSUWP\People_Directory\create_rest_nonce(),
-		'uid' => wp_get_current_user()->ID,
-		'site_url' => get_home_url(),
+		'sync_endpoint' => primary_directory_api_path() . 'wsuwp-people/v1/sync',
+		'sync_nonce' => \WSUWP\People_Directory\create_rest_nonce(),
+		'sync_uid' => wp_get_current_user()->ID,
+		'sync_site_url' => get_home_url(),
 	) );
 
 	$template = get_post_meta( $post->ID, '_wp_page_template', true );
