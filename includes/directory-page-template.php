@@ -71,11 +71,6 @@ function meta_keys() {
 			'description' => 'Link to full profiles',
 			'sanitize_callback' => 'sanitize_text_field',
 		),
-		'_wsu_people_directory_profile' => array(
-			'type' => 'string',
-			'description' => 'Whether full profiles should open as a page or a lightbox',
-			'sanitize_callback' => 'sanitize_text_field',
-		),
 		'_wsu_people_directory_show_photos' => array(
 			'type' => 'string',
 			'description' => 'Whether to show photos on this people listing',
@@ -101,7 +96,6 @@ add_action( 'wp_ajax_person_details', __NAMESPACE__ . '\\person_details' );
 add_action( 'wp_ajax_check_inserted_profiles', __NAMESPACE__ . '\\check_inserted_profiles' );
 add_filter( 'theme_page_templates', __NAMESPACE__ . '\\add_directory_template' );
 add_filter( 'template_include', __NAMESPACE__ . '\\template_include' );
-add_action( 'wp_footer', __NAMESPACE__ . '\\person_lightbox_template' );
 
 /**
  * Registers the meta keys used to store data about a directory page.
@@ -288,14 +282,6 @@ function display_people_directory_setup( $post ) {
 					<option value="if_bio"<?php selected( 'if_bio', $directory_data['profile_display_options']['link']['when'] ); ?>>If the person has a biography</option>
 					<option value="yes"<?php selected( 'yes', $directory_data['profile_display_options']['link']['when'] ); ?>>Yes</option>
 					<option value="no"<?php selected( 'no', $directory_data['profile_display_options']['link']['when'] ); ?>>No</option>
-				</select>
-			</p>
-
-			<p>
-				<label for="wsu-people-directory-profile">Open full profiles in a</label>
-				<select id="wsu-people-directory-profile" name="_wsu_people_directory_profile">
-					<option value="page"<?php selected( 'page', $directory_data['profile_display_options']['link']['profile'] ); ?>>Page</option>
-					<option value="lightbox"<?php selected( 'lightbox', $directory_data['profile_display_options']['link']['profile'] ); ?>>Lightbox</option>
 				</select>
 			</p>
 
@@ -796,10 +782,6 @@ function directory_data( $post_id ) {
 		$wrapper_classes .= ' photos';
 	}
 
-	if ( 'lightbox' === $open_profiles_as ) {
-		$wrapper_classes .= ' lightbox';
-	}
-
 	// Set up the page content.
 	$elements = array(
 		'people' => array(),
@@ -1014,10 +996,6 @@ function template_include( $template ) {
 	// Enqueue scripts.
 	wp_enqueue_script( 'wsu-people', plugin_dir_url( dirname( __FILE__ ) ) . 'js/directory-template.min.js', array(), plugin_version(), true );
 
-	if ( 'lightbox' === get_post_meta( $post->ID, '_wsu_people_directory_profile', true ) ) {
-		wp_localize_script( 'wsu-people', 'wsu_people_rest_url', trailingslashit( primary_directory_api_path() . 'wp/v2/people' ) );
-	}
-
 	add_filter( 'the_content', __NAMESPACE__ . '\\directory_content' );
 
 	return trailingslashit( get_template_directory() ) . 'templates/single.php';
@@ -1042,62 +1020,4 @@ function directory_content() {
 	$content = ob_get_clean();
 
 	return $content;
-}
-
-/**
- * Outputs the underscore template for lightbox profiles.
- *
- * @since 0.3.0
- */
-function person_lightbox_template() {
-	$post = get_post();
-
-	if ( ! $post ) {
-		return;
-	}
-
-	if ( 'lightbox' !== get_post_meta( $post->ID, '_wsu_people_directory_profile', true ) ) {
-		return;
-	}
-
-	?>
-	<script type="text/template" id="wsu-person-lightbox-template">
-
-		<div class="wsu-people-lightbox wsu-people-lightbox-close" tabindex="-1">
-
-			<article class="wsu-person" role="dialog" aria-labelledby="wsu-person-name">
-
-				<div class="card">
-
-					<h2 class="name" id="wsu-person-name" tabindex="0"><%= name %></h2>
-
-					<% if ( photo ) { %>
-					<figure class="photo">
-						<img src="<%= photo %>" alt="<%= name %>" />
-					</figure>
-					<% } %>
-
-					<div class="contact">
-						<%= title %>
-						<div class="email"><a href="mailto:<%= email %>"><%= email %></a></div>
-						<div class="phone"><%= phone %></div>
-						<div class="office"><%= office %></div>
-						<div class="address"><%= address %></div>
-						<% if ( website ) { %>
-						<div class="website"><a href="<%= website %>"><%= website %></a></div>
-						<% } %>
-					</div>
-
-				</div>
-
-				<div class="about"><%= about %></div>
-
-				<button type="button" class="wsu-people-lightbox-close" aria-label="Close this dialog window">&times;</button>
-
-			</article>
-
-		</div>
-
-	</script>
-	<?php
 }
