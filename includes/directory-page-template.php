@@ -1008,7 +1008,7 @@ function template_include( $template ) {
 
 	// Enqueue styles if appropriate.
 	if ( 'custom' !== get_post_meta( $post->ID, '_wsu_people_directory_layout', true ) ) {
-		wp_enqueue_style( 'wsu-people', plugin_dir_url( dirname( __FILE__ ) ) . 'css/people.css', array(), plugin_version() );
+		wp_enqueue_style( 'wsu-people', plugin_dir_url( dirname( __FILE__ ) ) . 'css/directory-template.css', array(), plugin_version() );
 	}
 
 	// Enqueue scripts.
