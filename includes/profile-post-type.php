@@ -1157,8 +1157,14 @@ function add_bio_column( $columns ) {
 		'use_bio' => 'Display Biography',
 	);
 
+	$position = array_search( 'date', array_keys( $columns ), true );
+
 	// Add the "Display Biography" column in before the "Date" column.
-	$new_columns = array_slice( $columns, 0, -2, true ) + $bio_column + array_slice( $columns, -2, null, true );
+	$new_columns = array_merge(
+		array_slice( $columns, 0, $position ),
+		$bio_column,
+		array_slice( $columns, $position )
+	);
 
 	return $new_columns;
 }
