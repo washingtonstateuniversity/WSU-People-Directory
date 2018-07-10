@@ -1226,15 +1226,18 @@ function display_bio_edit( $column_name, $post_type ) {
  * @since 0.3.0
  */
 function save_bio_edit() {
-	check_ajax_referer( 'person-meta', 'nonce' );
+	check_ajax_referer( 'person-meta' );
 
-	$post_ids = ( ! empty( $_POST['post_ids'] ) ) ? $_POST['post_ids'] : array();
-	$use_bio = ( ! empty( $_POST['use_bio'] ) ) ? $_POST['use_bio'] : null;
+	if ( empty( $_POST['post_ids'] ) || empty( $_POST['use_bio'] ) ) {
+		wp_send_json_error( 'No posts or biography display option selected.' );
+	}
 
-	if ( ! empty( $post_ids ) && is_array( $post_ids ) ) {
-		foreach ( $post_ids as $post_id ) {
-			update_post_meta( $post_id, '_use_bio', $use_bio );
-		}
+	if ( ! in_array( $_POST['use_bio'], array( 'personal', 'bio_unit', 'bio_university' ), true ) ) {
+		wp_send_json_error( 'Invalid biography display option selected.' );
+	}
+
+	foreach ( explode( ',', $_POST['post_ids'] ) as $post_id ) {
+		update_post_meta( absint( $post_id ), '_use_bio', $_POST['use_bio'] );
 	}
 
 	exit();
