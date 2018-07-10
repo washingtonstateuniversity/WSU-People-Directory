@@ -1012,7 +1012,7 @@ function template_include( $template ) {
 	}
 
 	// Enqueue scripts.
-	wp_enqueue_script( 'wsu-people', plugin_dir_url( dirname( __FILE__ ) ) . 'js/people.min.js', array( 'jquery', 'underscore' ), plugin_version(), true );
+	wp_enqueue_script( 'wsu-people', plugin_dir_url( dirname( __FILE__ ) ) . 'js/directory-template.min.js', array(), plugin_version(), true );
 
 	if ( 'lightbox' === get_post_meta( $post->ID, '_wsu_people_directory_profile', true ) ) {
 		wp_localize_script( 'wsu-people', 'wsu_people_rest_url', trailingslashit( primary_directory_api_path() . 'wp/v2/people' ) );
