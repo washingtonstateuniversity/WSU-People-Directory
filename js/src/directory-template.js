@@ -56,7 +56,7 @@ document.addEventListener( "DOMContentLoaded", function() {
 	/**
 	 * Toggles profile card visibility based on text entered into the search input.
 	 */
-	document.querySelector( ".wsu-people-filters .search input" ).addEventListener( "keyup", function( event ) {
+	document.querySelector( ".wsu-people-filters .search input" ).addEventListener( "input", function( event ) {
 		let	search_value = event.target.value;
 
 		if ( search_value.length > 0 ) {
