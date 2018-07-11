@@ -1,380 +1,480 @@
-/* global _ */
 var wsuwp = wsuwp || {};
+wsuwp.people = wsuwp.people || {};
 
-( function( $, window, document, wsuwp ) {
-	$( document ).ready( function() {
-		var $load = $( "#load-ad-data" ),
-			$loading = $( "#publishing-action .spinner" ),
-			$nid = $( "#_wsuwp_profile_ad_nid" ),
-			$hash = $( "#confirm-ad-hash" ),
-			$confirm = $( "#confirm-ad-data" ),
-			$card = $( ".wsu-person .card" ),
-			$photo_collection = $( ".wsu-person-photo-collection" ),
-			repeatable_meta_template = _.template( $( ".wsu-person-repeatable-meta-template" ).html() ),
-			photo_template = _.template( $( ".wsu-person-photo-template" ).html() ),
-			previous_focus,
-			media_frame;
+/**
+ * Makes a request for and returns profile data.
+ *
+ * @param {string} data POST data.
+ */
+wsuwp.people.make_request = function( data ) {
+	let options = {
+		method: "POST",
+		credentials: "same-origin",
+		headers: { "Content-Type": "application/x-www-form-urlencoded; charset=utf-8" },
+		body: data
+	};
 
-		// Insert the repeatable meta area buttons.
-		$( ".card header" ).append( "<button type='button' data-type='degree' class='wsu-person-add-repeatable-meta wsu-person-add-degree'>+ Add</button>" );
-		$( ".contact .title" ).last().after( "\n<button type='button' data-type='title' class='wsu-person-add-repeatable-meta wsu-person-add-title'>+ Add another title</button>" );
-		$.each( $( ".contact .title" ).slice( 1 ), function() {
-			$( this ).after( "<button type='button' class='wsu-person-remove dashicons dashicons-no'><span class='screen-reader-text'>Delete</span></button>" );
-		} );
-		$.each( $( "header .degree" ), function() {
-			$( this ).after( "<button type='button' class='wsu-person-remove dashicons dashicons-no'><span class='screen-reader-text'>Delete</span></button>" );
-		} );
+	return fetch( window.ajaxurl, options ).then( response => response.json() );
+};
 
-		// Capture data.
-		$load.on( "click", function( e ) {
-			e.preventDefault();
-			e.target.disabled = true;
+/**
+ * Returns a repeatable input.
+ *
+ * @param {string} type  The type of repeatable input.
+ * @param {string} value The input value.
+ */
+wsuwp.people.repeatable_input = function( type, value ) {
+	return `<span contenteditable="true" class="${type}" data-placeholder="Enter ${type} here">${value}</span><button type="button" class="wsu-person-remove">
+			<span class="screen-reader-text">Delete</span>
+		</button>
+		<input type="hidden" data-for="${type}" name="_wsuwp_profile_${type}[]" value="${value}" />`;
+};
 
-			// Don't let the user get too far without entering a NID.
-			if ( "" === $nid.val() ) {
-				window.alert( "Please enter a Network ID" );
-				return;
+/**
+ * Returns an image for the photo collection.
+ *
+ * @param {string} url The full URL path of the image.
+ * @param {string} id  The attachment post ID.
+ */
+wsuwp.people.photo_input = function( url, id ) {
+	return `<div class="wsu-person-photo-wrapper">
+		<img src="${url}" />
+		<button type="button" class="wsu-person-remove">
+			<span class="screen-reader-text">Delete</span>
+		</button>
+		<input type="hidden" name="_wsuwp_profile_photos[]" value="${id}" />
+	</div>`;
+};
+
+/**
+ * Closes the photo collection modal.
+ */
+wsuwp.people.close_photo_collection = function() {
+	let card_photo = document.querySelector( ".photo img" );
+	let primary_photo = document.querySelector( ".wsu-person-photo-wrapper:first-of-type img" );
+
+	if ( primary_photo ) {
+		card_photo.setAttribute( "src", primary_photo.getAttribute( "src" ) );
+	} else {
+		if ( card_photo ) {
+			card_photo.remove();
+		}
+
+		document.querySelector( ".photo" ).classList.add( "wsu-person-add-photo" );
+		document.querySelector( ".photo figcaption" ).textContent = "+ Add photo(s)";
+	}
+
+	document.body.classList.remove( "wsu-person-photo-collection-open" );
+	previous_focus.focus();
+};
+
+/**
+ * Determines if an object has any properties.
+ *
+ * @param {object} data The object to check.
+ */
+wsuwp.people.is_empty_object = function( data ) {
+	for ( var x in data ) {  // jshint ignore:line
+		return false;
+	}
+
+	return true;
+};
+
+/**
+ * Create an array of photo IDs already in the collection.
+ */
+wsuwp.people.existing_photos = function() {
+	let images = Array.prototype.slice.call( document.querySelectorAll( "[name='_wsuwp_profile_photos[]']" ) );
+	return images.map( image => parseInt( image.value ) );
+};
+
+/**
+ * Insert buttons for handling repeatable inputs.
+ */
+document.addEventListener( "DOMContentLoaded", function() {
+	const degrees = document.querySelectorAll( "header .degree" );
+	const titles = document.querySelectorAll( ".contact .title" );
+	const remove_button = "<button type='button' class='wsu-person-remove dashicons dashicons-no'><span class='screen-reader-text'>Delete</span></button>";
+
+	// Inserts a button for adding new degrees.
+	document.querySelector( ".card header" ).insertAdjacentHTML( "beforeend", "<button type='button' data-type='degree' class='wsu-person-add-repeatable-meta wsu-person-add-degree'>+ Add</button>" );
+
+	// Inserts a button for adding new titles.
+	titles[ titles.length - 1 ].insertAdjacentHTML( "afterend", "\n<button type='button' data-type='title' class='wsu-person-add-repeatable-meta wsu-person-add-title'>+ Add another title</button>" );
+
+	// Inserts a remove button for each degree.
+	degrees.forEach( function( input ) {
+		input.insertAdjacentHTML( "afterend", remove_button );
+	} );
+
+	// Inserts a remove button for all but the first title.
+	titles.forEach( function( input, index ) {
+		if ( 0 !== index ) {
+			input.insertAdjacentHTML( "afterend", remove_button );
+		}
+	} );
+} );
+
+/**
+ * Request and populate profile data.
+ */
+document.getElementById( "publishing-action" ).addEventListener( "click", function( event ) {
+
+	// Bail if the click isn't on the Load or Confirm button.
+	if ( !event.target || ( !event.target.matches( "#load-ad-data" ) && !event.target.matches( "#confirm-ad-data" ) ) ) {
+		return;
+	}
+
+	const loading_indicator = document.querySelector( "#publishing-action .spinner" );
+	const nid = document.getElementById( "_wsuwp_profile_ad_nid" );
+	const hash = document.getElementById( "confirm-ad-hash" );
+	const load_button = document.getElementById( "load-ad-data" );
+	const confirm_button = document.getElementById( "confirm-ad-data" );
+
+	event.preventDefault();
+	event.target.disabled = true;
+
+	// Prevent any further progress if no NID has been entered.
+	if ( "" === nid.value ) {
+		window.alert( "Please enter a Network ID" );
+		event.target.disabled = false;
+		return;
+	}
+
+	// Indicate that data is loading.
+	loading_indicator.style.visibility = "visible";
+
+	let data_nonce = "&_ajax_nonce=" + window.wsuwp_people_edit_profile.nid_nonce;
+	let data_request_from = "&request_from=" + window.wsuwp_people_edit_profile.request_from;
+	let data_network_id = "&network_id=" + nid.value;
+
+	let request;
+
+	// Make a request to load institutional profile data for review.
+	if ( event.target.matches( "#load-ad-data" ) ) {
+		let data = "action=wsu_people_get_data_by_nid" + data_nonce + data_request_from + data_network_id;
+		request = wsuwp.people.make_request( data );
+	}
+
+	// Make a request to confirm the loaded profile data.
+	if ( event.target.matches( "#confirm-ad-data" ) ) {
+		let data = "action=wsu_people_confirm_nid_data" + data_nonce + data_request_from + data_network_id;
+		data += "&confirm_ad_hash=" + hash.value;
+		data += "&post_id=" + document.getElementById( "post_ID" ).value;
+		request = wsuwp.people.make_request( data );
+	}
+
+	request.then( response => {
+		event.target.disabled = false;
+		loading_indicator.style.visibility = "hidden";
+
+		// Alert the user if the request was unsuccessful.
+		if ( !response.success ) {
+			window.alert( response.data );
+			return;
+		}
+
+		// Alert the user if the request returned an empty response.
+		if ( wsuwp.people.is_empty_object( response.data ) ) {
+			window.alert( "Sorry, a profile for " + nid.value + " could not be found." );
+			return;
+		}
+
+		// Populate the institutional profile data.
+		if ( event.target.matches( "#load-ad-data" ) ) {
+			if ( response.data.id ) {
+
+				// This function is defined in admin-edit-profile-secondary.js.
+				wsuwp.people.populate_profile_from_primary_directory( response.data );
+			} else {
+				document.querySelector( ".wsu-person" ).dataset.nid = nid.value;
+
+				// Populate card data.
+				new Map( [
+					[ "name", response.data.given_name + " " + response.data.surname ],
+					[ "title", response.data.title ],
+					[ "email", response.data.email ],
+					[ "phone", response.data.telephone_number ],
+					[ "office", response.data.office ],
+					[ "address", response.data.street_address ]
+				] )
+				.forEach( function( value, input ) {
+					document.querySelector( ".wsu-person ." + input ).textContent = value;
+					document.querySelector( "[data-for='" + input + "']" ).value = value;
+				} );
+
+				hash.value = response.data.confirm_ad_hash;
 			}
 
-			// Show that data is loading.
-			$loading.css( "visibility", "visible" );
+			confirm_button.classList.remove( "profile-hide-button" );
 
-			var data = {
-				"action": "wsu_people_get_data_by_nid",
-				"_ajax_nonce": window.wsuwp_people_edit_profile.nid_nonce,
-				"network_id": $nid.val(),
-				"request_from": window.wsuwp_people_edit_profile.request_from
-			};
+			document.querySelectorAll( "#post-body > div > div > div" ).forEach( function( item ) {
+				item.classList.add( "show" );
+			} );
+		}
 
-			$.post( window.ajaxurl, data, function( response ) {
-				e.target.disabled = false;
-				$loading.css( "visibility", "hidden" );
+		// Confirm the loaded profile data.
+		if ( event.target.matches( "#confirm-ad-data" ) ) {
+			const description = document.querySelector( ".load-ad-container .description" );
+			const publish_button = document.getElementById( "publish" );
 
-				if ( response.success ) {
-					if ( $.isEmptyObject( response.data ) ) {
-						window.alert( "Sorry, a profile for " + $nid.val() + " could not be found." );
-						return;
-					} else if ( response.data.id ) {
-						wsuwp.people.populate_person_from_people_directory( response.data );
-					} else {
-						$( ".wsu-person" ).attr( "data-nid", $nid.val() );
+			nid.setAttribute( "readonly", true );
+			description.textContent = "The WSU Network ID used to populate this profile's data from " + description.dataset.location + ".";
 
-						$( ".wsu-person .name" ).text( response.data.given_name + " " + response.data.surname );
-						$( "[name='post_title']" ).val( response.data.given_name + " " + response.data.surname );
+			load_button.classList.add( "profile-hide-button" );
+			confirm_button.classList.add( "profile-hide-button" );
+			publish_button.classList.remove( "profile-hide-button" );
+		}
+	} );
+} );
 
-						$( ".wsu-person .title" ).text( response.data.title );
-						$( "[name='_wsuwp_profile_title[]']" ).val( response.data.title );
+/**
+ * Profile card handling
+ */
+const card = document.querySelector( ".wsu-person .card" );
 
-						$( ".wsu-person .email" ).text( response.data.email );
-						$( "[name='_wsuwp_profile_alt_email']" ).val( response.data.email );
+/**
+ * Handles `focusout` events occuring within a profile card.
+ */
+card.addEventListener( "focusout", function( event ) {
+	if ( !event.target ) {
+		return;
+	}
 
-						$( ".wsu-person .phone" ).text( response.data.telephone_number );
-						$( "[name='_wsuwp_profile_alt_phone']" ).val( response.data.telephone_number );
+	// Copy content from `contenteditable` elements into their respective inputs.
+	if ( event.target.matches( "[contenteditable='true']" ) ) {
+		let field = event.target.classList;
+		let index = [].indexOf.call( document.querySelectorAll( "." + field ), event.target );
+		let value = event.target.textContent;
 
-						$( ".wsu-person .office" ).text( response.data.office );
-						$( "[name='_wsuwp_profile_alt_office']" ).val( response.data.office );
+		document.querySelectorAll( "[data-for='" + field + "']" )[ index ].value = value;
+	}
 
-						$( ".wsu-person .address" ).text( response.data.street_address );
-						$( "[name='_wsuwp_profile_alt_address']" ).val( response.data.street_address );
+	// Hide any visible repeatable area remove buttons.
+	if (
+		event.target.matches( ".title" ) ||
+		event.target.matches( ".degree" ) ||
+		event.target.matches( ".wsu-person-remove" )
+	) {
+		let new_target = event.relatedTarget;
 
-						$hash.val( response.data.confirm_ad_hash );
-					}
+		if (
+			!new_target ||
+			new_target.matches( ".wsu-person-remove" )
+		) {
+			return;
+		}
 
-					$( "#wsuwp-university-taxonomies" ).addClass( "show" );
-					$( "#wsuwp-profile-listing" ).addClass( "show" );
-					$( "#wsuwp-profile-local-display" ).addClass( "show" );
-				} else {
-					window.alert( response.data );
+		if (
+			new_target.matches( ".title" ) ||
+			new_target.matches( ".degree" )
+		) {
+			let index = [].indexOf.call( document.querySelectorAll( ".wsu-person-remove" ), new_target.nextSibling );
+
+			document.querySelectorAll( ".wsu-person-remove" ).forEach( function( item, i ) {
+				if ( i === index ) {
 					return;
 				}
 
-				$confirm.removeClass( "profile-hide-button" );
+				item.style.display = "none";
 			} );
-		} );
+		} else {
+			document.querySelector( ".wsu-person-remove" ).style.display = "none";
+		}
+	}
+} );
 
-		// Confirm/save retrieved data.
-		$confirm.on( "click", function( e ) {
-			e.preventDefault();
-			e.target.disabled = true;
-			$loading.css( "visibility", "visible" );
-			$( "#load-ad-data" ).addClass( "profile-hide-button" );
+/**
+ * Ignore the Enter key in editable elements.
+ */
+card.addEventListener( "keypress", function( event ) {
+	if ( event.target && event.target.matches( "[contenteditable='true']" ) ) {
+		if ( 13 === event.which ) {
+			event.preventDefault();
+		}
+	}
+} );
 
-			var data = {
-				"action": "wsu_people_confirm_nid_data",
-				"_ajax_nonce": window.wsuwp_people_edit_profile.nid_nonce,
-				"network_id": $nid.val(),
-				"confirm_ad_hash": $hash.val(),
-				"post_id": $( "#post_ID" ).val(),
-				"request_from": window.wsuwp_people_edit_profile.request_from
-			};
+/**
+ * Click event handling for repeatable meta.
+ */
+card.addEventListener( "click", function( event ) {
+	if ( !event.target ) {
+		return;
+	}
 
-			var $description = $( ".load-ad-container .description" ),
-				$publish = $( "#publish" );
+	// Add a repeatable meta input.
+	if ( event.target.matches( ".wsu-person-add-repeatable-meta" ) ) {
+		let type = event.target.dataset.type;
+		let value = "";
 
-			$.post( window.ajaxurl, data, function( response ) {
-				if ( response.success ) {
+		event.target.insertAdjacentHTML( "beforebegin", wsuwp.people.repeatable_input( type, value ) );
+	}
 
-					$nid.attr( "readonly", true );
-					$description.html( "The WSU Network ID used to populate this profile's data from " + $description.data( "location" ) + "." );
+	// Remove a repeatable meta input and its associated input.
+	if ( event.target.matches( ".wsu-person-remove" ) ) {
+		let span = event.target.previousElementSibling;
+		let field = span.classList[ 0 ];
+		let index = [].indexOf.call( document.querySelectorAll( "." + field ), span );
 
-					$( ".spinner" ).css( "visibility", "hidden" );
+		span.remove();
+		document.querySelectorAll( "[data-for='" + field + "']" )[ index ].remove();
+		event.target.remove();
+	}
+} );
 
-					$confirm.addClass( "profile-hide-button" );
-					$publish.removeClass( "profile-hide-button" );
-				}
-			} );
-		} );
+/**
+ * Surface a repeatable input's remove button.
+ * (This is a little buggy when the remove button for an empty input is clicked.)
+ */
+card.addEventListener( "focusin", function( event ) {
+	if ( !event.target ) {
+		return;
+	}
 
-		// Copy content from `contenteditable` elements into their respective inputs.
-		$card.on( "focusout", "[contenteditable='true']", function() {
-			var field = $( this ).attr( "class" ),
-				index = $( this ).index( "." + field ),
-				value = $( this ).text();
+	if ( event.target.matches( ".title" ) ||
+		 event.target.matches( ".degree" )
+	) {
+		event.target.nextElementSibling.style.display = "inline-block";
+	}
+} );
 
-			$( "[data-for='" + field + "']" ).eq( index ).val( value );
-		} );
+/**
+ * Photo collection handling.
+ */
+const card_photo_container = document.querySelector( ".wsu-person .photo" );
+const photo_collection = document.querySelector( ".wsu-person-photo-collection" );
+let previous_focus;
 
-		// Ignore the Enter key in editable divs.
-		$card.on( "keypress", "[contenteditable='true']", function( e ) {
-			if ( 13 === e.which ) {
-				e.preventDefault();
-			}
-		} );
+/**
+ * Click event handling for the photo collection modal.
+ */
+document.getElementById( "post-body-content" ).addEventListener( "click", function( event ) {
+	if ( !event.target ) {
+		return;
+	}
 
-		// Add a repeatable meta area.
-		$card.on( "click", ".wsu-person-add-repeatable-meta", function() {
-			$( this ).before( repeatable_meta_template( {
-				type: $( this ).data( "type" ),
-				value: ""
-			} ) );
-		} );
+	// Surface the photo collection modal.
+	if (
+		event.target.matches( ".wsu-person .photo:not(.wsu-person-add-photo)" ) ||
+		(
+			event.target.parentNode &&
+			event.target.parentNode.matches( ".wsu-person .photo:not(.wsu-person-add-photo)" )
+		)
+	) {
+		window.scroll( 0, 0 );
 
-		// Surface a repeatable meta area remove button.
-		$card.on( "focus", ".title, .degree", function() {
-			$( this ).next( "button:not(.wsu-person-add-repeatable-meta)" ).show( 50 );
-		} );
+		let position = card_photo_container.getBoundingClientRect();
 
-		// Hide any visible repeatable area remove buttons.
-		$card.on( "focusout", ".title, .degree, .wsu-person-remove", function( e ) {
-			var $new_target = $( e.relatedTarget );
+		photo_collection.style.top = position.top + "px";
+		photo_collection.style.left = position.left + "px";
+		previous_focus = document.activeElement;
+		document.body.classList.add( "wsu-person-photo-collection-open" );
 
-			if ( $new_target.hasClass( "wsu-person-remove" ) ) {
-				return;
-			} else if ( $new_target.hasClass( "title" ) || $new_target.hasClass( "title" ) ) {
-				var index = $new_target.next( ".wsu-person-remove" ).index( ".wsu-person-remove" );
+		document.querySelector( ".wsu-person-add-photo" ).focus();
+	}
 
-				$( ".wsu-person-remove" ).not( ":eq(" + index + ")" ).hide( 50 );
-			} else {
-				$( ".wsu-person-remove" ).hide( 50 );
-			}
-		} );
+	// Close the photo collection modal
+	if ( event.target.matches( ".wsu-person-photo-collection-close" ) ) {
+		wsuwp.people.close_photo_collection();
+	}
 
-		// Remove a repeatable meta area and its associated input.
-		$card.on( "click", ".wsu-person-remove", function() {
-			var $span = $( this ).prev( "span" ),
-				field = $span.attr( "class" ),
-				index = $span.index( "." + field );
+	// Surface the Add Media modal.
+	if (
+		event.target.matches( ".wsu-person-add-photo" ) ||
+		(
+			event.target.parentNode &&
+			event.target.parentNode.matches( ".wsu-person-add-photo" )
+		)
+	) {
+		let media_frame;
 
-			$span.remove();
-			$( "[data-for='" + field + "']" ).eq( index ).remove();
-			$( this ).remove();
-		} );
-
-		// Surface photo collection.
-		$card.on( "click", ".photo", function() {
-			if ( $( this ).hasClass( "wsu-person-add-photo" ) ) {
-				return;
-			}
-
-			var position = $( this ).offset();
-			previous_focus = document.activeElement;
-
-			$( window ).scrollTop( 0 );
-			$( "body" ).addClass( "wsu-person-photo-collection-open" );
-
-			$photo_collection.css( {
-				"top": position.top,
-				"left": position.left
-			} );
-
-			$( ".wsu-person-add-photo" ).focus();
-		} );
-
-		// Handle keyboard interactions with the photo collection.
-		/**
-		 * Based on ideas from https://github.com/gdkraus/accessible-modal-dialog.
-		 * The license is as follows:
-		 *
-		 * This license is governed by United States copyright law, and with respect to matters
-		 * of tort, contract, and other causes of action it is governed by North Carolina law,
-		 * without regard to North Carolina choice of law provisions.  The forum for any dispute
-		 * resolution shall be in Wake County, North Carolina.
-		 *
-		 * Redistribution and use in source and binary forms, with or without modification, are
-		 * permitted provided that the following conditions are met:
-		 *
-		 * 1. Redistributions of source code must retain the above copyright notice, this list
-		 * of conditions and the following disclaimer.
-		 *
-		 * 2. Redistributions in binary form must reproduce the above copyright notice, this
-		 * list of conditions and the following disclaimer in the documentation and/or other
-		 * materials provided with the distribution.
-
-		 * 3. The name of the author may not be used to endorse or promote products derived from
-		 * this software without specific prior written permission.
-
-		 * THIS SOFTWARE IS PROVIDED BY THE AUTHOR "AS IS" AND ANY EXPRESS OR IMPLIED
-		 * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
-		 * AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE
-		 * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-		 * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-		 * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-		 * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
-		 * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
-		 * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-		 */
-		$( document ).keydown( function( e ) {
-			if ( !$( "body" ).hasClass( "wsu-person-photo-collection-open" ) ) {
-				return;
-			}
-
-			// Trap Tab key navigation within the photo collection.
-			if ( e.which === 9 ) {
-				var focusable_elements = $photo_collection.find( "button" ),
-					focused_element_index = focusable_elements.index( $( ":focus" ) );
-
-				if ( e.shiftKey && 0 === focused_element_index ) {
-					focusable_elements[ focusable_elements.length - 1 ].focus();
-					e.preventDefault();
-				} else if ( !event.shiftKey && focused_element_index === focusable_elements.length - 1 ) {
-					focusable_elements[ 0 ].focus();
-					e.preventDefault();
-				}
-			}
-
-			// Close the photo collection when the Escape key is pushed.
-			if ( e.which === 27 ) {
-				wsuwp.close_photo_collection();
-			}
-		} );
-
-		// Close photo collection.
-		$( document ).on( "click", ".wsu-person-photo-collection-close", function( e ) {
-			if ( e.target === this ) {
-				wsuwp.close_photo_collection();
-			}
-		} );
-
-		// Add photos to a collection.
-		$( document ).on( "click", ".wsu-person-add-photo", function() {
-			if ( media_frame ) {
-				media_frame.open();
-				return;
-			}
-
-			media_frame = window.wp.media( {
-				title: "Select or Upload Your Photos",
-				multiple: true,
-				library: {
-					type: "image",
-					uploadedTo: window.wsuwp_people_edit_profile.post_id
-				},
-				button: {
-					text: "Use photo(s)"
-				}
-			} );
-
-			media_frame.on( "select", function() {
-				var photos = media_frame.state().get( "selection" );
-
-				$.each( photos.models, function( i, attachment ) {
-					var photo = attachment.toJSON(),
-						has_thumbnail = photo.sizes.hasOwnProperty( "thumbnail" ),
-						url = has_thumbnail ? photo.sizes.thumbnail.url : photo.url,
-						photo_added = false;
-
-					// Only add photos that aren't already in the collection.
-					if ( -1 === $.inArray( photo.id, wsuwp.existing_photos() ) ) {
-						$( "button.wsu-person-add-photo" ).before( photo_template( {
-							src: url,
-							id: photo.id
-						} ) );
-
-						// If this is the first photo added to the profile, add it to the card.
-						if ( !photo_added && $( ".photo" ).hasClass( "wsu-person-add-photo" ) ) {
-							$( ".photo" ).removeClass( "wsu-person-add-photo" )
-								.prepend( "<img src='" + url + "'>" );
-							$( ".photo figcaption" ).text( "Manage photo collection" );
-							photo_added = true;
-						}
-					} else {
-						window.alert( photo.url + " is already in your collection." );
-					}
-				} );
-			} );
-
+		if ( media_frame ) {
 			media_frame.open();
-		} );
+			return;
+		}
 
-		// Remove a photo from the collection.
-		$photo_collection.on( "click", ".wsu-person-remove", function() {
-			$( this ).parent( ".wsu-person-photo-wrapper" ).remove();
-		} );
-
-		// Use jQuery UI Sortable to allow reordering of photos.
-		$photo_collection.sortable( {
-			cursor: "move",
-			placeholder: "wsu-person-photo-wrapper placeholder",
-			items: "> .wsu-person-photo-wrapper",
-			start: function( e, ui ) {
-				ui.helper.height( "" ).width( "" );
+		media_frame = window.wp.media( {
+			title: "Select or Upload Your Photos",
+			multiple: true,
+			library: {
+				type: "image",
+				uploadedTo: window.wsuwp_people_edit_profile.post_id
+			},
+			button: {
+				text: "Use photo(s)"
 			}
 		} );
 
-		// Close the photo collection and update the card photo.
-		wsuwp.close_photo_collection = function() {
-			var $card_photo = $( ".photo img" ),
-				$primary_photo = $( ".wsu-person-photo-wrapper:first-of-type img" );
+		media_frame.on( "select", function() {
+			let photos = media_frame.state().get( "selection" );
 
-			if ( $primary_photo.length ) {
-				$card_photo.attr( "src", $primary_photo.attr( "src" ) );
-			} else {
-				$card_photo.remove();
-				$( ".photo" ).addClass( "wsu-person-add-photo" )
-					.find( "figcaption" ).text( "+ Add photo(s)" );
-			}
+			photos.models.forEach( function( attachment ) {
+				let photo = attachment.toJSON();
+				let has_thumbnail = photo.sizes.hasOwnProperty( "thumbnail" );
+				let url = has_thumbnail ? photo.sizes.thumbnail.url : photo.url;
+				let id = photo.id;
 
-			$( "body" ).removeClass( "wsu-person-photo-collection-open" );
-			previous_focus.focus();
-		};
-	} );
+				// Only add photos that aren't already in the collection.
+				if ( !wsuwp.people.existing_photos().includes( id ) ) {
+					document.querySelector( "button.wsu-person-add-photo" ).insertAdjacentHTML( "beforebegin", wsuwp.people.photo_input( url, id ) );
 
-	// Create an array of photo IDs already in the collection.
-	wsuwp.existing_photos = function() {
-		return $( "[name='_wsuwp_profile_photos[]']" ).map( function() { return parseInt( $( this ).val() ); } ).get();
-	};
-
-	// Allow deletion of legacy meta.
-	$( ".legacy-meta-delete" ).click( function() {
-		var meta_name = $( this ).data( "name" ),
-			meta_key = $( this ).data( "metakey" ),
-			$field = $( this ).closest( ".wsu-person-bio" );
-
-		window.confirm( "This will permanently delete your " + meta_name + " data." );
-
-		var data = {
-			"action": "wsu_people_delete_legacy_meta",
-			"_ajax_nonce": window.wsuwp_people_edit_profile.nid_nonce,
-			"post_id": $( "#post_ID" ).val(),
-			"meta_key": meta_key
-		};
-
-		$.post( window.ajaxurl, data, function( response ) {
-			if ( response.success ) {
-				$field.fadeOut( 300, function() {
-					$( this ).remove();
-				} );
-			}
+					// If this is the first photo added to the profile, add it to the card.
+					if ( card_photo_container.classList.contains( "wsu-person-add-photo" ) ) {
+						card_photo_container.classList.remove( "wsu-person-add-photo" );
+						card_photo_container.insertAdjacentHTML( "afterbegin", "<img src='" + url + "'>" );
+						card_photo_container.querySelector( "figcaption" ).textContent = "Manage photo collection";
+					}
+				}
+			} );
 		} );
-	} );
-}( jQuery, window, document, wsuwp ) );
+
+		media_frame.open();
+	}
+
+	// Remove a photo from the collection.
+	if ( event.target.matches( ".wsu-person-photo-wrapper .wsu-person-remove" ) ) {
+		event.target.parentNode.remove();
+	}
+} );
+
+/**
+ * Keydown event handling for the photo collection modal.
+ */
+document.addEventListener( "keydown", function( event ) {
+	if ( !document.body.classList.contains( "wsu-person-photo-collection-open" ) ) {
+		return;
+	}
+
+	// Trap focus within the photo collection modal.
+	if ( 9 === event.which ) {
+		let focusable_elements = photo_collection.querySelectorAll( "button:not(.wsu-person-remove)" );
+		let focused_element_index = [].indexOf.call( focusable_elements, document.activeElement );
+
+		if ( event.shiftKey && 0 === focused_element_index ) {
+			focusable_elements[ focusable_elements.length - 1 ].focus();
+			event.preventDefault();
+		} else if ( !event.shiftKey && focused_element_index === focusable_elements.length - 1 ) {
+			focusable_elements[ 0 ].focus();
+			event.preventDefault();
+		}
+	}
+
+	// Close the photo collection modal if the Escape key is pushed.
+	if ( 27 === event.which ) {
+		wsuwp.people.close_photo_collection();
+	}
+} );
+
+/**
+ * Use jQuery UI Sortable to allow reordering of photos.
+ */
+jQuery( ".wsu-person-photo-collection" ).sortable( {
+	cursor: "move",
+	placeholder: "wsu-person-photo-wrapper placeholder",
+	items: "> .wsu-person-photo-wrapper",
+	start: function( e, ui ) {
+		ui.helper.height( "" ).width( "" );
+	}
+} );

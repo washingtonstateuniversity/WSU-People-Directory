@@ -1,405 +1,438 @@
-/* global _ */
 var wsuwp = wsuwp || {};
 wsuwp.people = wsuwp.people || {};
 
-( function( $, window, document, wsuwp ) {
-	/**
-	 * Tracks whether a REST request for profile data has
-	 * completed.
-	 *
-	 * @type {boolean}
-	 */
-	wsuwp.people.rest_response_complete = false;
+/**
+ * Tracks whether a REST request for profile data has completed.
+ *
+ * @type {boolean}
+ */
+wsuwp.people.rest_response_complete = false;
 
-	/**
-	 * Contains a list of a person's working titles.
-	 *
-	 * @type {string}
-	 */
-	wsuwp.people.titles = "";
+/**
+ * Tracks whether a user has permissions to edit the current profile.
+ *
+ * @type {boolean}
+ */
+wsuwp.people.user_can_edit_profile = "";
 
-	/**
-	 * Contains a list of a person's degrees.
-	 *
-	 * @type {string}
-	 */
-	wsuwp.people.degrees = "";
+/**
+ * Contains a list of a person's working titles.
+ *
+ * @type {string}
+ */
+wsuwp.people.working_titles = "";
 
-	/**
-	 * Contains multiple biographies for a person.
-	 *
-	 * @type {{content: string, _wsuwp_profile_bio_unit: string, _wsuwp_profile_bio_university: string}}
-	 */
-	wsuwp.people.bio_content = {
-		"content": "",
-		"_wsuwp_profile_bio_unit": "",
-		"_wsuwp_profile_bio_university": ""
-	};
+/**
+ * Contains a list of a person's degrees.
+ *
+ * @type {string}
+ */
+wsuwp.people.degree = "";
 
-	/**
-	 * Contains a list of a person's taxonomy terms.
-	 *
-	 * @type {{taxonomy: [array]}}
-	 */
-	wsuwp.people.taxonomy_terms = {
-		"classification": [],
-		"wsuwp_university_category": [],
-		"wsuwp_university_location": [],
-		"wsuwp_university_org": []
-	};
+/**
+ * Contains multiple biographies for a person.
+ *
+ * @type {{content: string, _wsuwp_profile_bio_unit: string, _wsuwp_profile_bio_university: string}}
+ */
+wsuwp.people.bio_content = {
+	"content": "",
+	"_wsuwp_profile_bio_unit": "",
+	"_wsuwp_profile_bio_university": ""
+};
 
-	/**
-	 * Populate biography editors with existing data from the REST API
-	 * after that data has been received.
-	 *
-	 * This is registered as a callback when TinyMCE inits the editor.
-	 *
-	 * @param editor
-	 */
-	wsuwp.people.populate_editor = function( editor ) {
-		if ( false === wsuwp.people.rest_response_complete ) {
-			setTimeout( wsuwp.people.populate_editor.bind( null, editor ), 200 );
-			return;
+/**
+ * The NID associated with the current profile.
+ *
+ * @type {string}
+ */
+wsuwp.people.nid = document.getElementById( "_wsuwp_profile_ad_nid" );
+
+/**
+ * Populate the profile with data from the primary directory.
+ *
+ * @param {object} data Profile data from the primary directory.
+ */
+wsuwp.people.populate_profile_from_primary_directory = function( data ) {
+
+	// Populate the NID associated with the profile.
+	document.querySelector( ".wsu-person" ).dataset.nid = data.nid;
+
+	// Populate the primary profile id.
+	document.getElementById( "_wsuwp_profile_post_id" ).value = data.id;
+
+	// Populate the primary profile URL.
+	document.getElementById( "_wsuwp_profile_canonical_source" ).value = data.link;
+
+	// Populate card data.
+	new Map( [
+		[ "name", data.title.rendered ],
+		[ "email", ( data.email_alt ) ? data.email_alt : data.email ],
+		[ "phone", ( data.phone_alt ) ? data.phone_alt : data.phone ],
+		[ "office", ( data.office_alt ) ? data.office_alt : data.office ],
+		[ "address", ( data.address_alt ) ? data.address_alt : data.address ],
+		[ "website", data.website ]
+	] )
+	.forEach( function( value, input ) {
+		document.querySelector( ".wsu-person ." + input ).textContent = value;
+		document.querySelector( ".wsu-person ." + input ).dataset.original = value;
+		document.querySelector( "[data-for='" + input + "']" ).value = value;
+	} );
+
+	wsuwp.people.populate_profile_titles( ( data.working_titles ) ? data.working_titles : [ data.position_title ] );
+
+	wsuwp.people.populate_profile_degrees( data.degree );
+
+	wsuwp.people.populate_profile_photos( data.photos );
+
+	wsuwp.people.populate_profile_biographies( data.content.rendered, data.bio_unit, data.bio_university );
+
+	wsuwp.people.check_permissions( data.id );
+};
+
+/**
+ * Populate the profile title(s).
+ *
+ * @param {array} titles Profile titles.
+ */
+wsuwp.people.populate_profile_titles = function( titles ) {
+	wsuwp.people.working_titles = titles.join( "," );
+
+	let add_title_button = document.querySelector( ".wsu-person-add-title" );
+	let display_select = document.getElementById( "local-display-title" );
+
+	titles.forEach( function( value, index ) {
+		let input = document.querySelectorAll( ".contact .title" )[ index ];
+
+		if ( input ) {
+			input.textContent = value;
+			document.querySelector( "[data-for='title']" ).value = value;
+		} else {
+
+			// `wsuwp.people.repeatable_input` is defined in admin-edit-profile.js.
+			add_title_button.insertAdjacentHTML( "beforebegin", wsuwp.people.repeatable_input( "title", value ) );
 		}
 
-		window.tinymce.get( editor.id ).setContent( wsuwp.people.bio_content[ editor.id ] );
+		// Fill in the display options.
+		display_select.insertAdjacentHTML( "beforeend", "<option value='" + index + "'>" + value + "</option>" );
 
-		if ( 0 !== $( "#bio_unit .readonly" ).length ) {
-			window.tinymce.get( "_wsuwp_profile_bio_unit" ).setMode( "readonly" );
-		}
+		if ( titles.length - 1 === index ) {
+			let selected = display_select.dataset.selected.toString();
 
-		if ( 0 !== $( "#bio_university .readonly" ).length ) {
-			window.tinymce.get( "_wsuwp_profile_bio_university" ).setMode( "readonly" );
-		}
-	};
+			// Set the size of the select box so that all titles are visible without scrolling.
+			display_select.size = index + 1;
 
-	/**
-	 * Populates a profile with data retrieved from the main site via the REST API.
-	 *
-	 * @param data
-	 */
-	wsuwp.people.populate_person_from_people_directory = function( data ) {
-		var $ = jQuery,
-			title = ( data.working_titles.length ) ? data.working_titles : [ data.position_title ],
-			email = ( data.email_alt ) ? data.email_alt : data.email,
-			phone = ( data.phone_alt ) ? data.phone_alt : data.phone,
-			office = ( data.office_alt ) ? data.office_alt : data.office,
-			address = ( data.address_alt ) ? data.address_alt : data.address,
-			repeatable_meta_template = _.template( $( ".wsu-person-repeatable-meta-template" ).html() ),
-			$add_title_button = $( ".wsu-person-add-title" ),
-			$add_degree_button = $( ".wsu-person-add-degree" );
-
-		// Populate the NID.
-		$( ".wsu-person" ).attr( "data-nid", data.nid );
-
-		// Populate the primary record id.
-		$( "#_wsuwp_profile_post_id" ).val( data.id );
-
-		// Populate the primary record URL.
-		$( "#_wsuwp_profile_canonical_source" ).val( data.link );
-
-		// Populate card data.
-		$( ".wsu-person .name" ).text( data.title.rendered ).data( "original", data.title.rendered );
-		$( "[data-for='name']" ).val( data.title.rendered );
-
-		$( ".wsu-person .email" ).text( email ).data( "original", email );
-		$( "[data-for='email']" ).val( email );
-
-		$( ".wsu-person .phone" ).text( phone ).data( "original", phone );
-		$( "[data-for='phone']" ).val( phone );
-
-		$( ".wsu-person .office" ).text( office ).data( "original", office );
-		$( "[data-for='office']" ).val( office );
-
-		$( ".wsu-person .address" ).text( address ).data( "original", address );
-		$( "[data-for='address']" ).val( address );
-
-		$( ".wsu-person .website" ).text( data.website ).data( "original", data.website );
-		$( "[data-for='website']" ).val( data.website );
-
-		// Populate biographies.
-		wsuwp.people.bio_content.content = data.content.rendered;
-		wsuwp.people.bio_content._wsuwp_profile_bio_unit = data.bio_unit;
-		wsuwp.people.bio_content._wsuwp_profile_bio_university = data.bio_university;
-
-		// Populate biography textareas when Text mode is the default editor state.
-		if ( !window.tinymce.get( "content" ) ) {
-			$( "#content" ).val( data.content.rendered );
-			$( "#_wsuwp_profile_bio_unit" ).val( data.bio_unit );
-			$( "#_wsuwp_profile_bio_university" ).val( data.bio_university );
-		}
-
-		// Populate the read-only biographies.
-		$( "#bio_unit .readonly" ).html( data.bio_unit );
-		$( "#bio_university .readonly" ).html( data.bio_university );
-
-		wsuwp.people.rest_response_complete = true;
-
-		// Populate title(s).
-		$.each( title, function( i, value ) {
-			var $field = $( ".contact .title" )[ i ],
-				$display_select = $( "#local-display-title" );
-
-			if ( $field ) {
-				$( $field ).text( value );
-				$( "[data-for='title']" ).val( value );
-			} else {
-				$add_title_button.before( repeatable_meta_template( {
-					type: $add_title_button.data( "type" ),
-					value: value
-				} ) );
-			}
-
-			// Fill in the display options.
-			$display_select.append( "<option value='" + i + "'>" + value + "</option>" );
-
-			if ( data.working_titles.length - 1 === i ) {
-				var selected = $display_select.data( "selected" ).toString();
-
-				// Set the size of the select box so that all titles are visible without scrolling.
-				$display_select.attr( "size", i + 1 );
-
-				// Set selected titles.
-				if ( 1 === selected.length ) {
-					$display_select.find( "option[value='" + selected + "']" ).prop( "selected", "selected" );
-				} else if ( 2 < selected.length ) {
-					$.each( selected.split( "," ), function( index, value ) {
-						$display_select.find( "option[value='" + value + "']" ).prop( "selected", "selected" );
-					} );
-				}
-			}
-		} );
-
-		wsuwp.people.titles = data.working_titles;
-
-		// Populate degree(s).
-		$.each( data.degree, function( i, value ) {
-			var $field = $( ".contact .degree" )[ i ];
-
-			if ( $field ) {
-				$( $field ).text( value ).next( "input" ).val( value );
-			} else {
-				$add_degree_button.before( repeatable_meta_template( {
-					type: $add_degree_button.data( "type" ),
-					value: value
-				} ) );
-			}
-		} );
-
-		wsuwp.people.degrees = data.degree;
-
-		// Populate photo collection.
-		if ( data._embedded && data._embedded[ "wp:photos" ] !== 0 ) {
-			$.each( data._embedded[ "wp:photos" ], function( i, photo ) {
-				if ( "id" in photo ) {
-					wsuwp.people.populate_photos( photo, i );
-				}
-			} );
-		}
-
-		// Populate featured image as part of the photo collection.
-		if ( data._embedded && data._embedded[ "wp:featuredmedia" ] && data._embedded[ "wp:featuredmedia" ] !== 0 ) {
-			wsuwp.people.populate_photos( data._embedded[ "wp:featuredmedia" ][ 0 ] );
-		}
-
-		// Populate taxonomy data.
-		if ( data.taxonomy_terms ) {
-			$.each( data.taxonomy_terms, function( taxonomy, terms ) {
-
-				// Categories and tags are skipped for now to avoid term contamination.
-				if ( "category" === taxonomy || "post_tag" === taxonomy ) {
-					return;
-				}
-
-				if ( terms ) {
-					var original_terms = [];
-
-					$.each( terms, function( i, term ) {
-						$( "#" + taxonomy + "-select option" ).filter( function() { return $( this ).text() === term.name; } ).attr( "selected", "selected" );
-						$( "#" + taxonomy + "-select" ).trigger( "change" );
-
-						original_terms.push( term.name );
-					} );
-
-					wsuwp.people.taxonomy_terms[ taxonomy ] = original_terms;
-				}
-			} );
-		}
-
-		// Disable inputs if a user doesn't have adequate permissions to edit the profile.
-		$.ajax( {
-			url: window.wsuwp_people_edit_profile_secondary.rest_url + "/" + data.id,
-			type: "POST",
-			beforeSend: function( xhr ) {
-				xhr.setRequestHeader( "X-WP-Nonce", window.wsuwp_people_edit_profile_secondary.nonce );
-				xhr.setRequestHeader( "X-WSUWP-UID", window.wsuwp_people_edit_profile_secondary.uid );
-			},
-			error: function() {
-				$( ".wsu-person-card [contenteditable='true']" ).prop( "contenteditable", false );
-				$( ".wsu-person-remove" ).remove();
-				$( ".wsu-person-add-repeatable-meta" ).remove();
-				$( "#new-tag-post_tag" ).prop( "disabled", true );
-
-				window.tinymce.get( "content" ).setMode( "readonly" );
-			}
-		} );
-	};
-
-	/**
-	 * Populate the photo collection with data from the main site.
-	 *
-	 * @param data
-	 */
-	wsuwp.people.populate_photos = function( data, index ) {
-		var $ = jQuery,
-			photo_template = _.template( $( ".wsu-person-photo-template" ).html() ),
-			photo = data.media_details,
-			url = photo.sizes ? photo.sizes.thumbnail.source_url : data.source_url,
-			$display_photo = $( "#local-display-photo" ),
-			checked = ( index === $display_photo.data( "selected" ) ) ? " checked='checked'" : "";
-
-		// Avoid inserting duplicate images.
-		if ( -1 === $.inArray( data.id, wsuwp.existing_photos() ) ) {
-			$( "button.wsu-person-add-photo" ).before( photo_template( {
-				src: url,
-				id: data.id
-			} ) );
-
-			if ( 0 === $( ".wsu-person .photo img" ).length ) {
-				$( ".photo" ).removeClass( "wsu-person-add-photo" )
-					.prepend( "<img src='" + url + "'>" );
-				$( ".photo figcaption" ).text( "Manage photo collection" );
-			}
-
-			// Set the display options.
-			$display_photo.append( "<label><input type='radio' name='_use_photo' value='" + index + "'" + checked + "/><img src='" + url + "' /></label>" );
-		}
-	};
-
-	$( document ).ready( function() {
-		var $nid = $( "#_wsuwp_profile_ad_nid" ),
-			post_id = $( "#_wsuwp_profile_post_id" ).val();
-
-		// Make a REST request for profile data from people.wsu.edu.
-		if ( window.wsuwp_people_edit_profile_secondary.load_data ) {
-			$.ajax( {
-				url: window.wsuwp_people_edit_profile_secondary.rest_url,
-				data: {
-					_embed: true,
-					wsu_nid: $nid.val()
-				}
-			} ).done( function( response ) {
-				if ( response.length !== 0 ) {
-					wsuwp.people.populate_person_from_people_directory( response[ 0 ] );
-				}
-			} );
-		}
-
-		// Post data to the user's people.wsu.edu profile.
-		$( "#publish" ).on( "click", function() {
-			var data = {},
-				name = $( ".wsu-person .name" ),
-				email = $( ".wsu-person .email" ),
-				phone = $( ".wsu-person .phone" ),
-				office = $( ".wsu-person .office" ),
-				address = $( ".wsu-person .address" ),
-				website = $( ".wsu-person .website" ),
-				titles = $( ".wsu-person .title" ),
-				degrees = $( ".wsu-person .degree" ),
-				personal_bio = window.tinymce.get( "content" ),
-				unit_bio = window.tinymce.get( "_wsuwp_profile_bio_unit" ),
-				university_bio = window.tinymce.get( "_wsuwp_profile_bio_university" ),
-				classifications = $( "#classification-select option:selected" ).map( function() { return this.text; } ).get(),
-				organizations = $( "#wsuwp_university_org-select option:selected" ).map( function() { return this.text; } ).get(),
-				locations = $( "#wsuwp_university_location-select option:selected" ).map( function() { return this.text; } ).get(),
-				u_categories = $( "#wsuwp_university_category-select option:selected" ).map( function() { return this.text; } ).get();
-
-			// Only add changed values to the data array.
-			if ( name.text() !== name.data( "original" ) ) {
-				data.title = name.text();
-			}
-
-			if ( email.text() !== email.data( "original" ) ) {
-				data.email_alt = email.text();
-			}
-
-			if ( phone.text() !== phone.data( "original" ) ) {
-				data.phone_alt = phone.text();
-			}
-
-			if ( office.text() !== office.data( "original" ) ) {
-				data.office_alt = office.text();
-			}
-
-			if ( address.text() !== address.data( "original" ) ) {
-				data.address_alt = address.text();
-			}
-
-			if ( website.text() !== website.data( "original" ) ) {
-				data.website = website.text();
-			}
-
-			if ( titles ) {
-				var new_titles = titles.map( function() { return $( this ).text(); } ).get();
-				if ( new_titles.join( "," ) !== wsuwp.people.titles.join( "," ) ) {
-					data.working_titles = new_titles;
-				}
-			}
-
-			if ( degrees ) {
-				var new_degrees = degrees.map( function() { return $( this ).text(); } ).get();
-				if ( new_degrees.join( "," ) !== wsuwp.people.degrees.join( "," ) ) {
-					data.degree = new_degrees;
-				}
-			}
-
-			if ( personal_bio && ( personal_bio.getContent() !== wsuwp.people.bio_content.content ) ) {
-				data.content = personal_bio.getContent();
-			}
-
-			if ( unit_bio && ( unit_bio.getContent() !== wsuwp.people.bio_content._wsuwp_profile_bio_unit ) ) {
-				data.bio_unit = unit_bio.getContent();
-			}
-
-			if ( university_bio && ( university_bio.getContent() !== wsuwp.people.bio_content._wsuwp_profile_bio_university ) ) {
-				data.bio_university = university_bio.getContent();
-			}
-
-			data.taxonomy_terms = {};
-
-			if ( !wsuwp.people.terms_match( wsuwp.people.taxonomy_terms.classification, classifications ) ) {
-				data.taxonomy_terms.classification = ( 0 === classifications.length ) ? [ "wsuwp_people_empty_terms" ] : classifications;
-			}
-
-			if ( !wsuwp.people.terms_match( wsuwp.people.taxonomy_terms.wsuwp_university_org, organizations ) ) {
-				data.taxonomy_terms.wsuwp_university_org = ( 0 === organizations.length ) ? [ "wsuwp_people_empty_terms" ] : organizations;
-			}
-
-			if ( !wsuwp.people.terms_match( wsuwp.people.taxonomy_terms.wsuwp_university_location, locations ) ) {
-				data.taxonomy_terms.wsuwp_university_location = ( 0 === locations.length ) ? [ "wsuwp_people_empty_terms" ] : locations;
-			}
-
-			if ( !wsuwp.people.terms_match( wsuwp.people.taxonomy_terms.wsuwp_university_category, u_categories ) ) {
-				data.taxonomy_terms.wsuwp_university_category = ( 0 === u_categories.length ) ? [ "wsuwp_people_empty_terms" ] : u_categories;
-			}
-
-			// Only push data if values have changed.
-			if ( !$.isEmptyObject( data ) ) {
-				$.ajax( {
-					url: window.wsuwp_people_edit_profile_secondary.rest_url + "/" + post_id,
-					method: "POST",
-					beforeSend: function( xhr ) {
-						xhr.setRequestHeader( "X-WP-Nonce", window.wsuwp_people_edit_profile_secondary.nonce );
-						xhr.setRequestHeader( "X-WSUWP-UID", window.wsuwp_people_edit_profile_secondary.uid );
-					},
-					data: data
+			// Set selected titles.
+			if ( 1 === selected.length ) {
+				display_select.querySelector( "option[value='" + selected + "']" ).selected = true;
+			} else if ( 2 < selected.length ) {
+				selected.split( "," ).forEach( function( option_value ) {
+					display_select.querySelector( "option[value='" + option_value + "']" ).selected = true;
 				} );
 			}
-		} );
-
-		wsuwp.people.terms_match = function( original, current ) {
-			return JSON.stringify( original.sort() ) === JSON.stringify( current.sort() );
-		};
-
+		}
 	} );
-}( jQuery, window, document, wsuwp ) );
+};
+
+/**
+ * Populate the profile degrees.
+ *
+ * @param {array} degrees Degrees retrieved from the primary profile.
+ */
+wsuwp.people.populate_profile_degrees = function( degrees ) {
+	wsuwp.people.degree = degrees.join( "," );
+
+	let add_degree_button = document.querySelector( ".wsu-person-add-degree" );
+
+	degrees.forEach( function( value, index ) {
+		let input = document.querySelectorAll( ".contact .degree" )[ index ];
+
+		if ( input ) {
+			input.textContent = value;
+			input.nextSibling.value = value;
+		} else {
+
+			// `wsuwp.people.repeatable_input` is defined in admin-edit-profile.js.
+			add_degree_button.insertAdjacentHTML( "beforebegin", wsuwp.people.repeatable_input( "degree", value ) );
+		}
+	} );
+};
+
+/**
+ * Populate the profile photo collection.
+ *
+ * @param {array} photos Photos retrieved from the primary profile.
+ */
+wsuwp.people.populate_profile_photos = function( photos ) {
+	if ( photos ) {
+		let card_photo = document.querySelector( ".wsu-person .photo" );
+		let add_photo_button = document.querySelector( "button.wsu-person-add-photo" );
+		let display_select = document.getElementById( "local-display-photo" );
+
+		photos.forEach( function( value, index ) {
+			let url = value.thumbnail;
+			let checked = ( index === display_select.dataset.selected ) ? " checked='checked'" : "";
+
+			// Add each photo to the collection.
+			// `wsuwp.people.photo_input` is defined in admin-edit-profile.js.
+			add_photo_button.insertAdjacentHTML( "beforebegin", wsuwp.people.photo_input( url, "" ) );
+
+			// Add each photo as an option for local display.
+			display_select.insertAdjacentHTML( "beforeend", "<label><input type='radio' name='_use_photo' value='" + index + "'" + checked + "/><img src='" + url + "' /></label>" );
+
+			// Set a card photo.
+			if ( card_photo.classList.contains( "wsu-person-add-photo" ) ) {
+				card_photo.classList.remove( "wsu-person-add-photo" );
+				card_photo.insertAdjacentHTML( "afterbegin", "<img src='" + url + "'>" );
+				document.querySelector( ".photo figcaption" ).textContent = "Manage photo collection";
+			}
+		} );
+	}
+};
+
+/**
+ * Populate the TinyMCE text mode and/or read only profile biographies.
+ *
+ * @param {string} personal   The personal biography retrieved from the primary profile.
+ * @param {string} unit       The unit biography retrieved from the primary profile.
+ * @param {string} university The university biography retrieved from the primary profile.
+ */
+wsuwp.people.populate_profile_biographies = function( personal, unit, university ) {
+	if (
+		false === wsuwp.people.rest_response_complete ||
+		"" === wsuwp.people.user_can_edit_profile
+	) {
+		setTimeout( wsuwp.people.populate_profile_biographies.bind( null, personal, unit, university ), 200 );
+		return;
+	}
+
+	new Map( [
+		[ "content", personal ],
+		[ "_wsuwp_profile_bio_unit", unit ],
+		[ "_wsuwp_profile_bio_university", university ]
+	] )
+	.forEach( function( biography, editor ) {
+		wsuwp.people.bio_content[ editor ] = biography; // Store initial value for later comparison.
+
+		// Disable Text mode editors if the user doesn't have sufficient permissions.
+		if ( !wsuwp.people.user_can_edit_profile && document.getElementById( editor ) ) {
+			document.getElementById( editor ).disabled = true;
+			document.querySelectorAll( ".quicktags-toolbar [type='button']" ).forEach( function( quicktag_button ) {
+				quicktag_button.disabled = true;
+			} );
+		}
+
+		if ( "read-only" === wsuwp.people.check_editor_mode( editor ) ) {
+			document.querySelector( ".wsu-person-bio." + editor + " .readonly" ).insertAdjacentHTML( "beforeend", unit ); // Security
+		} else {
+			document.getElementById( editor ).value = biography;
+		}
+	} );
+};
+
+/**
+ * Populate biography editors once data from the REST API has been received.
+ *
+ * This is registered as a callback when TinyMCE inits the editor.
+ *
+ * @param editor
+ */
+wsuwp.people.populate_editor = function( editor ) {
+	if (
+		false === wsuwp.people.rest_response_complete ||
+		"" === wsuwp.people.user_can_edit_profile
+	) {
+		setTimeout( wsuwp.people.populate_editor.bind( null, editor ), 200 );
+		return;
+	}
+
+	if ( "visual" !== wsuwp.people.check_editor_mode( editor.id ) ) {
+		return;
+	}
+
+	window.tinymce.get( editor.id ).setContent( wsuwp.people.bio_content[ editor.id ] );
+
+	if ( !wsuwp.people.user_can_edit_profile ) {
+		window.tinymce.get( editor.id ).setMode( "readonly" );
+	}
+};
+
+/**
+ * Make a POST request to the primary profile to determine if
+ * the current user has sufficient permissions for editing it.
+ *
+ * The "rest_response_complete" flag is also set here so it can
+ * be appropriately leveraged when populating the WP Editors.
+ *
+ * @param {string} id Post ID of the primary profile.
+ */
+wsuwp.people.check_permissions = function( id ) {
+	let permissions_url = window.wsuwp_people_edit_profile_secondary.rest_url + "/" + id;
+	let permissions_options = {
+		method: "POST",
+		credentials: "same-origin",
+		headers: {
+			"X-WP-Nonce": window.wsuwp_people_edit_profile_secondary.nonce,
+			"X-WSUWP-UID": window.wsuwp_people_edit_profile_secondary.uid
+		}
+	};
+
+	fetch( permissions_url, permissions_options )
+	.then( wsuwp.people.set_permissions )
+	.then( data => window.console.log( data ) )
+	.catch( error => window.console.log( error ) );
+
+	wsuwp.people.rest_response_complete = true;
+};
+
+/**
+ * Handle editability and set the permissions flag based on
+ * the user's ability to edit the profile's primary record.
+ *
+ * @param {object} response The response from the primary profile request.
+ */
+wsuwp.people.set_permissions = function( response ) {
+	return response.json()
+	.then( json => {
+		if ( response.ok ) {
+			wsuwp.people.user_can_edit_profile = true;
+
+			return json;
+		} else {
+			wsuwp.people.user_can_edit_profile = false;
+
+			document.querySelectorAll( ".wsu-person [contenteditable='true']" ).forEach( function( input ) {
+				input.contentEditable = false;
+			} );
+
+			document.querySelectorAll( ".wsu-person-remove" ).forEach( function( input ) {
+				input.remove();
+			} );
+
+			document.querySelectorAll( ".wsu-person-add-repeatable-meta" ).forEach( function( input ) {
+				input.remove();
+			} );
+
+			// Should move all the bio editor permissions stuff down here.
+			if ( window.tinymce.get( "content" ) ) {
+				window.tinymce.get( "content" ).setMode( "readonly" );
+			}
+
+			return Promise.reject( Object.assign( {}, json, {
+				status: response.status,
+				statusText: response.statusText
+			} ) );
+		}
+	} );
+};
+
+/**
+ * Update the primary profile with any changed meta data.
+ */
+wsuwp.people.update_primary_profile = function() {
+	let data = {};
+
+	// Collect all card data that differs from the original.
+	new Map( [
+		[ "title", document.querySelector( ".wsu-person .name" ) ],
+		[ "email_alt", document.querySelector( ".wsu-person .email" ) ],
+		[ "phone_alt", document.querySelector( ".wsu-person .phone" ) ],
+		[ "office_alt", document.querySelector( ".wsu-person .office" ) ],
+		[ "address_alt", document.querySelector( ".wsu-person .address" ) ],
+		[ "website", document.querySelector( ".wsu-person .website" ) ]
+	] )
+	.forEach( function( input, rest_key ) {
+		if ( input.textContent !== input.dataset.original ) {
+			data[ rest_key ] = input.textContent;
+		}
+	} );
+
+	// Collect all repeatable input data that differs from the original.
+	new Map( [
+		[ "working_titles", document.querySelectorAll( ".wsu-person .title" ) ],
+		[ "degree", document.querySelectorAll( ".wsu-person .degree" ) ]
+	] )
+	.forEach( function( inputs, rest_key ) {
+		if ( inputs ) {
+			let current_values = Array.prototype.slice.call( inputs ).map( input => input.textContent ).join( "," );
+
+			if ( current_values !== wsuwp.people[ rest_key ] ) {
+				data[ rest_key ] = current_values;
+			}
+		}
+	} );
+
+	// Collect any biography data that differs from the original.
+	new Map( [
+		[ "content", "content" ],
+		[ "bio_unit", "_wsuwp_profile_bio_unit" ],
+		[ "bio_university", "_wsuwp_profile_bio_university" ]
+	] )
+	.forEach( function( editor, rest_key ) {
+		if ( "read-only" !== wsuwp.people.check_editor_mode( editor ) ) {
+			let biography = document.getElementById( editor ).value;
+
+			// This comparison isn't great, as switching the editor mode can easily throw it off.
+			if ( biography !== wsuwp.people.bio_content[ editor ] ) {
+				data[ rest_key ] = biography;
+			}
+		}
+	} );
+
+	// Bail if no data has been changed.
+	// `wsuwp.people.is_empty_object` is defined in admin-edit-profile.js.
+	if ( wsuwp.people.is_empty_object( data ) ) {
+		return;
+	}
+
+	let primary_profile_post_id = document.getElementById( "_wsuwp_profile_post_id" ).value;
+	let primary_profile_rest_url = window.wsuwp_people_edit_profile_secondary.rest_url + "/" + primary_profile_post_id;
+	let primary_profile_post_options = {
+		method: "POST",
+		credentials: "same-origin",
+		body: data,
+		headers: {
+			"Content-Type": "application/x-www-form-urlencoded; charset=utf-8",
+			"X-WP-Nonce": window.wsuwp_people_edit_profile_secondary.nonce,
+			"X-WSUWP-UID": window.wsuwp_people_edit_profile_secondary.uid
+		}
+	};
+
+	fetch( primary_profile_rest_url, primary_profile_post_options );
+};
+
+/**
+ * Determines if a given editor is in Visual or Text mode.
+ *
+ * If neither, the content is most likely being displayed in a div.
+ *
+ * @param {string} editor The ID for the given editor.
+ */
+wsuwp.people.check_editor_mode = function( editor ) {
+	let editor_wrapper = document.getElementById( "wp-" + editor + "-wrap" );
+
+	if ( editor_wrapper ) {
+		return ( editor_wrapper.classList.contains( "html-active" ) ) ? "text" : "visual";
+	} else {
+		return "read-only";
+	}
+};
+
+/**
+ * Only run this code when editing an existing profile.
+ */
+if ( window.wsuwp_people_edit_profile_secondary.load_data && wsuwp.people.nid.value ) {
+
+	// Make a REST request for profile data from the primary directory.
+	fetch( window.wsuwp_people_edit_profile_secondary.rest_url + "?wsu_nid=" + wsuwp.people.nid.value )
+	.then( response => response.json() )
+	.then( response => {
+		wsuwp.people.populate_profile_from_primary_directory( response[ 0 ] );
+	} );
+
+	// Post updated data to the primary profile.
+	document.getElementById( "publish" ).addEventListener( "click", function() {
+		if ( wsuwp.people.user_can_edit_profile ) {
+			wsuwp.people.update_primary_profile();
+		}
+	} );
+}

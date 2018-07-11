@@ -312,7 +312,7 @@ function admin_enqueue_scripts( $hook_suffix ) {
 		);
 
 		wp_enqueue_style( 'wsuwp-people-edit-profile', plugins_url( 'css/admin-edit-profile.css', dirname( __FILE__ ) ), array(), plugin_version() );
-		wp_enqueue_script( 'wsuwp-people-edit-profile', plugins_url( 'js/admin-edit-profile.min.js', dirname( __FILE__ ) ), array( 'underscore', 'jquery-ui-sortable' ), plugin_version(), true );
+		wp_enqueue_script( 'wsuwp-people-edit-profile', plugins_url( 'js/admin-edit-profile.min.js', dirname( __FILE__ ) ), array( 'jquery-ui-sortable' ), plugin_version(), true );
 		wp_localize_script( 'wsuwp-people-edit-profile', 'wsuwp_people_edit_profile', $profile_vars );
 
 		// Disable autosaving on secondary sites.
@@ -324,7 +324,7 @@ function admin_enqueue_scripts( $hook_suffix ) {
 	// Enqueue assets for the All Profiles page on secondary sites.
 	if ( 'edit.php' === $hook_suffix && false === is_primary_directory() ) {
 		wp_enqueue_style( 'wsuwp-people-admin', plugins_url( 'css/admin-profiles-list-table.css', dirname( __FILE__ ) ), array(), plugin_version() );
-		wp_enqueue_script( 'wsuwp-people-admin', plugins_url( 'js/admin-profiles-list-table.min.js', dirname( __FILE__ ) ), array( 'jquery' ), plugin_version() );
+		wp_enqueue_script( 'wsuwp-people-admin', plugins_url( 'js/admin-profiles-list-table.min.js', dirname( __FILE__ ) ), array(), plugin_version(), true );
 		wp_localize_script( 'wsuwp-people-admin', 'wsupeople', array(
 			'nonce' => wp_create_nonce( 'person-meta' ),
 		) );
@@ -388,23 +388,6 @@ function edit_form_after_title( $post ) {
 		$photo_url = get_the_post_thumbnail_url();
 	}
 	?>
-	<script type="text/template" class="wsu-person-repeatable-meta-template">
-		<span contenteditable="true" class="<%= type %>" data-placeholder="Enter <%= type %> here"><%= value %></span><button type="button" class="wsu-person-remove">
-				<span class="screen-reader-text">Delete</span>
-		</button>
-		<input type="hidden" data-for="<%= type %>" name="_wsuwp_profile_<%= type %>[]" value="<%= value %>" />
-	</script>
-
-	<script type="text/template" class="wsu-person-photo-template">
-		<div class="wsu-person-photo-wrapper">
-			<img src="<%= src %>" alt="<?php echo esc_attr( $post->post_title ); ?>" />
-			<button type="button" class="wsu-person-remove">
-				<span class="screen-reader-text">Delete</span>
-			</button>
-			<input type="hidden" name="_wsuwp_profile_photos[]" value="<%= id %>" />
-		</div>
-	</script>
-
 	<input type="hidden" data-for="name" name="post_title" value="<?php echo esc_attr( $post->post_title ); ?>" />
 	<input type="hidden" data-for="email" name="_wsuwp_profile_alt_email" value="<?php echo esc_attr( $email_value ); ?>" />
 	<input type="hidden" data-for="phone" name="_wsuwp_profile_alt_phone" value="<?php echo esc_attr( $phone_value ); ?>" />
@@ -1089,7 +1072,7 @@ function wp_enqueue_editor( $to_load ) {
 		$profile_vars['uid'] = wp_get_current_user()->ID;
 	}
 
-	wp_enqueue_script( 'wsuwp-people-edit-profile-secondary', plugins_url( 'js/admin-edit-profile-secondary.min.js', dirname( __FILE__ ) ), array( 'jquery', 'underscore' ), plugin_version(), true );
+	wp_enqueue_script( 'wsuwp-people-edit-profile-secondary', plugins_url( 'js/admin-edit-profile-secondary.min.js', dirname( __FILE__ ) ), array(), plugin_version(), true );
 	wp_localize_script( 'wsuwp-people-edit-profile-secondary', 'wsuwp_people_edit_profile_secondary', $profile_vars );
 }
 
