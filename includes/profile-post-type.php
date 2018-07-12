@@ -547,7 +547,7 @@ function edit_form_after_editor( $post ) {
 				}
 
 				?>
-				<div id="<?php echo esc_attr( $key ); ?>" class="wsu-person-bio">
+				<div id="<?php echo esc_attr( $key ); ?>" class="wsu-person-bio <?php echo esc_attr( $args['meta_key'] ); ?>">
 
 					<h2><?php echo esc_html( $args['description'] ); ?></h2>
 
@@ -622,7 +622,7 @@ function publish_meta_box( $post ) {
 		<div id="misc-publishing-actions">
 			<div class="misc-pub-section">
 				<label for="_wsuwp_profile_ad_nid">Network ID</label>:
-				<input type="text" id="_wsuwp_profile_ad_nid" name="_wsuwp_profile_ad_nid" value="<?php echo esc_attr( $nid ); ?>" class="widefat" <?php echo esc_attr( $readonly ); ?> />
+				<input type="text" id="_wsuwp_profile_ad_nid" name="_wsuwp_profile_ad_nid" value="<?php echo esc_attr( $nid ); ?>" class="widefat" autocomplete="off" <?php echo esc_attr( $readonly ); ?> />
 
 			<?php if ( false === is_primary_directory() ) { ?>
 				<?php
