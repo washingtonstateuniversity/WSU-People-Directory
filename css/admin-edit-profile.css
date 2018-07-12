@@ -13,20 +13,15 @@
 }
 
 /* Hide metaboxes until they are needed */
-.wsu-person[data-nid=""],
-.post-new-php #wsuwp-university-taxonomies,
-.post-new-php #wsuwp-profile-listing,
-.post-new-php #wsuwp-profile-local-display {
+.post-new-php #post-body > div > div > div {
 	height: 0;
 	opacity: 0;
 	overflow: hidden;
 	visibility: hidden;
 }
 
-.wsu-person,
-.post-new-php #wsuwp-university-taxonomies.show,
-.post-new-php #wsuwp-profile-listing.show,
-.post-new-php #wsuwp-profile-local-display.show {
+.post-new-php #post-body > div > div > div#submitdiv,
+.post-new-php #post-body > div > div > div.show {
 	height: auto;
 	opacity: 1;
 	transition: opacity .5s ease-in-out;
@@ -136,8 +131,11 @@
 	width: 21px;
 }
 
+.card button:focus,
+.wsu-person-photo-collection button:focus
 .wsu-person-remove:focus {
 	box-shadow: 0 0 0 1px #5b9dd9, 0 0 2px 1px rgba(30, 140, 190, .8);
+	color: #124964;
 	outline: none;
 }
 
@@ -175,9 +173,7 @@
 	text-decoration: underline;
 }
 
-.wsu-person-add-repeatable-meta:focus,
 .wsu-person-add-repeatable-meta:hover,
-.wsu-person-add-photo:focus,
 .wsu-person-add-photo:hover {
 	color: #00a0d2;
 	outline: none;
