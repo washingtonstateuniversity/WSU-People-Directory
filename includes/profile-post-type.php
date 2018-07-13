@@ -950,14 +950,15 @@ function ajax_get_data_by_nid() {
 		wp_send_json_error( 'Invalid or empty Network ID' );
 	}
 
-	$nid_query = new WP_Query( array(
+	$nid_query = get_posts( array(
 		'meta_key' => '_wsuwp_profile_ad_nid',
 		'meta_value' => $nid,
 		'post_type' => slug(),
-		'posts_per_page' => -1,
+		'posts_per_page' => 1,
+		'post_status' => array( 'publish', 'draft' ),
 	) );
 
-	if ( 0 < $nid_query->found_posts ) {
+	if ( ! empty( $nid_query ) ) {
 		wp_send_json_error( "A profile for $nid already exists." );
 	}
 
