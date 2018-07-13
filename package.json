@@ -8,16 +8,34 @@
   "author": "washingtonstateuniversity",
   "license": "GPL-2.0+",
   "devDependencies": {
+    "@wordpress/babel-preset-default": "1.1.1",
     "autoprefixer": "^8.6.2",
+    "babel-core": "6.26.0",
+    "babel-eslint": "8.0.3",
+    "babel-loader": "7.1.4",
+    "babel-minify": "^0.4.3",
+    "babel-plugin-transform-async-generator-functions": "6.24.1",
+    "cross-env": "^5.0.1",
+    "es6-promise": "^4.2.4",
     "grunt": "~1.0.3",
     "grunt-contrib-connect": "^1.0.2",
     "grunt-contrib-jshint": "^1.1.0",
-    "grunt-contrib-uglify": "^3.3.0",
     "grunt-contrib-watch": "^1.1.0",
     "grunt-jscs": "^3.0.1",
     "grunt-phpcs": "^0.4.0",
     "grunt-postcss": "^0.9.0",
     "grunt-stylelint": "^0.10.0",
-    "stylelint": "^9.2.1"
+    "stylelint": "^9.2.1",
+    "webpack": "^4.4.1",
+    "webpack-cli": "^2.0.13"
+  },
+  "babel": {
+    "presets": [
+      "@wordpress/default"
+    ]
+  },
+  "scripts": {
+    "build": "cross-env BABEL_ENV=default NODE_ENV=production webpack",
+    "dev": "cross-env BABEL_ENV=default webpack --watch"
   }
 }

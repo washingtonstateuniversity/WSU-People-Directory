@@ -1,3 +1,5 @@
+var Promise = require( "es6-promise" ).polyfill();
+
 module.exports = function( grunt ) {
     grunt.initConfig( {
         pkg: grunt.file.readJSON( "package.json" ),
@@ -70,20 +72,9 @@ module.exports = function( grunt ) {
                     undef: true,
                     unused: true,
                     browser: true, // Define globals exposed by modern browsers.
-                    jquery: true   // Define globals exposed by jQuery.
+                    jquery: true,  // Define globals exposed by jQuery.
+                    esversion: 6   // Use ES6 as the JavaScript syntax.
                 }
-            }
-        },
-
-        uglify: {
-            dist: {
-                files: [ {
-                    expand: true,
-                    cwd: "js/src/",
-                    src: "*.js",
-                    dest: "js",
-                    ext: ".min.js"
-                } ]
             }
         },
 
@@ -110,7 +101,6 @@ module.exports = function( grunt ) {
 
     grunt.loadNpmTasks( "grunt-contrib-connect" );
     grunt.loadNpmTasks( "grunt-contrib-jshint" );
-    grunt.loadNpmTasks( "grunt-contrib-uglify" );
     grunt.loadNpmTasks( "grunt-contrib-watch" );
     grunt.loadNpmTasks( "grunt-jscs" );
     grunt.loadNpmTasks( "grunt-phpcs" );
@@ -118,6 +108,6 @@ module.exports = function( grunt ) {
     grunt.loadNpmTasks( "grunt-stylelint" );
 
     // Default task(s).
-    grunt.registerTask( "default", [ "postcss", "stylelint", "jscs", "jshint", "uglify", "phpcs" ] );
+    grunt.registerTask( "default", [ "postcss", "stylelint", "jscs", "jshint", "phpcs" ] );
     grunt.registerTask( "serve", [ "connect", "watch" ] );
 };
