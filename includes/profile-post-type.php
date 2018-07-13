@@ -556,8 +556,7 @@ function edit_form_after_editor( $post ) {
 					$unit_bio = '_wsuwp_profile_bio_unit' === $args['meta_key'];
 					$university_bio = '_wsuwp_profile_bio_university' === $args['meta_key'];
 
-					if ( ( is_primary_directory() && $profile_owner && $unit_bio ) ||
-							( $university_bio && ! $global_admin ) ) {
+					if ( ( is_primary_directory() && $profile_owner && $unit_bio ) || ( $university_bio && ! $global_admin ) ) {
 						echo '<div class="readonly">' . wp_kses_post( apply_filters( 'the_content', $value ) ) . '</div>';
 					} else {
 						wp_editor( $value, $args['meta_key'] );
