@@ -315,8 +315,8 @@ function admin_enqueue_scripts( $hook_suffix ) {
 		wp_enqueue_script( 'wsuwp-people-edit-profile', plugins_url( 'js/admin-edit-profile.min.js', dirname( __FILE__ ) ), array( 'jquery-ui-sortable' ), plugin_version(), true );
 		wp_localize_script( 'wsuwp-people-edit-profile', 'wsuwp_people_edit_profile', $profile_vars );
 
-		// Disable autosaving on secondary sites.
-		if ( false === is_primary_directory() ) {
+		// Disable autosaving to prevent duplicate and premature profiles.
+		if ( 'add' !== $screen->action ) {
 			wp_dequeue_script( 'autosave' );
 		}
 	}
