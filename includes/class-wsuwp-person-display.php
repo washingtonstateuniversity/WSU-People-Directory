@@ -309,7 +309,7 @@ class WSUWP_Person_Display {
 				//'single_view_data' => $data,
 				//'local_post' => ( ! empty( $local_post[0] ) ) ? $local_post[0] : false,
 			//);
-			
+
 		//}
 
 		return $data;
@@ -371,16 +371,15 @@ class WSUWP_Person_Display {
 				$card_attributes .= ' data-about="' . get_post_meta( $local_post_id, '_use_bio', true ) . '"';
 			}*/
 			if ( ! empty( $data['titles'] ) ) {
-				$card_attributes .= ( ! empty( $local_post_id ) ) ? ' data-title="' . get_post_meta( $local_post_id, '_use_title', true ) . '"' : 0 ;
+				$card_attributes .= ( ! empty( $local_post_id ) ) ? ' data-title="' . get_post_meta( $local_post_id, '_use_title', true ) . '"' : 0;
 			}
 
 			if ( ! empty( $data['photo'] ) ) {
-				$card_attributes .= ( ! empty( $local_post_id ) ) ? ' data-photo="' . get_post_meta( $local_post_id, '_use_photo', true ) . '"' : 0 ;
+				$card_attributes .= ( ! empty( $local_post_id ) ) ? ' data-photo="' . get_post_meta( $local_post_id, '_use_photo', true ) . '"' : 0;
 			}
 			if ( ! empty( $data['about'] ) ) {
-				$card_attributes .= ( ! empty( $local_post_id ) ) ? ' data-about="' . get_post_meta( $local_post_id, '_use_bio', true ) . '"' : 'personal' ;
+				$card_attributes .= ( ! empty( $local_post_id ) ) ? ' data-about="' . get_post_meta( $local_post_id, '_use_bio', true ) . '"' : 'personal';
 			}
-
 		}
 
 		// Add attributes to be leveraged when editing the directory page.

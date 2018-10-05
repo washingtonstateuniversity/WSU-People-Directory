@@ -845,7 +845,7 @@ class WSUWP_People_Directory_Page_Template {
 				}
 				/**
 				 * Removed the following code. There are a number of instances where the count
-				 * would not match either the local or the remote people count. Setting the 
+				 * would not match either the local or the remote people count. Setting the
 				 * $elements['people'] to an empty array would cause the directory page to go blank if
 				 * any of the above instances are true.
 				*/
@@ -857,7 +857,7 @@ class WSUWP_People_Directory_Page_Template {
 				// Otherwise, cache the more expensive content for this page.
 				/*if ( $local_people_data['count'] !== $count || count( $elements['people'] ) !== $count ) {
 					$loading = true;
-					
+
 					$elements['people'] = array();
 				} else {
 					wp_cache_set( $cache_key, $elements, 'directory_page_elements', 3600 );
