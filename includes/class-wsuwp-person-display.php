@@ -295,16 +295,22 @@ class WSUWP_Person_Display {
 			'website' => $primary_data['website'],
 			'photo' => $photo,
 			'about' => $bio,
+			'primary_data' => $primary_data,
+			'local_post' => ( ! empty( $local_post[0] ) ) ? $local_post[0] : false,
 		);
 
+		// Not sure why this needs to be here but adding it for security stuff
+		$data['single_view_data'] = $data;
+
 		// Retrieve directory page-specific content display options.
-		if ( ! empty( $options['page_id'] ) && $local_post ) {
-			$data = array(
-				'primary_data' => $primary_data,
-				'single_view_data' => $data,
-				'local_post' => $local_post[0],
-			);
-		}
+		//if ( ! empty( $options['page_id'] ) && $local_post ) {
+			//$data = array(
+				//'primary_data' => $primary_data,
+				//'single_view_data' => $data,
+				//'local_post' => ( ! empty( $local_post[0] ) ) ? $local_post[0] : false,
+			//);
+
+		//}
 
 		return $data;
 	}
@@ -324,23 +330,26 @@ class WSUWP_Person_Display {
 		$primary_data = $profile['primary_data'];
 		$data = $profile['single_view_data'];
 		$local_post = $profile['local_post'];
-		$local_post_id = $local_post->ID;
+		$local_post_id = ( ! empty( $local_post ) ) ? $local_post->ID : false;
 
 		// Set up card classes.
 		$card_classes = 'wsu-person';
 
-		// Add a class for each taxonomy term.
-		$taxonomies = get_object_taxonomies( WSUWP_People_Post_Type::$post_type_slug );
-		$taxonomy_data = array();
+		if ( $local_post ) {
 
-		foreach ( $taxonomies as $taxonomy ) {
-			$prefix = array_pop( explode( '_', $taxonomy ) );
-			$terms = wp_get_post_terms( $local_post_id, $taxonomy, array(
-				'fields' => 'names',
-			) );
+			// Add a class for each taxonomy term.
+			$taxonomies = get_object_taxonomies( WSUWP_People_Post_Type::$post_type_slug );
+			$taxonomy_data = array();
 
-			foreach ( $terms as $term ) {
-				$card_classes .= ' ' . $prefix . '-' . sanitize_title( $term );
+			foreach ( $taxonomies as $taxonomy ) {
+				$prefix = array_pop( explode( '_', $taxonomy ) );
+				$terms = wp_get_post_terms( $local_post_id, $taxonomy, array(
+					'fields' => 'names',
+				) );
+
+				foreach ( $terms as $term ) {
+					$card_classes .= ' ' . $prefix . '-' . sanitize_title( $term );
+				}
 			}
 		}
 
@@ -350,7 +359,7 @@ class WSUWP_Person_Display {
 
 		// Add attributes to be leveraged for opening this profile in a modal.
 		if ( 'lightbox' === $options['link']['profile'] && ! is_admin() ) {
-			if ( ! empty( $data['titles'] ) ) {
+			/*if ( ! empty( $data['titles'] ) ) {
 				$card_attributes .= ' data-title="' . get_post_meta( $local_post_id, '_use_title', true ) . '"';
 			}
 
@@ -360,6 +369,16 @@ class WSUWP_Person_Display {
 
 			if ( ! empty( $data['about'] ) ) {
 				$card_attributes .= ' data-about="' . get_post_meta( $local_post_id, '_use_bio', true ) . '"';
+			}*/
+			if ( ! empty( $data['titles'] ) ) {
+				$card_attributes .= ( ! empty( $local_post_id ) ) ? ' data-title="' . get_post_meta( $local_post_id, '_use_title', true ) . '"' : 0;
+			}
+
+			if ( ! empty( $data['photo'] ) ) {
+				$card_attributes .= ( ! empty( $local_post_id ) ) ? ' data-photo="' . get_post_meta( $local_post_id, '_use_photo', true ) . '"' : 0;
+			}
+			if ( ! empty( $data['about'] ) ) {
+				$card_attributes .= ( ! empty( $local_post_id ) ) ? ' data-about="' . get_post_meta( $local_post_id, '_use_bio', true ) . '"' : 'personal';
 			}
 		}
 

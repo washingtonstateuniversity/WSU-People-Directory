@@ -822,10 +822,12 @@ class WSUWP_People_Directory_Page_Template {
 				$elements = $cached_elements;
 			} else {
 				$id_array = explode( ' ', $ids );
+
 				$count = count( $id_array );
 
 				// Get post count and taxonomy terms from the local people records.
 				$local_people_data = $this->get_local_people( $post_id, $count, $filters );
+
 				$elements['locations'] = $local_people_data['locations'];
 				$elements['orgs'] = $local_people_data['orgs'];
 
@@ -841,19 +843,27 @@ class WSUWP_People_Directory_Page_Template {
 						$elements['people'] = array_merge( $elements['people'], $people_group );
 					}
 				}
-
+				/**
+				 * Removed the following code. There are a number of instances where the count
+				 * would not match either the local or the remote people count. Setting the
+				 * $elements['people'] to an empty array would cause the directory page to go blank if
+				 * any of the above instances are true.
+				*/
 				// If the number of IDs doesn't match the number of local profiles,
 				// they're probably still being inserted, so set a flag to display
 				// a notification telling the user as much.
 				// This also checks that the number of profiles returned by the REST
 				// request matches the number of IDs.
 				// Otherwise, cache the more expensive content for this page.
-				if ( $local_people_data['count'] !== $count || count( $elements['people'] ) !== $count ) {
+				/*if ( $local_people_data['count'] !== $count || count( $elements['people'] ) !== $count ) {
 					$loading = true;
+
 					$elements['people'] = array();
 				} else {
 					wp_cache_set( $cache_key, $elements, 'directory_page_elements', 3600 );
-				}
+				}*/
+
+				wp_cache_set( $cache_key, $elements, 'directory_page_elements', 3600 );
 			}
 		}
 
