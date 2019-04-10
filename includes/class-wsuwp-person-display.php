@@ -393,7 +393,8 @@ class WSUWP_Person_Display {
 		if ( false !== apply_filters( 'wsuwp_people_default_rewrite_slug', false ) ) {
 			$link = get_the_permalink( $local_post_id );
 		} elseif ( 'if_bio' === $options['link']['when'] && '' !== $data['about'] || 'yes' === $options['link']['when'] ) {
-			$link = trailingslashit( $options['link']['base_url'] . $local_post->post_name );
+			$base_link = trailingslashit( $options['link']['base_url'] );
+			$link = trailingslashit( $base_link . $local_post->post_name );
 		}
 
 		// Set up directory page-specific content display options.
