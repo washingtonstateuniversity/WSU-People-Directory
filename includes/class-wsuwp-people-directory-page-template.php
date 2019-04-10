@@ -945,11 +945,16 @@ class WSUWP_People_Directory_Page_Template {
 				if ( in_array( 'location', $filters, true ) ) {
 					$locations = wp_get_post_terms( get_the_ID(), 'wsuwp_university_location', $get_terms_args );
 
+					$locations = ( is_array( $locations ) ) ? $locations : array();
+
 					$local_data['locations'] = array_unique( array_merge( $local_data['locations'], $locations ) );
 				}
 
 				if ( in_array( 'org', $filters, true ) ) {
 					$orgs = wp_get_post_terms( get_the_ID(), 'wsuwp_university_org', $get_terms_args );
+
+					$orgs = ( is_array( $orgs ) ) ? $orgs : array();
+
 					$local_data['orgs'] = array_unique( array_merge( $local_data['orgs'], $orgs ) );
 				}
 			}
