@@ -558,8 +558,26 @@ class WSUWP_People_REST_API {
 	 */
 	public function handle_wsu_nid_query_var( $query ) {
 		if ( isset( $query->query['wsu_nid'] ) && $query->query['wsu_nid'] ) {
-			$query->set( 'meta_key', '_wsuwp_profile_ad_nid' );
-			$query->set( 'meta_value', sanitize_text_field( $query->query['wsu_nid'] ) );
+
+			// Check if list of nids
+			if ( false !== strpos( $query->query['wsu_nid'], ',' ) ) {
+
+				$nids = explode( ',', $query->query['wsu_nid'] );
+
+				$meta_query = array(
+					array(
+						'key'     => '_wsuwp_profile_ad_nid',
+						'value'   => $nids,
+						'compare' => 'IN',
+					),
+				);
+
+				$query->set( 'meta_query', $meta_query );
+
+			} else {
+				$query->set( 'meta_key', '_wsuwp_profile_ad_nid' );
+				$query->set( 'meta_value', sanitize_text_field( $query->query['wsu_nid'] ) );
+			}
 		}
 	}
 
