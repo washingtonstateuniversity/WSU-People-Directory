@@ -119,6 +119,14 @@ class WSUWP_People_Post_Type {
 			'register_as_meta' => true,
 			'updatable_via_rest' => true,
 		),
+		'department' => array(
+			'type' => 'string',
+			'description' => '',
+			'sanitize_callback' => 'sanitize_text_field',
+			'meta_key' => '_wsuwp_profile_department',
+			'register_as_meta' => true,
+			'updatable_via_rest' => true,
+		),
 		'degree' => array(
 			'type' => 'array',
 			'items' => array(
@@ -576,6 +584,7 @@ class WSUWP_People_Post_Type {
 		$address_alt = get_post_meta( $post->ID, '_wsuwp_profile_alt_address', true );
 
 		// Additional data.
+		$department = get_post_meta( $post->ID, '_wsuwp_profile_department', true );
 		$website = get_post_meta( $post->ID, '_wsuwp_profile_website', true );
 		$degrees = get_post_meta( $post->ID, '_wsuwp_profile_degree', true );
 		$photos = get_post_meta( $post->ID, '_wsuwp_profile_photos', true );
@@ -748,6 +757,11 @@ class WSUWP_People_Post_Type {
 			</div>
 
 			<div class="about">
+
+			<p>
+				<label style="font-weight: bold;display: block">Department/Area Name</label>
+				<input type="text" name="_wsuwp_profile_department" value="<?php echo esc_attr( $department ); ?>" style="width: 100%">
+			</p>
 
 				<div id="bio_personal" class="wsu-person-bio">
 
