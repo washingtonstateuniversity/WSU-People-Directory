@@ -106,3 +106,6 @@ function WSUWP_Person_Card_Shortcode() {
 function WSUWP_People_User_Profile() {
 	return WSUWP_People_User_Profile::get_instance();
 }
+
+
+require_once __DIR__ . '/includes/class-wsuwp-people-area-of-focus-taxonomy.php';
