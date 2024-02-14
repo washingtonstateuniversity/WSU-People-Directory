@@ -30,6 +30,7 @@ class WSUWP_People_Post_Type {
 			'description' => '',
 			'sanitize_callback' => 'sanitize_text_field',
 			'meta_key' => '_wsuwp_profile_ad_nid',
+			'register_as_meta' => true,
 		),
 		'first_name' => array(
 			'type' => 'string',
