@@ -927,7 +927,7 @@ class WSUWP_People_Post_Type {
 			<div id="misc-publishing-actions">
 				<div class="misc-pub-section">
 					<label for="_wsuwp_profile_ad_nid">Network ID</label>:
-					<input type="text" id="_wsuwp_profile_ad_nid" name="_wsuwp_profile_ad_nid" value="<?php echo esc_attr( $nid ); ?>" class="widefat" <?php echo esc_attr( $readonly ); ?> />
+					<input type="text" id="_wsuwp_profile_ad_nid" name="_wsuwp_profile_ad_nid" value="<?php echo esc_attr( $nid ); ?>" class="widefat" />
 
 				<?php if ( false === WSUWP_People_Directory::is_main_site() ) { ?>
 					<?php
